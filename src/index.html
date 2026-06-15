@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>devnestio — Free Developer Tools</title>
+  <meta name="description" content="Free online developer tools: regex tester, JWT decoder, hash generator, base64, timestamp converter, and more. No login, no tracking, instant results." />
+  <link rel="canonical" href="https://devnestio.pages.dev/" />
+  <meta property="og:title" content="devnestio — Free Developer Tools" />
+  <meta property="og:description" content="Free online developer tools: regex tester, JWT decoder, hash generator, base64, timestamp converter, and more. No login, no tracking, instant results." />
+  <meta property="og:url" content="https://devnestio.pages.dev/" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="devnestio — Free Developer Tools" />
+  <meta name="twitter:description" content="Free online developer tools. No login, no tracking, instant results." />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "devnestio",
+    "url": "https://devnestio.pages.dev",
+    "description": "Free online developer tools"
+  }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d1117;
+      --bg-card: #161b22;
+      --bg-card-hover: #1c2128;
+      --border: #30363d;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --accent-hover: #79b8ff;
+
+      --badge-text: #c9d1d9;
+      --badge-security: #1f4e79;
+      --badge-text-tool: #1e3a2f;
+      --badge-time: #3d2b00;
+      --badge-design: #3b1f5e;
+      --badge-devops: #1e3a4a;
+      --badge-math: #2e1f00;
+      --badge-data: #1c2f1c;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .logo span {
+      color: var(--accent);
+    }
+
+    .tagline {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      border-left: 1px solid var(--border);
+      padding-left: 1rem;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      padding: 3.5rem 1.5rem 2.5rem;
+    }
+
+    .hero h1 {
+      font-size: clamp(1.75rem, 5vw, 2.75rem);
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 0.75rem;
+    }
+
+    .hero h1 em {
+      font-style: normal;
+      color: var(--accent);
+    }
+
+    .hero p {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    /* ── Grid ── */
+    main {
+      flex: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 1.5rem 3rem;
+      width: 100%;
+    }
+
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem 1.25rem 1rem;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    }
+
+    .card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .card-title {
+      font-size: 0.975rem;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .card-title svg {
+      flex-shrink: 0;
+      opacity: 0.45;
+      transition: opacity 0.15s;
+    }
+
+    .card:hover .card-title svg {
+      opacity: 0.9;
+    }
+
+    .card-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      flex: 1;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.15em 0.55em;
+      border-radius: 999px;
+      color: var(--badge-text);
+      background: #21262d;
+      border: 1px solid var(--border);
+      align-self: flex-start;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .badge-Security  { background: var(--badge-security);  border-color: #1f6feb; color: #79b8ff; }
+    .badge-Text      { background: var(--badge-text-tool); border-color: #2ea043; color: #56d364; }
+    .badge-Time      { background: var(--badge-time);      border-color: #9e6a03; color: #e3b341; }
+    .badge-Design    { background: var(--badge-design);    border-color: #8957e5; color: #d2a8ff; }
+    .badge-DevOps    { background: var(--badge-devops);    border-color: #1f6feb; color: #58a6ff; }
+    .badge-Math      { background: var(--badge-math);      border-color: #bd561d; color: #ffa657; }
+    .badge-Data      { background: var(--badge-data);      border-color: #2ea043; color: #3fb950; }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 1.5rem;
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 480px) {
+      header { flex-direction: column; align-items: flex-start; gap: 0.35rem; }
+      .tagline { border-left: none; padding-left: 0; }
+      .hero { padding: 2rem 1rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="/" class="logo">dev<span>nestio</span></a>
+  <span class="tagline">Free developer tools. No login. No tracking.</span>
+</header>
+
+<div class="hero">
+  <h1>Tools that <em>just work.</em></h1>
+  <p>12 free online utilities for developers — open instantly in the browser, no account required.</p>
+</div>
+
+<main>
+  <p class="section-label">All Tools</p>
+  <div class="grid" id="grid"></div>
+</main>
+
+<footer>
+  Built with ❤️ for developers &nbsp;·&nbsp; © 2026 devnestio
+</footer>
+
+<script>
+const tools = [
+  {
+    name: "Regex Tester",
+    desc: "Test and debug regular expressions with real-time match highlighting.",
+    url:  "https://regex-tester-dfe.pages.dev",
+    cat:  "Text"
+  },
+  {
+    name: "JWT Decoder",
+    desc: "Decode and inspect JSON Web Tokens — header, payload, and signature.",
+    url:  "https://jwt-decoder.pages.dev",
+    cat:  "Security"
+  },
+  {
+    name: "Unix Timestamp Converter",
+    desc: "Convert between Unix timestamps and human-readable date/time formats.",
+    url:  "https://unix-timestamp-converter-37v.pages.dev",
+    cat:  "Time"
+  },
+  {
+    name: "Hash Generator",
+    desc: "Generate MD5, SHA-1, SHA-256, and SHA-512 hashes from any string.",
+    url:  "https://hash-generator-745.pages.dev",
+    cat:  "Security"
+  },
+  {
+    name: "CSS Color Converter",
+    desc: "Convert colors between HEX, RGB, HSL, and HSV color spaces instantly.",
+    url:  "https://css-color-converter.pages.dev",
+    cat:  "Design"
+  },
+  {
+    name: "URL Encoder / Decoder",
+    desc: "Encode or decode URLs and query strings with percent-encoding.",
+    url:  "https://url-encoder-decoder-ezs.pages.dev",
+    cat:  "Text"
+  },
+  {
+    name: "Base64 Encoder / Decoder",
+    desc: "Encode text or binary data to Base64 and decode it back.",
+    url:  "https://base64-encoder-decoder-3yw.pages.dev",
+    cat:  "Text"
+  },
+  {
+    name: "Cron Expression Builder",
+    desc: "Build and validate cron expressions with a visual schedule preview.",
+    url:  "https://cron-expression-builder.pages.dev",
+    cat:  "DevOps"
+  },
+  {
+    name: "Number Base Converter",
+    desc: "Convert numbers between binary, octal, decimal, and hexadecimal.",
+    url:  "https://number-base-converter-eo2.pages.dev",
+    cat:  "Math"
+  },
+  {
+    name: "String Case Converter",
+    desc: "Transform strings between camelCase, snake_case, PascalCase, and more.",
+    url:  "https://string-case-converter.pages.dev",
+    cat:  "Text"
+  },
+  {
+    name: "JSON Diff Tool",
+    desc: "Compare two JSON objects side-by-side and highlight the differences.",
+    url:  "https://json-diff-tool-bvs.pages.dev",
+    cat:  "Data"
+  },
+  {
+    name: "Lorem Ipsum Generator",
+    desc: "Generate placeholder text — words, sentences, or paragraphs on demand.",
+    url:  "https://lorem-ipsum-generator-adt.pages.dev",
+    cat:  "Text"
+  }
+];
+
+const arrow = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>`;
+
+const grid = document.getElementById("grid");
+
+tools.forEach(t => {
+  const a = document.createElement("a");
+  a.href = t.url;
+  a.className = "card";
+  a.rel = "noopener noreferrer";
+  a.innerHTML = `
+    <div class="card-title">${t.name} ${arrow}</div>
+    <div class="card-desc">${t.desc}</div>
+    <span class="badge badge-${t.cat}">${t.cat}</span>
+  `;
+  grid.appendChild(a);
+});
+</script>
+
+</body>
+</html>
