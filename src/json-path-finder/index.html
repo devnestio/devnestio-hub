@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JSON Path Finder – Click to Get JSONPath Expression | DevNestio</title>
+  <meta name="description" content="Paste JSON and click any value to instantly get its JSONPath expression ($.store.books[0].title). Query JSONPath to highlight matching nodes. Browser-only." />
+  <link rel="canonical" href="https://devnestio.pages.dev/json-path-finder/" />
+  <meta property="og:title" content="JSON Path Finder – Click to Get JSONPath" />
+  <meta property="og:description" content="Click any value in the JSON tree to get its JSONPath expression. Query JSONPath to highlight matches. 100% browser-side." />
+  <meta property="og:url" content="https://devnestio.pages.dev/json-path-finder/" />
+  <meta property="og:type" content="website" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --surface: #161b22; --surface2: #1c2128; --border: #30363d;
+      --text: #c9d1d9; --muted: #8b949e; --accent: #58a6ff;
+      --green: #3fb950; --red: #f85149; --yellow: #d29922;
+      --str: #a5d6ff; --num: #79c0ff; --bool: #ff7b72; --null: #8b949e; --key: #d2a8ff;
+    }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; min-height: 100vh; line-height: 1.6; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1.25rem 1.5rem; }
+    header h1 { font-size: 1.4rem; font-weight: 700; color: var(--accent); }
+    header p { font-size: .85rem; color: var(--muted); margin-top: .2rem; }
+    .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; padding: 1.5rem; max-width: 1300px; margin: 0 auto; }
+    @media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.4rem; display: flex; flex-direction: column; gap: .8rem; }
+    .panel h2 { font-size: .8rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+    textarea {
+      width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+      border-radius: 8px; padding: .75rem; font-family: 'SFMono-Regular', Consolas, monospace; font-size: .82rem;
+      resize: vertical; min-height: 160px; outline: none; transition: border-color .15s;
+    }
+    textarea:focus { border-color: var(--accent); }
+    .btn-row { display: flex; gap: .6rem; flex-wrap: wrap; }
+    button {
+      background: var(--accent); border: none; color: #000; padding: .45rem 1rem;
+      border-radius: 7px; font-size: .85rem; font-weight: 600; cursor: pointer; transition: opacity .15s;
+    }
+    button:hover { opacity: .82; }
+    button.secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+    button.secondary:hover { border-color: var(--accent); color: var(--accent); opacity: 1; }
+    .error-msg { background: #f8514920; border: 1px solid var(--red); color: var(--red); padding: .5rem .75rem; border-radius: 7px; font-size: .82rem; display: none; }
+    .query-row { display: flex; gap: .5rem; align-items: center; }
+    .query-row input { flex: 1; background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 7px; padding: .45rem .75rem; font-family: monospace; font-size: .88rem; outline: none; }
+    .query-row input:focus { border-color: var(--accent); }
+    .path-display { background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; padding: .6rem .8rem; display: flex; align-items: center; gap: .5rem; min-height: 2.4rem; }
+    .path-display code { font-family: 'SFMono-Regular', Consolas, monospace; font-size: .88rem; color: var(--accent); flex: 1; word-break: break-all; }
+    .copy-path-btn { background: var(--surface); border: 1px solid var(--border); color: var(--muted); border-radius: 5px; padding: .2rem .55rem; font-size: .75rem; cursor: pointer; flex-shrink: 0; }
+    .copy-path-btn:hover { color: var(--accent); border-color: var(--accent); }
+    .tree-wrap { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: .8rem; overflow: auto; max-height: 500px; font-family: 'SFMono-Regular', Consolas, monospace; font-size: .82rem; line-height: 1.7; }
+    .tree-node { padding-left: 1.2rem; }
+    .tree-key { color: var(--key); }
+    .tree-colon { color: var(--muted); }
+    .tree-str { color: var(--str); }
+    .tree-num { color: var(--num); }
+    .tree-bool { color: var(--bool); }
+    .tree-null { color: var(--null); }
+    .tree-brace { color: var(--muted); }
+    .tree-leaf { cursor: pointer; border-radius: 3px; padding: 0 2px; transition: background .1s; }
+    .tree-leaf:hover { background: #58a6ff22; }
+    .tree-leaf.selected { background: #58a6ff33; outline: 1px solid var(--accent); }
+    .tree-leaf.highlighted { background: #3fb95022; outline: 1px solid var(--green); }
+    .toggle-arrow { cursor: pointer; user-select: none; color: var(--muted); display: inline-block; width: 1rem; }
+    .toggle-arrow:hover { color: var(--text); }
+    .tree-collapsed .tree-children { display: none; }
+    .match-count { font-size: .78rem; color: var(--green); margin-left: .3rem; }
+    footer { text-align: center; padding: 2rem; color: var(--muted); font-size: .8rem; border-top: 1px solid var(--border); margin-top: 1rem; }
+    footer a { color: var(--accent); }
+  </style>
+</head>
+<body>
+<header>
+  <h1>JSON Path Finder</h1>
+  <p>Click any value in the tree to get its JSONPath · Query JSONPath to highlight matches</p>
+</header>
+
+<div class="layout">
+  <!-- Left: Input -->
+  <div class="panel">
+    <h2>JSON Input</h2>
+    <textarea id="jsonInput" placeholder='Paste JSON here…
+
+{
+  "store": {
+    "books": [
+      { "title": "LOTR", "price": 9.99 }
+    ]
+  }
+}'></textarea>
+    <div class="btn-row">
+      <button id="parseBtn">Parse &amp; Build Tree</button>
+      <button class="secondary" id="sampleBtn">Load Sample</button>
+      <button class="secondary" id="clearBtn">Clear</button>
+    </div>
+    <div class="error-msg" id="errorMsg"></div>
+
+    <h2 style="margin-top:.4rem">JSONPath Query</h2>
+    <div class="query-row">
+      <input type="text" id="queryInput" placeholder="$.store.books[*].title" />
+      <button id="queryBtn">Run</button>
+    </div>
+    <div id="matchInfo" style="font-size:.78rem;color:var(--muted)"></div>
+
+    <h2 style="margin-top:.4rem">Selected Path</h2>
+    <div class="path-display">
+      <code id="selectedPath">Click a value in the tree →</code>
+      <button class="copy-path-btn" id="copyPathBtn">Copy</button>
+    </div>
+  </div>
+
+  <!-- Right: Tree -->
+  <div class="panel">
+    <h2>JSON Tree <span id="treeInfo" style="font-weight:400;color:var(--muted)"></span></h2>
+    <div class="tree-wrap" id="treeWrap"><span style="color:var(--muted)">Paste JSON and click Parse to see the tree.</span></div>
+  </div>
+</div>
+
+<footer>
+  <p>DevNestio JSON Path Finder · <a href="https://devnestio.pages.dev/">More Tools</a></p>
+  <p style="margin-top:.5rem">☕ <a href="https://www.buymeacoffee.com/devnestio">Buy Me a Coffee</a></p>
+</footer>
+
+<script>
+const SAMPLE = JSON.stringify({
+  store: {
+    name: "Book Store",
+    books: [
+      { title: "The Lord of the Rings", author: "Tolkien", price: 12.99, inStock: true },
+      { title: "Harry Potter", author: "Rowling", price: 9.99, inStock: false },
+      { title: "Dune", author: "Herbert", price: 14.99, inStock: true }
+    ],
+    manager: { name: "Alice", age: 34, email: null }
+  },
+  version: "1.0"
+}, null, 2);
+
+let parsedData = null;
+let selectedEl = null;
+
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function pathKey(key) {
+  return /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(key) ? '.' + key : '[' + JSON.stringify(key) + ']';
+}
+
+function buildTree(val, path, depth) {
+  const indent = '  '.repeat(depth);
+  const indentInner = '  '.repeat(depth + 1);
+
+  if (val === null) {
+    return `<span class="tree-leaf tree-null" data-path="${escHtml(path)}" title="${escHtml(path)}">null</span>`;
+  }
+  if (typeof val === 'boolean') {
+    return `<span class="tree-leaf tree-bool" data-path="${escHtml(path)}" title="${escHtml(path)}">${val}</span>`;
+  }
+  if (typeof val === 'number') {
+    return `<span class="tree-leaf tree-num" data-path="${escHtml(path)}" title="${escHtml(path)}">${val}</span>`;
+  }
+  if (typeof val === 'string') {
+    return `<span class="tree-leaf tree-str" data-path="${escHtml(path)}" title="${escHtml(path)}">"${escHtml(val)}"</span>`;
+  }
+  if (Array.isArray(val)) {
+    if (val.length === 0) return `<span class="tree-brace">[]</span>`;
+    const id = 'n' + Math.random().toString(36).slice(2);
+    const items = val.map((item, i) => {
+      const itemPath = path + '[' + i + ']';
+      return `${indentInner}<span class="tree-brace">${i > 0 ? '' : ''}</span>${buildTree(item, itemPath, depth+1)}${i < val.length-1 ? '<span class="tree-brace">,</span>' : ''}`;
+    }).join('\n');
+    return `<span class="toggle-arrow" data-target="${id}">▼</span><span class="tree-brace">[</span><span id="${id}" class="tree-children">\n${items}\n${indent}</span><span class="tree-brace">]</span>`;
+  }
+  if (typeof val === 'object') {
+    const keys = Object.keys(val);
+    if (keys.length === 0) return `<span class="tree-brace">{}</span>`;
+    const id = 'n' + Math.random().toString(36).slice(2);
+    const entries = keys.map((k, i) => {
+      const kPath = path + pathKey(k);
+      return `${indentInner}<span class="tree-key">"${escHtml(k)}"</span><span class="tree-colon">: </span>${buildTree(val[k], kPath, depth+1)}${i < keys.length-1 ? '<span class="tree-brace">,</span>' : ''}`;
+    }).join('\n');
+    return `<span class="toggle-arrow" data-target="${id}">▼</span><span class="tree-brace">{</span><span id="${id}" class="tree-children">\n${entries}\n${indent}</span><span class="tree-brace">}</span>`;
+  }
+  return escHtml(String(val));
+}
+
+function renderTree(data) {
+  const wrap = document.getElementById('treeWrap');
+  wrap.innerHTML = '$: ' + buildTree(data, '$', 0);
+
+  // Toggle collapse
+  wrap.querySelectorAll('.toggle-arrow').forEach(arrow => {
+    arrow.addEventListener('click', e => {
+      e.stopPropagation();
+      const target = document.getElementById(arrow.dataset.target);
+      if (!target) return;
+      const collapsed = target.style.display === 'none';
+      target.style.display = collapsed ? '' : 'none';
+      arrow.textContent = collapsed ? '▼' : '▶';
+    });
+  });
+
+  // Click leaf → show path
+  wrap.querySelectorAll('.tree-leaf').forEach(leaf => {
+    leaf.addEventListener('click', e => {
+      e.stopPropagation();
+      if (selectedEl) selectedEl.classList.remove('selected');
+      selectedEl = leaf;
+      leaf.classList.add('selected');
+      document.getElementById('selectedPath').textContent = leaf.dataset.path;
+      document.getElementById('selectedPath').style.color = 'var(--accent)';
+    });
+  });
+
+  // Count nodes
+  const leafCount = wrap.querySelectorAll('.tree-leaf').length;
+  document.getElementById('treeInfo').textContent = `(${leafCount} values)`;
+}
+
+// JSONPath evaluator (subset: $, ., [], [*], [n], ..)
+function jsonpath(data, expr) {
+  if (!expr.startsWith('$')) return [];
+  const results = [];
+  const pathResults = [];
+
+  function step(node, remaining, currentPath) {
+    if (remaining === '' || remaining === undefined) {
+      results.push(node);
+      pathResults.push(currentPath);
+      return;
+    }
+    if (remaining.startsWith('..')) {
+      // Recursive descent
+      const rest = remaining.slice(2);
+      stepAny(node, rest, currentPath);
+      return;
+    }
+    if (remaining.startsWith('.')) {
+      const rest = remaining.slice(1);
+      if (rest === '*' || rest.startsWith('*')) {
+        const afterStar = rest.slice(1);
+        if (Array.isArray(node)) node.forEach((v,i) => step(v, afterStar, currentPath + '[' + i + ']'));
+        else if (node && typeof node === 'object') Object.entries(node).forEach(([k,v]) => step(v, afterStar, currentPath + pathKey(k)));
+        return;
+      }
+      const match = rest.match(/^([a-zA-Z_$][a-zA-Z0-9_$]*)(.*)/);
+      if (match && node && typeof node === 'object' && !Array.isArray(node) && Object.prototype.hasOwnProperty.call(node, match[1])) {
+        step(node[match[1]], match[2], currentPath + '.' + match[1]);
+        return;
+      }
+    }
+    if (remaining.startsWith('[')) {
+      const closeIdx = remaining.indexOf(']');
+      if (closeIdx === -1) return;
+      const inner = remaining.slice(1, closeIdx);
+      const rest = remaining.slice(closeIdx + 1);
+      if (inner === '*') {
+        if (Array.isArray(node)) node.forEach((v,i) => step(v, rest, currentPath + '[' + i + ']'));
+        else if (node && typeof node === 'object') Object.entries(node).forEach(([k,v]) => step(v, rest, currentPath + pathKey(k)));
+      } else if (/^\d+$/.test(inner)) {
+        const idx = parseInt(inner);
+        if (Array.isArray(node) && idx < node.length) step(node[idx], rest, currentPath + '[' + idx + ']');
+      } else if (/^-\d+$/.test(inner)) {
+        const idx = node.length + parseInt(inner);
+        if (Array.isArray(node) && idx >= 0) step(node[idx], rest, currentPath + '[' + idx + ']');
+      } else {
+        // String key
+        const key = inner.replace(/^['"]|['"]$/g, '');
+        if (node && typeof node === 'object' && Object.prototype.hasOwnProperty.call(node, key)) step(node[key], rest, currentPath + '[' + JSON.stringify(key) + ']');
+      }
+    }
+  }
+
+  function stepAny(node, remaining, currentPath) {
+    step(node, remaining, currentPath);
+    if (Array.isArray(node)) node.forEach((v,i) => stepAny(v, remaining, currentPath + '[' + i + ']'));
+    else if (node && typeof node === 'object') Object.values(node).forEach((v,i) => stepAny(v, remaining, currentPath + pathKey(Object.keys(node)[i])));
+  }
+
+  step(data, expr.slice(1), '$');
+  return pathResults;
+}
+
+function clearHighlights() {
+  document.querySelectorAll('.tree-leaf.highlighted').forEach(el => el.classList.remove('highlighted'));
+}
+
+document.getElementById('parseBtn').addEventListener('click', () => {
+  const raw = document.getElementById('jsonInput').value.trim();
+  const err = document.getElementById('errorMsg');
+  err.style.display = 'none';
+  if (!raw) { err.textContent = 'Please paste some JSON first.'; err.style.display = 'block'; return; }
+  try {
+    parsedData = JSON.parse(raw);
+    renderTree(parsedData);
+    document.getElementById('selectedPath').textContent = 'Click a value in the tree →';
+    document.getElementById('selectedPath').style.color = '';
+    document.getElementById('matchInfo').textContent = '';
+    selectedEl = null;
+  } catch(e) {
+    err.textContent = 'JSON parse error: ' + e.message;
+    err.style.display = 'block';
+  }
+});
+
+document.getElementById('sampleBtn').addEventListener('click', () => {
+  document.getElementById('jsonInput').value = SAMPLE;
+  document.getElementById('parseBtn').click();
+});
+
+document.getElementById('clearBtn').addEventListener('click', () => {
+  document.getElementById('jsonInput').value = '';
+  document.getElementById('treeWrap').innerHTML = '<span style="color:var(--muted)">Paste JSON and click Parse to see the tree.</span>';
+  document.getElementById('selectedPath').textContent = 'Click a value in the tree →';
+  document.getElementById('matchInfo').textContent = '';
+  parsedData = null; selectedEl = null;
+});
+
+document.getElementById('queryBtn').addEventListener('click', () => {
+  if (!parsedData) { return; }
+  clearHighlights();
+  const q = document.getElementById('queryInput').value.trim();
+  if (!q) return;
+  try {
+    const paths = jsonpath(parsedData, q);
+    document.getElementById('matchInfo').textContent = paths.length + ' match' + (paths.length !== 1 ? 'es' : '');
+    paths.forEach(p => {
+      const escaped = p.replace(/"/g, '\\"').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      const el = document.querySelector(`.tree-leaf[data-path="${escaped.replace(/\\/g,'\\\\')}"]`);
+      if (el) el.classList.add('highlighted');
+    });
+    if (paths.length === 0) document.getElementById('matchInfo').style.color = 'var(--red)';
+    else document.getElementById('matchInfo').style.color = 'var(--green)';
+  } catch(e) {
+    document.getElementById('matchInfo').textContent = 'Query error: ' + e.message;
+    document.getElementById('matchInfo').style.color = 'var(--red)';
+  }
+});
+
+document.getElementById('queryInput').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('queryBtn').click(); });
+
+document.getElementById('copyPathBtn').addEventListener('click', () => {
+  const path = document.getElementById('selectedPath').textContent;
+  if (path && path !== 'Click a value in the tree →') {
+    navigator.clipboard.writeText(path).then(() => {
+      const btn = document.getElementById('copyPathBtn');
+      btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 1500);
+    });
+  }
+});
+</script>
+</body>
+</html>

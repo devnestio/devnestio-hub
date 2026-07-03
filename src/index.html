@@ -763,7 +763,7 @@ const tools = [
   },
   {
     "name": "Color Contrast Checker",
-    "desc": "Check foreground/background color contrast for WCAG AA and AAA compliance. Live preview, hex/RGB display, and all four WCAG 2.1 levels at once.",
+    "desc": "WCAG 2.1 contrast ratio checker: input foreground and background colors in hex, rgb(), or hsl(). Shows ratio, AA/AAA pass/fail for normal and large text, live text preview. Browser-only.",
     "url": "https://devnestio.pages.dev/color-contrast-checker/",
     "cat": "Design"
   },
@@ -1390,6 +1390,30 @@ const tools = [
     "desc": "Parse any URL into protocol, username, password, hostname, port, path, query string, and hash. Decode query parameters into a table with raw vs decoded values. Rebuild URLs with the visual URL builder form. Browser-only.",
     "url": "https://devnestio.pages.dev/url-parser/",
     "cat": "DevOps"
+  },
+  {
+    "name": "SSL Certificate Checker",
+    "desc": "Paste a PEM certificate and instantly parse subject, issuer, validity dates (with expiry countdown bar), Subject Alternative Names, SHA-256 fingerprint (via WebCrypto), serial number, and signature algorithm. Browser-only — nothing uploaded.",
+    "url": "https://devnestio.pages.dev/ssl-certificate-checker/",
+    "cat": "Security"
+  },
+  {
+    "name": "Password Strength Checker",
+    "desc": "Real-time password strength analyzer: entropy calculation, crack-time estimates across 5 attack scenarios (online throttled to GPU MD5 farm), character class analysis (uppercase/lowercase/digits/symbols), common password detection, show/hide toggle, and strength meter bar.",
+    "url": "https://devnestio.pages.dev/password-strength-checker/",
+    "cat": "Security"
+  },
+  {
+    "name": "JSON Path Finder",
+    "desc": "Paste JSON and click any value in the rendered tree to instantly get its JSONPath expression (e.g. $.store.books[0].title). Also supports JSONPath query input to highlight all matching nodes. Collapse/expand tree nodes. Browser-only.",
+    "url": "https://devnestio.pages.dev/json-path-finder/",
+    "cat": "JSON"
+  },
+  {
+    "name": "MIME Type Reference",
+    "desc": "Searchable reference of 200+ MIME types with file extensions, browser support indicators (Chrome/Firefox/Safari), and category filter (image/audio/video/text/application/font/multipart/model). Copy any MIME type with one click. Browser-only.",
+    "url": "https://devnestio.pages.dev/mime-type-reference/",
+    "cat": "Reference"
   }
 ];
 

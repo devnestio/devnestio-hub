@@ -3,91 +3,96 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Color Contrast Checker – WCAG AA/AAA Compliance | DevNestio</title>
-  <meta name="description" content="Check foreground/background color contrast ratio for WCAG AA and AAA accessibility compliance. Live preview, hex/RGB input, contrast ratio display." />
+  <title>Color Contrast Checker – WCAG 2.1 AA/AAA | DevNestio</title>
+  <meta name="description" content="WCAG 2.1 contrast ratio checker. Input hex, rgb(), or hsl() colors, see contrast ratio, AA/AAA pass/fail for normal and large text, live preview." />
   <link rel="canonical" href="https://devnestio.pages.dev/color-contrast-checker/" />
-  <meta property="og:title" content="Color Contrast Checker – WCAG AA/AAA Compliance" />
-  <meta property="og:description" content="Check color contrast ratio for WCAG AA and AAA compliance. Live preview and hex/RGB input." />
+  <meta property="og:title" content="Color Contrast Checker – WCAG 2.1 AA/AAA Compliance" />
+  <meta property="og:description" content="Check foreground/background contrast ratio for WCAG AA and AAA compliance. Supports hex, rgb(), hsl(). Live text preview." />
   <meta property="og:url" content="https://devnestio.pages.dev/color-contrast-checker/" />
   <meta property="og:type" content="website" />
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #0f1117; --surface: #1a1d27; --surface2: #22263a; --border: #2e3248;
-      --text: #e2e8f0; --muted: #8892a4;
-      --pass: #4ade80; --fail: #f87171; --warn: #fbbf24;
+      --bg: #0d1117; --surface: #161b22; --surface2: #1c2128; --border: #30363d;
+      --text: #c9d1d9; --muted: #8b949e; --accent: #58a6ff;
+      --pass: #3fb950; --fail: #f85149; --warn: #d29922;
     }
-    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
-    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1.2rem 1.5rem; }
-    header h1 { font-size: 1.4rem; font-weight: 700; color: #c084fc; }
-    header p { font-size: .85rem; color: var(--muted); margin-top: .25rem; }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; min-height: 100vh; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1.25rem 1.5rem; }
+    header h1 { font-size: 1.4rem; font-weight: 700; color: var(--accent); }
+    header p { font-size: .85rem; color: var(--muted); margin-top: .2rem; }
     .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; padding: 1.5rem; max-width: 1100px; margin: 0 auto; }
     @media (max-width: 700px) { .layout { grid-template-columns: 1fr; } }
-    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.4rem; }
-    .panel h2 { font-size: .95rem; font-weight: 600; color: var(--muted); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: .05em; }
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.4rem; }
+    .panel h2 { font-size: .8rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 1rem; }
     .color-row { margin-bottom: 1.1rem; }
     label { display: block; font-size: .85rem; color: var(--muted); margin-bottom: .35rem; }
     .color-input-group { display: flex; gap: .5rem; align-items: center; }
     input[type="color"] { width: 44px; height: 44px; border: 2px solid var(--border); border-radius: 8px; background: none; cursor: pointer; padding: 2px; flex-shrink: 0; }
-    input[type="color"]:focus { outline: 2px solid #c084fc; }
-    input[type="text"] { flex: 1; background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: .5rem .75rem; font-family: monospace; font-size: .95rem; outline: none; transition: border-color .2s; }
-    input[type="text"]:focus { border-color: #c084fc; }
-    .swap-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: .5rem .9rem; cursor: pointer; font-size: 1rem; transition: all .15s; width: 100%; margin-top: .75rem; }
-    .swap-btn:hover { background: #c084fc22; border-color: #c084fc; color: #c084fc; }
-    .ratio-display { text-align: center; padding: 1.5rem; }
-    .ratio-number { font-size: 3.5rem; font-weight: 800; line-height: 1; font-family: monospace; }
-    .ratio-label { font-size: .85rem; color: var(--muted); margin-top: .4rem; }
+    input[type="color"]:focus { outline: 2px solid var(--accent); }
+    input[type="text"] { flex: 1; background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: .5rem .75rem; font-family: 'SFMono-Regular', Consolas, monospace; font-size: .9rem; outline: none; transition: border-color .2s; }
+    input[type="text"]:focus { border-color: var(--accent); }
+    input[type="text"].invalid { border-color: var(--fail); }
+    .format-hint { font-size: .72rem; color: var(--muted); margin-top: .25rem; }
+    .swap-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: .5rem .9rem; cursor: pointer; font-size: .9rem; transition: all .15s; width: 100%; margin-top: .75rem; }
+    .swap-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .ratio-display { text-align: center; padding: 1.5rem 1rem; }
+    .ratio-number { font-size: 3.5rem; font-weight: 800; line-height: 1; font-family: 'SFMono-Regular', Consolas, monospace; }
+    .ratio-label { font-size: .82rem; color: var(--muted); margin-top: .4rem; }
     .wcag-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin-top: 1.2rem; }
     .wcag-item { background: var(--surface2); border-radius: 8px; padding: .75rem; text-align: center; }
-    .wcag-level { font-size: .75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: .35rem; }
-    .wcag-status { font-size: .95rem; font-weight: 700; padding: .3rem .7rem; border-radius: 5px; display: inline-block; }
-    .wcag-status.pass { background: #4ade8022; color: var(--pass); }
-    .wcag-status.fail { background: #f8717122; color: var(--fail); }
-    .wcag-desc { font-size: .72rem; color: var(--muted); margin-top: .3rem; }
-    .preview-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-    .preview-panel h2 { font-size: .95rem; font-weight: 600; color: var(--muted); padding: 1.4rem 1.4rem .75rem; text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid var(--border); }
-    .preview-area { padding: 2rem; }
-    .preview-box { border-radius: 10px; padding: 2rem; margin-bottom: .75rem; }
+    .wcag-level { font-size: .72rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: .35rem; }
+    .wcag-status { font-size: .88rem; font-weight: 700; padding: .3rem .7rem; border-radius: 5px; display: inline-block; }
+    .wcag-status.pass { background: #3fb95022; color: var(--pass); }
+    .wcag-status.fail { background: #f8514922; color: var(--fail); }
+    .wcag-desc { font-size: .7rem; color: var(--muted); margin-top: .3rem; }
+    .preview-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .preview-panel h2 { font-size: .8rem; font-weight: 600; color: var(--muted); padding: 1.4rem 1.4rem .75rem; text-transform: uppercase; letter-spacing: .06em; border-bottom: 1px solid var(--border); }
+    .preview-area { padding: 1.5rem; }
+    .preview-box { border-radius: 10px; padding: 1.5rem; margin-bottom: .75rem; }
     .preview-box .p-heading { font-size: 1.4rem; font-weight: 700; margin-bottom: .5rem; }
     .preview-box .p-body { font-size: 1rem; line-height: 1.6; }
     .preview-box .p-small { font-size: .8rem; margin-top: .5rem; }
-    .preview-box .p-btn { display: inline-block; padding: .5rem 1.2rem; border-radius: 6px; font-size: .9rem; font-weight: 600; margin-top: .75rem; }
-    .info-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.4rem; }
-    .info-panel h2 { font-size: .95rem; font-weight: 600; color: var(--muted); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: .05em; }
+    .preview-box .p-large { font-size: 1.3rem; font-weight: 700; margin-top: .5rem; }
+    .preview-box .p-btn { display: inline-block; padding: .45rem 1.1rem; border-radius: 6px; font-size: .9rem; font-weight: 600; margin-top: .75rem; }
+    .info-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.4rem; }
+    .info-panel h2 { font-size: .8rem; font-weight: 600; color: var(--muted); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: .06em; }
     .info-table { width: 100%; border-collapse: collapse; font-size: .82rem; }
     .info-table th, .info-table td { padding: .5rem .6rem; text-align: left; border-bottom: 1px solid var(--border); }
     .info-table th { color: var(--muted); font-weight: 600; }
     .info-table td { color: var(--text); }
     .info-table tr:last-child td, .info-table tr:last-child th { border-bottom: none; }
-    .rgb-display { font-size: .82rem; color: var(--muted); margin-top: .75rem; display: flex; gap: .5rem; flex-wrap: wrap; }
-    .rgb-chip { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: .2rem .5rem; font-family: monospace; }
+    .color-chips { font-size: .79rem; color: var(--muted); margin-top: .75rem; display: flex; gap: .4rem; flex-wrap: wrap; }
+    .chip { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: .15rem .5rem; font-family: monospace; }
     footer { text-align: center; padding: 2rem; color: var(--muted); font-size: .8rem; border-top: 1px solid var(--border); margin-top: .5rem; }
+    footer a { color: var(--accent); }
   </style>
 </head>
 <body>
 <header>
-  <h1>🎨 Color Contrast Checker</h1>
-  <p>WCAG AA / AAA compliance · Live preview · Hex &amp; RGB input</p>
+  <h1>Color Contrast Checker</h1>
+  <p>WCAG 2.1 AA/AAA · Hex, RGB, HSL input · Live preview</p>
 </header>
 
 <div class="layout">
-  <!-- Input Panel -->
   <div class="panel">
     <h2>Colors</h2>
     <div class="color-row">
       <label>Foreground (Text)</label>
       <div class="color-input-group">
-        <input type="color" id="fgPicker" value="#e2e8f0" />
-        <input type="text" id="fgHex" value="#e2e8f0" maxlength="9" placeholder="#000000" />
+        <input type="color" id="fgPicker" value="#c9d1d9" />
+        <input type="text" id="fgText" value="#c9d1d9" placeholder="#hex or rgb() or hsl()" />
       </div>
+      <div class="format-hint">Accepts: #fff, #aabbcc, rgb(r,g,b), rgba(r,g,b,a), hsl(h,s%,l%)</div>
     </div>
     <div class="color-row">
       <label>Background</label>
       <div class="color-input-group">
-        <input type="color" id="bgPicker" value="#0f1117" />
-        <input type="text" id="bgHex" value="#0f1117" maxlength="9" placeholder="#ffffff" />
+        <input type="color" id="bgPicker" value="#0d1117" />
+        <input type="text" id="bgText" value="#0d1117" placeholder="#hex or rgb() or hsl()" />
       </div>
+      <div class="format-hint">Accepts: #fff, #aabbcc, rgb(r,g,b), rgba(r,g,b,a), hsl(h,s%,l%)</div>
     </div>
     <button class="swap-btn" id="swapBtn">⇅ Swap Colors</button>
 
@@ -105,7 +110,7 @@
       <div class="wcag-item">
         <div class="wcag-level">AA Large</div>
         <div class="wcag-status" id="aa-large">—</div>
-        <div class="wcag-desc">≥ 3:1 (18pt / 14pt bold)</div>
+        <div class="wcag-desc">≥ 3:1</div>
       </div>
       <div class="wcag-item">
         <div class="wcag-level">AAA Normal</div>
@@ -118,157 +123,203 @@
         <div class="wcag-desc">≥ 4.5:1</div>
       </div>
     </div>
-
-    <div class="rgb-display" id="rgbDisplay"></div>
+    <div class="color-chips" id="colorChips"></div>
   </div>
 
-  <!-- Preview Panel -->
   <div class="preview-panel">
     <h2>Live Preview</h2>
     <div class="preview-area">
       <div class="preview-box" id="previewBox">
-        <div class="p-heading">The quick brown fox</div>
-        <div class="p-body">Accessible text ensures everyone can read your content, regardless of visual ability. Good contrast matters.</div>
-        <div class="p-small">Small text is harder to read — aim for WCAG AA or higher.</div>
+        <div class="p-heading">Heading text (large)</div>
+        <div class="p-body">Body copy — accessible text ensures everyone can read your content regardless of visual ability. Good contrast ratios matter for WCAG compliance.</div>
+        <div class="p-small">Small text (12px) is harder to read — aim for WCAG AA or higher.</div>
+        <div class="p-large">Bold large text (18pt)</div>
         <span class="p-btn" id="previewBtn">Button</span>
       </div>
     </div>
   </div>
 
-  <!-- Info Panel -->
   <div class="info-panel" style="grid-column: 1 / -1;">
     <h2>WCAG 2.1 Contrast Requirements</h2>
     <table class="info-table">
       <thead><tr><th>Level</th><th>Text Size</th><th>Min Ratio</th><th>Notes</th></tr></thead>
       <tbody>
-        <tr><td>AA</td><td>Normal text</td><td>4.5:1</td><td>Default for body text, UI labels</td></tr>
-        <tr><td>AA</td><td>Large text</td><td>3:1</td><td>18pt (24px) regular or 14pt (18.67px) bold</td></tr>
+        <tr><td>AA</td><td>Normal text</td><td>4.5:1</td><td>Body text, UI labels, links</td></tr>
+        <tr><td>AA</td><td>Large text</td><td>3:1</td><td>≥ 18pt (24px) regular or ≥ 14pt (18.67px) bold</td></tr>
         <tr><td>AAA</td><td>Normal text</td><td>7:1</td><td>Enhanced — recommended for critical UI</td></tr>
-        <tr><td>AAA</td><td>Large text</td><td>4.5:1</td><td>Enhanced for large text</td></tr>
-        <tr><td>—</td><td>Non-text contrast</td><td>3:1</td><td>UI components, icons, focus indicators</td></tr>
+        <tr><td>AAA</td><td>Large text</td><td>4.5:1</td><td>Enhanced large text</td></tr>
+        <tr><td>AA</td><td>Non-text (UI components)</td><td>3:1</td><td>Icons, focus rings, form borders</td></tr>
       </tbody>
     </table>
   </div>
 </div>
 
 <footer>
-  <p>DevNestio Color Contrast Checker · <a href="https://devnestio.pages.dev/" style="color:#c084fc">More Tools</a></p>
+  <p>DevNestio Color Contrast Checker · <a href="https://devnestio.pages.dev/">More Tools</a></p>
+  <p style="margin-top:.5rem">☕ <a href="https://www.buymeacoffee.com/devnestio">Buy Me a Coffee</a></p>
 </footer>
 
 <script>
-// WCAG relative luminance
-function hexToRgb(hex) {
-  hex = hex.replace(/^#/, '');
-  if (hex.length === 3) hex = hex.split('').map(c => c+c).join('');
-  if (hex.length !== 6) return null;
-  const n = parseInt(hex, 16);
-  if (isNaN(n)) return null;
-  return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+// Parse various color formats → { r, g, b } or null
+function parseColor(str) {
+  str = str.trim();
+
+  // #rgb or #rgba
+  if (/^#[0-9a-f]{3,4}$/i.test(str)) {
+    const hex = str.slice(1);
+    const r = parseInt(hex[0]+hex[0], 16);
+    const g = parseInt(hex[1]+hex[1], 16);
+    const b = parseInt(hex[2]+hex[2], 16);
+    return { r, g, b };
+  }
+  // #rrggbb or #rrggbbaa
+  if (/^#[0-9a-f]{6,8}$/i.test(str)) {
+    const h = str.slice(1);
+    return { r: parseInt(h.slice(0,2),16), g: parseInt(h.slice(2,4),16), b: parseInt(h.slice(4,6),16) };
+  }
+  // rgb(r, g, b) or rgba(r, g, b, a)
+  const rgbM = str.match(/^rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)/i);
+  if (rgbM) {
+    return { r: Math.round(clamp(+rgbM[1], 0, 255)), g: Math.round(clamp(+rgbM[2], 0, 255)), b: Math.round(clamp(+rgbM[3], 0, 255)) };
+  }
+  // hsl(h, s%, l%) or hsla(h, s%, l%, a)
+  const hslM = str.match(/^hsla?\(\s*([\d.]+)\s*,\s*([\d.]+)%?\s*,\s*([\d.]+)%?/i);
+  if (hslM) {
+    return hslToRgb(+hslM[1], +hslM[2], +hslM[3]);
+  }
+  return null;
+}
+
+function clamp(v, lo, hi) { return Math.min(hi, Math.max(lo, v)); }
+
+function hslToRgb(h, s, l) {
+  s /= 100; l /= 100;
+  h = ((h % 360) + 360) % 360;
+  const c = (1 - Math.abs(2*l - 1)) * s;
+  const x = c * (1 - Math.abs((h/60) % 2 - 1));
+  const m = l - c/2;
+  let r=0, g=0, b=0;
+  if (h < 60) { r=c; g=x; }
+  else if (h < 120) { r=x; g=c; }
+  else if (h < 180) { g=c; b=x; }
+  else if (h < 240) { g=x; b=c; }
+  else if (h < 300) { r=x; b=c; }
+  else { r=c; b=x; }
+  return { r: Math.round((r+m)*255), g: Math.round((g+m)*255), b: Math.round((b+m)*255) };
+}
+
+function rgbToHex(rgb) {
+  return '#' + [rgb.r, rgb.g, rgb.b].map(v => v.toString(16).padStart(2,'0')).join('');
+}
+
+function rgbToHsl(rgb) {
+  const r = rgb.r/255, g = rgb.g/255, b = rgb.b/255;
+  const max = Math.max(r,g,b), min = Math.min(r,g,b), d = max - min;
+  let h=0, s=0, l=(max+min)/2;
+  if (d !== 0) {
+    s = d / (1 - Math.abs(2*l - 1));
+    switch(max) {
+      case r: h = ((g-b)/d + 6) % 6; break;
+      case g: h = (b-r)/d + 2; break;
+      case b: h = (r-g)/d + 4; break;
+    }
+    h = Math.round(h * 60);
+  }
+  return `hsl(${h}, ${Math.round(s*100)}%, ${Math.round(l*100)}%)`;
 }
 
 function linearize(c) {
   c /= 255;
   return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
 }
-
 function luminance(rgb) {
-  return 0.2126 * linearize(rgb.r) + 0.7152 * linearize(rgb.g) + 0.0722 * linearize(rgb.b);
+  return 0.2126*linearize(rgb.r) + 0.7152*linearize(rgb.g) + 0.0722*linearize(rgb.b);
 }
-
 function contrastRatio(l1, l2) {
-  const lighter = Math.max(l1, l2);
-  const darker = Math.min(l1, l2);
-  return (lighter + 0.05) / (darker + 0.05);
+  const hi = Math.max(l1,l2), lo = Math.min(l1,l2);
+  return (hi + 0.05) / (lo + 0.05);
 }
 
-function passStatus(pass) {
-  return `<span class="wcag-status ${pass ? 'pass' : 'fail'}">${pass ? '✓ Pass' : '✗ Fail'}</span>`;
+function setStatus(id, pass) {
+  const el = document.getElementById(id);
+  el.className = 'wcag-status ' + (pass ? 'pass' : 'fail');
+  el.textContent = pass ? '✓ Pass' : '✗ Fail';
 }
 
 function update() {
-  const fgHex = document.getElementById('fgHex').value.trim();
-  const bgHex = document.getElementById('bgHex').value.trim();
+  const fgVal = document.getElementById('fgText').value.trim();
+  const bgVal = document.getElementById('bgText').value.trim();
+  const fg = parseColor(fgVal);
+  const bg = parseColor(bgVal);
 
-  const fg = hexToRgb(fgHex);
-  const bg = hexToRgb(bgHex);
+  document.getElementById('fgText').classList.toggle('invalid', fgVal !== '' && !fg);
+  document.getElementById('bgText').classList.toggle('invalid', bgVal !== '' && !bg);
 
   if (!fg || !bg) {
     document.getElementById('ratioNum').textContent = '—';
+    document.getElementById('ratioNum').style.color = '';
     ['aa-normal','aa-large','aaa-normal','aaa-large'].forEach(id => {
-      document.getElementById(id).innerHTML = '—';
-      document.getElementById(id).className = 'wcag-status';
+      const el = document.getElementById(id);
+      el.textContent = '—'; el.className = 'wcag-status';
     });
+    document.getElementById('colorChips').innerHTML = '';
     return;
   }
 
-  const fgL = luminance(fg);
-  const bgL = luminance(bg);
+  const fgL = luminance(fg), bgL = luminance(bg);
   const ratio = contrastRatio(fgL, bgL);
-  const ratioStr = ratio.toFixed(2);
 
-  // Update ratio display with color coding
   const ratioEl = document.getElementById('ratioNum');
-  ratioEl.textContent = ratioStr + ':1';
-  ratioEl.style.color = ratio >= 7 ? '#4ade80' : ratio >= 4.5 ? '#60a5fa' : ratio >= 3 ? '#fbbf24' : '#f87171';
+  ratioEl.textContent = ratio.toFixed(2) + ':1';
+  ratioEl.style.color = ratio >= 7 ? '#3fb950' : ratio >= 4.5 ? '#58a6ff' : ratio >= 3 ? '#d29922' : '#f85149';
 
-  // WCAG checks
-  document.getElementById('aa-normal').innerHTML = passStatus(ratio >= 4.5);
-  document.getElementById('aa-large').innerHTML = passStatus(ratio >= 3);
-  document.getElementById('aaa-normal').innerHTML = passStatus(ratio >= 7);
-  document.getElementById('aaa-large').innerHTML = passStatus(ratio >= 4.5);
+  setStatus('aa-normal', ratio >= 4.5);
+  setStatus('aa-large', ratio >= 3);
+  setStatus('aaa-normal', ratio >= 7);
+  setStatus('aaa-large', ratio >= 4.5);
 
   // Preview
   const box = document.getElementById('previewBox');
-  box.style.backgroundColor = '#' + bgHex.replace(/^#/, '');
-  box.style.color = '#' + fgHex.replace(/^#/, '');
+  box.style.backgroundColor = rgbToHex(bg);
+  box.style.color = rgbToHex(fg);
   const btn = document.getElementById('previewBtn');
-  btn.style.backgroundColor = '#' + fgHex.replace(/^#/, '');
-  btn.style.color = '#' + bgHex.replace(/^#/, '');
-
-  // RGB display
-  document.getElementById('rgbDisplay').innerHTML =
-    `<span class="rgb-chip">FG rgb(${fg.r}, ${fg.g}, ${fg.b})</span>` +
-    `<span class="rgb-chip">BG rgb(${bg.r}, ${bg.g}, ${bg.b})</span>` +
-    `<span class="rgb-chip">FG lum: ${fgL.toFixed(4)}</span>` +
-    `<span class="rgb-chip">BG lum: ${bgL.toFixed(4)}</span>`;
+  btn.style.backgroundColor = rgbToHex(fg);
+  btn.style.color = rgbToHex(bg);
 
   // Sync pickers
-  try {
-    document.getElementById('fgPicker').value = '#' + hexToRgbToHex(fg);
-    document.getElementById('bgPicker').value = '#' + hexToRgbToHex(bg);
-  } catch(e) {}
+  try { document.getElementById('fgPicker').value = rgbToHex(fg); } catch(e) {}
+  try { document.getElementById('bgPicker').value = rgbToHex(bg); } catch(e) {}
+
+  // Color info chips
+  document.getElementById('colorChips').innerHTML =
+    `<span class="chip">FG hex: ${rgbToHex(fg)}</span>` +
+    `<span class="chip">FG rgb(${fg.r},${fg.g},${fg.b})</span>` +
+    `<span class="chip">FG ${rgbToHsl(fg)}</span>` +
+    `<span class="chip">BG hex: ${rgbToHex(bg)}</span>` +
+    `<span class="chip">BG rgb(${bg.r},${bg.g},${bg.b})</span>` +
+    `<span class="chip">BG ${rgbToHsl(bg)}</span>` +
+    `<span class="chip">Lum FG: ${fgL.toFixed(4)}</span>` +
+    `<span class="chip">Lum BG: ${bgL.toFixed(4)}</span>`;
 }
 
-function hexToRgbToHex(rgb) {
-  return ((1 << 24) | (rgb.r << 16) | (rgb.g << 8) | rgb.b).toString(16).slice(1);
-}
+// Picker → text field
+['fg','bg'].forEach(side => {
+  document.getElementById(side+'Picker').addEventListener('input', () => {
+    document.getElementById(side+'Text').value = document.getElementById(side+'Picker').value;
+    update();
+  });
+  document.getElementById(side+'Text').addEventListener('input', () => {
+    const rgb = parseColor(document.getElementById(side+'Text').value);
+    if (rgb) { try { document.getElementById(side+'Picker').value = rgbToHex(rgb); } catch(e) {} }
+    update();
+  });
+});
 
-function syncHexFromPicker(pickerId, hexId) {
-  const val = document.getElementById(pickerId).value;
-  document.getElementById(hexId).value = val;
-  update();
-}
-
-function syncPickerFromHex(hexId, pickerId) {
-  let val = document.getElementById(hexId).value.trim();
-  if (!val.startsWith('#')) val = '#' + val;
-  const rgb = hexToRgb(val);
-  if (rgb) {
-    document.getElementById(pickerId).value = '#' + hexToRgbToHex(rgb);
-    document.getElementById(hexId).value = val.startsWith('#') ? val : '#' + val;
-  }
-  update();
-}
-
-document.getElementById('fgPicker').addEventListener('input', () => syncHexFromPicker('fgPicker','fgHex'));
-document.getElementById('bgPicker').addEventListener('input', () => syncHexFromPicker('bgPicker','bgHex'));
-document.getElementById('fgHex').addEventListener('input', () => syncPickerFromHex('fgHex','fgPicker'));
-document.getElementById('bgHex').addEventListener('input', () => syncPickerFromHex('bgHex','bgPicker'));
 document.getElementById('swapBtn').addEventListener('click', () => {
-  const fg = document.getElementById('fgHex').value;
-  const bg = document.getElementById('bgHex').value;
-  document.getElementById('fgHex').value = bg;
-  document.getElementById('bgHex').value = fg;
+  const fg = document.getElementById('fgText').value;
+  const bg = document.getElementById('bgText').value;
+  document.getElementById('fgText').value = bg;
+  document.getElementById('bgText').value = fg;
   update();
 });
 

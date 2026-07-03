@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SSL Certificate Checker – Parse PEM & Inspect Cert Fields | DevNestio</title>
+  <meta name="description" content="Paste a PEM certificate and instantly parse subject, issuer, validity dates, SANs, and SHA-256 fingerprint. Browser-only SSL certificate inspector." />
+  <link rel="canonical" href="https://devnestio.pages.dev/ssl-certificate-checker/" />
+  <meta property="og:title" content="SSL Certificate Checker – Parse PEM Certificates" />
+  <meta property="og:description" content="Paste a PEM certificate to parse subject, issuer, validity dates, SANs, and SHA-256 fingerprint. 100% browser-side." />
+  <meta property="og:url" content="https://devnestio.pages.dev/ssl-certificate-checker/" />
+  <meta property="og:type" content="website" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --surface: #161b22; --surface2: #1c2128; --border: #30363d;
+      --text: #c9d1d9; --muted: #8b949e; --accent: #58a6ff;
+      --green: #3fb950; --red: #f85149; --yellow: #d29922;
+    }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; min-height: 100vh; line-height: 1.6; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1.25rem 1.5rem; }
+    header h1 { font-size: 1.4rem; font-weight: 700; color: var(--accent); }
+    header p { font-size: .85rem; color: var(--muted); margin-top: .2rem; }
+    .container { max-width: 960px; margin: 0 auto; padding: 1.5rem; display: grid; gap: 1.5rem; }
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.4rem; }
+    .panel h2 { font-size: .8rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 1rem; }
+    textarea {
+      width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+      border-radius: 8px; padding: .75rem; font-family: 'SFMono-Regular', Consolas, monospace; font-size: .82rem;
+      resize: vertical; min-height: 180px; outline: none; transition: border-color .15s;
+    }
+    textarea:focus { border-color: var(--accent); }
+    .btn-row { display: flex; gap: .75rem; margin-top: .75rem; flex-wrap: wrap; }
+    button {
+      background: var(--accent); border: none; color: #000; padding: .5rem 1.1rem;
+      border-radius: 7px; font-size: .88rem; font-weight: 600; cursor: pointer; transition: opacity .15s;
+    }
+    button:hover { opacity: .85; }
+    button.secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+    button.secondary:hover { border-color: var(--accent); color: var(--accent); background: var(--surface2); opacity: 1; }
+    .error-msg { background: #f8514920; border: 1px solid #f85149; color: #f85149; padding: .65rem .9rem; border-radius: 7px; font-size: .85rem; margin-top: .75rem; display: none; }
+    .results { display: none; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    @media (max-width: 700px) { .results { grid-template-columns: 1fr; } }
+    .field { padding: .6rem 0; border-bottom: 1px solid var(--border); display: flex; gap: .75rem; align-items: flex-start; }
+    .field:last-child { border-bottom: none; }
+    .field-label { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; min-width: 120px; flex-shrink: 0; padding-top: .1rem; }
+    .field-value { font-family: 'SFMono-Regular', Consolas, monospace; font-size: .83rem; word-break: break-all; }
+    .validity-bar { height: 8px; border-radius: 4px; background: var(--surface2); margin-top: .4rem; overflow: hidden; }
+    .validity-fill { height: 100%; border-radius: 4px; transition: width .4s; }
+    .tag { display: inline-block; font-size: .72rem; padding: .15rem .5rem; border-radius: 4px; font-weight: 600; margin: .1rem; }
+    .tag.valid { background: #3fb95022; color: var(--green); }
+    .tag.expired { background: #f8514922; color: var(--red); }
+    .tag.warn { background: #d2992222; color: var(--yellow); }
+    .san-list { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .3rem; }
+    .san-chip { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: .15rem .5rem; font-size: .78rem; font-family: monospace; }
+    .copy-btn { font-size: .7rem; padding: .15rem .45rem; margin-left: .4rem; background: var(--surface2); border: 1px solid var(--border); color: var(--muted); border-radius: 4px; cursor: pointer; }
+    .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+    .sample-link { font-size: .8rem; color: var(--accent); cursor: pointer; text-decoration: underline; margin-left: .5rem; }
+    footer { text-align: center; padding: 2rem; color: var(--muted); font-size: .8rem; border-top: 1px solid var(--border); margin-top: 1rem; }
+    footer a { color: var(--accent); }
+  </style>
+</head>
+<body>
+<header>
+  <h1>SSL Certificate Checker</h1>
+  <p>Paste a PEM certificate to inspect fields — subject, issuer, validity, SANs, SHA-256 fingerprint</p>
+</header>
+
+<div class="container">
+  <div class="panel">
+    <h2>PEM Certificate Input</h2>
+    <textarea id="pemInput" placeholder="Paste your certificate here — -----BEGIN CERTIFICATE-----  ...  -----END CERTIFICATE-----"></textarea>
+    <div class="btn-row">
+      <button id="parseBtn">Parse Certificate</button>
+      <button class="secondary" id="clearBtn">Clear</button>
+      <span class="sample-link" id="loadSample">Load sample cert</span>
+    </div>
+    <div class="error-msg" id="errorMsg"></div>
+  </div>
+
+  <div class="results" id="results">
+    <div class="panel">
+      <h2>Subject</h2>
+      <div id="subjectFields"></div>
+    </div>
+    <div class="panel">
+      <h2>Issuer</h2>
+      <div id="issuerFields"></div>
+    </div>
+    <div class="panel">
+      <h2>Validity</h2>
+      <div id="validityFields"></div>
+    </div>
+    <div class="panel">
+      <h2>Fingerprint &amp; Key</h2>
+      <div id="fingerprintFields"></div>
+    </div>
+    <div class="panel" style="grid-column: 1 / -1;">
+      <h2>Subject Alternative Names (SANs)</h2>
+      <div id="sanFields"></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>DevNestio SSL Certificate Checker · <a href="https://devnestio.pages.dev/">More Tools</a></p>
+  <p style="margin-top:.5rem">☕ <a href="https://www.buymeacoffee.com/devnestio">Buy Me a Coffee</a></p>
+</footer>
+
+<script>
+const SAMPLE_PEM = `-----BEGIN CERTIFICATE-----
+MIIFazCCA1OgAwIBAgIRAIIQz7DSQONZRGPgu2OCiwAwDQYJKoZIhvcNAQELBQAw
+TzELMAkGA1UEBhMCVVMxKTAnBgNVBAoTIEludGVybmV0IFNlY3VyaXR5IFJlc2Vh
+cmNoIEdyb3VwMRUwEwYDVQQDEwxJU1JHIFJvb3QgWDEwHhcNMTUwNjA0MTEwNDM4
+WhcNMzUwNjA0MTEwNDM4WjBPMQswCQYDVQQGEwJVUzEpMCcGA1UEChMgSW50ZXJu
+ZXQgU2VjdXJpdHkgUmVzZWFyY2ggR3JvdXAxFTATBgNVBAMTDElTUkcgUm9vdCBY
+MTCCAiIwDQYJKoZIhvcNAQEBBQADggIPADCCAgoBggIBAK3oJHP0FDfzm54rVygc
+h77ct984kIxuPOZXoHj3dcKi/vVqbvYATyjb3miGbESTtrFj/RQSa78f0uoxmyF+
+0TM8ukj13Xnfs7j/EvEhmkvBioZxaUpmZmyPfjxwv60pIgbz5MDmgK7iS4+3mX6U
+A5/TR5d8mUgjU+g4rk8Kb4Mu0UlXjIB0ttov0DiNewNwIRt18jA8+o+u3dpjq+sW
+T8KOEUt+zwvo/7V3LvSye0rgTBIlDHCNAymg4VMk7BPZ7hm/ELNKjD+Jo2FR3qyH
+B5T0Y3HsLuJvW5iB4YlcNHlsdu87kGJ55tukmi8mxdAQ4Q7e2RCOFvu396j3x+UC
+B5iPNgiV5+I3lg02dZ77DnKxHZu8A/lJBdiB3QW0KtZB6awBdpUKD9jf1b0SHzUv
+KBds0pjBqAlkd25HN7rOrFleaJ1/ctaJxQZBKT5ZPt0m9STJEadao0xAH0ahmbWn
+OlFuhjuefXKnEgV4We0+UXgVCwOPjdAvBbI+e0ocS3MFEvzG6uBQE3xDk3SzynTn
+jh8BCNAw1FtxNrQHusEwMFxIt4I7mKZ9YIqioymCzLq9gwQbooMDQaHWBfEbwrbw
+qHyGO0aoSCqI3Haadr8faqU9GY/rOPNk3sgrDQoo//fb4hVC1CLQJ13hef4Y53CI
+rU7m2Ys6xt0nUW7/vGT1M0NPAgMBAAGjQjBAMA4GA1UdDwEB/wQEAwIBBjAPBgNV
+HRMBAf8EBTADAQH/MB0GA1UdDgQWBBR5tFnme7bl5AFzgAiIyBpY9umbbjANBgkq
+hkiG9w0BAQsFAAOCAgEAVR9YqbyyqFDQDLHYGmkgJykIrGF1XIpu+ILlaS/V9lZL
+ubhzEFnTIZd+50xx+7LSYK05qAvqFyFWhfFQDlnrzuBZ6brJFe+GnY+EgPbk6ZGQ
+3BebYhtF8GaV0nxvwuo77x/Py9auJ/GpsMiu/X1+mvoiBOv/2X/qkSsisRcOj/KK
+NFtY2PwByVS5uCbMiogziUwthDyC3+6WVwW6LLv3xLfHTjuCvjHIInNzktHCgKQ5
+ORAzI4JMPJ+GslWYHb4phowim57iaztXOoJwTdwJx4nLCgdNbOhdjsnvzqvHu7Ur
+TkXWStAmzOVyyghqpZXjFaH3pO3JLF+l+/+sKAIuvtd7u+Nxe5AW0wdeRlN8NwdC
+jNPElpzVmbUq4JUagEiuTDkHzsxHpFKVK7q4+63SM1N95R1NbdWhscdCb+ZAJzVc
+oyi3B43njTOQ5yOf+1CceWxG1bQVs5ZufpsMljq4Ui0/1lvh+wjChP4kqKOJ2qxq
+4RgqsahDYVvTH9w7jXbyLeiNdd8XM2w9U/t7y0Ff/9yi0GE44Za4rF2LN9d11TPA
+mRGunUHBcnWEvgJBQl9nJEiU0Zsnvgc/ubhPgXRR4Xq37Z0j4r7g1SgEEzwxA57d
+emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
+-----END CERTIFICATE-----`;
+
+// ASN.1 DER parser (minimal, for X.509)
+function b64decode(str) {
+  const bin = atob(str.replace(/\s+/g, ''));
+  return Uint8Array.from(bin, c => c.charCodeAt(0));
+}
+
+function pemToDer(pem) {
+  const lines = pem.replace(/-----[^-]+-----/g, '').replace(/\s+/g, '');
+  return b64decode(lines);
+}
+
+function readLength(buf, offset) {
+  let len = buf[offset++];
+  if (len & 0x80) {
+    const numBytes = len & 0x7f;
+    len = 0;
+    for (let i = 0; i < numBytes; i++) len = (len << 8) | buf[offset++];
+  }
+  return { len, offset };
+}
+
+function parseTag(buf, offset) {
+  const tag = buf[offset++];
+  const { len, offset: nextOff } = readLength(buf, offset);
+  return { tag, len, offset: nextOff, end: nextOff + len };
+}
+
+function parseOID(bytes) {
+  const first = Math.floor(bytes[0] / 40);
+  const second = bytes[0] % 40;
+  const parts = [first, second];
+  let value = 0;
+  for (let i = 1; i < bytes.length; i++) {
+    value = (value << 7) | (bytes[i] & 0x7f);
+    if (!(bytes[i] & 0x80)) { parts.push(value); value = 0; }
+  }
+  return parts.join('.');
+}
+
+const OID_NAMES = {
+  '2.5.4.3': 'CN', '2.5.4.6': 'C', '2.5.4.7': 'L', '2.5.4.8': 'ST',
+  '2.5.4.10': 'O', '2.5.4.11': 'OU', '2.5.4.5': 'serialNumber',
+  '2.5.29.17': 'subjectAltName', '2.5.29.19': 'basicConstraints',
+  '2.5.29.15': 'keyUsage', '2.5.29.37': 'extKeyUsage',
+  '1.2.840.113549.1.1.11': 'sha256WithRSAEncryption',
+  '1.2.840.113549.1.1.5': 'sha1WithRSAEncryption',
+  '1.2.840.113549.1.1.1': 'rsaEncryption',
+  '1.2.840.10045.4.3.2': 'ecdsaWithSHA256',
+};
+
+function parseName(buf, start, end) {
+  const result = {};
+  let pos = start;
+  while (pos < end) {
+    const set = parseTag(buf, pos);
+    pos = set.end;
+    let sp = set.offset;
+    while (sp < set.end) {
+      const seq = parseTag(buf, sp);
+      sp = seq.end;
+      let sq = seq.offset;
+      const oid = parseTag(buf, sq);
+      const oidBytes = buf.slice(oid.offset, oid.end);
+      const oidStr = parseOID(oidBytes);
+      sq = oid.end;
+      const val = parseTag(buf, sq);
+      const str = new TextDecoder('utf-8').decode(buf.slice(val.offset, val.end));
+      const name = OID_NAMES[oidStr] || oidStr;
+      result[name] = str;
+    }
+  }
+  return result;
+}
+
+function parseUTCTime(bytes) {
+  const s = new TextDecoder().decode(bytes);
+  // YYMMDDHHMMSSZ or YYYYMMDDHHMMSSZ
+  let y, rest;
+  if (s.length === 13) { y = parseInt(s.slice(0,2)); y += y < 50 ? 2000 : 1900; rest = s.slice(2); }
+  else { y = parseInt(s.slice(0,4)); rest = s.slice(4); }
+  const mo = parseInt(rest.slice(0,2)) - 1;
+  const d = parseInt(rest.slice(2,4));
+  const h = parseInt(rest.slice(4,6));
+  const mi = parseInt(rest.slice(6,8));
+  const se = parseInt(rest.slice(8,10));
+  return new Date(Date.UTC(y, mo, d, h, mi, se));
+}
+
+function parseSANs(buf, start, end) {
+  const sans = [];
+  let pos = start;
+  // Outer SEQUENCE
+  const outer = parseTag(buf, pos);
+  pos = outer.offset;
+  while (pos < outer.end) {
+    const item = parseTag(buf, pos);
+    pos = item.end;
+    const tagType = item.tag & 0x1f;
+    const val = new TextDecoder('utf-8').decode(buf.slice(item.offset, item.end));
+    if (tagType === 2) sans.push('DNS: ' + val);
+    else if (tagType === 7) {
+      const ip = buf.slice(item.offset, item.end);
+      if (ip.length === 4) sans.push('IP: ' + Array.from(ip).join('.'));
+      else sans.push('IP: ' + Array.from(ip).map(b => b.toString(16).padStart(2,'0')).join(':'));
+    } else if (tagType === 1) sans.push('Email: ' + val);
+    else sans.push('Type' + tagType + ': ' + val);
+  }
+  return sans;
+}
+
+async function parseCertificate(pem) {
+  const der = pemToDer(pem);
+  let pos = 0;
+
+  // Certificate SEQUENCE
+  const cert = parseTag(der, pos); pos = cert.offset;
+  // tbsCertificate SEQUENCE
+  const tbs = parseTag(der, pos); pos = tbs.offset;
+
+  // version [0] EXPLICIT
+  let version = 1;
+  if ((der[pos] & 0xe0) === 0xa0) {
+    const verTag = parseTag(der, pos); pos = verTag.end;
+  }
+
+  // serialNumber INTEGER
+  const serial = parseTag(der, pos); pos = serial.end;
+  const serialHex = Array.from(der.slice(serial.offset, serial.end)).map(b => b.toString(16).padStart(2,'0')).join(':');
+
+  // signature AlgorithmIdentifier
+  const sigAlg = parseTag(der, pos); pos = sigAlg.end;
+  const sigAlgSeq = parseTag(der, sigAlg.offset);
+  const sigAlgOid = parseTag(der, sigAlgSeq.offset);
+  const sigAlgName = OID_NAMES[parseOID(der.slice(sigAlgOid.offset, sigAlgOid.end))] || parseOID(der.slice(sigAlgOid.offset, sigAlgOid.end));
+
+  // issuer Name
+  const issuer = parseTag(der, pos); pos = issuer.end;
+  const issuerFields = parseName(der, issuer.offset, issuer.end);
+
+  // validity Sequence
+  const validity = parseTag(der, pos); pos = validity.end;
+  let vpos = validity.offset;
+  const notBeforeTag = parseTag(der, vpos); vpos = notBeforeTag.end;
+  const notBefore = parseUTCTime(der.slice(notBeforeTag.offset, notBeforeTag.end));
+  const notAfterTag = parseTag(der, vpos);
+  const notAfter = parseUTCTime(der.slice(notAfterTag.offset, notAfterTag.end));
+
+  // subject Name
+  const subject = parseTag(der, pos); pos = subject.end;
+  const subjectFields = parseName(der, subject.offset, subject.end);
+
+  // SHA-256 fingerprint of the whole DER
+  const hashBuf = await crypto.subtle.digest('SHA-256', der);
+  const fingerprint = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2,'0').toUpperCase()).join(':');
+
+  // Parse extensions for SANs
+  let sans = [];
+  try {
+    let epos = pos;
+    // subjectPublicKeyInfo
+    const spki = parseTag(der, epos); epos = spki.end;
+    // Optional: issuerUniqueID, subjectUniqueID
+    // extensions [3]
+    while (epos < tbs.end) {
+      const ext = parseTag(der, epos); epos = ext.end;
+      if ((ext.tag & 0xe0) === 0xa0) {
+        let xpos = ext.offset;
+        while (xpos < ext.end) {
+          const extSeq = parseTag(der, xpos); xpos = extSeq.end;
+          let xs = extSeq.offset;
+          const extOid = parseTag(der, xs); xs = extOid.end;
+          const oidStr = parseOID(der.slice(extOid.offset, extOid.end));
+          // Skip optional critical BOOLEAN
+          if (der[xs] === 0x01) { const b = parseTag(der, xs); xs = b.end; }
+          const extVal = parseTag(der, xs);
+          if (oidStr === '2.5.29.17') {
+            const inner = parseTag(der, extVal.offset);
+            sans = parseSANs(der, extVal.offset, extVal.end);
+          }
+        }
+      }
+    }
+  } catch(e) { /* extensions optional */ }
+
+  return { subjectFields, issuerFields, notBefore, notAfter, serialHex, sigAlgName, fingerprint, sans };
+}
+
+function renderDN(obj) {
+  return Object.entries(obj).map(([k,v]) =>
+    `<div class="field"><span class="field-label">${k}</span><span class="field-value">${escHtml(v)}</span></div>`
+  ).join('') || '<div class="field"><span class="field-value" style="color:var(--muted)">No fields parsed</span></div>';
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function copyText(text, btn) {
+  navigator.clipboard.writeText(text).then(() => { btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 1500); });
+}
+
+document.getElementById('loadSample').addEventListener('click', () => {
+  document.getElementById('pemInput').value = SAMPLE_PEM.trim();
+});
+
+document.getElementById('clearBtn').addEventListener('click', () => {
+  document.getElementById('pemInput').value = '';
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('errorMsg').style.display = 'none';
+});
+
+document.getElementById('parseBtn').addEventListener('click', async () => {
+  const pem = document.getElementById('pemInput').value.trim();
+  const errEl = document.getElementById('errorMsg');
+  errEl.style.display = 'none';
+
+  if (!pem) { errEl.textContent = 'Please paste a PEM certificate.'; errEl.style.display = 'block'; return; }
+  if (!pem.includes('-----BEGIN CERTIFICATE-----')) { errEl.textContent = 'Input does not look like a PEM certificate (missing BEGIN CERTIFICATE header).'; errEl.style.display = 'block'; return; }
+
+  try {
+    const cert = await parseCertificate(pem);
+    const now = Date.now();
+    const total = cert.notAfter - cert.notBefore;
+    const elapsed = now - cert.notBefore;
+    const pct = Math.min(100, Math.max(0, (elapsed / total) * 100));
+    const daysLeft = Math.ceil((cert.notAfter - now) / 86400000);
+    const isExpired = daysLeft < 0;
+    const isWarn = daysLeft >= 0 && daysLeft < 30;
+
+    document.getElementById('subjectFields').innerHTML = renderDN(cert.subjectFields);
+    document.getElementById('issuerFields').innerHTML = renderDN(cert.issuerFields);
+
+    const validityColor = isExpired ? 'var(--red)' : isWarn ? 'var(--yellow)' : 'var(--green)';
+    const statusTag = isExpired
+      ? `<span class="tag expired">EXPIRED</span>`
+      : isWarn
+        ? `<span class="tag warn">Expires in ${daysLeft} days</span>`
+        : `<span class="tag valid">Valid — ${daysLeft} days left</span>`;
+
+    document.getElementById('validityFields').innerHTML = `
+      <div class="field"><span class="field-label">Not Before</span><span class="field-value">${cert.notBefore.toUTCString()}</span></div>
+      <div class="field"><span class="field-label">Not After</span><span class="field-value">${cert.notAfter.toUTCString()}</span></div>
+      <div class="field"><span class="field-label">Status</span><span class="field-value">${statusTag}</span></div>
+      <div class="validity-bar"><div class="validity-fill" style="width:${pct}%;background:${validityColor}"></div></div>
+    `;
+
+    document.getElementById('fingerprintFields').innerHTML = `
+      <div class="field">
+        <span class="field-label">SHA-256</span>
+        <span class="field-value" style="font-size:.76rem">${cert.fingerprint}
+          <button class="copy-btn" onclick="copyText('${cert.fingerprint}',this)">Copy</button>
+        </span>
+      </div>
+      <div class="field"><span class="field-label">Serial</span><span class="field-value" style="font-size:.76rem">${cert.serialHex}</span></div>
+      <div class="field"><span class="field-label">Algorithm</span><span class="field-value">${cert.sigAlgName}</span></div>
+    `;
+
+    if (cert.sans.length === 0) {
+      document.getElementById('sanFields').innerHTML = '<span style="color:var(--muted);font-size:.85rem">No Subject Alternative Names found.</span>';
+    } else {
+      const chips = cert.sans.map(s => `<span class="san-chip">${escHtml(s)}</span>`).join('');
+      document.getElementById('sanFields').innerHTML = `<div class="san-list">${chips}</div><p style="font-size:.8rem;color:var(--muted);margin-top:.6rem">${cert.sans.length} SAN${cert.sans.length!==1?'s':''} found</p>`;
+    }
+
+    document.getElementById('results').style.display = 'grid';
+  } catch(e) {
+    errEl.textContent = 'Failed to parse certificate: ' + e.message + '. Make sure the PEM is complete and valid.';
+    errEl.style.display = 'block';
+  }
+});
+</script>
+</body>
+</html>

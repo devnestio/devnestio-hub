@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MIME Type Reference – 200+ Types with Extensions | DevNestio</title>
+  <meta name="description" content="Searchable reference of 200+ MIME types with file extensions, browser support, and category filter. Copy any MIME type in one click. 100% browser-side." />
+  <link rel="canonical" href="https://devnestio.pages.dev/mime-type-reference/" />
+  <meta property="og:title" content="MIME Type Reference – 200+ Types Searchable" />
+  <meta property="og:description" content="Find MIME types by extension or name. Filter by category (image/audio/video/text/application). Copy with one click." />
+  <meta property="og:url" content="https://devnestio.pages.dev/mime-type-reference/" />
+  <meta property="og:type" content="website" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --surface: #161b22; --surface2: #1c2128; --border: #30363d;
+      --text: #c9d1d9; --muted: #8b949e; --accent: #58a6ff;
+    }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; min-height: 100vh; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1.25rem 1.5rem; }
+    header h1 { font-size: 1.4rem; font-weight: 700; color: var(--accent); }
+    header p { font-size: .85rem; color: var(--muted); margin-top: .2rem; }
+    .toolbar { display: flex; gap: .75rem; padding: 1.25rem 1.5rem; background: var(--surface); border-bottom: 1px solid var(--border); flex-wrap: wrap; align-items: center; }
+    .search-wrap { position: relative; flex: 1; min-width: 200px; }
+    .search-wrap input { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: .5rem .75rem .5rem 2.1rem; font-size: .88rem; outline: none; }
+    .search-wrap input:focus { border-color: var(--accent); }
+    .search-icon { position: absolute; left: .65rem; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: .85rem; pointer-events: none; }
+    .cats { display: flex; gap: .4rem; flex-wrap: wrap; }
+    .cat-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); padding: .3rem .75rem; border-radius: 6px; font-size: .8rem; cursor: pointer; transition: all .15s; }
+    .cat-btn:hover { color: var(--text); border-color: var(--text); }
+    .cat-btn.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 600; }
+    .count-bar { padding: .5rem 1.5rem; font-size: .78rem; color: var(--muted); }
+    table { width: 100%; border-collapse: collapse; font-size: .83rem; }
+    th { background: var(--surface); border-bottom: 1px solid var(--border); padding: .6rem 1rem; text-align: left; font-size: .75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; position: sticky; top: 0; z-index: 1; }
+    td { padding: .5rem 1rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tr:hover td { background: var(--surface); }
+    .mime-cell { font-family: 'SFMono-Regular', Consolas, monospace; color: var(--accent); font-size: .8rem; }
+    .ext-cell { font-family: monospace; color: var(--muted); font-size: .79rem; }
+    .cat-badge { display: inline-block; padding: .12rem .5rem; border-radius: 4px; font-size: .72rem; font-weight: 600; }
+    .cat-image { background: #1f4e7930; color: #79c0ff; }
+    .cat-audio { background: #3d2b0030; color: #d29922; }
+    .cat-video { background: #1e3a4a30; color: #58a6ff; }
+    .cat-text { background: #1e3a2f30; color: #3fb950; }
+    .cat-application { background: #3b1f5e30; color: #d2a8ff; }
+    .cat-font { background: #2e1f0030; color: #e3692c; }
+    .cat-model { background: #1c2f1c30; color: #8b949e; }
+    .cat-multipart { background: #30363d30; color: #8b949e; }
+    .support-dots { display: flex; gap: .25rem; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .dot.yes { background: #3fb950; }
+    .dot.partial { background: #d29922; }
+    .dot.no { background: #30363d; }
+    .copy-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); border-radius: 5px; padding: .2rem .5rem; font-size: .72rem; cursor: pointer; white-space: nowrap; }
+    .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+    .no-results { text-align: center; padding: 3rem; color: var(--muted); }
+    footer { text-align: center; padding: 2rem; color: var(--muted); font-size: .8rem; border-top: 1px solid var(--border); margin-top: 1rem; }
+    footer a { color: var(--accent); }
+  </style>
+</head>
+<body>
+<header>
+  <h1>MIME Type Reference</h1>
+  <p>200+ MIME types with file extensions, browser support, and category filter</p>
+</header>
+
+<div class="toolbar">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="search" placeholder="Search MIME type or extension…" />
+  </div>
+  <div class="cats" id="cats"></div>
+</div>
+<div class="count-bar" id="countBar"></div>
+
+<div style="overflow-x:auto">
+<table>
+  <thead>
+    <tr>
+      <th>MIME Type</th>
+      <th>Extensions</th>
+      <th>Category</th>
+      <th>Description</th>
+      <th title="Chrome · Firefox · Safari">Browser</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody id="tbody"></tbody>
+</table>
+</div>
+<div class="no-results" id="noResults" style="display:none">No MIME types found matching your filter.</div>
+
+<footer>
+  <p>DevNestio MIME Type Reference · <a href="https://devnestio.pages.dev/">More Tools</a></p>
+  <p style="margin-top:.5rem">☕ <a href="https://www.buymeacoffee.com/devnestio">Buy Me a Coffee</a></p>
+</footer>
+
+<script>
+// y=yes, p=partial, n=no  [Chrome, Firefox, Safari]
+const MIMES = [
+  // IMAGE
+  ['image/jpeg','jpg jpeg jpe','image','JPEG image','y','y','y'],
+  ['image/png','png','image','PNG image','y','y','y'],
+  ['image/gif','gif','image','GIF image','y','y','y'],
+  ['image/webp','webp','image','WebP image','y','y','y'],
+  ['image/svg+xml','svg svgz','image','SVG vector image','y','y','y'],
+  ['image/avif','avif','image','AV1 image (AVIF)','y','y','y'],
+  ['image/apng','apng','image','Animated PNG','y','y','y'],
+  ['image/bmp','bmp','image','BMP bitmap','y','y','y'],
+  ['image/x-icon','ico','image','Windows icon','y','y','y'],
+  ['image/tiff','tif tiff','image','TIFF image','n','n','y'],
+  ['image/heic','heic','image','HEIC image (Apple)','n','n','p'],
+  ['image/heif','heif','image','HEIF image','n','n','p'],
+  ['image/jxl','jxl','image','JPEG XL image','p','p','n'],
+  ['image/x-png','png','image','Alternate PNG type','y','y','y'],
+  ['image/vnd.microsoft.icon','ico','image','ICO icon (vendor)','y','y','y'],
+  ['image/x-xbitmap','xbm','image','X Bitmap image','y','y','y'],
+  ['image/x-rgb','rgb','image','RGB raw image','n','n','n'],
+  ['image/x-portable-pixmap','ppm','image','Portable pixmap','n','n','n'],
+  ['image/x-portable-graymap','pgm','image','Portable graymap','n','n','n'],
+  ['image/x-portable-bitmap','pbm','image','Portable bitmap','n','n','n'],
+  ['image/vnd.djvu','djvu djv','image','DjVu document','n','n','n'],
+  ['image/x-xcf','xcf','image','GIMP native format','n','n','n'],
+  ['image/x-psd','psd','image','Photoshop document','n','n','n'],
+  // AUDIO
+  ['audio/mpeg','mp3 mpga','audio','MP3 audio','y','y','y'],
+  ['audio/ogg','oga ogg','audio','Ogg audio','y','y','n'],
+  ['audio/wav','wav','audio','WAV audio','y','y','y'],
+  ['audio/webm','weba','audio','WebM audio','y','y','p'],
+  ['audio/aac','aac','audio','AAC audio','y','y','y'],
+  ['audio/flac','flac','audio','FLAC lossless audio','y','y','y'],
+  ['audio/mp4','m4a mp4a','audio','MP4 audio','y','y','y'],
+  ['audio/midi','midi mid','audio','MIDI','n','n','n'],
+  ['audio/x-midi','mid midi','audio','MIDI (x)','n','n','n'],
+  ['audio/opus','opus','audio','Opus audio','y','y','p'],
+  ['audio/3gpp','3gp','audio','3GPP audio','p','p','p'],
+  ['audio/x-aiff','aif aiff','audio','AIFF audio','n','n','y'],
+  ['audio/x-ms-wma','wma','audio','Windows Media Audio','n','n','n'],
+  ['audio/x-wav','wav','audio','WAV (x)','y','y','y'],
+  ['audio/vnd.rn-realaudio','ra ram','audio','RealAudio','n','n','n'],
+  // VIDEO
+  ['video/mp4','mp4 m4v','video','MP4 video','y','y','y'],
+  ['video/webm','webm','video','WebM video','y','y','p'],
+  ['video/ogg','ogv','video','Ogg video','y','y','n'],
+  ['video/mpeg','mpeg mpg mpe','video','MPEG video','p','p','p'],
+  ['video/quicktime','mov qt','video','QuickTime video','p','p','y'],
+  ['video/x-msvideo','avi','video','AVI video','p','p','n'],
+  ['video/x-ms-wmv','wmv','video','Windows Media Video','n','n','n'],
+  ['video/3gpp','3gp','video','3GPP video','p','p','p'],
+  ['video/3gpp2','3g2','video','3GPP2 video','p','p','p'],
+  ['video/x-flv','flv','video','Flash video','n','n','n'],
+  ['video/x-matroska','mkv','video','Matroska video','p','p','n'],
+  ['video/av1','av1','video','AV1 raw video','n','n','n'],
+  // TEXT
+  ['text/html','html htm','text','HTML document','y','y','y'],
+  ['text/css','css','text','CSS stylesheet','y','y','y'],
+  ['text/javascript','js mjs','text','JavaScript','y','y','y'],
+  ['text/plain','txt text','text','Plain text','y','y','y'],
+  ['text/csv','csv','text','Comma-separated values','y','y','y'],
+  ['text/xml','xml','text','XML document','y','y','y'],
+  ['text/markdown','md markdown','text','Markdown','n','n','n'],
+  ['text/rtf','rtf','text','Rich Text Format','n','n','n'],
+  ['text/calendar','ics ifb','text','iCalendar','n','n','n'],
+  ['text/vcard','vcf vcard','text','vCard','n','n','n'],
+  ['text/tab-separated-values','tsv','text','Tab-separated values','n','n','n'],
+  ['text/x-python','py','text','Python source','n','n','n'],
+  ['text/x-java-source','java','text','Java source','n','n','n'],
+  ['text/x-c','c h','text','C source','n','n','n'],
+  ['text/x-c++src','cpp cxx','text','C++ source','n','n','n'],
+  ['text/x-shellscript','sh','text','Shell script','n','n','n'],
+  ['text/x-yaml','yaml yml','text','YAML','n','n','n'],
+  ['text/uri-list','uris uri','text','URI list','n','n','n'],
+  ['text/event-stream','','text','Server-Sent Events stream','y','y','y'],
+  ['text/x-log','log','text','Log file','n','n','n'],
+  ['text/x-markdown','md','text','Markdown (x)','n','n','n'],
+  ['text/x-php','php','text','PHP source','n','n','n'],
+  ['text/x-diff','diff patch','text','Diff/patch file','n','n','n'],
+  ['text/x-go','go','text','Go source','n','n','n'],
+  ['text/x-rust','rs','text','Rust source','n','n','n'],
+  ['text/x-toml','toml','text','TOML config','n','n','n'],
+  // APPLICATION
+  ['application/json','json','application','JSON data','y','y','y'],
+  ['application/xml','xml','application','XML document','y','y','y'],
+  ['application/javascript','js','application','JavaScript (legacy)','y','y','y'],
+  ['application/pdf','pdf','application','PDF document','y','y','y'],
+  ['application/zip','zip','application','ZIP archive','n','n','n'],
+  ['application/gzip','gz gzip','application','GZIP archive','n','n','n'],
+  ['application/x-tar','tar','application','TAR archive','n','n','n'],
+  ['application/x-7z-compressed','7z','application','7-Zip archive','n','n','n'],
+  ['application/x-rar-compressed','rar','application','RAR archive','n','n','n'],
+  ['application/x-bzip2','bz2','application','Bzip2 archive','n','n','n'],
+  ['application/x-xz','xz','application','XZ archive','n','n','n'],
+  ['application/x-compressed','z','application','Compress archive','n','n','n'],
+  ['application/octet-stream','bin exe dll','application','Binary stream','n','n','n'],
+  ['application/x-www-form-urlencoded','','application','HTML form encoded','y','y','y'],
+  ['application/form-data','','application','Form multipart','y','y','y'],
+  ['application/ld+json','jsonld','application','JSON-LD','n','n','n'],
+  ['application/graphql','graphql','application','GraphQL','n','n','n'],
+  ['application/wasm','wasm','application','WebAssembly','y','y','y'],
+  ['application/ogg','ogx','application','Ogg container','y','y','n'],
+  ['application/rtf','rtf','application','Rich text (app)','n','n','n'],
+  ['application/epub+zip','epub','application','EPUB e-book','n','n','n'],
+  ['application/x-mobipocket-ebook','mobi prc','application','Mobipocket e-book','n','n','n'],
+  ['application/vnd.ms-excel','xls','application','Excel spreadsheet','n','n','n'],
+  ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','xlsx','application','Excel OpenXML','n','n','n'],
+  ['application/vnd.ms-powerpoint','ppt','application','PowerPoint','n','n','n'],
+  ['application/vnd.openxmlformats-officedocument.presentationml.presentation','pptx','application','PowerPoint OpenXML','n','n','n'],
+  ['application/msword','doc','application','Word document','n','n','n'],
+  ['application/vnd.openxmlformats-officedocument.wordprocessingml.document','docx','application','Word OpenXML','n','n','n'],
+  ['application/vnd.oasis.opendocument.text','odt','application','LibreOffice text','n','n','n'],
+  ['application/vnd.oasis.opendocument.spreadsheet','ods','application','LibreOffice spreadsheet','n','n','n'],
+  ['application/vnd.oasis.opendocument.presentation','odp','application','LibreOffice presentation','n','n','n'],
+  ['application/x-shockwave-flash','swf','application','Flash (deprecated)','n','n','n'],
+  ['application/xhtml+xml','xhtml xht','application','XHTML','y','y','y'],
+  ['application/atom+xml','atom','application','Atom feed','n','n','n'],
+  ['application/rss+xml','rss','application','RSS feed','n','n','n'],
+  ['application/vnd.api+json','json','application','JSON:API','n','n','n'],
+  ['application/jwt','','application','JSON Web Token','n','n','n'],
+  ['application/x-ndjson','ndjson','application','Newline-delimited JSON','n','n','n'],
+  ['application/cbor','cbor','application','CBOR binary JSON','n','n','n'],
+  ['application/msgpack','msgpack','application','MessagePack','n','n','n'],
+  ['application/x-pem-file','pem','application','PEM certificate','n','n','n'],
+  ['application/pkcs8','p8','application','PKCS #8 key','n','n','n'],
+  ['application/pkix-cert','cer crt','application','X.509 certificate','n','n','n'],
+  ['application/pkix-crl','crl','application','Certificate Revocation List','n','n','n'],
+  ['application/x-pkcs12','p12 pfx','application','PKCS #12 key store','n','n','n'],
+  ['application/x-x509-ca-cert','crt','application','X.509 CA cert (DER)','n','n','n'],
+  ['application/vnd.google-earth.kml+xml','kml','application','Google Earth KML','n','n','n'],
+  ['application/geo+json','geojson','application','GeoJSON','n','n','n'],
+  ['application/x-sqlite3','sqlite db','application','SQLite database','n','n','n'],
+  ['application/sql','sql','application','SQL script','n','n','n'],
+  ['application/schema+json','','application','JSON Schema','n','n','n'],
+  ['application/problem+json','','application','RFC 7807 problem detail','n','n','n'],
+  ['application/x-httpd-php','php','application','PHP script','n','n','n'],
+  ['application/x-sh','sh','application','Shell script','n','n','n'],
+  ['application/x-python-code','pyc pyo','application','Python bytecode','n','n','n'],
+  ['application/java-archive','jar','application','Java archive (JAR)','n','n','n'],
+  ['application/x-java-serialized-object','ser','application','Java serialized object','n','n','n'],
+  ['application/x-deb','deb','application','Debian package','n','n','n'],
+  ['application/x-rpm','rpm','application','RPM package','n','n','n'],
+  ['application/vnd.apple.installer+xml','dist distz','application','Apple installer','n','n','n'],
+  ['application/x-apple-diskimage','dmg','application','macOS disk image','n','n','n'],
+  ['application/x-ms-dos-executable','exe','application','Windows executable','n','n','n'],
+  ['application/x-msi','msi','application','Windows installer','n','n','n'],
+  ['application/x-font-ttf','ttf','application','TrueType font','y','y','y'],
+  ['application/x-font-woff','woff','application','Web Open Font Format','y','y','y'],
+  ['application/vnd.ms-fontobject','eot','application','Embedded OpenType font','n','n','n'],
+  ['application/x-font-opentype','otf','application','OpenType font','y','y','y'],
+  ['application/manifest+json','webmanifest','application','Web App Manifest','y','y','y'],
+  ['application/service-worker','','application','Service worker script','y','y','y'],
+  ['application/x-ndjson','','application','NDJSON (newline-delimited)','n','n','n'],
+  // FONT
+  ['font/woff','woff','font','WOFF font','y','y','y'],
+  ['font/woff2','woff2','font','WOFF2 font','y','y','y'],
+  ['font/ttf','ttf','font','TrueType font','y','y','y'],
+  ['font/otf','otf','font','OpenType font','y','y','y'],
+  ['font/collection','ttc otc','font','Font collection','y','y','y'],
+  ['font/sfnt','','font','SFNT font','y','y','y'],
+  // MULTIPART
+  ['multipart/form-data','','multipart','Multipart form data','y','y','y'],
+  ['multipart/byteranges','','multipart','Byte range parts','y','y','y'],
+  ['multipart/mixed','','multipart','Mixed multipart','n','n','n'],
+  ['multipart/alternative','','multipart','Alternative versions','n','n','n'],
+  ['multipart/related','','multipart','Related parts (MHTML)','n','n','n'],
+  // MODEL
+  ['model/gltf+json','gltf','model','glTF 3D (JSON)','n','n','n'],
+  ['model/gltf-binary','glb','model','glTF 3D (binary)','n','n','n'],
+  ['model/obj','obj','model','Wavefront OBJ','n','n','n'],
+  ['model/stl','stl','model','STL 3D model','n','n','n'],
+  ['model/fbx','fbx','model','FBX 3D model','n','n','n'],
+  ['model/vnd.usdz+zip','usdz','model','USDZ AR model (Apple)','n','n','p'],
+  ['model/x3d+xml','x3d','model','X3D 3D scene','n','n','n'],
+];
+
+const ALL_CATS = ['all','image','audio','video','text','application','font','multipart','model'];
+let activeCat = 'all';
+let searchVal = '';
+
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function dotHtml(s, title) { return `<span class="dot ${s === 'y' ? 'yes' : s === 'p' ? 'partial' : 'no'}" title="${title}"></span>`; }
+
+function render() {
+  const q = searchVal.toLowerCase();
+  const tbody = document.getElementById('tbody');
+  let count = 0;
+  const rows = MIMES.filter(([mime, ext, cat]) => {
+    if (activeCat !== 'all' && cat !== activeCat) return false;
+    if (q && !mime.toLowerCase().includes(q) && !ext.toLowerCase().includes(q) && !MIMES[0][3]?.toLowerCase().includes(q)) {
+      // Check description too
+      const desc = mime[3] || '';
+      if (!mime.toLowerCase().includes(q) && !ext.toLowerCase().includes(q)) return false;
+    }
+    return true;
+  });
+
+  tbody.innerHTML = rows.map(([mime, ext, cat, desc, ch, ff, sf]) => {
+    count++;
+    const catClass = 'cat-badge cat-' + cat;
+    const exts = ext ? ext.split(' ').map(e => `<span style="margin-right:.3rem">.${e}</span>`).join('') : '<span style="color:var(--muted)">—</span>';
+    return `<tr>
+      <td class="mime-cell">${escHtml(mime)}</td>
+      <td class="ext-cell">${exts}</td>
+      <td><span class="${catClass}">${cat}</span></td>
+      <td style="font-size:.8rem;color:var(--muted)">${escHtml(desc||'')}</td>
+      <td><div class="support-dots">${dotHtml(ch,'Chrome')}${dotHtml(ff,'Firefox')}${dotHtml(sf,'Safari')}</div></td>
+      <td><button class="copy-btn" onclick="copyMime('${escHtml(mime)}',this)">Copy</button></td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('noResults').style.display = rows.length === 0 ? 'block' : 'none';
+  document.getElementById('countBar').textContent = `${rows.length} MIME type${rows.length !== 1 ? 's' : ''} shown · ● Chrome  ● Firefox  ● Safari`;
+}
+
+function copyMime(mime, btn) {
+  navigator.clipboard.writeText(mime).then(() => { btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 1500); });
+}
+
+// Build category buttons
+const catsEl = document.getElementById('cats');
+ALL_CATS.forEach(cat => {
+  const btn = document.createElement('button');
+  btn.className = 'cat-btn' + (cat === 'all' ? ' active' : '');
+  btn.textContent = cat === 'all' ? 'All' : cat;
+  btn.addEventListener('click', () => {
+    activeCat = cat;
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  });
+  catsEl.appendChild(btn);
+});
+
+document.getElementById('search').addEventListener('input', e => { searchVal = e.target.value; render(); });
+
+render();
+</script>
+</body>
+</html>
