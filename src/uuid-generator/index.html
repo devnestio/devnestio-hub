@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UUID Generator — devnestio</title>
+  <meta name="description" content="Generate UUID v4, v1, and v5 in bulk. Instant browser-based UUID generation with copy buttons, uppercase/lowercase toggle, hyphen toggle, and export options. No install required.">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --surface: #161b22; --surface2: #21262d;
+      --border: #30363d; --text: #c9d1d9; --muted: #8b949e;
+      --accent: #58a6ff; --green: #3fb950; --red: #f85149; --purple: #bc8cff;
+    }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 24px; }
+    header nav a { color: var(--accent); text-decoration: none; font-size: 0.9em; }
+    header h1 { font-size: 1.6rem; margin: 8px 0 4px; }
+    header p { color: var(--muted); font-size: 0.95em; }
+    main { flex: 1; padding: 24px; max-width: 860px; width: 100%; margin: 0 auto; }
+    footer { background: var(--surface); border-top: 1px solid var(--border); padding: 16px 24px; text-align: center; color: var(--muted); font-size: 0.875rem; }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+    h2 { font-size: 1rem; font-weight: 600; margin-bottom: 14px; }
+
+    .btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9em; transition: background .15s; }
+    .btn:hover { background: var(--border); }
+    .btn-primary { background: var(--accent); color: #0d1117; border-color: var(--accent); font-weight: 600; }
+    .btn-primary:hover { background: #79b8ff; }
+
+    /* Version tabs */
+    .tabs { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+    .tab { padding: 8px 18px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; font-size: 0.9em; transition: all .15s; }
+    .tab:hover { border-color: var(--accent); color: var(--accent); }
+    .tab.active { background: var(--accent); border-color: var(--accent); color: #0d1117; font-weight: 600; }
+
+    /* Controls */
+    .controls { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+    .control-group { display: flex; align-items: center; gap: 8px; font-size: 0.9em; }
+    label { color: var(--muted); }
+    input[type=number] { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 7px 10px; border-radius: 6px; font-size: 0.9em; width: 80px; }
+    input[type=number]:focus { outline: none; border-color: var(--accent); }
+    input[type=text] { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 7px 10px; border-radius: 6px; font-size: 0.9em; width: 100%; }
+    input[type=text]:focus { outline: none; border-color: var(--accent); }
+    .toggle-group { display: flex; gap: 6px; }
+    .toggle-btn { padding: 5px 12px; border-radius: 4px; border: 1px solid var(--border); background: transparent; color: var(--muted); font-size: 0.82em; cursor: pointer; transition: all .15s; }
+    .toggle-btn.active { background: var(--surface2); border-color: var(--accent); color: var(--accent); }
+
+    /* UUID list */
+    .uuid-list { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.9em; }
+    .uuid-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .uuid-item:last-child { border-bottom: none; }
+    .uuid-num { color: var(--muted); font-size: 0.8em; width: 28px; text-align: right; flex-shrink: 0; }
+    .uuid-value { flex: 1; letter-spacing: .03em; }
+    .copy-btn { background: none; border: 1px solid transparent; color: var(--muted); cursor: pointer; padding: 3px 8px; border-radius: 4px; font-size: 0.82em; transition: all .15s; flex-shrink: 0; }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+
+    /* v5 section */
+    .v5-options { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 16px; }
+    .v5-options label { display: block; font-size: 0.85em; color: var(--muted); margin-bottom: 4px; margin-top: 10px; }
+    .v5-options label:first-child { margin-top: 0; }
+    .ns-presets { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+    .ns-btn { padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border); background: transparent; color: var(--muted); font-size: 0.78em; cursor: pointer; transition: all .15s; }
+    .ns-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Info box */
+    .info-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 0.85em; color: var(--muted); line-height: 1.6; }
+    .info-box code { background: var(--surface); padding: 1px 5px; border-radius: 3px; font-family: monospace; color: var(--text); font-size: 0.9em; }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+<header>
+  <nav><a href="/">← devnestio</a></nav>
+  <h1>UUID Generator</h1>
+  <p>Generate v4, v1, and v5 UUIDs in bulk. Browser-only, no tracking.</p>
+</header>
+<main>
+
+  <div class="card">
+    <h2>Version</h2>
+    <div class="tabs">
+      <button class="tab active" onclick="setVersion(4,this)">v4 — Random</button>
+      <button class="tab" onclick="setVersion(1,this)">v1 — Time-based</button>
+      <button class="tab" onclick="setVersion(5,this)">v5 — Name-based (SHA-1)</button>
+    </div>
+
+    <!-- v5 options -->
+    <div id="v5-options" class="v5-options hidden">
+      <label>Namespace UUID</label>
+      <input type="text" id="v5-namespace" value="6ba7b810-9dad-11d1-80b4-00c04fd430c8" placeholder="Namespace UUID">
+      <div class="ns-presets">
+        <span style="font-size:0.78em;color:var(--muted);align-self:center;">Presets:</span>
+        <button class="ns-btn" onclick="setNS('6ba7b810-9dad-11d1-80b4-00c04fd430c8')">DNS</button>
+        <button class="ns-btn" onclick="setNS('6ba7b811-9dad-11d1-80b4-00c04fd430c8')">URL</button>
+        <button class="ns-btn" onclick="setNS('6ba7b812-9dad-11d1-80b4-00c04fd430c8')">OID</button>
+        <button class="ns-btn" onclick="setNS('6ba7b814-9dad-11d1-80b4-00c04fd430c8')">X.500</button>
+      </div>
+      <label style="margin-top:12px;">Name (input string)</label>
+      <input type="text" id="v5-name" value="example.com" placeholder="Name to hash">
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <div class="control-group">
+        <label>Count:</label>
+        <input type="number" id="count" value="10" min="1" max="1000">
+      </div>
+      <div class="control-group">
+        <label>Case:</label>
+        <div class="toggle-group">
+          <button class="toggle-btn active" id="lower-btn" onclick="setCase('lower')">lowercase</button>
+          <button class="toggle-btn" id="upper-btn" onclick="setCase('upper')">UPPERCASE</button>
+        </div>
+      </div>
+      <div class="control-group">
+        <label>Format:</label>
+        <div class="toggle-group">
+          <button class="toggle-btn active" id="hyphens-btn" onclick="setHyphens(true)">with-hyphens</button>
+          <button class="toggle-btn" id="nohyphens-btn" onclick="setHyphens(false)">nohyphens</button>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="generate()">Generate</button>
+    </div>
+
+    <div class="uuid-list" id="uuid-list"></div>
+
+    <div class="toolbar">
+      <button class="btn" onclick="copyAll()">Copy All</button>
+      <button class="btn" onclick="downloadTxt()">Download .txt</button>
+      <button class="btn" onclick="generate()">↺ Regenerate</button>
+    </div>
+  </div>
+
+  <!-- Info -->
+  <div class="card">
+    <h2>About UUID Versions</h2>
+    <div style="display:grid;gap:12px;">
+      <div class="info-box">
+        <strong style="color:var(--accent)">v4 — Random</strong><br>
+        128 bits of cryptographically random data. Version bits are <code>4</code> and variant bits are set. Most commonly used. Zero collision risk in practice.
+      </div>
+      <div class="info-box">
+        <strong style="color:var(--green)">v1 — Time-based</strong><br>
+        Combines the current timestamp (100-nanosecond intervals since Oct 1582), a random clock sequence, and a node identifier. Sortable by time but leaks the MAC/timestamp.
+      </div>
+      <div class="info-box">
+        <strong style="color:var(--purple)">v5 — Name-based (SHA-1)</strong><br>
+        Deterministic: given the same namespace + name, always produces the same UUID. Uses SHA-1 internally. Useful for stable IDs from known strings (e.g. URLs, DNS names).
+      </div>
+    </div>
+  </div>
+</main>
+<footer>
+  <p>Made with ☕ · <a href="https://devnestio.pages.dev">devnestio</a></p>
+  <p style="margin-top:8px;font-size:0.85em;">If this saved you time, <a href="https://buymeacoffee.com/devnestio" target="_blank" rel="noopener">buy me a coffee ☕</a></p>
+</footer>
+<script>
+let currentVersion = 4;
+let currentCase = 'lower';
+let useHyphens = true;
+let generated = [];
+
+function setVersion(v, btn) {
+  currentVersion = v;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('v5-options').classList.toggle('hidden', v !== 5);
+  generate();
+}
+
+function setCase(c) {
+  currentCase = c;
+  document.getElementById('lower-btn').classList.toggle('active', c === 'lower');
+  document.getElementById('upper-btn').classList.toggle('active', c === 'upper');
+  applyFormat();
+}
+
+function setHyphens(h) {
+  useHyphens = h;
+  document.getElementById('hyphens-btn').classList.toggle('active', h);
+  document.getElementById('nohyphens-btn').classList.toggle('active', !h);
+  applyFormat();
+}
+
+function setNS(ns) { document.getElementById('v5-namespace').value = ns; generate(); }
+
+// ── UUID generation ──
+
+function uuidv4() {
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  return bytesToUUID(bytes);
+}
+
+function uuidv1() {
+  // Simplified v1: timestamp-based with random node
+  const now = Date.now();
+  const ts100ns = BigInt(now) * 10000n + 122192928000000000n; // offset to Oct 1582
+  const tl = Number(ts100ns & 0xFFFFFFFFn);
+  const tm = Number((ts100ns >> 32n) & 0xFFFFn);
+  const th = Number((ts100ns >> 48n) & 0x0FFFn) | 0x1000; // version 1
+  const clock = Math.floor(Math.random() * 0x3fff) | 0x8000;
+  const node = crypto.getRandomValues(new Uint8Array(6));
+  const p = (n, w) => n.toString(16).padStart(w, '0');
+  return `${p(tl,8)}-${p(tm,4)}-${p(th,4)}-${p(clock,4)}-${Array.from(node).map(b=>p(b,2)).join('')}`;
+}
+
+async function uuidv5(namespace, name) {
+  // Parse namespace UUID
+  const nsBytes = parseUUID(namespace);
+  if (!nsBytes) return 'invalid-namespace-uuid';
+  const nameBytes = new TextEncoder().encode(name);
+  const data = new Uint8Array(nsBytes.length + nameBytes.length);
+  data.set(nsBytes); data.set(nameBytes, nsBytes.length);
+  const hash = await crypto.subtle.digest('SHA-1', data);
+  const h = new Uint8Array(hash);
+  h[6] = (h[6] & 0x0f) | 0x50; // version 5
+  h[8] = (h[8] & 0x3f) | 0x80;
+  return bytesToUUID(h.slice(0, 16));
+}
+
+function parseUUID(uuid) {
+  const hex = uuid.replace(/-/g, '');
+  if (hex.length !== 32) return null;
+  const bytes = new Uint8Array(16);
+  for (let i = 0; i < 16; i++) bytes[i] = parseInt(hex.slice(i*2, i*2+2), 16);
+  return bytes;
+}
+
+function bytesToUUID(b) {
+  const p = (n) => b.slice(...n).reduce((s,x)=>s+x.toString(16).padStart(2,'0'),'');
+  return `${p([0,4])}-${p([4,6])}-${p([6,8])}-${p([8,10])}-${p([10,16])}`;
+}
+
+function formatUUID(u) {
+  let s = useHyphens ? u : u.replace(/-/g,'');
+  return currentCase === 'upper' ? s.toUpperCase() : s;
+}
+
+async function generate() {
+  const count = Math.min(Math.max(1, parseInt(document.getElementById('count').value) || 10), 1000);
+  const list = [];
+
+  if (currentVersion === 5) {
+    const ns = document.getElementById('v5-namespace').value.trim();
+    const name = document.getElementById('v5-name').value;
+    // v5 is deterministic, so generate variants
+    for (let i = 0; i < count; i++) {
+      const u = await uuidv5(ns, i === 0 ? name : `${name}-${i}`);
+      list.push(u);
+    }
+  } else {
+    for (let i = 0; i < count; i++) {
+      list.push(currentVersion === 1 ? uuidv1() : uuidv4());
+    }
+  }
+
+  generated = list;
+  renderList();
+}
+
+function applyFormat() {
+  renderList();
+}
+
+function renderList() {
+  const container = document.getElementById('uuid-list');
+  container.innerHTML = generated.map((u, i) => {
+    const formatted = formatUUID(u);
+    return `<div class="uuid-item">
+      <span class="uuid-num">${i+1}</span>
+      <span class="uuid-value">${formatted}</span>
+      <button class="copy-btn" onclick="copyOne(this,'${formatted}')">Copy</button>
+    </div>`;
+  }).join('');
+}
+
+function copyOne(btn, val) {
+  navigator.clipboard.writeText(val).then(() => {
+    const orig = btn.textContent; btn.textContent = '✓'; setTimeout(() => btn.textContent = orig, 900);
+  });
+}
+
+function copyAll() {
+  const text = generated.map(u => formatUUID(u)).join('\n');
+  navigator.clipboard.writeText(text).then(() => alert(`${generated.length} UUIDs copied!`));
+}
+
+function downloadTxt() {
+  const text = generated.map(u => formatUUID(u)).join('\n');
+  const blob = new Blob([text], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `uuids-v${currentVersion}-${generated.length}.txt`;
+  a.click();
+}
+
+// Init
+generate();
+</script>
+</body>
+</html>

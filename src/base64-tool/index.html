@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Base64 Encoder / Decoder – Text & File | DevNestio</title>
+  <meta name="description" content="Encode and decode Base64 online. Supports text and file input. URL-safe Base64, line breaks, and character count. Free browser tool." />
+  <link rel="canonical" href="https://devnestio.pages.dev/base64-tool/" />
+  <meta property="og:title" content="Base64 Encoder / Decoder – Text & File" />
+  <meta property="og:description" content="Encode and decode Base64 online. Supports text and file input, URL-safe mode, and line breaks." />
+  <meta property="og:url" content="https://devnestio.pages.dev/base64-tool/" />
+  <meta property="og:type" content="website" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1117; --surface: #1a1d27; --surface2: #22263a; --border: #2e3248;
+      --text: #e2e8f0; --muted: #8892a4;
+      --accent: #34d399; --red: #f87171; --yellow: #fbbf24; --blue: #60a5fa;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1.1rem 1.5rem; }
+    header h1 { font-size: 1.35rem; font-weight: 700; color: var(--accent); }
+    header p { font-size: .85rem; color: var(--muted); margin-top: .2rem; }
+    .main { max-width: 900px; margin: 0 auto; padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; }
+
+    /* Mode tabs */
+    .tabs { display: flex; gap: .4rem; }
+    .tab { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); border-radius: 7px; padding: .4rem 1rem; font-size: .85rem; cursor: pointer; transition: all .15s; }
+    .tab.active { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 600; }
+
+    /* Options row */
+    .options-row { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: .75rem 1.1rem; display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; }
+    .opt-label { font-size: .8rem; color: var(--muted); display: flex; align-items: center; gap: .4rem; cursor: pointer; user-select: none; }
+    .opt-label input[type="checkbox"] { accent-color: var(--accent); width: 15px; height: 15px; }
+    .sep { width: 1px; height: 20px; background: var(--border); }
+
+    /* I/O panels */
+    .io-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border-radius: 10px; overflow: hidden; }
+    .io-pane { background: var(--surface); padding: 1rem; }
+    .io-pane label { display: block; font-size: .78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: .5rem; }
+    textarea { width: 100%; min-height: 180px; background: var(--surface2); border: 1px solid var(--border); color: var(--text); font-family: 'Fira Code', monospace; font-size: .85rem; border-radius: 8px; padding: .65rem .85rem; resize: vertical; outline: none; line-height: 1.6; transition: border-color .2s; }
+    textarea:focus { border-color: var(--accent); }
+    .pane-footer { display: flex; justify-content: space-between; align-items: center; margin-top: .5rem; }
+    .char-count { font-size: .75rem; color: var(--muted); }
+    .action-btn { background: var(--accent); border: none; color: #000; border-radius: 6px; padding: .35rem .85rem; font-size: .8rem; font-weight: 600; cursor: pointer; transition: opacity .15s; }
+    .action-btn:hover { opacity: .85; }
+    .action-btn.secondary { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); }
+    .action-btn.secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Arrow buttons */
+    .arrow-row { display: flex; justify-content: center; gap: .75rem; padding: .5rem; }
+    .arrow-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: .5rem 1.5rem; font-size: .9rem; cursor: pointer; transition: all .15s; display: flex; align-items: center; gap: .4rem; }
+    .arrow-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .arrow-btn.encode { border-color: var(--accent); color: var(--accent); }
+    .arrow-btn.decode { border-color: var(--blue); color: var(--blue); }
+
+    /* Error / info */
+    .msg-bar { padding: .55rem 1rem; border-radius: 8px; font-size: .83rem; margin-top: .25rem; }
+    .msg-bar.err { background: #f8717122; color: var(--red); border: 1px solid var(--red); }
+    .msg-bar.ok { background: #34d39922; color: var(--accent); border: 1px solid var(--accent); }
+    .msg-bar.hidden { display: none; }
+
+    /* File drop */
+    .file-zone { background: var(--surface2); border: 2px dashed var(--border); border-radius: 10px; padding: 1.5rem; text-align: center; cursor: pointer; transition: border-color .2s; }
+    .file-zone:hover, .file-zone.drag { border-color: var(--accent); }
+    .file-zone p { color: var(--muted); font-size: .88rem; }
+    .file-zone .file-name { color: var(--text); font-size: .9rem; margin-top: .3rem; font-family: monospace; }
+    #fileInput { display: none; }
+
+    /* Info section */
+    .info-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.1rem; }
+    .info-card h2 { font-size: .8rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: .65rem; }
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: .5rem; }
+    .info-item { background: var(--surface2); border-radius: 7px; padding: .55rem .85rem; font-size: .8rem; }
+    .info-item .ilabel { color: var(--muted); margin-bottom: .15rem; }
+    .info-item .icode { font-family: monospace; color: var(--accent); font-size: .82rem; }
+
+    footer { text-align: center; padding: 1.5rem; color: var(--muted); font-size: .8rem; border-top: 1px solid var(--border); margin-top: .5rem; }
+    @media (max-width: 640px) { .io-grid { grid-template-columns: 1fr; } .main { padding: .75rem; } }
+  </style>
+</head>
+<body>
+<header>
+  <h1>🔄 Base64 Encoder / Decoder</h1>
+  <p>Text &amp; file encoding · URL-safe · Line breaks · Instant conversion</p>
+</header>
+
+<div class="main">
+  <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap">
+    <div class="tabs" id="modeTabs">
+      <button class="tab active" data-mode="text">Text</button>
+      <button class="tab" data-mode="file">File</button>
+    </div>
+    <div class="options-row" style="flex:1">
+      <label class="opt-label"><input type="checkbox" id="urlSafe" /> URL-safe (- and _ instead of + and /)</label>
+      <div class="sep"></div>
+      <label class="opt-label"><input type="checkbox" id="lineBreaks" /> Line breaks every 76 chars</label>
+    </div>
+  </div>
+
+  <!-- Text mode -->
+  <div id="textMode">
+    <div class="io-grid">
+      <div class="io-pane">
+        <label>Input</label>
+        <textarea id="inputText" placeholder="Enter text to encode or Base64 to decode…" spellcheck="false"></textarea>
+        <div class="pane-footer">
+          <span class="char-count" id="inputCount">0 chars</span>
+          <button class="action-btn secondary" onclick="clearAll()">Clear</button>
+        </div>
+      </div>
+      <div class="io-pane">
+        <label>Output</label>
+        <textarea id="outputText" placeholder="Result appears here…" readonly spellcheck="false"></textarea>
+        <div class="pane-footer">
+          <span class="char-count" id="outputCount">0 chars</span>
+          <button class="action-btn" onclick="copyOutput()">Copy</button>
+        </div>
+      </div>
+    </div>
+    <div class="arrow-row">
+      <button class="arrow-btn encode" onclick="encode()">⬆ Encode to Base64</button>
+      <button class="arrow-btn decode" onclick="decode()">⬇ Decode from Base64</button>
+    </div>
+    <div class="msg-bar hidden" id="msgBar"></div>
+  </div>
+
+  <!-- File mode -->
+  <div id="fileMode" style="display:none">
+    <div class="file-zone" id="fileZone" onclick="document.getElementById('fileInput').click()">
+      <p>Drop a file here or click to select</p>
+      <div class="file-name" id="fileName"></div>
+      <input type="file" id="fileInput" />
+    </div>
+    <div class="arrow-row" style="margin-top:.75rem">
+      <button class="arrow-btn encode" onclick="encodeFile()">⬆ Encode file to Base64</button>
+    </div>
+    <div class="io-pane" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-top:.5rem">
+      <label>Base64 Output</label>
+      <textarea id="fileOutput" placeholder="File Base64 will appear here…" readonly rows="8" spellcheck="false"></textarea>
+      <div class="pane-footer">
+        <span class="char-count" id="fileOutputCount">0 chars</span>
+        <button class="action-btn" onclick="copyFileOutput()">Copy</button>
+      </div>
+    </div>
+    <div class="msg-bar hidden" id="fileMsgBar"></div>
+  </div>
+
+  <!-- Info section -->
+  <div class="info-card">
+    <h2>Base64 Quick Facts</h2>
+    <div class="info-grid">
+      <div class="info-item"><div class="ilabel">Alphabet</div><div class="icode">A–Z, a–z, 0–9, +, /</div></div>
+      <div class="info-item"><div class="ilabel">URL-safe alphabet</div><div class="icode">A–Z, a–z, 0–9, -, _</div></div>
+      <div class="info-item"><div class="ilabel">Padding</div><div class="icode">= (1 or 2 chars)</div></div>
+      <div class="info-item"><div class="ilabel">Size overhead</div><div class="icode">~33% larger than input</div></div>
+      <div class="info-item"><div class="ilabel">Line length (MIME)</div><div class="icode">76 chars per line</div></div>
+      <div class="info-item"><div class="ilabel">Bits per char</div><div class="icode">6 bits → 1 char</div></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  DevNestio Base64 Tool · <a href="https://devnestio.pages.dev/" style="color:var(--accent)">More Tools</a>
+</footer>
+
+<script>
+function getOptions() {
+  return {
+    urlSafe: document.getElementById('urlSafe').checked,
+    lineBreaks: document.getElementById('lineBreaks').checked
+  };
+}
+
+function toBase64(str, urlSafe, lineBreaks) {
+  // Encode using TextEncoder to handle UTF-8 properly
+  const bytes = new TextEncoder().encode(str);
+  let b64 = btoa(String.fromCharCode(...bytes));
+  if (urlSafe) b64 = b64.replace(/\+/g, '-').replace(/\//g, '_');
+  if (lineBreaks) b64 = b64.match(/.{1,76}/g).join('\n');
+  return b64;
+}
+
+function fromBase64(b64, urlSafe) {
+  // Normalize
+  let s = b64.replace(/\s/g, '');
+  if (urlSafe) s = s.replace(/-/g, '+').replace(/_/g, '/');
+  // Add padding if needed
+  while (s.length % 4 !== 0) s += '=';
+  const binary = atob(s);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+
+function showMsg(id, text, isErr) {
+  const el = document.getElementById(id);
+  el.textContent = text;
+  el.className = `msg-bar ${isErr ? 'err' : 'ok'}`;
+}
+
+function hideMsg(id) {
+  document.getElementById(id).className = 'msg-bar hidden';
+}
+
+function updateCounts() {
+  const i = document.getElementById('inputText').value;
+  const o = document.getElementById('outputText').value;
+  document.getElementById('inputCount').textContent = i.length.toLocaleString() + ' chars';
+  document.getElementById('outputCount').textContent = o.length.toLocaleString() + ' chars';
+}
+
+function encode() {
+  const { urlSafe, lineBreaks } = getOptions();
+  const input = document.getElementById('inputText').value;
+  try {
+    document.getElementById('outputText').value = toBase64(input, urlSafe, lineBreaks);
+    hideMsg('msgBar');
+  } catch (e) {
+    showMsg('msgBar', 'Encode error: ' + e.message, true);
+  }
+  updateCounts();
+}
+
+function decode() {
+  const { urlSafe } = getOptions();
+  const input = document.getElementById('inputText').value;
+  try {
+    document.getElementById('outputText').value = fromBase64(input, urlSafe);
+    hideMsg('msgBar');
+  } catch (e) {
+    showMsg('msgBar', 'Invalid Base64: ' + e.message, true);
+  }
+  updateCounts();
+}
+
+function clearAll() {
+  document.getElementById('inputText').value = '';
+  document.getElementById('outputText').value = '';
+  hideMsg('msgBar');
+  updateCounts();
+}
+
+function copyOutput() {
+  const val = document.getElementById('outputText').value;
+  if (!val) return;
+  navigator.clipboard.writeText(val).then(() => showMsg('msgBar', 'Copied to clipboard!', false));
+}
+
+function copyFileOutput() {
+  const val = document.getElementById('fileOutput').value;
+  if (!val) return;
+  navigator.clipboard.writeText(val).then(() => showMsg('fileMsgBar', 'Copied to clipboard!', false));
+}
+
+// File mode
+function encodeFile() {
+  const file = document.getElementById('fileInput').files[0];
+  if (!file) { showMsg('fileMsgBar', 'Please select a file first.', true); return; }
+  const { urlSafe, lineBreaks } = getOptions();
+  const reader = new FileReader();
+  reader.onload = e => {
+    let b64 = e.target.result.split(',')[1] || '';
+    if (urlSafe) b64 = b64.replace(/\+/g, '-').replace(/\//g, '_');
+    if (lineBreaks) b64 = b64.match(/.{1,76}/g).join('\n');
+    document.getElementById('fileOutput').value = b64;
+    document.getElementById('fileOutputCount').textContent = b64.length.toLocaleString() + ' chars';
+    showMsg('fileMsgBar', `Encoded ${file.name} (${(file.size/1024).toFixed(1)} KB → ${b64.length.toLocaleString()} chars)`, false);
+  };
+  reader.readAsDataURL(file);
+}
+
+document.getElementById('fileInput').addEventListener('change', e => {
+  const f = e.target.files[0];
+  if (f) document.getElementById('fileName').textContent = f.name + ' (' + (f.size/1024).toFixed(1) + ' KB)';
+});
+
+// Drag and drop
+const zone = document.getElementById('fileZone');
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
+zone.addEventListener('drop', e => {
+  e.preventDefault();
+  zone.classList.remove('drag');
+  const f = e.dataTransfer.files[0];
+  if (f) {
+    document.getElementById('fileInput').files = e.dataTransfer.files;
+    document.getElementById('fileName').textContent = f.name + ' (' + (f.size/1024).toFixed(1) + ' KB)';
+  }
+});
+
+// Mode tabs
+document.getElementById('modeTabs').addEventListener('click', e => {
+  const btn = e.target.closest('[data-mode]');
+  if (!btn) return;
+  const mode = btn.dataset.mode;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('textMode').style.display = mode === 'text' ? '' : 'none';
+  document.getElementById('fileMode').style.display = mode === 'file' ? '' : 'none';
+});
+
+document.getElementById('inputText').addEventListener('input', updateCounts);
+updateCounts();
+</script>
+</body>
+</html>

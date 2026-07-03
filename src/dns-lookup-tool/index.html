@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DNS Lookup Tool — Query A, AAAA, MX, TXT, NS, CNAME Records</title>
+  <meta name="description" content="Free browser-based DNS lookup tool. Query A, AAAA, MX, TXT, NS, CNAME, SOA, PTR records using DNS-over-HTTPS. No server-side processing. Results in seconds." />
+  <link rel="canonical" href="https://dns-lookup-tool-dev.pages.dev/" />
+  <meta property="og:title" content="DNS Lookup Tool — Query A, AAAA, MX, TXT, NS, CNAME Records" />
+  <meta property="og:description" content="Browser-based DNS lookup. Query any record type via DNS-over-HTTPS. Free, fast, no tracking." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary" />
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d1117;
+      --bg-card: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --accent-hover: #79b8ff;
+      --green: #3fb950;
+      --yellow: #d29922;
+      --red: #f85149;
+      --purple: #bc8cff;
+      --orange: #ffa657;
+      --radius: 8px;
+      --font-mono: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', Consolas, monospace;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+    }
+
+    #privacy-banner {
+      background: #161b22;
+      border-bottom: 1px solid var(--border);
+      padding: 8px 16px;
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    #privacy-banner button {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 2px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+    #privacy-banner button:hover { border-color: var(--accent); color: var(--accent); }
+
+    header {
+      padding: 24px 16px 12px;
+      text-align: center;
+    }
+    header h1 { font-size: clamp(20px, 4vw, 28px); font-weight: 700; }
+    header p { color: var(--text-muted); margin-top: 6px; font-size: 14px; }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 16px 48px;
+    }
+
+    /* Query form */
+    .query-form {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .query-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .query-row input[type="text"] {
+      flex: 1;
+      min-width: 200px;
+      padding: 9px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 15px;
+      font-family: var(--font-mono);
+      outline: none;
+      transition: border-color .15s;
+    }
+    .query-row input[type="text"]:focus { border-color: var(--accent); }
+    .query-row input[type="text"]::placeholder { color: var(--text-muted); }
+
+    .select-wrap {
+      position: relative;
+    }
+    .select-wrap select {
+      padding: 9px 32px 9px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      min-width: 90px;
+    }
+    .select-wrap::after {
+      content: '▾';
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    .select-wrap select:focus { border-color: var(--accent); }
+
+    .btn-lookup {
+      padding: 9px 20px;
+      background: var(--accent);
+      color: #0d1117;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s;
+      white-space: nowrap;
+    }
+    .btn-lookup:hover { background: var(--accent-hover); }
+    .btn-lookup:disabled { background: var(--text-muted); cursor: not-allowed; }
+
+    .provider-row {
+      margin-top: 10px;
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .provider-row label {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .provider-btns {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .provider-btn {
+      padding: 3px 10px;
+      font-size: 12px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all .12s;
+    }
+    .provider-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(88,166,255,0.1); }
+    .provider-btn:hover:not(.active) { border-color: var(--text-muted); color: var(--text); }
+
+    .quick-types {
+      margin-top: 10px;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .quick-types span { font-size: 12px; color: var(--text-muted); }
+    .type-chip {
+      padding: 2px 8px;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all .12s;
+    }
+    .type-chip:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Status / error */
+    #status-line {
+      min-height: 28px;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    #status-line.error { color: var(--red); }
+    #status-line.success { color: var(--green); }
+
+    /* Results */
+    .results-area {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .record-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .record-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.02);
+    }
+    .record-type-badge {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      color: #0d1117;
+    }
+    .badge-A     { background: var(--accent); }
+    .badge-AAAA  { background: var(--purple); }
+    .badge-MX    { background: var(--yellow); }
+    .badge-TXT   { background: var(--green); }
+    .badge-NS    { background: var(--orange); }
+    .badge-CNAME { background: var(--accent-hover); }
+    .badge-SOA   { background: #da3633; }
+    .badge-PTR   { background: #6e7681; color: var(--text); }
+    .badge-CAA   { background: #388bfd; }
+    .badge-SRV   { background: #56d364; }
+    .badge-ANY   { background: var(--text-muted); color: var(--bg); }
+
+    .record-count {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .record-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .record-table th {
+      text-align: left;
+      padding: 6px 16px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      background: rgba(255,255,255,0.02);
+      border-bottom: 1px solid var(--border);
+    }
+    .record-table td {
+      padding: 8px 16px;
+      border-bottom: 1px solid rgba(48,54,61,0.5);
+      font-family: var(--font-mono);
+      word-break: break-all;
+    }
+    .record-table tr:last-child td { border-bottom: none; }
+    .record-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .ttl-cell { color: var(--text-muted); text-align: right; }
+
+    /* Copy output */
+    .copy-raw-btn {
+      padding: 3px 10px;
+      font-size: 11px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all .12s;
+    }
+    .copy-raw-btn:hover { border-color: var(--green); color: var(--green); }
+
+    /* History */
+    .history-section {
+      margin-top: 20px;
+    }
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .history-header h3 { font-size: 13px; color: var(--text-muted); }
+    .history-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .history-chip {
+      padding: 3px 10px;
+      font-size: 12px;
+      font-family: var(--font-mono);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg-card);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all .12s;
+    }
+    .history-chip:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Ad slot */
+    #ad-slot {
+      margin: 20px 0;
+      min-height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    /* Spinner */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--text-muted);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      flex-shrink: 0;
+    }
+
+    footer {
+      text-align: center;
+      padding: 24px 16px;
+      color: var(--text-muted);
+      font-size: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 600px) {
+      .query-row input[type="text"] { font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="privacy-banner">
+  <span>🔒 Queries are sent to a DNS-over-HTTPS resolver (Cloudflare or Google). No data is stored by this site.</span>
+  <button onclick="document.getElementById('privacy-banner').remove()">✕</button>
+</div>
+
+<header>
+  <h1>DNS Lookup Tool</h1>
+  <p>Query A, AAAA, MX, TXT, NS, CNAME and more via DNS-over-HTTPS</p>
+</header>
+
+<div class="container">
+
+  <div class="query-form">
+    <div class="query-row">
+      <input type="text" id="domain-input" placeholder="example.com" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" />
+      <div class="select-wrap">
+        <select id="type-select">
+          <option value="A">A</option>
+          <option value="AAAA">AAAA</option>
+          <option value="MX">MX</option>
+          <option value="TXT">TXT</option>
+          <option value="NS">NS</option>
+          <option value="CNAME">CNAME</option>
+          <option value="SOA">SOA</option>
+          <option value="PTR">PTR</option>
+          <option value="CAA">CAA</option>
+          <option value="SRV">SRV</option>
+          <option value="ANY">ANY</option>
+        </select>
+      </div>
+      <button class="btn-lookup" id="btn-lookup">Lookup</button>
+    </div>
+    <div class="provider-row">
+      <label>Provider:</label>
+      <div class="provider-btns">
+        <button class="provider-btn active" data-provider="cloudflare">Cloudflare</button>
+        <button class="provider-btn" data-provider="google">Google</button>
+        <button class="provider-btn" data-provider="quad9">Quad9</button>
+      </div>
+    </div>
+    <div class="quick-types">
+      <span>Quick:</span>
+      <button class="type-chip" data-type="A">A</button>
+      <button class="type-chip" data-type="AAAA">AAAA</button>
+      <button class="type-chip" data-type="MX">MX</button>
+      <button class="type-chip" data-type="TXT">TXT</button>
+      <button class="type-chip" data-type="NS">NS</button>
+      <button class="type-chip" data-type="CNAME">CNAME</button>
+      <button class="type-chip" data-type="SOA">SOA</button>
+      <button class="type-chip" data-type="ALL" title="Run A, AAAA, MX, TXT, NS, CNAME, SOA in parallel">ALL</button>
+    </div>
+  </div>
+
+  <div id="status-line"></div>
+
+  <div class="results-area" id="results-area"></div>
+
+  <div id="ad-slot" data-ea-publisher="devnestio">Advertisement</div>
+
+  <div class="history-section" id="history-section" style="display:none">
+    <div class="history-header">
+      <h3>Recent lookups</h3>
+      <button class="copy-raw-btn" onclick="clearHistory()">Clear</button>
+    </div>
+    <div class="history-list" id="history-list"></div>
+  </div>
+
+</div>
+
+<footer>
+  &copy; 2026 devnestio — <a href="https://devnestio.pages.dev" style="color:var(--accent)">More Tools</a>
+</footer>
+
+<script>
+'use strict';
+
+/* ── DNS-over-HTTPS providers ───────────────────────────────────────────────*/
+const DOH_PROVIDERS = {
+  cloudflare: 'https://cloudflare-dns.com/dns-query',
+  google:     'https://dns.google/resolve',
+  quad9:      'https://dns.quad9.net/dns-query'
+};
+
+let currentProvider = 'cloudflare';
+
+/* ── DNS type number map ────────────────────────────────────────────────────*/
+const TYPE_MAP = {
+  A:     1,
+  NS:    2,
+  CNAME: 5,
+  SOA:   6,
+  PTR:   12,
+  MX:    15,
+  TXT:   16,
+  AAAA:  28,
+  SRV:   33,
+  CAA:   257,
+  ANY:   255
+};
+
+const TYPE_NAME_MAP = Object.fromEntries(Object.entries(TYPE_MAP).map(([k,v]) => [v,k]));
+
+const ALL_TYPES = ['A','AAAA','MX','TXT','NS','CNAME','SOA'];
+
+/* ── Validation ─────────────────────────────────────────────────────────────*/
+function isValidDomain(domain) {
+  if (!domain || domain.length > 253) return false;
+  const d = domain.replace(/\.$/, ''); // allow trailing dot
+  if (d.length === 0) return false;
+  const labels = d.split('.');
+  return labels.every(label =>
+    label.length > 0 &&
+    label.length <= 63 &&
+    /^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?$/.test(label)
+  );
+}
+
+function isValidIPv4(ip) {
+  return /^(\d{1,3}\.){3}\d{1,3}$/.test(ip) &&
+    ip.split('.').every(n => parseInt(n) <= 255);
+}
+
+function isValidIPv6(ip) {
+  // Basic check: contains colons and valid hex groups
+  return /^[0-9a-fA-F:]+$/.test(ip) && ip.includes(':') && ip.split(':').length >= 3;
+}
+
+/* ── DoH query ──────────────────────────────────────────────────────────────*/
+async function queryDNS(domain, type) {
+  const url = DOH_PROVIDERS[currentProvider];
+  const params = new URLSearchParams({ name: domain, type });
+  const fullUrl = `${url}?${params}`;
+  const res = await fetch(fullUrl, {
+    headers: { 'Accept': 'application/dns-json' },
+    signal: AbortSignal.timeout(8000)
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+/* ── Record formatting ──────────────────────────────────────────────────────*/
+function formatRecord(record, typeName) {
+  const data = record.data;
+  switch (typeName) {
+    case 'MX': {
+      // "10 mail.example.com."
+      const parts = String(data).split(' ');
+      return { priority: parts[0] || '', value: parts.slice(1).join(' ') };
+    }
+    case 'SOA': {
+      const parts = String(data).split(' ');
+      return {
+        mname: parts[0] || '',
+        rname: parts[1] || '',
+        serial: parts[2] || '',
+        refresh: parts[3] || '',
+        retry: parts[4] || '',
+        expire: parts[5] || '',
+        minimum: parts[6] || ''
+      };
+    }
+    case 'SRV': {
+      const parts = String(data).split(' ');
+      return { priority: parts[0], weight: parts[1], port: parts[2], target: parts[3] };
+    }
+    case 'CAA': {
+      const parts = String(data).split(' ');
+      return { flag: parts[0], tag: parts[1], value: parts.slice(2).join(' ').replace(/^"|"$/g,'') };
+    }
+    default:
+      return { value: String(data) };
+  }
+}
+
+/* ── Render records ─────────────────────────────────────────────────────────*/
+function renderCard(typeName, records, domain) {
+  const card = document.createElement('div');
+  card.className = 'record-card';
+
+  const header = document.createElement('div');
+  header.className = 'record-card-header';
+
+  const badge = document.createElement('span');
+  badge.className = `record-type-badge badge-${typeName}`;
+  badge.textContent = typeName;
+
+  const meta = document.createElement('div');
+  meta.style.display = 'flex';
+  meta.style.gap = '10px';
+  meta.style.alignItems = 'center';
+
+  const count = document.createElement('span');
+  count.className = 'record-count';
+  count.textContent = `${records.length} record${records.length !== 1 ? 's' : ''}`;
+
+  const copyBtn = document.createElement('button');
+  copyBtn.className = 'copy-raw-btn';
+  copyBtn.textContent = 'Copy';
+  copyBtn.onclick = () => {
+    const text = records.map(r => `${domain}\t${r.TTL}\tIN\t${typeName}\t${r.data}`).join('\n');
+    navigator.clipboard.writeText(text).then(() => {
+      copyBtn.textContent = 'Copied!';
+      setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500);
+    });
+  };
+
+  meta.appendChild(count);
+  meta.appendChild(copyBtn);
+  header.appendChild(badge);
+  header.appendChild(meta);
+  card.appendChild(header);
+
+  const table = document.createElement('table');
+  table.className = 'record-table';
+
+  if (typeName === 'MX') {
+    const thead = document.createElement('thead');
+    thead.innerHTML = '<tr><th>Priority</th><th>Mail server</th><th style="text-align:right">TTL</th></tr>';
+    table.appendChild(thead);
+    const tbody = document.createElement('tbody');
+    records.forEach(r => {
+      const fmt = formatRecord(r, typeName);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${fmt.priority}</td><td>${fmt.value}</td><td class="ttl-cell">${r.TTL}s</td>`;
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+  } else if (typeName === 'SOA') {
+    const tbody = document.createElement('tbody');
+    if (records.length > 0) {
+      const fmt = formatRecord(records[0], typeName);
+      const fields = [
+        ['Primary NS', fmt.mname],
+        ['Responsible', fmt.rname],
+        ['Serial', fmt.serial],
+        ['Refresh', fmt.refresh + 's'],
+        ['Retry', fmt.retry + 's'],
+        ['Expire', fmt.expire + 's'],
+        ['Min TTL', fmt.minimum + 's'],
+        ['TTL', records[0].TTL + 's']
+      ];
+      fields.forEach(([k,v]) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td style="color:var(--text-muted);width:140px">${k}</td><td>${v}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+    table.appendChild(tbody);
+  } else if (typeName === 'SRV') {
+    const thead = document.createElement('thead');
+    thead.innerHTML = '<tr><th>Priority</th><th>Weight</th><th>Port</th><th>Target</th><th style="text-align:right">TTL</th></tr>';
+    table.appendChild(thead);
+    const tbody = document.createElement('tbody');
+    records.forEach(r => {
+      const fmt = formatRecord(r, typeName);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${fmt.priority}</td><td>${fmt.weight}</td><td>${fmt.port}</td><td>${fmt.target}</td><td class="ttl-cell">${r.TTL}s</td>`;
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+  } else if (typeName === 'CAA') {
+    const thead = document.createElement('thead');
+    thead.innerHTML = '<tr><th>Flag</th><th>Tag</th><th>Value</th><th style="text-align:right">TTL</th></tr>';
+    table.appendChild(thead);
+    const tbody = document.createElement('tbody');
+    records.forEach(r => {
+      const fmt = formatRecord(r, typeName);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${fmt.flag}</td><td>${fmt.tag}</td><td>${fmt.value}</td><td class="ttl-cell">${r.TTL}s</td>`;
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+  } else {
+    const thead = document.createElement('thead');
+    thead.innerHTML = `<tr><th>Value</th><th style="text-align:right">TTL</th></tr>`;
+    table.appendChild(thead);
+    const tbody = document.createElement('tbody');
+    records.forEach(r => {
+      const tr = document.createElement('tr');
+      const val = String(r.data).replace(/\\(.)./g, (m,n) => String.fromCharCode(parseInt(n)));
+      tr.innerHTML = `<td>${escapeHtmlDisplay(val)}</td><td class="ttl-cell">${r.TTL}s</td>`;
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+  }
+
+  card.appendChild(table);
+  return card;
+}
+
+function escapeHtmlDisplay(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ── Lookup ─────────────────────────────────────────────────────────────────*/
+async function doLookup(domain, type) {
+  const resultsArea = document.getElementById('results-area');
+  const statusLine = document.getElementById('status-line');
+  const btn = document.getElementById('btn-lookup');
+
+  domain = domain.trim().toLowerCase().replace(/\.$/, '');
+  if (!isValidDomain(domain)) {
+    setStatus('Invalid domain name.', 'error');
+    return;
+  }
+
+  btn.disabled = true;
+  resultsArea.innerHTML = '';
+  setStatus('<span class="spinner"></span> Querying…');
+
+  const t0 = Date.now();
+
+  try {
+    if (type === 'ALL') {
+      const results = await Promise.allSettled(
+        ALL_TYPES.map(t => queryDNS(domain, t).then(r => ({ type: t, data: r })))
+      );
+      resultsArea.innerHTML = '';
+      let found = 0;
+      results.forEach(r => {
+        if (r.status === 'fulfilled') {
+          const { type: t, data } = r.value;
+          const answers = (data.Answer || []).filter(a => TYPE_NAME_MAP[a.type] === t || a.type === TYPE_MAP[t]);
+          if (answers.length > 0) {
+            resultsArea.appendChild(renderCard(t, answers, domain));
+            found++;
+          }
+        }
+      });
+      const ms = Date.now() - t0;
+      if (found === 0) {
+        setStatus(`No records found for ${domain} (${ms}ms)`, 'error');
+      } else {
+        setStatus(`${found} record type${found !== 1 ? 's' : ''} found in ${ms}ms`, 'success');
+      }
+    } else {
+      const data = await queryDNS(domain, type);
+      const answers = data.Answer || [];
+      const ms = Date.now() - t0;
+      if (answers.length === 0) {
+        setStatus(`No ${type} records found for ${domain} (${ms}ms)`, 'error');
+      } else {
+        resultsArea.appendChild(renderCard(type, answers, domain));
+        setStatus(`${answers.length} record${answers.length !== 1 ? 's' : ''} in ${ms}ms`, 'success');
+      }
+    }
+    addHistory(domain, type);
+  } catch (e) {
+    setStatus('Error: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function setStatus(html, cls) {
+  const el = document.getElementById('status-line');
+  el.innerHTML = html;
+  el.className = cls || '';
+}
+
+/* ── History ────────────────────────────────────────────────────────────────*/
+let lookupHistory = [];
+
+function addHistory(domain, type) {
+  const key = `${domain} ${type}`;
+  lookupHistory = lookupHistory.filter(h => h !== key);
+  lookupHistory.unshift(key);
+  lookupHistory = lookupHistory.slice(0, 12);
+  renderHistory();
+}
+
+function renderHistory() {
+  const section = document.getElementById('history-section');
+  const list = document.getElementById('history-list');
+  if (lookupHistory.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = '';
+  list.innerHTML = '';
+  lookupHistory.forEach(h => {
+    const [domain, type] = h.split(' ');
+    const chip = document.createElement('button');
+    chip.className = 'history-chip';
+    chip.textContent = `${domain} ${type}`;
+    chip.onclick = () => {
+      document.getElementById('domain-input').value = domain;
+      document.getElementById('type-select').value = type || 'A';
+      doLookup(domain, type || 'A');
+    };
+    list.appendChild(chip);
+  });
+}
+
+function clearHistory() {
+  lookupHistory = [];
+  renderHistory();
+}
+
+/* ── Event wiring ────────────────────────────────────────────────────────────*/
+
+document.getElementById('btn-lookup').addEventListener('click', () => {
+  const domain = document.getElementById('domain-input').value;
+  const type = document.getElementById('type-select').value;
+  doLookup(domain, type);
+});
+
+document.getElementById('domain-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('btn-lookup').click();
+});
+
+document.querySelectorAll('.provider-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.provider-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentProvider = btn.dataset.provider;
+  });
+});
+
+document.querySelectorAll('.type-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    const type = chip.dataset.type;
+    if (type !== 'ALL') {
+      document.getElementById('type-select').value = type;
+    }
+    const domain = document.getElementById('domain-input').value;
+    if (domain.trim()) doLookup(domain, type);
+  });
+});
+
+</script>
+</body>
+</html>

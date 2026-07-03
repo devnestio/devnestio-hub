@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Responsive Breakpoints Reference — devnestio</title>
+  <meta name="description" content="Compare responsive breakpoints from Bootstrap, Tailwind CSS, Material UI, Bulma, Foundation, and Chakra UI side-by-side. Interactive viewport ruler. Copy media query snippets." />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    header { background: #1a1d2e; border-bottom: 1px solid #2d3748; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+    header a { color: #7c85f3; text-decoration: none; font-size: 14px; }
+    header h1 { font-size: 18px; font-weight: 700; color: #fff; }
+    .container { max-width: 1060px; margin: 0 auto; padding: 24px 16px; }
+    .panel { background: #1a1d2e; border: 1px solid #2d3748; border-radius: 10px; padding: 18px; margin-bottom: 20px; }
+    .panel h2 { font-size: 13px; font-weight: 600; color: #a0aec0; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 14px; }
+    .ruler-wrap { position: relative; margin-bottom: 8px; }
+    .ruler { height: 28px; background: #0f1117; border-radius: 6px; border: 1px solid #2d3748; position: relative; overflow: hidden; }
+    .ruler-tick { position: absolute; top: 0; height: 100%; border-left: 1px solid #2d3748; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 2px; }
+    .ruler-label { font-size: 9px; color: #4a5568; padding-left: 3px; white-space: nowrap; }
+    .viewport-line { position: absolute; top: 0; height: 100%; border-left: 2px solid #7c85f3; z-index: 10; pointer-events: none; }
+    .viewport-badge { position: absolute; top: 2px; background: #7c85f3; color: #fff; font-size: 10px; padding: 1px 5px; border-radius: 3px; white-space: nowrap; transform: translateX(-50%); }
+    .bp-row { margin-bottom: 14px; }
+    .bp-framework { font-size: 12px; font-weight: 700; color: #7c85f3; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+    .fw-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+    .bp-track { position: relative; height: 32px; background: #0f1117; border-radius: 6px; overflow: hidden; }
+    .bp-segment { position: absolute; top: 4px; height: 24px; border-radius: 3px; display: flex; align-items: center; overflow: hidden; cursor: pointer; }
+    .bp-seg-label { font-size: 10px; font-weight: 700; color: rgba(255,255,255,.9); padding: 0 6px; white-space: nowrap; overflow: hidden; }
+    .table-wrap { overflow-x: auto; margin-top: 14px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th { background: #0f1117; padding: 8px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #718096; text-transform: uppercase; border-bottom: 1px solid #2d3748; }
+    td { padding: 8px 12px; border-bottom: 1px solid #1a1d2e; }
+    .bp-name { font-family: 'Courier New', monospace; font-weight: 700; }
+    .bp-val { font-family: 'Courier New', monospace; color: #fbd38d; }
+    .bp-mq { font-family: 'Courier New', monospace; font-size: 11px; color: #7ee787; cursor: pointer; }
+    .bp-mq:hover { color: #7c85f3; }
+    .device-info { background: #0f1117; border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #a0aec0; display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 16px; }
+    .device-info span { color: #e2e8f0; font-weight: 700; }
+    .toast { position: fixed; bottom: 24px; right: 24px; background: #276749; color: #fff; padding: 10px 18px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity .3s; pointer-events: none; }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+<header>
+  <a href="/">← devnestio</a>
+  <h1>Responsive Breakpoints Reference</h1>
+</header>
+<div class="container">
+  <div class="device-info" id="device-info">
+    Your viewport: <span id="vp-width">—</span>px wide
+    · Device pixel ratio: <span id="vp-dpr">—</span>
+    · Category: <span id="vp-cat">—</span>
+  </div>
+
+  <div class="panel">
+    <h2>Viewport Ruler (0 – 1920px)</h2>
+    <div class="ruler-wrap">
+      <div class="ruler" id="ruler"></div>
+    </div>
+    <div style="font-size:11px;color:#4a5568;margin-top:4px;">Blue line = your current viewport width. Click ruler to simulate a width.</div>
+  </div>
+
+  <div class="panel">
+    <h2>Framework Breakpoints</h2>
+    <div id="fw-tracks"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Breakpoint Details</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Framework</th><th>Name</th><th>Min Width</th><th>Max Width</th><th>Media Query</th></tr></thead>
+        <tbody id="bp-table"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const MAX_PX = 1920;
+
+const FRAMEWORKS = [
+  {
+    name: 'Bootstrap 5', color: '#7952b3',
+    bps: [
+      { name: 'xs', min: 0, max: 575 },
+      { name: 'sm', min: 576, max: 767 },
+      { name: 'md', min: 768, max: 991 },
+      { name: 'lg', min: 992, max: 1199 },
+      { name: 'xl', min: 1200, max: 1399 },
+      { name: 'xxl', min: 1400, max: MAX_PX },
+    ]
+  },
+  {
+    name: 'Tailwind CSS', color: '#38bdf8',
+    bps: [
+      { name: 'default', min: 0, max: 639 },
+      { name: 'sm', min: 640, max: 767 },
+      { name: 'md', min: 768, max: 1023 },
+      { name: 'lg', min: 1024, max: 1279 },
+      { name: 'xl', min: 1280, max: 1535 },
+      { name: '2xl', min: 1536, max: MAX_PX },
+    ]
+  },
+  {
+    name: 'Material UI', color: '#1565c0',
+    bps: [
+      { name: 'xs', min: 0, max: 599 },
+      { name: 'sm', min: 600, max: 899 },
+      { name: 'md', min: 900, max: 1199 },
+      { name: 'lg', min: 1200, max: 1535 },
+      { name: 'xl', min: 1536, max: MAX_PX },
+    ]
+  },
+  {
+    name: 'Bulma', color: '#00d1b2',
+    bps: [
+      { name: 'mobile', min: 0, max: 768 },
+      { name: 'tablet', min: 769, max: 1023 },
+      { name: 'desktop', min: 1024, max: 1215 },
+      { name: 'widescreen', min: 1216, max: 1407 },
+      { name: 'fullhd', min: 1408, max: MAX_PX },
+    ]
+  },
+  {
+    name: 'Chakra UI', color: '#319795',
+    bps: [
+      { name: 'base', min: 0, max: 479 },
+      { name: 'sm', min: 480, max: 767 },
+      { name: 'md', min: 768, max: 991 },
+      { name: 'lg', min: 992, max: 1279 },
+      { name: 'xl', min: 1280, max: 1535 },
+      { name: '2xl', min: 1536, max: MAX_PX },
+    ]
+  },
+];
+
+function buildMQ(bp) {
+  if (bp.min === 0 && bp.max < MAX_PX) return `@media (max-width: ${bp.max}px)`;
+  if (bp.min > 0 && bp.max < MAX_PX) return `@media (min-width: ${bp.min}px) and (max-width: ${bp.max}px)`;
+  return `@media (min-width: ${bp.min}px)`;
+}
+
+let simWidth = window.innerWidth;
+
+function toPercent(px) { return (px / MAX_PX * 100).toFixed(3) + '%'; }
+
+function buildRuler() {
+  const ruler = document.getElementById('ruler');
+  ruler.innerHTML = '';
+  [0, 320, 480, 640, 768, 960, 1024, 1280, 1440, 1536, 1920].forEach(px => {
+    const tick = document.createElement('div');
+    tick.className = 'ruler-tick';
+    tick.style.left = toPercent(px);
+    tick.innerHTML = `<span class="ruler-label">${px}</span>`;
+    ruler.appendChild(tick);
+  });
+  const vline = document.createElement('div');
+  vline.className = 'viewport-line';
+  vline.id = 'vp-line';
+  ruler.appendChild(vline);
+  const badge = document.createElement('div');
+  badge.className = 'viewport-badge';
+  badge.id = 'vp-badge';
+  ruler.appendChild(badge);
+  ruler.addEventListener('click', e => {
+    const rect = ruler.getBoundingClientRect();
+    simWidth = Math.round((e.clientX - rect.left) / rect.width * MAX_PX);
+    updateViewportLine();
+  });
+  updateViewportLine();
+}
+
+function updateViewportLine() {
+  const pct = Math.min(100, simWidth / MAX_PX * 100);
+  const vline = document.getElementById('vp-line');
+  const badge = document.getElementById('vp-badge');
+  if (vline) vline.style.left = pct + '%';
+  if (badge) { badge.style.left = pct + '%'; badge.textContent = simWidth + 'px'; }
+  document.getElementById('vp-width').textContent = window.innerWidth;
+  document.getElementById('vp-dpr').textContent = window.devicePixelRatio || 1;
+  // Category
+  let cat = 'Desktop';
+  if (simWidth < 480) cat = 'Mobile (small)';
+  else if (simWidth < 768) cat = 'Mobile (large)';
+  else if (simWidth < 1024) cat = 'Tablet';
+  else if (simWidth < 1440) cat = 'Desktop';
+  else cat = 'Large Desktop';
+  document.getElementById('vp-cat').textContent = cat;
+}
+
+function buildTracks() {
+  const el = document.getElementById('fw-tracks');
+  el.innerHTML = '';
+  FRAMEWORKS.forEach(fw => {
+    const row = document.createElement('div');
+    row.className = 'bp-row';
+    row.innerHTML = `<div class="bp-framework"><span class="fw-badge" style="background:${fw.color}22;color:${fw.color}">${fw.name}</span></div>`;
+    const track = document.createElement('div');
+    track.className = 'bp-track';
+    fw.bps.forEach((bp, i) => {
+      const seg = document.createElement('div');
+      seg.className = 'bp-segment';
+      const left = bp.min / MAX_PX * 100;
+      const width = (bp.max - bp.min + 1) / MAX_PX * 100;
+      const alpha = 0.3 + (i % 2) * 0.2;
+      seg.style.cssText = `left:${left}%;width:${width}%;background:${fw.color}${Math.round(alpha*255).toString(16).padStart(2,'0')}`;
+      seg.innerHTML = `<span class="bp-seg-label">${bp.name}</span>`;
+      seg.title = `${bp.name}: ${bp.min}–${bp.max}px`;
+      seg.onclick = () => copyToast(buildMQ(bp));
+      track.appendChild(seg);
+    });
+    row.appendChild(track);
+    el.appendChild(row);
+  });
+}
+
+function buildTable() {
+  const tbody = document.getElementById('bp-table');
+  tbody.innerHTML = '';
+  FRAMEWORKS.forEach(fw => {
+    fw.bps.forEach((bp, i) => {
+      const tr = document.createElement('tr');
+      const mq = buildMQ(bp);
+      tr.innerHTML = `
+        <td style="color:${fw.color};font-weight:700">${i === 0 ? fw.name : ''}</td>
+        <td class="bp-name" style="color:${fw.color}">${bp.name}</td>
+        <td class="bp-val">${bp.min}px</td>
+        <td class="bp-val">${bp.max < MAX_PX ? bp.max + 'px' : '∞'}</td>
+        <td class="bp-mq" title="Click to copy" onclick="copyToast('${mq.replace(/'/g,"\\'")}')">${mq}</td>`;
+      tbody.appendChild(tr);
+    });
+  });
+}
+
+function copyToast(text) {
+  navigator.clipboard.writeText(text);
+  const t = document.getElementById('toast');
+  t.textContent = 'Copied: ' + text.slice(0, 50);
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+buildRuler();
+buildTracks();
+buildTable();
+window.addEventListener('resize', () => { simWidth = window.innerWidth; updateViewportLine(); });
+</script>
+</body>
+</html>

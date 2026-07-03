@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OpenAPI / Swagger Validator | DevNestio</title>
+  <meta name="description" content="Validate OpenAPI 2.0 (Swagger) and OpenAPI 3.0/3.1 documents in your browser. Checks required fields, paths, operations, schemas, and references." />
+  <meta property="og:title" content="OpenAPI / Swagger Validator | DevNestio" />
+  <meta property="og:description" content="Paste JSON or YAML OpenAPI documents and instantly validate structure, required fields, and schemas. Browser-only, zero upload." />
+  <meta property="og:url" content="https://devnestio.pages.dev/openapi-validator/" />
+  <meta name="twitter:card" content="summary" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    #privacy-banner { background: #1e293b; border-bottom: 1px solid #334155; padding: 8px 16px; font-size: 12px; color: #94a3b8; text-align: center; }
+    header { background: #1e293b; border-bottom: 1px solid #334155; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+    header a { color: #64748b; font-size: 13px; text-decoration: none; margin-left: auto; }
+    header a:hover { color: #94a3b8; }
+    .badge { background: #0891b2; color: #fff; font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+    main { max-width: 1000px; margin: 0 auto; padding: 24px 16px; }
+    .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+    .btn { padding: 8px 16px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; }
+    .btn-primary { background: #0891b2; color: #fff; }
+    .btn-primary:hover { background: #0e7490; }
+    .btn-secondary { background: #334155; color: #e2e8f0; }
+    .btn-secondary:hover { background: #475569; }
+    .btn-sm { padding: 5px 12px; font-size: 12px; }
+    .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 700px) { .layout { grid-template-columns: 1fr; } }
+    .panel { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 16px; }
+    .panel-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .panel-hdr h2 { font-size: 13px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em; }
+    textarea { width: 100%; padding: 10px 12px; background: #0f1117; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 12px; font-family: 'JetBrains Mono', monospace; outline: none; resize: vertical; min-height: 420px; }
+    textarea:focus { border-color: #0891b2; }
+    .results { overflow-y: auto; max-height: 460px; font-size: 13px; }
+    .summary-bar { display: flex; gap: 10px; flex-wrap: wrap; padding: 10px 12px; background: #0f1117; border-radius: 8px; margin-bottom: 12px; }
+    .sum-item { font-size: 12px; }
+    .sum-item strong { font-size: 16px; }
+    .c-err { color: #f87171; }
+    .c-warn { color: #fbbf24; }
+    .c-info { color: #38bdf8; }
+    .c-ok { color: #4ade80; }
+    .issue-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .issue { background: #0f1117; border-radius: 7px; padding: 10px 12px; border-left: 3px solid; }
+    .issue.error { border-color: #f87171; }
+    .issue.warning { border-color: #fbbf24; }
+    .issue.info { border-color: #38bdf8; }
+    .issue-title { font-size: 12px; font-weight: 600; margin-bottom: 2px; }
+    .issue.error .issue-title { color: #f87171; }
+    .issue.warning .issue-title { color: #fbbf24; }
+    .issue.info .issue-title { color: #38bdf8; }
+    .issue-path { font-size: 11px; color: #64748b; font-family: monospace; }
+    .issue-msg { font-size: 12px; color: #94a3b8; margin-top: 4px; }
+    .spec-summary { background: #0f1117; border-radius: 8px; padding: 14px; margin-bottom: 12px; }
+    .spec-summary h3 { font-size: 12px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
+    .spec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .spec-item { font-size: 12px; color: #94a3b8; }
+    .spec-item strong { color: #e2e8f0; font-weight: 600; }
+    .paths-list { margin-top: 10px; }
+    .path-row { display: flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 5px; font-size: 11px; font-family: monospace; }
+    .path-row:hover { background: #1e293b; }
+    .method-badge { padding: 1px 6px; border-radius: 3px; font-weight: 700; font-size: 10px; text-transform: uppercase; min-width: 42px; text-align: center; }
+    .m-get { background: #134e4a; color: #34d399; }
+    .m-post { background: #1c1917; color: #fb923c; }
+    .m-put { background: #1e1b4b; color: #818cf8; }
+    .m-delete { background: #450a0a; color: #f87171; }
+    .m-patch { background: #14532d; color: #86efac; }
+    .m-other { background: #1e293b; color: #94a3b8; }
+    .path-val { color: #e2e8f0; }
+    .empty-state { text-align: center; padding: 60px 20px; color: #475569; }
+    .empty-state svg { width: 48px; height: 48px; margin: 0 auto 12px; display: block; opacity: 0.3; }
+    .valid-banner { background: #052e16; border: 1px solid #166534; border-radius: 8px; padding: 14px; text-align: center; color: #4ade80; font-size: 14px; font-weight: 700; margin-bottom: 12px; }
+    select.fmt-sel { padding: 5px 8px; background: #0f1117; border: 1px solid #334155; border-radius: 5px; color: #e2e8f0; font-size: 12px; outline: none; }
+    select.fmt-sel:focus { border-color: #0891b2; }
+    #ad-slot { margin: 20px auto; text-align: center; }
+  </style>
+</head>
+<body>
+<div id="privacy-banner">🔒 All processing happens in your browser. No data is sent to any server.</div>
+<header>
+  <span class="badge">FREE</span>
+  <h1>OpenAPI / Swagger Validator</h1>
+  <a href="https://devnestio.pages.dev">← All Tools</a>
+</header>
+<main>
+  <div class="toolbar">
+    <button class="btn btn-primary" onclick="runValidation()">Validate</button>
+    <button class="btn btn-secondary" onclick="loadSample('v3')">Sample OAS 3.0</button>
+    <button class="btn btn-secondary" onclick="loadSample('v2')">Sample Swagger 2.0</button>
+    <button class="btn btn-secondary" onclick="clearAll()">Clear</button>
+    <select class="fmt-sel" id="input-format">
+      <option value="auto">Auto-detect</option>
+      <option value="json">JSON</option>
+      <option value="yaml">YAML (basic)</option>
+    </select>
+  </div>
+
+  <div class="layout">
+    <div class="panel">
+      <div class="panel-hdr">
+        <h2>Input (JSON or YAML)</h2>
+        <button class="btn btn-secondary btn-sm" onclick="formatJson()">Format JSON</button>
+      </div>
+      <textarea id="input-doc" spellcheck="false" placeholder='Paste your OpenAPI / Swagger document here…
+
+Supported:
+• OpenAPI 3.0.x / 3.1.x (JSON or YAML)
+• Swagger 2.0 (JSON or YAML)'></textarea>
+    </div>
+
+    <div class="panel">
+      <div class="panel-hdr">
+        <h2>Validation Results</h2>
+        <span id="result-label" style="font-size:11px;color:#64748b"></span>
+      </div>
+      <div class="results" id="results">
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          Paste a document and click Validate
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="ad-slot" data-ea-publisher="devnestio" data-ea-type="image"></div>
+</main>
+<script>
+// Minimal YAML → JSON converter (key:value, arrays, nested by indent)
+function parseYaml(str) {
+  const lines = str.split('\n');
+  const root = {};
+  const stack = [{ obj: root, indent: -1 }];
+
+  function getParent(indent) {
+    while (stack.length > 1 && stack[stack.length - 1].indent >= indent) stack.pop();
+    return stack[stack.length - 1].obj;
+  }
+
+  function parseValue(v) {
+    v = v.trim();
+    if (v === 'true') return true;
+    if (v === 'false') return false;
+    if (v === 'null' || v === '~') return null;
+    if (/^-?\d+(\.\d+)?$/.test(v)) return Number(v);
+    if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) return v.slice(1, -1);
+    return v;
+  }
+
+  for (const rawLine of lines) {
+    if (rawLine.trim() === '' || rawLine.trim().startsWith('#')) continue;
+    const indent = rawLine.search(/\S/);
+    const line = rawLine.trim();
+
+    if (line.startsWith('- ')) {
+      const parent = getParent(indent);
+      const arr = Array.isArray(parent.__arr__) ? parent.__arr__ : (parent.__arr__ = []);
+      const val = line.slice(2).trim();
+      if (val === '' || val === '{') {
+        const child = {};
+        arr.push(child);
+        stack.push({ obj: child, indent });
+      } else {
+        arr.push(parseValue(val));
+      }
+    } else if (line.includes(':')) {
+      const colon = line.indexOf(':');
+      const key = line.slice(0, colon).trim();
+      const val = line.slice(colon + 1).trim();
+      const parent = getParent(indent);
+      if (val === '' || val === '{') {
+        const child = {};
+        parent[key] = child;
+        stack.push({ obj: child, indent });
+      } else {
+        parent[key] = parseValue(val);
+      }
+    }
+  }
+  return root;
+}
+
+function parseDoc(text) {
+  const fmt = document.getElementById('input-format').value;
+  const trimmed = text.trim();
+
+  if (fmt === 'json' || (fmt === 'auto' && trimmed.startsWith('{'))) {
+    return JSON.parse(text);
+  }
+  // YAML
+  return parseYaml(text);
+}
+
+// ── Validators ────────────────────────────────────────────────
+const issues = [];
+function addIssue(level, path, title, msg) {
+  issues.push({ level, path, title, msg });
+}
+function required(obj, keys, path) {
+  for (const k of keys) {
+    if (obj[k] === undefined || obj[k] === null) {
+      addIssue('error', path, `Missing required field: "${k}"`, `The field "${k}" is required at ${path}.`);
+    }
+  }
+}
+function isObj(v) { return v && typeof v === 'object' && !Array.isArray(v); }
+
+function validateV2(doc) {
+  required(doc, ['swagger', 'info', 'paths'], '#');
+  if (doc.info) {
+    required(doc.info, ['title', 'version'], '#/info');
+  }
+  if (!isObj(doc.paths)) {
+    addIssue('error', '#/paths', 'paths must be an object', 'The paths field must be a map of path items.');
+    return;
+  }
+  const methods = ['get','put','post','delete','options','head','patch'];
+  for (const [pth, item] of Object.entries(doc.paths || {})) {
+    if (!pth.startsWith('/')) {
+      addIssue('error', `#/paths/${pth}`, 'Path must start with /', `Path "${pth}" must begin with a forward slash.`);
+    }
+    if (!isObj(item)) continue;
+    for (const m of methods) {
+      const op = item[m];
+      if (!op) continue;
+      const loc = `#/paths/${pth}/${m}`;
+      if (!op.responses) {
+        addIssue('error', loc, 'Operation missing responses', 'Every operation must define at least one response.');
+      } else if (typeof op.responses === 'object' && Object.keys(op.responses).length === 0) {
+        addIssue('warning', loc, 'Empty responses object', 'responses is empty — define at least one response code.');
+      }
+      if (op.parameters) {
+        op.parameters.forEach((p, i) => {
+          if (!p.name) addIssue('error', `${loc}/parameters/${i}`, 'Parameter missing "name"', 'Each parameter must have a "name" field.');
+          if (!p.in) addIssue('error', `${loc}/parameters/${i}`, 'Parameter missing "in"', 'Each parameter must specify "in" (query, path, header, body, formData).');
+        });
+      }
+    }
+  }
+  if (doc.definitions) {
+    for (const [name, schema] of Object.entries(doc.definitions)) {
+      if (!schema.type && !schema.$ref && !schema.allOf && !schema.properties) {
+        addIssue('warning', `#/definitions/${name}`, 'Schema has no type', `Schema "${name}" has no type, $ref, or properties.`);
+      }
+    }
+  }
+  addIssue('info', '#', 'Swagger 2.0 document', `Detected Swagger version ${doc.swagger}.`);
+}
+
+function validateV3(doc) {
+  required(doc, ['openapi', 'info', 'paths'], '#');
+  if (doc.info) {
+    required(doc.info, ['title', 'version'], '#/info');
+    if (doc.info.contact && !doc.info.contact.email && !doc.info.contact.url) {
+      addIssue('warning', '#/info/contact', 'Contact block incomplete', 'Contact should have at least an email or url.');
+    }
+  }
+  if (!isObj(doc.paths)) {
+    if (doc.paths !== undefined) {
+      addIssue('error', '#/paths', 'paths must be an object', 'The paths field must be a map of path items.');
+    }
+    return;
+  }
+  const methods = ['get','put','post','delete','options','head','patch','trace'];
+  const operationIds = new Set();
+  for (const [pth, item] of Object.entries(doc.paths || {})) {
+    if (!pth.startsWith('/')) {
+      addIssue('error', `#/paths/${pth}`, 'Path must start with /', `Path "${pth}" must begin with a forward slash.`);
+    }
+    if (!isObj(item)) continue;
+    for (const m of methods) {
+      const op = item[m];
+      if (!op) continue;
+      const loc = `#/paths/${pth}/${m}`;
+      if (!op.responses) {
+        addIssue('error', loc, 'Operation missing responses', 'Every operation must define at least one response.');
+      } else {
+        const codes = Object.keys(op.responses || {});
+        if (codes.length === 0) addIssue('warning', loc, 'Empty responses', 'No response codes defined.');
+        for (const code of codes) {
+          if (!/^[1-5]\d{2}$|^default$/.test(code)) {
+            addIssue('warning', `${loc}/responses/${code}`, 'Invalid HTTP status code', `"${code}" is not a valid HTTP status code.`);
+          }
+        }
+      }
+      if (op.operationId) {
+        if (operationIds.has(op.operationId)) {
+          addIssue('error', loc, 'Duplicate operationId', `operationId "${op.operationId}" is already used by another operation.`);
+        } else {
+          operationIds.add(op.operationId);
+        }
+      } else {
+        addIssue('info', loc, 'Missing operationId', 'Adding an operationId helps with SDK generation and documentation.');
+      }
+      if (op.parameters) {
+        op.parameters.forEach((p, i) => {
+          if (!p.$ref) {
+            if (!p.name) addIssue('error', `${loc}/parameters/${i}`, 'Parameter missing "name"', '');
+            if (!p.in) addIssue('error', `${loc}/parameters/${i}`, 'Parameter missing "in"', '');
+          }
+        });
+      }
+    }
+  }
+  // Servers check
+  if (!doc.servers || doc.servers.length === 0) {
+    addIssue('warning', '#/servers', 'No servers defined', 'Define at least one server URL for the API.');
+  } else {
+    doc.servers.forEach((s, i) => {
+      if (!s.url) addIssue('error', `#/servers/${i}`, 'Server missing url', 'Each server entry must have a url field.');
+    });
+  }
+  // Components schemas
+  const schemas = (doc.components || {}).schemas || {};
+  for (const [name, schema] of Object.entries(schemas)) {
+    if (!schema.type && !schema.$ref && !schema.allOf && !schema.anyOf && !schema.oneOf && !schema.properties) {
+      addIssue('warning', `#/components/schemas/${name}`, 'Schema has no type', `Schema "${name}" has no type, $ref, or composition keyword.`);
+    }
+  }
+  const major = parseFloat(doc.openapi);
+  addIssue('info', '#', `OpenAPI ${doc.openapi} document`, `Detected OpenAPI version ${doc.openapi}.`);
+  if (major >= 3.1) {
+    addIssue('info', '#', 'OpenAPI 3.1 uses JSON Schema 2020-12', 'OAS 3.1 aligns schema validation with JSON Schema 2020-12 draft.');
+  }
+}
+
+function validateDoc(doc) {
+  issues.length = 0;
+  if (!isObj(doc)) {
+    addIssue('error', '#', 'Document must be an object', 'The root of an OpenAPI document must be a JSON object.');
+    return;
+  }
+  if (doc.swagger && String(doc.swagger).startsWith('2')) {
+    validateV2(doc);
+  } else if (doc.openapi && String(doc.openapi).startsWith('3')) {
+    validateV3(doc);
+  } else {
+    addIssue('error', '#', 'Unknown OpenAPI version', 'Add either "swagger": "2.0" or "openapi": "3.x.x" at the root.');
+  }
+}
+
+// ── Rendering ─────────────────────────────────────────────────
+function methodClass(m) {
+  const map = { get: 'm-get', post: 'm-post', put: 'm-put', delete: 'm-delete', patch: 'm-patch' };
+  return map[m.toLowerCase()] || 'm-other';
+}
+
+function renderResults(doc) {
+  const errors = issues.filter(i => i.level === 'error');
+  const warnings = issues.filter(i => i.level === 'warning');
+  const infos = issues.filter(i => i.level === 'info');
+  const box = document.getElementById('results');
+  document.getElementById('result-label').textContent =
+    `${errors.length} errors · ${warnings.length} warnings · ${infos.length} info`;
+
+  let html = '';
+
+  // Summary bar
+  html += `<div class="summary-bar">
+    <div class="sum-item"><strong class="c-err">${errors.length}</strong> <span class="c-err">Error${errors.length !== 1 ? 's' : ''}</span></div>
+    <div class="sum-item"><strong class="c-warn">${warnings.length}</strong> <span class="c-warn">Warning${warnings.length !== 1 ? 's' : ''}</span></div>
+    <div class="sum-item"><strong class="c-info">${infos.length}</strong> <span class="c-info">Info</span></div>
+  </div>`;
+
+  if (errors.length === 0 && warnings.length === 0) {
+    html += `<div class="valid-banner">✅ Document is valid! No errors or warnings found.</div>`;
+  }
+
+  // Spec summary
+  if (doc && isObj(doc)) {
+    const version = doc.openapi || (doc.swagger ? 'Swagger ' + doc.swagger : '—');
+    const title = (doc.info || {}).title || '—';
+    const ver = (doc.info || {}).version || '—';
+    const pathCount = Object.keys(doc.paths || {}).length;
+    const methods = ['get','put','post','delete','options','head','patch','trace'];
+    const operations = [];
+    for (const [pth, item] of Object.entries(doc.paths || {})) {
+      if (!isObj(item)) continue;
+      for (const m of methods) {
+        if (item[m]) operations.push({ method: m, path: pth, summary: item[m].summary || '' });
+      }
+    }
+    html += `<div class="spec-summary">
+      <h3>API Summary</h3>
+      <div class="spec-grid">
+        <div class="spec-item">Version: <strong>${escHtml(String(version))}</strong></div>
+        <div class="spec-item">Title: <strong>${escHtml(title)}</strong></div>
+        <div class="spec-item">API version: <strong>${escHtml(String(ver))}</strong></div>
+        <div class="spec-item">Paths: <strong>${pathCount}</strong></div>
+        <div class="spec-item">Operations: <strong>${operations.length}</strong></div>
+      </div>`;
+    if (operations.length > 0) {
+      html += `<div class="paths-list">`;
+      for (const op of operations.slice(0, 30)) {
+        html += `<div class="path-row"><span class="method-badge ${methodClass(op.method)}">${op.method.toUpperCase()}</span><span class="path-val">${escHtml(op.path)}</span>${op.summary ? `<span style="color:#64748b;margin-left:6px">${escHtml(op.summary)}</span>` : ''}</div>`;
+      }
+      if (operations.length > 30) html += `<div style="font-size:11px;color:#64748b;padding:6px 8px">…and ${operations.length - 30} more</div>`;
+      html += `</div>`;
+    }
+    html += `</div>`;
+  }
+
+  // Issue list
+  const all = [...errors, ...warnings, ...infos];
+  if (all.length > 0) {
+    html += `<ul class="issue-list">`;
+    for (const issue of all) {
+      html += `<li class="issue ${issue.level}">
+        <div class="issue-title">${escHtml(issue.title)}</div>
+        <div class="issue-path">${escHtml(issue.path)}</div>
+        ${issue.msg ? `<div class="issue-msg">${escHtml(issue.msg)}</div>` : ''}
+      </li>`;
+    }
+    html += `</ul>`;
+  }
+
+  box.innerHTML = html;
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function runValidation() {
+  const text = document.getElementById('input-doc').value.trim();
+  if (!text) {
+    document.getElementById('results').innerHTML = '<div class="empty-state">Nothing to validate. Paste a document first.</div>';
+    return;
+  }
+  let doc = null;
+  try {
+    doc = parseDoc(text);
+  } catch(e) {
+    issues.length = 0;
+    addIssue('error', '#', 'Parse error', e.message);
+    renderResults(null);
+    return;
+  }
+  validateDoc(doc);
+  renderResults(doc);
+}
+
+function formatJson() {
+  const ta = document.getElementById('input-doc');
+  try {
+    ta.value = JSON.stringify(JSON.parse(ta.value), null, 2);
+  } catch(e) {
+    alert('Not valid JSON: ' + e.message);
+  }
+}
+
+function clearAll() {
+  document.getElementById('input-doc').value = '';
+  document.getElementById('results').innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>Paste a document and click Validate</div>';
+  document.getElementById('result-label').textContent = '';
+}
+
+const SAMPLE_V3 = {
+  openapi: '3.0.3',
+  info: { title: 'Pet Store API', version: '1.0.0', description: 'A sample API' },
+  servers: [{ url: 'https://petstore.example.com/v1', description: 'Production' }],
+  paths: {
+    '/pets': {
+      get: {
+        operationId: 'listPets',
+        summary: 'List all pets',
+        parameters: [{ name: 'limit', in: 'query', schema: { type: 'integer' } }],
+        responses: { '200': { description: 'A list of pets' }, '500': { description: 'Server error' } }
+      },
+      post: {
+        operationId: 'createPet',
+        summary: 'Create a pet',
+        requestBody: { required: true, content: { 'application/json': { schema: { '$ref': '#/components/schemas/NewPet' } } } },
+        responses: { '201': { description: 'Created' } }
+      }
+    },
+    '/pets/{petId}': {
+      get: {
+        operationId: 'showPetById',
+        summary: 'Info for a specific pet',
+        parameters: [{ name: 'petId', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: { '200': { description: 'Expected response' }, '404': { description: 'Not found' } }
+      }
+    }
+  },
+  components: {
+    schemas: {
+      Pet: { type: 'object', properties: { id: { type: 'integer' }, name: { type: 'string' } }, required: ['id', 'name'] },
+      NewPet: { type: 'object', properties: { name: { type: 'string' } }, required: ['name'] }
+    }
+  }
+};
+
+const SAMPLE_V2 = {
+  swagger: '2.0',
+  info: { title: 'Sample Swagger API', version: '1.0.0' },
+  host: 'api.example.com',
+  basePath: '/v1',
+  schemes: ['https'],
+  paths: {
+    '/users': {
+      get: {
+        summary: 'Get users',
+        parameters: [{ name: 'limit', in: 'query', type: 'integer' }],
+        responses: { '200': { description: 'OK' } }
+      }
+    },
+    '/users/{id}': {
+      get: {
+        summary: 'Get user by ID',
+        parameters: [{ name: 'id', in: 'path', required: true, type: 'integer' }],
+        responses: { '200': { description: 'OK' }, '404': { description: 'Not found' } }
+      }
+    }
+  }
+};
+
+function loadSample(v) {
+  document.getElementById('input-doc').value = JSON.stringify(v === 'v3' ? SAMPLE_V3 : SAMPLE_V2, null, 2);
+  runValidation();
+}
+</script>
+</body>
+</html>

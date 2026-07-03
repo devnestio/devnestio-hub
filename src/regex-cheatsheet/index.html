@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Regex Cheat Sheet — devnestio</title>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#0f1117;color:#e2e8f0;min-height:100vh}
+header{padding:24px 32px;border-bottom:1px solid #1e2535}
+h1{font-size:1.5rem;font-weight:700;color:#f8fafc}
+h1 span{color:#60a5fa}
+.desc{color:#94a3b8;margin-top:4px;font-size:.9rem}
+.controls{display:flex;gap:12px;flex-wrap:wrap;padding:16px 32px;border-bottom:1px solid #1e2535;align-items:center}
+.search-wrap{position:relative;flex:1;min-width:200px}
+.search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#64748b}
+#search{width:100%;background:#1e2535;border:1px solid #334155;color:#e2e8f0;padding:8px 12px 8px 34px;border-radius:6px;font-size:.9rem;outline:none}
+#search:focus{border-color:#60a5fa}
+.cat-filters{display:flex;gap:8px;flex-wrap:wrap}
+.cat-btn{padding:5px 12px;border-radius:99px;border:1px solid #334155;background:#1e2535;color:#94a3b8;font-size:.8rem;cursor:pointer}
+.cat-btn.active,.cat-btn:hover{background:#2563eb;border-color:#2563eb;color:#fff}
+.content{max-width:1000px;margin:0 auto;padding:24px 32px}
+.section{margin-bottom:28px}
+.section-title{font-size:.95rem;font-weight:700;color:#60a5fa;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #1e2535}
+.item{display:grid;grid-template-columns:160px 1fr 1fr;gap:0;background:#141924;border:1px solid #1e2535;border-radius:8px;margin-bottom:8px;overflow:hidden}
+.item:hover{border-color:#334155}
+@media(max-width:640px){.item{grid-template-columns:1fr}}
+.item-pat{padding:10px 14px;border-right:1px solid #1e2535;display:flex;align-items:center}
+.pat{font-family:monospace;font-size:.9rem;color:#c4b5fd;font-weight:700;cursor:pointer;word-break:break-all}
+.pat:hover{text-decoration:underline}
+.item-desc{padding:10px 14px;border-right:1px solid #1e2535;font-size:.83rem;color:#94a3b8;line-height:1.5}
+.item-example{padding:10px 14px;font-size:.8rem}
+.ex-label{font-size:.72rem;color:#64748b;margin-bottom:3px}
+.ex-code{font-family:monospace;color:#7dd3fc;font-size:.8rem;word-break:break-all}
+.match{background:#14532d;color:#4ade80;border-radius:2px;padding:0 2px}
+.no-results{text-align:center;color:#64748b;padding:48px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#22c55e;color:#fff;padding:8px 18px;border-radius:6px;font-size:.85rem;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none;z-index:999}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<header>
+  <h1>Regex <span>Cheat Sheet</span></h1>
+  <p class="desc">Regular expression syntax — anchors, quantifiers, groups, lookaheads, flags, and patterns</p>
+</header>
+<div class="controls">
+  <div class="search-wrap">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="search" placeholder="Search patterns or descriptions…">
+  </div>
+  <div class="cat-filters" id="cats"></div>
+</div>
+<div class="content" id="content"></div>
+<div class="toast" id="toast">Copied!</div>
+<script>
+const ITEMS = [
+  // Anchors
+  {cat:'Anchors',pat:'^',desc:'Start of string (or line with m flag)',ex:'`^hello`',match:'<mark class="match">hello</mark> world'},
+  {cat:'Anchors',pat:'$',desc:'End of string (or line with m flag)',ex:'`world$`',match:'hello <mark class="match">world</mark>'},
+  {cat:'Anchors',pat:'\\b',desc:'Word boundary',ex:'`\\bcat\\b`',match:'the <mark class="match">cat</mark> concatenate'},
+  {cat:'Anchors',pat:'\\B',desc:'Non-word boundary',ex:'`\\Bcat\\B`',match:'the cat con<mark class="match">cat</mark>enate'},
+  {cat:'Anchors',pat:'\\A',desc:'Start of string (Python/Ruby — not JS)',ex:'`\\Ahello`',match:'<mark class="match">hello</mark> world'},
+  {cat:'Anchors',pat:'\\Z',desc:'End of string (Python/Ruby — not JS)',ex:'`world\\Z`',match:'hello <mark class="match">world</mark>'},
+  // Character classes
+  {cat:'Character Classes',pat:'.',desc:'Any character except newline (use [\\s\\S] for all)',ex:'`h.t`',match:'<mark class="match">hat</mark> hit hurt'},
+  {cat:'Character Classes',pat:'\\d',desc:'Digit [0-9]',ex:'`\\d+`',match:'abc <mark class="match">123</mark> def'},
+  {cat:'Character Classes',pat:'\\D',desc:'Non-digit [^0-9]',ex:'`\\D+`',match:'<mark class="match">abc</mark>123<mark class="match">def</mark>'},
+  {cat:'Character Classes',pat:'\\w',desc:'Word character [a-zA-Z0-9_]',ex:'`\\w+`',match:'<mark class="match">hello</mark> <mark class="match">world</mark>'},
+  {cat:'Character Classes',pat:'\\W',desc:'Non-word character',ex:'`\\W+`',match:'hello<mark class="match"> </mark>world'},
+  {cat:'Character Classes',pat:'\\s',desc:'Whitespace [\\t\\n\\r\\f\\v ]',ex:'`\\s+`',match:'hello<mark class="match"> </mark>world'},
+  {cat:'Character Classes',pat:'\\S',desc:'Non-whitespace',ex:'`\\S+`',match:'<mark class="match">hello</mark> <mark class="match">world</mark>'},
+  {cat:'Character Classes',pat:'[abc]',desc:'Character set — a, b, or c',ex:'`[aeiou]`',match:'h<mark class="match">e</mark>ll<mark class="match">o</mark>'},
+  {cat:'Character Classes',pat:'[^abc]',desc:'Negated set — not a, b, or c',ex:'`[^aeiou]+`',match:'<mark class="match">h</mark>e<mark class="match">ll</mark>o'},
+  {cat:'Character Classes',pat:'[a-z]',desc:'Character range a through z',ex:'`[a-z]+`',match:'<mark class="match">abc</mark>123<mark class="match">def</mark>'},
+  {cat:'Character Classes',pat:'[a-zA-Z0-9]',desc:'Alphanumeric range',ex:'`[a-zA-Z0-9]+`',match:'<mark class="match">abc123</mark>!@#'},
+  // Quantifiers
+  {cat:'Quantifiers',pat:'*',desc:'0 or more (greedy)',ex:'`ab*`',match:'<mark class="match">a</mark> <mark class="match">ab</mark> <mark class="match">abb</mark>'},
+  {cat:'Quantifiers',pat:'+',desc:'1 or more (greedy)',ex:'`ab+`',match:'a <mark class="match">ab</mark> <mark class="match">abb</mark>'},
+  {cat:'Quantifiers',pat:'?',desc:'0 or 1 (optional)',ex:'`colou?r`',match:'<mark class="match">color</mark> <mark class="match">colour</mark>'},
+  {cat:'Quantifiers',pat:'{n}',desc:'Exactly n times',ex:'`\\d{4}`',match:'12 123 <mark class="match">1234</mark> 12345'},
+  {cat:'Quantifiers',pat:'{n,}',desc:'n or more times',ex:'`\\d{3,}`',match:'12 <mark class="match">123</mark> <mark class="match">1234</mark>'},
+  {cat:'Quantifiers',pat:'{n,m}',desc:'Between n and m times',ex:'`\\d{2,4}`',match:'1 <mark class="match">12</mark> <mark class="match">123</mark> <mark class="match">1234</mark> 12345'},
+  {cat:'Quantifiers',pat:'*?',desc:'0 or more (lazy)',ex:'`a.*?b`',match:'<mark class="match">aXb</mark>YaZb'},
+  {cat:'Quantifiers',pat:'+?',desc:'1 or more (lazy)',ex:'`a.+?b`',match:'<mark class="match">aXb</mark>YaZb'},
+  // Groups
+  {cat:'Groups',pat:'(abc)',desc:'Capturing group — saved in $1, \\1',ex:'`(\\w+)@(\\w+)`',match:'<mark class="match">user@example</mark>.com'},
+  {cat:'Groups',pat:'(?:abc)',desc:'Non-capturing group — grouped but not saved',ex:'`(?:foo|bar)\\d`',match:'<mark class="match">foo1</mark> <mark class="match">bar2</mark>'},
+  {cat:'Groups',pat:'(?<name>abc)',desc:'Named capturing group — accessed as $<name>',ex:'`(?<yr>\\d{4})-(?<mo>\\d{2})`',match:'<mark class="match">2024-07</mark>'},
+  {cat:'Groups',pat:'\\1',desc:'Backreference to group 1',ex:'`(\\w)\\1`',match:'a<mark class="match">bb</mark>c<mark class="match">cc</mark>'},
+  {cat:'Groups',pat:'(?:a|b)',desc:'Alternation — a or b',ex:'`cat|dog`',match:'I have a <mark class="match">cat</mark> and a <mark class="match">dog</mark>'},
+  // Lookahead / Lookbehind
+  {cat:'Lookaround',pat:'(?=...)',desc:'Positive lookahead — followed by',ex:'`\\d+(?= px)`',match:'<mark class="match">16</mark> px 2em'},
+  {cat:'Lookaround',pat:'(?!...)',desc:'Negative lookahead — not followed by',ex:'`\\d+(?! px)`',match:'16 px <mark class="match">2</mark>em'},
+  {cat:'Lookaround',pat:'(?<=...)',desc:'Positive lookbehind — preceded by (not IE)',ex:'`(?<=\\$)\\d+`',match:'$<mark class="match">100</mark> 200'},
+  {cat:'Lookaround',pat:'(?<!...)',desc:'Negative lookbehind — not preceded by',ex:'`(?<!\\$)\\d+`',match:'$100 <mark class="match">200</mark>'},
+  // Flags
+  {cat:'Flags',pat:'g',desc:'Global — find all matches (not just first)',ex:'`/\\d/g`',match:'a<mark class="match">1</mark>b<mark class="match">2</mark>c<mark class="match">3</mark>'},
+  {cat:'Flags',pat:'i',desc:'Case-insensitive matching',ex:'`/hello/i`',match:'<mark class="match">Hello</mark> <mark class="match">HELLO</mark>'},
+  {cat:'Flags',pat:'m',desc:'Multiline — ^ and $ match line start/end',ex:'`/^\\w+/mg`',match:'<mark class="match">line1</mark>\\n<mark class="match">line2</mark>'},
+  {cat:'Flags',pat:'s',desc:'Dotall — . matches newline too',ex:'`/a.b/s`',match:'<mark class="match">a\\nb</mark>'},
+  {cat:'Flags',pat:'u',desc:'Unicode mode — treat pattern as Unicode',ex:'`/\\u{1F600}/u`',match:'<mark class="match">😀</mark>'},
+  {cat:'Flags',pat:'d',desc:'Indices — report start/end indices of matches (JS ES2022)',ex:'`/a/d`',match:'indices in result'},
+  // Common patterns
+  {cat:'Common Patterns',pat:'Email',desc:'Basic email validation pattern',ex:'`/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/`',match:'user@example.com'},
+  {cat:'Common Patterns',pat:'URL',desc:'HTTP/HTTPS URL pattern',ex:'`/https?:\\/\\/[^\\s]+/`',match:'https://example.com'},
+  {cat:'Common Patterns',pat:'IPv4',desc:'IPv4 address pattern',ex:'`/\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b/`',match:'192.168.1.1'},
+  {cat:'Common Patterns',pat:'Hex color',desc:'6 or 3 digit hex color',ex:'`/#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})\\b/`',match:'#ff0000 #fff'},
+  {cat:'Common Patterns',pat:'Date (YYYY-MM-DD)',desc:'ISO date format',ex:'`/\\d{4}-\\d{2}-\\d{2}/`',match:'2024-07-02'},
+  {cat:'Common Patterns',pat:'Phone (US)',desc:'US phone number formats',ex:'`/\\(\\d{3}\\)\\s?\\d{3}-\\d{4}/`',match:'(555) 123-4567'},
+  {cat:'Common Patterns',pat:'Slug',desc:'URL slug (lowercase, dashes)',ex:'`/^[a-z0-9]+(?:-[a-z0-9]+)*$/`',match:'my-blog-post'},
+  {cat:'Common Patterns',pat:'Semver',desc:'Semantic version number',ex:'`/^\\d+\\.\\d+\\.\\d+$/`',match:'1.2.3'},
+];
+
+const CATS=['All',...new Set(ITEMS.map(i=>i.cat))];
+let activeCat='All', query='';
+let toastTimer;
+
+function showToast(){
+  const t=document.getElementById('toast');
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),1500);
+}
+
+function render(){
+  const visible=ITEMS.filter(i=>{
+    const mc=activeCat==='All'||i.cat===activeCat;
+    const mq=!query||i.pat.toLowerCase().includes(query)||i.desc.toLowerCase().includes(query)||i.cat.toLowerCase().includes(query);
+    return mc&&mq;
+  });
+  const el=document.getElementById('content');
+  if(!visible.length){el.innerHTML='<div class="no-results">No results</div>';return;}
+  const byCat={};
+  visible.forEach(i=>{(byCat[i.cat]=byCat[i.cat]||[]).push(i);});
+  el.innerHTML=Object.entries(byCat).map(([cat,items])=>`
+    <div class="section">
+      <div class="section-title">${cat}</div>
+      ${items.map(i=>`
+        <div class="item">
+          <div class="item-pat"><span class="pat" onclick="cp('${i.pat.replace(/'/g,"\\'")}')" title="Click to copy">${escHtml(i.pat)}</span></div>
+          <div class="item-desc">${i.desc}</div>
+          <div class="item-example">
+            <div class="ex-label">Example</div>
+            <div class="ex-code">${i.ex}</div>
+            <div class="ex-label" style="margin-top:4px">Match</div>
+            <div class="ex-code">${i.match}</div>
+          </div>
+        </div>`).join('')}
+    </div>`).join('');
+}
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function cp(text){
+  navigator.clipboard.writeText(text);
+  showToast();
+}
+document.getElementById('cats').innerHTML=CATS.map(c=>`
+  <button class="cat-btn${c==='All'?' active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
+function setCat(c){
+  activeCat=c;
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.toggle('active',b.textContent===c));
+  render();
+}
+document.getElementById('search').addEventListener('input',e=>{query=e.target.value.toLowerCase();render();});
+render();
+</script>
+</body>
+</html>

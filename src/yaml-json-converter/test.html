@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>YAML↔JSON Converter — Tests</title>
+  <style>
+    body { font-family: monospace; background: #0f1117; color: #e2e8f0; padding: 20px; }
+    .pass { color: #4ade80; } .fail { color: #f87171; }
+    #summary { font-size: 18px; font-weight: bold; margin-top: 16px; }
+  </style>
+</head>
+<body>
+<pre id="out"></pre>
+<div id="summary"></div>
+<script>
+// ── Copy logic from index.html ─────────────────────────────────────────────
+
+function parseYamlLines(lines, startIdx, parentIndent) {
+  const result = {};
+  const arr = [];
+  let isArr = null;
+  let i = startIdx;
+
+  while (i < lines.length) {
+    const raw = lines[i];
+    const stripped = raw.replace(/#.*$/, '').trimEnd();
+    if (stripped.trim() === '') { i++; continue; }
+    const indent = stripped.length - stripped.trimStart().length;
+    if (indent <= parentIndent) break;
+    const line = stripped.trimStart();
+
+    if (line.startsWith('- ') || line === '-') {
+      isArr = true;
+      const val = line.slice(2).trim();
+      if (val === '' || val === null) {
+        i++;
+        const sub = parseYamlLines(lines, i, indent);
+        arr.push(sub.value);
+        i = sub.nextIdx;
+      } else if (val.includes(': ')) {
+        const obj = {};
+        parseInlineKV(val, obj);
+        const sub = parseYamlLines(lines, i + 1, indent);
+        if (sub.nextIdx > i + 1) { Object.assign(obj, sub.value); i = sub.nextIdx; }
+        else i++;
+        arr.push(obj);
+      } else {
+        arr.push(parseScalar(val));
+        i++;
+      }
+    } else if (line.includes(': ') || line.endsWith(':')) {
+      isArr = false;
+      const colonIdx = line.indexOf(': ');
+      let key, val;
+      if (colonIdx === -1) { key = line.slice(0, -1); val = ''; }
+      else { key = line.slice(0, colonIdx); val = line.slice(colonIdx + 2).trim(); }
+      if (val === '' || val === '|' || val === '>') {
+        i++;
+        const sub = parseYamlLines(lines, i, indent);
+        result[key] = sub.value;
+        i = sub.nextIdx;
+      } else {
+        result[key] = parseScalar(val);
+        i++;
+      }
+    } else { i++; }
+  }
+  return { value: isArr === true ? arr : (Object.keys(result).length > 0 ? result : (isArr === null ? null : arr)), nextIdx: i };
+}
+
+function parseInlineKV(str, obj) {
+  const parts = str.split(', ');
+  for (const p of parts) {
+    const idx = p.indexOf(': ');
+    if (idx > -1) obj[p.slice(0, idx)] = parseScalar(p.slice(idx + 2));
+  }
+}
+
+function parseScalar(v) {
+  if (v === 'true' || v === 'yes') return true;
+  if (v === 'false' || v === 'no') return false;
+  if (v === 'null' || v === '~' || v === '') return null;
+  if (/^-?\d+$/.test(v)) return parseInt(v, 10);
+  if (/^-?\d*\.\d+$/.test(v)) return parseFloat(v);
+  if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) return v.slice(1, -1);
+  return v;
+}
+
+function parseYaml(text) {
+  const lines = text.split('\n');
+  return parseYamlLines(lines, 0, -1).value;
+}
+
+function toYaml(obj, indent, sortKeys) {
+  return serializeYaml(obj, 0, indent, sortKeys).trimEnd() + '\n';
+}
+
+function serializeYaml(val, depth, indent, sortKeys) {
+  const pad = ' '.repeat(depth * indent);
+  if (val === null || val === undefined) return 'null';
+  if (typeof val === 'boolean') return val ? 'true' : 'false';
+  if (typeof val === 'number') return String(val);
+  if (typeof val === 'string') return yamlStr(val);
+  if (Array.isArray(val)) {
+    if (val.length === 0) return '[]';
+    return val.map(item => {
+      if (item !== null && typeof item === 'object') {
+        const sub = serializeYaml(item, depth + 1, indent, sortKeys);
+        return `${pad}- ${sub.trimStart()}`;
+      }
+      return `${pad}- ${serializeYaml(item, depth + 1, indent, sortKeys)}`;
+    }).join('\n');
+  }
+  if (typeof val === 'object') {
+    const keys = Object.keys(val);
+    if (keys.length === 0) return '{}';
+    if (sortKeys) keys.sort();
+    return keys.map(k => {
+      const v = val[k];
+      if (v !== null && typeof v === 'object' && !Array.isArray(v) && Object.keys(v).length > 0) {
+        return `${pad}${yamlKey(k)}:\n${serializeYaml(v, depth + 1, indent, sortKeys)}`;
+      }
+      if (Array.isArray(v) && v.length > 0) {
+        return `${pad}${yamlKey(k)}:\n${serializeYaml(v, depth + 1, indent, sortKeys)}`;
+      }
+      return `${pad}${yamlKey(k)}: ${serializeYaml(v, depth, indent, sortKeys)}`;
+    }).join('\n');
+  }
+  return String(val);
+}
+
+function yamlKey(k) {
+  return /[:\[\]{},#|>&*!%@`'"?]|\s/.test(k) ? `"${k.replace(/"/g, '\\"')}"` : k;
+}
+
+function yamlStr(s) {
+  if (s === '') return '""';
+  if (s === 'true' || s === 'false' || s === 'null' || s === 'yes' || s === 'no' || s === '~') return `"${s}"`;
+  if (/^\d+$/.test(s) || /^\d*\.\d+$/.test(s)) return `"${s}"`;
+  if (s.includes('\n')) return `|\n  ${s.split('\n').join('\n  ')}`;
+  if (/[:#{}\[\],&*?|<>=!%@`]/.test(s) || s.startsWith(' ') || s.endsWith(' ') || s.startsWith('"') || s.startsWith("'")) {
+    return `"${s.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+  }
+  return s;
+}
+
+function detectFormat(text) {
+  const t = text.trim();
+  if (!t) return 'unknown';
+  if (t.startsWith('{') || t.startsWith('[')) return 'json';
+  try { JSON.parse(t); return 'json'; } catch(_) {}
+  return 'yaml';
+}
+
+// ── Test framework ─────────────────────────────────────────────────────────
+let passed = 0, failed = 0;
+const out = document.getElementById('out');
+
+function test(name, fn) {
+  try {
+    fn();
+    out.innerHTML += `<span class="pass">PASS</span> ${name}\n`;
+    passed++;
+  } catch(e) {
+    out.innerHTML += `<span class="fail">FAIL</span> ${name}: ${e.message}\n`;
+    failed++;
+  }
+}
+
+function eq(a, b, msg) {
+  if (JSON.stringify(a) !== JSON.stringify(b))
+    throw new Error(msg || `expected ${JSON.stringify(b)}, got ${JSON.stringify(a)}`);
+}
+
+function ok(v, msg) { if (!v) throw new Error(msg || 'assertion failed'); }
+
+// ── parseScalar tests ──────────────────────────────────────────────────────
+test('parseScalar: true', () => eq(parseScalar('true'), true));
+test('parseScalar: false', () => eq(parseScalar('false'), false));
+test('parseScalar: yes', () => eq(parseScalar('yes'), true));
+test('parseScalar: no', () => eq(parseScalar('no'), false));
+test('parseScalar: null', () => eq(parseScalar('null'), null));
+test('parseScalar: tilde', () => eq(parseScalar('~'), null));
+test('parseScalar: integer', () => eq(parseScalar('42'), 42));
+test('parseScalar: negative int', () => eq(parseScalar('-7'), -7));
+test('parseScalar: float', () => eq(parseScalar('3.14'), 3.14));
+test('parseScalar: negative float', () => eq(parseScalar('-0.5'), -0.5));
+test('parseScalar: quoted double', () => eq(parseScalar('"hello"'), 'hello'));
+test('parseScalar: quoted single', () => eq(parseScalar("'world'"), 'world'));
+test('parseScalar: plain string', () => eq(parseScalar('hello world'), 'hello world'));
+test('parseScalar: empty string', () => eq(parseScalar(''), null));
+
+// ── parseYaml: simple key-value ────────────────────────────────────────────
+test('parseYaml: simple string', () => {
+  const r = parseYaml('name: Alice');
+  eq(r.name, 'Alice');
+});
+
+test('parseYaml: integer value', () => {
+  const r = parseYaml('age: 30');
+  eq(r.age, 30);
+});
+
+test('parseYaml: boolean true', () => {
+  const r = parseYaml('active: true');
+  eq(r.active, true);
+});
+
+test('parseYaml: boolean false', () => {
+  const r = parseYaml('debug: false');
+  eq(r.debug, false);
+});
+
+test('parseYaml: null value', () => {
+  const r = parseYaml('token: null');
+  eq(r.token, null);
+});
+
+test('parseYaml: multiple keys', () => {
+  const r = parseYaml('a: 1\nb: 2\nc: 3');
+  eq(r.a, 1); eq(r.b, 2); eq(r.c, 3);
+});
+
+test('parseYaml: float value', () => {
+  const r = parseYaml('pi: 3.14');
+  eq(r.pi, 3.14);
+});
+
+test('parseYaml: quoted string value', () => {
+  const r = parseYaml('ver: "1.0.0"');
+  eq(r.ver, '1.0.0');
+});
+
+// ── parseYaml: nested objects ──────────────────────────────────────────────
+test('parseYaml: nested object', () => {
+  const r = parseYaml('db:\n  host: localhost\n  port: 5432');
+  eq(r.db.host, 'localhost');
+  eq(r.db.port, 5432);
+});
+
+test('parseYaml: deeply nested', () => {
+  const yaml = 'a:\n  b:\n    c: 42';
+  const r = parseYaml(yaml);
+  eq(r.a.b.c, 42);
+});
+
+test('parseYaml: sibling after nested', () => {
+  const yaml = 'db:\n  host: localhost\nport: 8080';
+  const r = parseYaml(yaml);
+  eq(r.db.host, 'localhost');
+  eq(r.port, 8080);
+});
+
+// ── parseYaml: arrays ──────────────────────────────────────────────────────
+test('parseYaml: simple array', () => {
+  const r = parseYaml('items:\n  - a\n  - b\n  - c');
+  eq(r.items, ['a', 'b', 'c']);
+});
+
+test('parseYaml: array of integers', () => {
+  const r = parseYaml('nums:\n  - 1\n  - 2\n  - 3');
+  eq(r.nums, [1, 2, 3]);
+});
+
+test('parseYaml: array of booleans', () => {
+  const r = parseYaml('flags:\n  - true\n  - false');
+  eq(r.flags, [true, false]);
+});
+
+test('parseYaml: top-level array', () => {
+  const r = parseYaml('- x\n- y\n- z');
+  eq(r, ['x', 'y', 'z']);
+});
+
+// ── parseYaml: comments ────────────────────────────────────────────────────
+test('parseYaml: inline comment stripped', () => {
+  const r = parseYaml('name: Alice # comment');
+  eq(r.name, 'Alice');
+});
+
+test('parseYaml: full-line comment ignored', () => {
+  const r = parseYaml('# comment\nname: Bob');
+  eq(r.name, 'Bob');
+});
+
+test('parseYaml: blank lines ignored', () => {
+  const r = parseYaml('a: 1\n\nb: 2');
+  eq(r.a, 1); eq(r.b, 2);
+});
+
+// ── parseYaml: complex sample ──────────────────────────────────────────────
+test('parseYaml: sample config', () => {
+  const yaml = `name: my-app\nversion: "1.0.0"\ndebug: false\nport: 8080\ndatabase:\n  host: localhost\n  port: 5432`;
+  const r = parseYaml(yaml);
+  eq(r.name, 'my-app');
+  eq(r.version, '1.0.0');
+  eq(r.debug, false);
+  eq(r.port, 8080);
+  eq(r.database.host, 'localhost');
+  eq(r.database.port, 5432);
+});
+
+// ── yamlStr tests ──────────────────────────────────────────────────────────
+test('yamlStr: plain string', () => eq(yamlStr('hello'), 'hello'));
+test('yamlStr: empty string', () => eq(yamlStr(''), '""'));
+test('yamlStr: true keyword quoted', () => eq(yamlStr('true'), '"true"'));
+test('yamlStr: false keyword quoted', () => eq(yamlStr('false'), '"false"'));
+test('yamlStr: null keyword quoted', () => eq(yamlStr('null'), '"null"'));
+test('yamlStr: yes keyword quoted', () => eq(yamlStr('yes'), '"yes"'));
+test('yamlStr: numeric string quoted', () => eq(yamlStr('42'), '"42"'));
+test('yamlStr: float string quoted', () => eq(yamlStr('3.14'), '"3.14"'));
+test('yamlStr: colon in string quoted', () => ok(yamlStr('a: b').startsWith('"')));
+test('yamlStr: hash in string quoted', () => ok(yamlStr('a#b').startsWith('"')));
+
+// ── yamlKey tests ──────────────────────────────────────────────────────────
+test('yamlKey: plain key', () => eq(yamlKey('name'), 'name'));
+test('yamlKey: key with colon quoted', () => eq(yamlKey('a:b'), '"a:b"'));
+test('yamlKey: key with space quoted', () => eq(yamlKey('a b'), '"a b"'));
+test('yamlKey: key with hash quoted', () => eq(yamlKey('a#b'), '"a#b"'));
+
+// ── toYaml (serializer) tests ──────────────────────────────────────────────
+test('toYaml: null value', () => ok(toYaml(null, 2, false).includes('null')));
+test('toYaml: true', () => ok(toYaml(true, 2, false).includes('true')));
+test('toYaml: false', () => ok(toYaml(false, 2, false).includes('false')));
+test('toYaml: number', () => ok(toYaml(42, 2, false).includes('42')));
+test('toYaml: string', () => ok(toYaml('hello', 2, false).includes('hello')));
+test('toYaml: empty object', () => ok(toYaml({}, 2, false).includes('{}')));
+test('toYaml: empty array', () => ok(toYaml([], 2, false).includes('[]')));
+
+test('toYaml: simple object', () => {
+  const y = toYaml({ name: 'Alice', age: 30 }, 2, false);
+  ok(y.includes('name: Alice'));
+  ok(y.includes('age: 30'));
+});
+
+test('toYaml: nested object', () => {
+  const y = toYaml({ db: { host: 'localhost', port: 5432 } }, 2, false);
+  ok(y.includes('db:'));
+  ok(y.includes('host: localhost'));
+});
+
+test('toYaml: array value', () => {
+  const y = toYaml({ items: ['a', 'b', 'c'] }, 2, false);
+  ok(y.includes('items:'));
+  ok(y.includes('- a'));
+  ok(y.includes('- b'));
+});
+
+test('toYaml: boolean values', () => {
+  const y = toYaml({ active: true, debug: false }, 2, false);
+  ok(y.includes('active: true'));
+  ok(y.includes('debug: false'));
+});
+
+test('toYaml: null value in object', () => {
+  const y = toYaml({ token: null }, 2, false);
+  ok(y.includes('token: null'));
+});
+
+test('toYaml: sort keys', () => {
+  const y = toYaml({ z: 1, a: 2, m: 3 }, 2, true);
+  const ai = y.indexOf('a:');
+  const mi = y.indexOf('m:');
+  const zi = y.indexOf('z:');
+  ok(ai < mi && mi < zi, 'keys should be sorted a < m < z');
+});
+
+test('toYaml: string that looks like int gets quoted', () => {
+  const y = toYaml({ v: '42' }, 2, false);
+  ok(y.includes('"42"'));
+});
+
+test('toYaml: string that looks like bool gets quoted', () => {
+  const y = toYaml({ v: 'true' }, 2, false);
+  ok(y.includes('"true"'));
+});
+
+// ── JSON → YAML → JSON round-trip ─────────────────────────────────────────
+test('round-trip: simple object', () => {
+  const obj = { name: 'Alice', age: 30, active: true };
+  const yaml = toYaml(obj, 2, false);
+  const back = parseYaml(yaml);
+  eq(back.name, 'Alice');
+  eq(back.age, 30);
+  eq(back.active, true);
+});
+
+test('round-trip: nested object', () => {
+  const obj = { db: { host: 'localhost', port: 5432 } };
+  const yaml = toYaml(obj, 2, false);
+  const back = parseYaml(yaml);
+  eq(back.db.host, 'localhost');
+  eq(back.db.port, 5432);
+});
+
+test('round-trip: array', () => {
+  const obj = { tags: ['js', 'yaml', 'json'] };
+  const yaml = toYaml(obj, 2, false);
+  const back = parseYaml(yaml);
+  eq(back.tags, ['js', 'yaml', 'json']);
+});
+
+test('round-trip: boolean values', () => {
+  const obj = { a: true, b: false };
+  const yaml = toYaml(obj, 2, false);
+  const back = parseYaml(yaml);
+  eq(back.a, true);
+  eq(back.b, false);
+});
+
+test('round-trip: null value', () => {
+  const obj = { token: null };
+  const yaml = toYaml(obj, 2, false);
+  const back = parseYaml(yaml);
+  eq(back.token, null);
+});
+
+test('round-trip: integer', () => {
+  const obj = { count: 99 };
+  const yaml = toYaml(obj, 2, false);
+  const back = parseYaml(yaml);
+  eq(back.count, 99);
+});
+
+test('round-trip: float', () => {
+  const obj = { pi: 3.14 };
+  const yaml = toYaml(obj, 2, false);
+  const back = parseYaml(yaml);
+  eq(back.pi, 3.14);
+});
+
+// ── detectFormat tests ─────────────────────────────────────────────────────
+test('detectFormat: JSON object', () => eq(detectFormat('{"a":1}'), 'json'));
+test('detectFormat: JSON array', () => eq(detectFormat('[1,2,3]'), 'json'));
+test('detectFormat: YAML key-value', () => eq(detectFormat('name: Alice'), 'yaml'));
+test('detectFormat: empty string', () => eq(detectFormat(''), 'unknown'));
+test('detectFormat: whitespace only', () => eq(detectFormat('   '), 'unknown'));
+test('detectFormat: quoted JSON string value', () => eq(detectFormat('{"x": "hello"}'), 'json'));
+
+// ── JSON.parse round-trip for JSON→YAML conversion ─────────────────────────
+test('JSON→YAML: parse JSON then serialize', () => {
+  const json = '{"name":"Bob","score":100,"active":false}';
+  const obj = JSON.parse(json);
+  const yaml = toYaml(obj, 2, false);
+  ok(yaml.includes('name: Bob'));
+  ok(yaml.includes('score: 100'));
+  ok(yaml.includes('active: false'));
+});
+
+test('JSON→YAML: nested array of objects', () => {
+  const json = '{"users":[{"id":1,"name":"A"},{"id":2,"name":"B"}]}';
+  const obj = JSON.parse(json);
+  const yaml = toYaml(obj, 2, false);
+  ok(yaml.includes('users:'));
+  ok(yaml.includes('- '));
+  ok(yaml.includes('name: A') || yaml.includes('name: B'));
+});
+
+// ── HTML structure checks ──────────────────────────────────────────────────
+test('HTML: title present', () => ok(document.title.includes('YAML')));
+test('HTML: left textarea exists', () => ok(document.getElementById('left-ta') !== null));
+test('HTML: right textarea exists', () => ok(document.getElementById('right-ta') !== null));
+test('HTML: error area exists', () => ok(document.getElementById('error-area') !== null));
+test('HTML: json-indent select exists', () => ok(document.getElementById('json-indent') !== null));
+test('HTML: opt-sort checkbox exists', () => ok(document.getElementById('opt-sort') !== null));
+test('HTML: ad slot present', () => ok(document.querySelector('[data-ea-publisher="devnestio"]') !== null));
+test('HTML: privacy banner present', () => ok(document.getElementById('privacy-banner') !== null));
+test('HTML: back link present', () => ok(document.querySelector('a[href="https://devnestio.pages.dev"]') !== null));
+
+// ── Sample config round-trip ───────────────────────────────────────────────
+const SAMPLE_YAML = `name: my-app\nversion: "1.0.0"\ndebug: false\nport: 8080\n\ndatabase:\n  host: localhost\n  port: 5432\n  ssl: true\n  pool:\n    min: 2\n    max: 10\n\nfeatures:\n  - authentication\n  - caching\n  - logging\n`;
+
+test('Sample: parses name field', () => {
+  const obj = parseYaml(SAMPLE_YAML);
+  eq(obj.name, 'my-app');
+});
+test('Sample: parses port as integer', () => {
+  const obj = parseYaml(SAMPLE_YAML);
+  eq(obj.port, 8080);
+});
+test('Sample: parses debug as boolean false', () => {
+  const obj = parseYaml(SAMPLE_YAML);
+  eq(obj.debug, false);
+});
+test('Sample: parses database.host', () => {
+  const obj = parseYaml(SAMPLE_YAML);
+  eq(obj.database.host, 'localhost');
+});
+test('Sample: parses database.port', () => {
+  const obj = parseYaml(SAMPLE_YAML);
+  eq(obj.database.port, 5432);
+});
+test('Sample: parses features array', () => {
+  const obj = parseYaml(SAMPLE_YAML);
+  ok(Array.isArray(obj.features));
+  eq(obj.features[0], 'authentication');
+});
+test('Sample: YAML→JSON serializes to valid JSON', () => {
+  const obj = parseYaml(SAMPLE_YAML);
+  const json = JSON.stringify(obj, null, 2);
+  JSON.parse(json);
+});
+test('Sample: JSON→YAML produces name key', () => {
+  const obj = parseYaml(SAMPLE_YAML);
+  const yaml = toYaml(obj, 2, false);
+  ok(yaml.includes('name: my-app'));
+});
+
+// ── serializeYaml indentation ──────────────────────────────────────────────
+test('serializeYaml: 4-space indent', () => {
+  const y = toYaml({ db: { host: 'localhost' } }, 4, false);
+  ok(y.includes('    host:'));
+});
+
+test('serializeYaml: 2-space indent', () => {
+  const y = toYaml({ db: { host: 'localhost' } }, 2, false);
+  ok(y.includes('  host:'));
+});
+
+test('serializeYaml: ends with newline', () => {
+  const y = toYaml({ a: 1 }, 2, false);
+  ok(y.endsWith('\n'));
+});
+
+// ── Summary ────────────────────────────────────────────────────────────────
+const total = passed + failed;
+document.getElementById('summary').innerHTML =
+  `<span class="${failed ? 'fail' : 'pass'}">${passed}/${total} tests passed${failed ? ` (${failed} FAILED)` : ' ✓'}</span>`;
+</script>
+</body>
+</html>

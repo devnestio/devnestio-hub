@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JSON to TypeScript Interface Generator | DevNestio</title>
+  <meta name="description" content="Convert JSON objects to TypeScript interfaces instantly. Auto-detects types, handles nested objects and arrays, optional properties. Browser-only." />
+  <meta property="og:title" content="JSON to TypeScript Interface Generator | DevNestio" />
+  <meta property="og:description" content="Paste JSON, get TypeScript interfaces. Handles nested objects, arrays, union types. Browser-only, no server." />
+  <meta property="og:url" content="https://devnestio.pages.dev/json-to-typescript/" />
+  <meta name="twitter:card" content="summary" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    #privacy-banner { background: #1e293b; border-bottom: 1px solid #334155; padding: 8px 16px; font-size: 12px; color: #94a3b8; text-align: center; }
+    header { background: #1e293b; border-bottom: 1px solid #334155; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+    header a { color: #64748b; font-size: 13px; text-decoration: none; margin-left: auto; }
+    header a:hover { color: #94a3b8; }
+    .badge { background: #2563eb; color: #fff; font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+    main { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+    .options-bar { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 10px 14px; }
+    .opt { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+    .opt input[type="checkbox"] { width: 15px; height: 15px; cursor: pointer; accent-color: #2563eb; }
+    input[type="text"].opt-input { padding: 4px 8px; background: #0f1117; border: 1px solid #334155; border-radius: 5px; color: #e2e8f0; font-size: 12px; width: 120px; outline: none; }
+    input[type="text"].opt-input:focus { border-color: #2563eb; }
+    .editor-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 700px) { .editor-row { grid-template-columns: 1fr; } }
+    .panel { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 16px; }
+    .panel-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .panel-hdr h2 { font-size: 13px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em; }
+    textarea { width: 100%; padding: 10px 12px; background: #0f1117; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 13px; font-family: 'JetBrains Mono', monospace; outline: none; resize: vertical; min-height: 320px; }
+    textarea:focus { border-color: #2563eb; }
+    .output-box { background: #0f1117; border: 1px solid #334155; border-radius: 6px; padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.7; white-space: pre; overflow: auto; min-height: 320px; }
+    .btn { padding: 7px 16px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: background 0.15s; }
+    .btn-primary { background: #2563eb; color: #fff; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-secondary { background: #334155; color: #e2e8f0; }
+    .btn-secondary:hover { background: #475569; }
+    .btn-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+    .status { margin-top: 8px; padding: 7px 12px; border-radius: 6px; font-size: 12px; }
+    .status.err { background: #450a0a; color: #fca5a5; }
+    .status.ok { background: #14532d; color: #86efac; }
+    /* TS syntax colors */
+    .ts-kw { color: #c084fc; }
+    .ts-iface { color: #60a5fa; font-weight: 700; }
+    .ts-key { color: #e2e8f0; }
+    .ts-type { color: #4ade80; }
+    .ts-optional { color: #94a3b8; }
+    .ts-brace { color: #f1f5f9; }
+    .presets { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .preset { padding: 4px 10px; border-radius: 5px; font-size: 11px; cursor: pointer; background: #1e3a5f; color: #93c5fd; border: 1px solid #1d4ed8; }
+    .preset:hover { background: #1d4ed8; color: #fff; }
+    #ad-slot { margin: 20px auto; text-align: center; }
+  </style>
+</head>
+<body>
+
+<div id="privacy-banner">🔒 All processing happens in your browser. No data is sent to any server.</div>
+
+<header>
+  <span class="badge">FREE</span>
+  <h1>JSON → TypeScript Interface</h1>
+  <a href="https://devnestio.pages.dev">← All Tools</a>
+</header>
+
+<main>
+  <div class="options-bar">
+    <div class="opt">
+      <input type="checkbox" id="opt-optional" />
+      <label for="opt-optional">Optional properties (<code>?</code>)</label>
+    </div>
+    <div class="opt">
+      <input type="checkbox" id="opt-readonly" />
+      <label for="opt-readonly">Readonly properties</label>
+    </div>
+    <div class="opt">
+      <input type="checkbox" id="opt-export" checked />
+      <label for="opt-export">Export interfaces</label>
+    </div>
+    <div class="opt">
+      <input type="checkbox" id="opt-semicolons" checked />
+      <label for="opt-semicolons">Semicolons</label>
+    </div>
+    <div class="opt">
+      <label for="opt-root-name">Root name:</label>
+      <input type="text" id="opt-root-name" class="opt-input" value="Root" placeholder="Root" />
+    </div>
+  </div>
+
+  <div class="presets">
+    <span class="preset" onclick="loadExample('user')">User</span>
+    <span class="preset" onclick="loadExample('api')">API Response</span>
+    <span class="preset" onclick="loadExample('config')">Config</span>
+    <span class="preset" onclick="loadExample('array')">Array</span>
+    <span class="preset" onclick="loadExample('nested')">Deeply Nested</span>
+  </div>
+
+  <div class="editor-row">
+    <div class="panel">
+      <div class="panel-hdr">
+        <h2>JSON Input</h2>
+        <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px" onclick="formatInput()">Format JSON</button>
+      </div>
+      <textarea id="json-input" spellcheck="false" placeholder='Paste your JSON here…
+{
+  "id": 1,
+  "name": "Alice",
+  "email": "alice@example.com"
+}'></textarea>
+      <div id="json-status" class="status" style="display:none"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="convert()">Convert →</button>
+        <button class="btn btn-secondary" onclick="clearAll()">Clear</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-hdr">
+        <h2>TypeScript Output</h2>
+        <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px" onclick="copyOutput()">Copy</button>
+      </div>
+      <div class="output-box" id="ts-output"><span style="color:#475569">Output will appear here…</span></div>
+      <div id="ts-status" class="status" style="display:none"></div>
+    </div>
+  </div>
+
+  <div id="ad-slot" data-ea-publisher="devnestio" data-ea-type="image"></div>
+</main>
+
+<script>
+const EXAMPLES = {
+  user: `{
+  "id": 42,
+  "name": "Alice",
+  "email": "alice@example.com",
+  "age": 30,
+  "active": true,
+  "score": 98.6,
+  "tags": ["admin", "editor"],
+  "address": null
+}`,
+  api: `{
+  "status": "success",
+  "code": 200,
+  "data": {
+    "users": [
+      {
+        "id": 1,
+        "username": "alice",
+        "roles": ["admin"]
+      }
+    ],
+    "total": 1,
+    "page": 1
+  },
+  "meta": {
+    "requestId": "abc-123",
+    "duration": 45.3
+  }
+}`,
+  config: `{
+  "host": "localhost",
+  "port": 3000,
+  "debug": false,
+  "database": {
+    "url": "postgres://localhost/mydb",
+    "poolSize": 10,
+    "ssl": true
+  },
+  "features": {
+    "analytics": true,
+    "darkMode": false
+  }
+}`,
+  array: `[
+  {
+    "id": 1,
+    "title": "First Post",
+    "author": "Alice",
+    "published": true,
+    "views": 1234
+  }
+]`,
+  nested: `{
+  "company": {
+    "name": "Acme Corp",
+    "departments": [
+      {
+        "id": 1,
+        "name": "Engineering",
+        "head": {
+          "name": "Bob",
+          "level": 5
+        },
+        "members": [
+          { "name": "Alice", "level": 3 }
+        ]
+      }
+    ]
+  }
+}`
+};
+
+function loadExample(key) {
+  document.getElementById('json-input').value = EXAMPLES[key];
+  convert();
+}
+
+function getOpts() {
+  return {
+    optional: document.getElementById('opt-optional').checked,
+    readonly: document.getElementById('opt-readonly').checked,
+    exportKw: document.getElementById('opt-export').checked,
+    semi: document.getElementById('opt-semicolons').checked,
+    rootName: (document.getElementById('opt-root-name').value.trim() || 'Root').replace(/[^a-zA-Z0-9_]/g, '')
+  };
+}
+
+function inferType(value, key, opts, interfaces, depth) {
+  if (value === null) return 'null';
+  const t = typeof value;
+  if (t === 'string') return 'string';
+  if (t === 'boolean') return 'boolean';
+  if (t === 'number') return Number.isInteger(value) ? 'number' : 'number';
+  if (Array.isArray(value)) {
+    if (value.length === 0) return 'unknown[]';
+    const itemType = inferType(value[0], key, opts, interfaces, depth);
+    return itemType + '[]';
+  }
+  if (t === 'object') {
+    const ifaceName = toInterfaceName(key, depth);
+    buildInterface(ifaceName, value, opts, interfaces, depth + 1);
+    return ifaceName;
+  }
+  return 'unknown';
+}
+
+function toInterfaceName(key, depth) {
+  if (!key || key === '__root__') return 'Root';
+  // Remove trailing 's' for array item type names (users -> User)
+  const base = key.charAt(0).toUpperCase() + key.slice(1);
+  return base.replace(/s$/, '');
+}
+
+function buildInterface(name, obj, opts, interfaces, depth) {
+  if (interfaces[name]) {
+    // Merge if already exists (for array items)
+    return;
+  }
+  const lines = [];
+  for (const [k, v] of Object.entries(obj)) {
+    const tsType = inferType(v, k, opts, interfaces, depth);
+    const optMark = opts.optional ? '?' : '';
+    const rdMark = opts.readonly ? 'readonly ' : '';
+    const semi = opts.semi ? ';' : '';
+    lines.push(`  ${rdMark}${k}${optMark}: ${tsType}${semi}`);
+  }
+  interfaces[name] = lines;
+}
+
+function convert() {
+  const raw = document.getElementById('json-input').value.trim();
+  const opts = getOpts();
+  if (!raw) return;
+
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch(e) {
+    showStatus('json-status', 'err', '❌ Invalid JSON: ' + e.message);
+    return;
+  }
+  hideStatus('json-status');
+
+  const interfaces = {};
+  const rootName = opts.rootName;
+
+  if (Array.isArray(parsed)) {
+    if (parsed.length === 0) {
+      setOutput('type ' + rootName + ' = unknown[]');
+      return;
+    }
+    const itemName = rootName.replace(/s$/, '') || rootName;
+    if (typeof parsed[0] === 'object' && parsed[0] !== null && !Array.isArray(parsed[0])) {
+      buildInterface(itemName, parsed[0], opts, interfaces, 1);
+    }
+    // Root is an array type alias
+    const exportKw = opts.exportKw ? 'export ' : '';
+    const semi = opts.semi ? ';' : '';
+    interfaces['__alias__'] = [`${exportKw}type ${rootName} = ${itemName}[]${semi}`];
+  } else if (typeof parsed === 'object' && parsed !== null) {
+    buildInterface(rootName, parsed, opts, interfaces, 1);
+  } else {
+    const exportKw = opts.exportKw ? 'export ' : '';
+    const semi = opts.semi ? ';' : '';
+    setOutput(`${exportKw}type ${rootName} = ${typeof parsed}${semi}`);
+    return;
+  }
+
+  // Render all interfaces (root last? no, nested first makes more sense)
+  const exportKw = opts.exportKw ? 'export ' : '';
+  const parts = [];
+
+  for (const [name, lines] of Object.entries(interfaces)) {
+    if (name === '__alias__') {
+      parts.unshift(lines.join('\n'));
+      continue;
+    }
+    if (name === rootName) continue; // render root last
+    parts.push(`${exportKw}interface ${name} {\n${lines.join('\n')}\n}`);
+  }
+
+  // Render root
+  if (interfaces[rootName]) {
+    parts.push(`${exportKw}interface ${rootName} {\n${interfaces[rootName].join('\n')}\n}`);
+  }
+
+  const text = parts.join('\n\n');
+  setOutput(text);
+
+  const count = Object.keys(interfaces).filter(k => k !== '__alias__').length;
+  showStatus('ts-status', 'ok', `✅ Generated ${count} interface${count !== 1 ? 's' : ''}`);
+}
+
+function setOutput(text) {
+  const box = document.getElementById('ts-output');
+  box.dataset.raw = text;
+  box.innerHTML = syntaxHighlight(text);
+}
+
+function syntaxHighlight(text) {
+  return text
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/\b(export|interface|type|readonly)\b/g, '<span class="ts-kw">$1</span>')
+    .replace(/\b(string|number|boolean|null|unknown|void|any)\b(\[\])?/g, (m, t, arr) =>
+      `<span class="ts-type">${t}</span>${arr || ''}`)
+    .replace(/^(\s+)(readonly\s+)?([a-zA-Z_$][a-zA-Z0-9_$]*\??)/gm, (m, sp, rd, key) =>
+      `${sp}${rd || ''}<span class="ts-key">${key}</span>`)
+    .replace(/\b([A-Z][a-zA-Z0-9]*)((?:\[\])?:)/g, (m, name, rest) =>
+      `<span class="ts-iface">${name}</span>${rest}`)
+    .replace(/^(export\s+)?(interface|type)\s+([A-Z][a-zA-Z0-9]*)/gm, (m, exp, kw, name) =>
+      `${exp ? '<span class="ts-kw">export</span> ' : ''}<span class="ts-kw">${kw}</span> <span class="ts-iface">${name}</span>`);
+}
+
+function formatInput() {
+  try {
+    const parsed = JSON.parse(document.getElementById('json-input').value);
+    document.getElementById('json-input').value = JSON.stringify(parsed, null, 2);
+    hideStatus('json-status');
+  } catch(e) {
+    showStatus('json-status', 'err', '❌ ' + e.message);
+  }
+}
+
+function copyOutput() {
+  const raw = document.getElementById('ts-output').dataset.raw || '';
+  navigator.clipboard.writeText(raw);
+}
+
+function clearAll() {
+  document.getElementById('json-input').value = '';
+  document.getElementById('ts-output').innerHTML = '<span style="color:#475569">Output will appear here…</span>';
+  document.getElementById('ts-output').dataset.raw = '';
+  hideStatus('json-status');
+  hideStatus('ts-status');
+}
+
+function showStatus(id, type, msg) {
+  const el = document.getElementById(id);
+  el.className = 'status ' + type;
+  el.textContent = msg;
+  el.style.display = '';
+}
+
+function hideStatus(id) {
+  document.getElementById(id).style.display = 'none';
+}
+
+// Auto-convert on input change
+document.getElementById('json-input').addEventListener('input', () => {
+  clearTimeout(document.getElementById('json-input')._timer);
+  document.getElementById('json-input')._timer = setTimeout(convert, 400);
+});
+['opt-optional','opt-readonly','opt-export','opt-semicolons'].forEach(id => {
+  document.getElementById(id).addEventListener('change', convert);
+});
+document.getElementById('opt-root-name').addEventListener('input', convert);
+</script>
+</body>
+</html>

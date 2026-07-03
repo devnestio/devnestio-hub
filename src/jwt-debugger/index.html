@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JWT Debugger — devnestio</title>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#0f1117;color:#e2e8f0;min-height:100vh}
+header{padding:24px 32px;border-bottom:1px solid #1e2535}
+h1{font-size:1.5rem;font-weight:700;color:#f8fafc}
+h1 span{color:#f472b6}
+.desc{color:#94a3b8;margin-top:4px;font-size:.9rem}
+.main{max-width:900px;margin:0 auto;padding:24px 32px;display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:700px){.main{grid-template-columns:1fr}}
+.panel{display:flex;flex-direction:column;gap:12px}
+.card{background:#141924;border:1px solid #1e2535;border-radius:10px;overflow:hidden}
+.card-title{padding:10px 16px;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid #1e2535}
+.card-body{padding:14px 16px}
+textarea{width:100%;background:#0f1117;border:none;color:#e2e8f0;resize:vertical;padding:12px;font-family:'Courier New',monospace;font-size:.8rem;line-height:1.6;outline:none;min-height:120px}
+textarea::placeholder{color:#334155}
+.jwt-display{padding:12px 16px;font-family:monospace;font-size:.82rem;line-height:1.8;word-break:break-all}
+.jwt-header{color:#f472b6}
+.jwt-payload{color:#60a5fa}
+.jwt-sig{color:#34d399}
+.section-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:#64748b;margin-bottom:6px;font-weight:700}
+pre{background:#0f1117;border:1px solid #1e2535;border-radius:4px;padding:10px 12px;font-size:.8rem;line-height:1.6;overflow:auto;font-family:'Courier New',monospace;white-space:pre-wrap;word-break:break-word}
+.key{color:#7dd3fc}
+.str{color:#4ade80}
+.num{color:#fb923c}
+.bool{color:#c4b5fd}
+.null{color:#94a3b8}
+.claim-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.claim-tag{font-size:.72rem;padding:2px 8px;border-radius:99px;border:1px solid}
+.tag-exp{background:#422006;border-color:#c2410c;color:#fed7aa}
+.tag-ok{background:#14532d;border-color:#16a34a;color:#4ade80}
+.tag-iat{background:#1e2535;border-color:#334155;color:#94a3b8}
+.error{color:#f87171;font-size:.82rem;padding:12px 16px}
+.status{padding:8px 16px;font-size:.78rem;border-top:1px solid #1e2535}
+.status-ok{color:#4ade80}
+.status-err{color:#f87171}
+.status-warn{color:#fb923c}
+.sample-btn{font-size:.75rem;color:#60a5fa;background:none;border:1px solid #334155;border-radius:4px;padding:3px 8px;cursor:pointer;margin-top:6px}
+.sample-btn:hover{border-color:#60a5fa}
+</style>
+</head>
+<body>
+<header>
+  <h1>JWT <span>Debugger</span></h1>
+  <p class="desc">Decode and inspect JSON Web Tokens — header, payload, claims, and expiry. No validation — browser only.</p>
+</header>
+<div class="main">
+  <div class="panel">
+    <div class="card">
+      <div class="card-title" style="color:#f472b6">Encoded Token</div>
+      <textarea id="jwtInput" placeholder="Paste a JWT here&#10;&#10;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ..." oninput="decode()"></textarea>
+      <div style="padding:8px 16px 12px"><button class="sample-btn" onclick="loadSample()">Load sample token</button></div>
+    </div>
+    <div class="card" id="colorCard">
+      <div class="card-title">Token Structure</div>
+      <div class="jwt-display" id="jwtDisplay">Paste a token to inspect it.</div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="card">
+      <div class="card-title" style="color:#f472b6">Header</div>
+      <div class="card-body">
+        <pre id="headerOut"><span style="color:#334155">—</span></pre>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:#60a5fa">Payload</div>
+      <div class="card-body">
+        <pre id="payloadOut"><span style="color:#334155">—</span></pre>
+        <div class="claim-tags" id="claimTags"></div>
+      </div>
+      <div class="status" id="statusBar"></div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:#34d399">Signature</div>
+      <div class="card-body" style="font-size:.8rem;color:#94a3b8;line-height:1.5">
+        <div id="sigInfo">—</div>
+        <div style="margin-top:8px;font-size:.75rem;color:#64748b">⚠ Signature verification requires the secret key and cannot be done client-side securely. This tool only decodes — it does not verify.</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+function b64url(str) {
+  str = str.replace(/-/g, '+').replace(/_/g, '/');
+  while (str.length % 4) str += '=';
+  try { return JSON.parse(atob(str)); } catch { return null; }
+}
+
+function colorJson(obj) {
+  const s = JSON.stringify(obj, null, 2);
+  return s.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function(m) {
+    let cls = 'num';
+    if (/^"/.test(m)) cls = /:$/.test(m) ? 'key' : 'str';
+    else if (/true|false/.test(m)) cls = 'bool';
+    else if (/null/.test(m)) cls = 'null';
+    return `<span class="${cls}">${m.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>`;
+  });
+}
+
+function fmtTime(ts) {
+  const d = new Date(ts * 1000);
+  return d.toISOString() + ' (' + timeAgo(ts * 1000) + ')';
+}
+
+function timeAgo(ms) {
+  const diff = Date.now() - ms;
+  const abs = Math.abs(diff);
+  const future = diff < 0;
+  const s = Math.floor(abs / 1000);
+  if (s < 60) return (future ? 'in ' : '') + s + 's' + (future ? '' : ' ago');
+  const m = Math.floor(s / 60);
+  if (m < 60) return (future ? 'in ' : '') + m + 'm' + (future ? '' : ' ago');
+  const h = Math.floor(m / 60);
+  if (h < 24) return (future ? 'in ' : '') + h + 'h' + (future ? '' : ' ago');
+  const day = Math.floor(h / 24);
+  return (future ? 'in ' : '') + day + 'd' + (future ? '' : ' ago');
+}
+
+function decode() {
+  const raw = document.getElementById('jwtInput').value.trim();
+  if (!raw) {
+    document.getElementById('jwtDisplay').textContent = 'Paste a token to inspect it.';
+    document.getElementById('headerOut').innerHTML = '<span style="color:#334155">—</span>';
+    document.getElementById('payloadOut').innerHTML = '<span style="color:#334155">—</span>';
+    document.getElementById('claimTags').innerHTML = '';
+    document.getElementById('statusBar').textContent = '';
+    document.getElementById('sigInfo').textContent = '—';
+    return;
+  }
+
+  const parts = raw.split('.');
+  if (parts.length !== 3) {
+    document.getElementById('jwtDisplay').innerHTML = '<span style="color:#f87171">Invalid JWT — expected 3 parts separated by dots, got ' + parts.length + '</span>';
+    document.getElementById('headerOut').innerHTML = '<span style="color:#f87171">—</span>';
+    document.getElementById('payloadOut').innerHTML = '<span style="color:#f87171">—</span>';
+    document.getElementById('statusBar').textContent = '✗ Not a valid JWT structure';
+    document.getElementById('statusBar').className = 'status status-err';
+    return;
+  }
+
+  const [h, p, s] = parts;
+  const header = b64url(h);
+  const payload = b64url(p);
+
+  // Colored display
+  document.getElementById('jwtDisplay').innerHTML =
+    `<span class="jwt-header">${h}</span>` +
+    `<span style="color:#64748b">.</span>` +
+    `<span class="jwt-payload">${p}</span>` +
+    `<span style="color:#64748b">.</span>` +
+    `<span class="jwt-sig">${s}</span>`;
+
+  if (!header) { document.getElementById('headerOut').innerHTML = '<span style="color:#f87171">Could not decode header</span>'; return; }
+  if (!payload) { document.getElementById('payloadOut').innerHTML = '<span style="color:#f87171">Could not decode payload</span>'; return; }
+
+  document.getElementById('headerOut').innerHTML = colorJson(header);
+  document.getElementById('payloadOut').innerHTML = colorJson(payload);
+
+  // Claims analysis
+  const tags = [];
+  const now = Math.floor(Date.now() / 1000);
+  if (payload.exp) {
+    const expired = now > payload.exp;
+    tags.push(`<span class="claim-tag ${expired ? 'tag-exp' : 'tag-ok'}">${expired ? '⚠ Expired' : '✓ Valid'} exp: ${fmtTime(payload.exp)}</span>`);
+  }
+  if (payload.iat) tags.push(`<span class="claim-tag tag-iat">iat: ${fmtTime(payload.iat)}</span>`);
+  if (payload.nbf) {
+    const notYet = now < payload.nbf;
+    tags.push(`<span class="claim-tag ${notYet ? 'tag-exp' : 'tag-ok'}">nbf: ${fmtTime(payload.nbf)}</span>`);
+  }
+  document.getElementById('claimTags').innerHTML = tags.join('');
+
+  // Status
+  const statusEl = document.getElementById('statusBar');
+  if (payload.exp && now > payload.exp) {
+    statusEl.textContent = '⚠ Token is EXPIRED (exp: ' + new Date(payload.exp * 1000).toISOString() + ')';
+    statusEl.className = 'status status-warn';
+  } else {
+    statusEl.textContent = '✓ Token decoded successfully (signature NOT verified)';
+    statusEl.className = 'status status-ok';
+  }
+
+  document.getElementById('sigInfo').innerHTML =
+    `Algorithm: <strong style="color:#e2e8f0">${header.alg || 'unknown'}</strong><br>` +
+    `Raw: <span style="font-family:monospace;color:#34d399;font-size:.76rem;word-break:break-all">${s}</span>`;
+}
+
+function loadSample() {
+  // Sample JWT with exp in the past for demonstration
+  document.getElementById('jwtInput').value =
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
+    'eyJzdWIiOiJ1c2VyXzEyMyIsIm5hbWUiOiJBbGljZSBTbWl0aCIsImVtYWlsIjoiYWxpY2VAZXhhbXBsZS5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3MjAwMDAwMDAsImV4cCI6OTk5OTk5OTk5OX0.' +
+    'SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
+  decode();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Markdown Cheat Sheet — devnestio</title>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#0f1117;color:#e2e8f0;min-height:100vh}
+header{padding:24px 32px;border-bottom:1px solid #1e2535}
+h1{font-size:1.5rem;font-weight:700;color:#f8fafc}
+h1 span{color:#60a5fa}
+.desc{color:#94a3b8;margin-top:4px;font-size:.9rem}
+.controls{display:flex;gap:12px;flex-wrap:wrap;padding:16px 32px;border-bottom:1px solid #1e2535;align-items:center}
+.search-wrap{position:relative;flex:1;min-width:200px}
+.search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#64748b}
+#search{width:100%;background:#1e2535;border:1px solid #334155;color:#e2e8f0;padding:8px 12px 8px 34px;border-radius:6px;font-size:.9rem;outline:none}
+#search:focus{border-color:#60a5fa}
+.cat-filters{display:flex;gap:8px;flex-wrap:wrap}
+.cat-btn{padding:5px 12px;border-radius:99px;border:1px solid #334155;background:#1e2535;color:#94a3b8;font-size:.8rem;cursor:pointer}
+.cat-btn.active,.cat-btn:hover{background:#2563eb;border-color:#2563eb;color:#fff}
+.content{max-width:1100px;margin:0 auto;padding:24px 32px}
+.section{margin-bottom:32px}
+.section-title{font-size:1rem;font-weight:700;color:#60a5fa;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #1e2535}
+.item{display:grid;grid-template-columns:1fr 1fr auto;gap:0;border:1px solid #1e2535;border-radius:8px;overflow:hidden;margin-bottom:10px;transition:border-color .15s}
+.item:hover{border-color:#334155}
+.item-syntax,.item-rendered{padding:12px 16px;font-size:.85rem}
+.item-syntax{background:#141924;border-right:1px solid #1e2535}
+.item-syntax pre{font-family:monospace;color:#7dd3fc;white-space:pre-wrap;word-break:break-all}
+.item-label{font-size:.75rem;color:#64748b;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+.item-rendered{background:#0f1117}
+.item-rendered .render{line-height:1.6}
+.item-rendered .render h1{font-size:1.5rem;color:#f8fafc;margin-bottom:4px}
+.item-rendered .render h2{font-size:1.3rem;color:#f8fafc;margin-bottom:4px}
+.item-rendered .render h3{font-size:1.1rem;color:#f8fafc;margin-bottom:4px}
+.item-rendered .render strong{color:#f8fafc;font-weight:700}
+.item-rendered .render em{color:#c4b5fd;font-style:italic}
+.item-rendered .render del{color:#64748b}
+.item-rendered .render code{background:#1e2535;padding:1px 5px;border-radius:3px;font-family:monospace;font-size:.85em;color:#7dd3fc}
+.item-rendered .render pre{background:#1e2535;padding:8px;border-radius:4px;overflow:auto}
+.item-rendered .render blockquote{border-left:3px solid #334155;padding-left:12px;color:#94a3b8;margin:4px 0}
+.item-rendered .render a{color:#60a5fa;text-decoration:none}
+.item-rendered .render ul{padding-left:20px}
+.item-rendered .render ol{padding-left:20px}
+.item-rendered .render li{margin:2px 0}
+.item-rendered .render table{border-collapse:collapse;width:100%}
+.item-rendered .render th,.item-rendered .render td{border:1px solid #334155;padding:4px 8px;font-size:.82rem}
+.item-rendered .render th{background:#1e2535}
+.item-rendered .render hr{border:none;border-top:1px solid #334155;margin:8px 0}
+.item-rendered .render input[type=checkbox]{margin-right:4px}
+.item-copy{display:flex;align-items:flex-start;padding:12px 8px;background:#141924;border-left:1px solid #1e2535}
+.copy-btn{background:#1e2535;border:1px solid #334155;color:#64748b;padding:5px 10px;border-radius:4px;font-size:.75rem;cursor:pointer;white-space:nowrap}
+.copy-btn:hover{background:#334155;color:#e2e8f0}
+.item-tag{display:inline-block;font-size:.7rem;padding:2px 7px;border-radius:99px;margin-bottom:6px}
+.tag-gfm{background:#0c2a1a;color:#4ade80;border:1px solid #166534}
+.no-results{text-align:center;color:#64748b;padding:48px;font-size:.9rem}
+</style>
+</head>
+<body>
+<header>
+  <h1>Markdown <span>Cheat Sheet</span></h1>
+  <p class="desc">CommonMark + GitHub Flavored Markdown (GFM) syntax reference with live previews</p>
+</header>
+<div class="controls">
+  <div class="search-wrap">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="search" placeholder="Search syntax…">
+  </div>
+  <div class="cat-filters" id="cats"></div>
+</div>
+<div class="content" id="content"></div>
+<script>
+const ITEMS = [
+  {cat:'Headings', label:'Heading 1', syntax:'# Heading 1', render:'<h1>Heading 1</h1>'},
+  {cat:'Headings', label:'Heading 2', syntax:'## Heading 2', render:'<h2>Heading 2</h2>'},
+  {cat:'Headings', label:'Heading 3', syntax:'### Heading 3', render:'<h3>Heading 3</h3>'},
+  {cat:'Headings', label:'Alt Heading 1', syntax:'Heading 1\n=========', render:'<h1>Heading 1</h1>'},
+  {cat:'Headings', label:'Alt Heading 2', syntax:'Heading 2\n---------', render:'<h2>Heading 2</h2>'},
+  {cat:'Emphasis', label:'Bold', syntax:'**bold text**', render:'<strong>bold text</strong>'},
+  {cat:'Emphasis', label:'Italic', syntax:'*italic text*', render:'<em>italic text</em>'},
+  {cat:'Emphasis', label:'Bold & Italic', syntax:'***bold and italic***', render:'<strong><em>bold and italic</em></strong>'},
+  {cat:'Emphasis', label:'Strikethrough (GFM)', syntax:'~~strikethrough~~', render:'<del>strikethrough</del>', gfm:true},
+  {cat:'Emphasis', label:'Highlight (GFM)', syntax:'==highlighted==', render:'<mark>highlighted</mark>', gfm:true},
+  {cat:'Links', label:'Inline link', syntax:'[title](https://example.com)', render:'<a href="#">title</a>'},
+  {cat:'Links', label:'Reference link', syntax:'[title][ref]\n[ref]: https://example.com', render:'<a href="#">title</a>'},
+  {cat:'Links', label:'Auto-link', syntax:'<https://example.com>', render:'<a href="#">https://example.com</a>'},
+  {cat:'Links', label:'Email link', syntax:'<user@example.com>', render:'<a href="#">user@example.com</a>'},
+  {cat:'Images', label:'Image', syntax:'![alt text](image.png)', render:'<em>[image: alt text]</em>'},
+  {cat:'Images', label:'Image with title', syntax:'![alt text](image.png "Title")', render:'<em>[image: alt text (Title)]</em>'},
+  {cat:'Code', label:'Inline code', syntax:'`inline code`', render:'<code>inline code</code>'},
+  {cat:'Code', label:'Code block (fenced)', syntax:'```js\nconst x = 1;\n```', render:'<pre><code>const x = 1;</code></pre>'},
+  {cat:'Code', label:'Code block (indented)', syntax:'    const x = 1;', render:'<pre><code>const x = 1;</code></pre>'},
+  {cat:'Lists', label:'Unordered list', syntax:'- Item 1\n- Item 2\n- Item 3', render:'<ul><li>Item 1</li><li>Item 2</li><li>Item 3</li></ul>'},
+  {cat:'Lists', label:'Ordered list', syntax:'1. First\n2. Second\n3. Third', render:'<ol><li>First</li><li>Second</li><li>Third</li></ol>'},
+  {cat:'Lists', label:'Nested list', syntax:'- Item 1\n  - Nested 1\n  - Nested 2\n- Item 2', render:'<ul><li>Item 1<ul><li>Nested 1</li><li>Nested 2</li></ul></li><li>Item 2</li></ul>'},
+  {cat:'Lists', label:'Task list (GFM)', syntax:'- [x] Done\n- [ ] Todo', render:'<ul><li><input type="checkbox" checked disabled> Done</li><li><input type="checkbox" disabled> Todo</li></ul>', gfm:true},
+  {cat:'Blockquotes', label:'Blockquote', syntax:'> Quoted text', render:'<blockquote>Quoted text</blockquote>'},
+  {cat:'Blockquotes', label:'Nested blockquote', syntax:'> Level 1\n>> Level 2', render:'<blockquote>Level 1<blockquote>Level 2</blockquote></blockquote>'},
+  {cat:'Tables', label:'Table (GFM)', syntax:'| Head 1 | Head 2 |\n|--------|--------|\n| Cell 1 | Cell 2 |', render:'<table><tr><th>Head 1</th><th>Head 2</th></tr><tr><td>Cell 1</td><td>Cell 2</td></tr></table>', gfm:true},
+  {cat:'Tables', label:'Table alignment (GFM)', syntax:'| Left | Center | Right |\n|:-----|:------:|------:|\n| L    |   C    |     R |', render:'<table><tr><th>Left</th><th>Center</th><th>Right</th></tr><tr><td>L</td><td>C</td><td>R</td></tr></table>', gfm:true},
+  {cat:'Misc', label:'Horizontal rule', syntax:'---', render:'<hr>'},
+  {cat:'Misc', label:'Horizontal rule (alt)', syntax:'***', render:'<hr>'},
+  {cat:'Misc', label:'Line break', syntax:'Line 1  \nLine 2', render:'Line 1<br>Line 2'},
+  {cat:'Misc', label:'Escape character', syntax:'\\*not italic\\*', render:'\\*not italic\\*'},
+  {cat:'Misc', label:'HTML inline', syntax:'<span style="color:red">Red</span>', render:'<span style="color:#ef4444">Red</span>'},
+  {cat:'Footnotes', label:'Footnote (GFM)', syntax:'Text[^1]\n[^1]: Footnote text.', render:'Text<sup>1</sup><br><small>1. Footnote text.</small>', gfm:true},
+  {cat:'Footnotes', label:'Inline footnote', syntax:'Text[^note: Short note]', render:'Text<sup>note</sup>', gfm:true},
+];
+
+const CATS=['All',...new Set(ITEMS.map(i=>i.cat))];
+let activeCat='All';
+let query='';
+
+function render(){
+  const content=document.getElementById('content');
+  let visible=ITEMS.filter(i=>{
+    const matchCat=activeCat==='All'||i.cat===activeCat;
+    const matchQ=!query||i.label.toLowerCase().includes(query)||i.syntax.toLowerCase().includes(query);
+    return matchCat&&matchQ;
+  });
+  if(!visible.length){
+    content.innerHTML='<div class="no-results">No results found</div>';
+    return;
+  }
+  const byCat={};
+  visible.forEach(i=>{(byCat[i.cat]=byCat[i.cat]||[]).push(i);});
+  content.innerHTML=Object.entries(byCat).map(([cat,items])=>`
+    <div class="section">
+      <div class="section-title">${cat}</div>
+      ${items.map(item=>`
+        <div class="item">
+          <div class="item-syntax">
+            <div class="item-label">${item.label}${item.gfm?'&nbsp;<span class="item-tag tag-gfm">GFM</span>':''}</div>
+            <pre>${escHtml(item.syntax)}</pre>
+          </div>
+          <div class="item-rendered">
+            <div class="item-label">Rendered</div>
+            <div class="render">${item.render}</div>
+          </div>
+          <div class="item-copy">
+            <button class="copy-btn" onclick="cp(${JSON.stringify(item.syntax)})">Copy</button>
+          </div>
+        </div>`).join('')}
+    </div>`).join('');
+}
+
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function cp(text){
+  navigator.clipboard.writeText(text);
+}
+
+document.getElementById('cats').innerHTML=CATS.map(c=>`
+  <button class="cat-btn${c==='All'?' active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
+
+function setCat(c){
+  activeCat=c;
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.toggle('active',b.textContent===c));
+  render();
+}
+document.getElementById('search').addEventListener('input',e=>{
+  query=e.target.value.toLowerCase();
+  render();
+});
+render();
+</script>
+</body>
+</html>

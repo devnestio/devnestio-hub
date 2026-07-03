@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IPv6 Address Calculator — Expand, Compress, Prefix | DevNestio</title>
+  <meta name="description" content="Expand or compress IPv6 addresses, calculate network prefix ranges, convert to binary, and validate addresses. Supports EUI-64 from MAC. Browser-only." />
+  <meta property="og:title" content="IPv6 Address Calculator | DevNestio" />
+  <meta property="og:description" content="Full IPv6 toolkit: expand/compress notation, prefix/range calculation, binary view, EUI-64 generation from MAC address. No data sent to server." />
+  <meta property="og:url" content="https://devnestio.pages.dev/ipv6-calc/" />
+  <meta name="twitter:card" content="summary" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    #privacy-banner { background: #1e293b; border-bottom: 1px solid #334155; padding: 8px 16px; font-size: 12px; color: #94a3b8; text-align: center; }
+    header { background: #1e293b; border-bottom: 1px solid #334155; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+    header a { color: #64748b; font-size: 13px; text-decoration: none; margin-left: auto; }
+    header a:hover { color: #94a3b8; }
+    .badge { background: #f59e0b; color: #000; font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+    main { max-width: 860px; margin: 0 auto; padding: 24px 16px; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 18px; margin-bottom: 16px; }
+    .card-title { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 14px; }
+    label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 5px; font-weight: 600; }
+    input[type=text] { width: 100%; padding: 10px 14px; background: #0f1117; border: 1px solid #334155; border-radius: 8px; color: #e2e8f0; font-size: 15px; font-family: 'Menlo','Courier New',monospace; outline: none; }
+    input[type=text]:focus { border-color: #f59e0b; }
+    input[type=text].error { border-color: #ef4444; }
+    .row { display: flex; gap: 8px; align-items: flex-end; }
+    .row input { flex: 1; }
+    .btn { padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; background: #f59e0b; color: #000; white-space: nowrap; }
+    .btn:hover { background: #d97706; }
+    .btn-sm { padding: 3px 10px; border-radius: 5px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid #334155; background: transparent; color: #64748b; }
+    .btn-sm:hover { border-color: #f59e0b; color: #f59e0b; }
+    .info-grid { display: grid; grid-template-columns: 180px 1fr auto; gap: 8px 12px; align-items: center; }
+    .info-label { font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase; }
+    .info-val { font-family: 'Menlo','Courier New',monospace; font-size: 13px; color: #f1f5f9; word-break: break-all; }
+    .info-val.mono-sm { font-size: 11px; }
+    .err-msg { color: #f87171; font-size: 13px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-family: monospace; cursor: pointer; border: 1px solid #334155; background: #0f1117; color: #94a3b8; }
+    .chip:hover { border-color: #f59e0b; color: #f59e0b; }
+    .group-highlight { background: rgba(245,158,11,0.08); border-color: #f59e0b; }
+    .bit-row { font-family: monospace; font-size: 11px; letter-spacing: 0.5px; line-height: 1.8; word-break: break-all; color: #94a3b8; }
+    .bit-net { color: #f59e0b; }
+    .bit-host { color: #86efac; }
+    .prefix-row { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+    .prefix-row label { margin: 0; white-space: nowrap; }
+    .prefix-row input[type=number] { width: 70px; padding: 8px 10px; background: #0f1117; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 14px; outline: none; text-align: center; }
+    .prefix-row input[type=number]:focus { border-color: #f59e0b; }
+    .tab-row { display: flex; gap: 4px; margin-bottom: 14px; }
+    .tab { padding: 5px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid #334155; background: #0f1117; color: #64748b; }
+    .tab.active { background: #f59e0b; border-color: #f59e0b; color: #000; }
+    #ad-slot { margin: 20px auto; text-align: center; }
+  </style>
+</head>
+<body>
+<div id="privacy-banner">🔒 All processing happens in your browser. No data is sent to any server.</div>
+<header>
+  <span class="badge">FREE</span>
+  <h1>IPv6 Address Calculator</h1>
+  <a href="https://devnestio.pages.dev">← All Tools</a>
+</header>
+<main>
+
+  <!-- Mode tabs -->
+  <div class="tab-row">
+    <button class="tab active" onclick="setMode('address')" id="tab-address">Address Info</button>
+    <button class="tab" onclick="setMode('prefix')" id="tab-prefix">Prefix / Range</button>
+    <button class="tab" onclick="setMode('eui64')" id="tab-eui64">EUI-64 from MAC</button>
+  </div>
+
+  <!-- Address mode -->
+  <div id="mode-address">
+    <div class="card">
+      <div class="card-title">IPv6 Address</div>
+      <div class="row">
+        <div style="flex:1">
+          <label>Address (with or without prefix length)</label>
+          <input type="text" id="addr-input" placeholder="e.g. 2001:db8::1 or ::1 or fe80::1%eth0" oninput="calcAddress()" />
+        </div>
+      </div>
+      <div style="margin-top:10px">
+        <div class="card-title" style="margin-bottom:6px">Examples</div>
+        <div class="chips" id="addr-chips"></div>
+      </div>
+    </div>
+    <div class="card" id="addr-result" style="display:none">
+      <div class="card-title">Address Information</div>
+      <div class="info-grid" id="addr-info"></div>
+    </div>
+  </div>
+
+  <!-- Prefix mode -->
+  <div id="mode-prefix" style="display:none">
+    <div class="card">
+      <div class="card-title">Network Prefix</div>
+      <label>IPv6 Address</label>
+      <input type="text" id="pfx-addr" placeholder="e.g. 2001:db8::" oninput="calcPrefix()" />
+      <div class="prefix-row">
+        <label>Prefix length:</label>
+        <input type="number" id="pfx-len" min="0" max="128" value="64" oninput="calcPrefix()" />
+        <span style="font-size:12px;color:#64748b">/ 0–128</span>
+      </div>
+    </div>
+    <div class="card" id="pfx-result" style="display:none">
+      <div class="card-title">Network Range</div>
+      <div class="info-grid" id="pfx-info"></div>
+      <div style="margin-top:14px">
+        <div class="card-title">Binary Bit Map</div>
+        <div class="bit-row" id="bit-map"></div>
+        <div style="margin-top:4px;font-size:11px;color:#64748b"><span style="color:#f59e0b">■</span> Network bits &nbsp; <span style="color:#86efac">■</span> Host bits</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EUI-64 mode -->
+  <div id="mode-eui64" style="display:none">
+    <div class="card">
+      <div class="card-title">MAC Address → EUI-64 IPv6</div>
+      <label>MAC Address (48-bit)</label>
+      <input type="text" id="mac-input" placeholder="e.g. 00:1A:2B:3C:4D:5E or 00-1A-2B-3C-4D-5E" oninput="calcEui64()" />
+      <div style="margin-top:8px;font-size:12px;color:#64748b">Optionally add a /64 prefix to form a full link-local or global address</div>
+      <div style="margin-top:8px">
+        <label>IPv6 Prefix (optional)</label>
+        <input type="text" id="eui64-prefix" placeholder="e.g. fe80:: or 2001:db8::" oninput="calcEui64()" />
+      </div>
+    </div>
+    <div class="card" id="eui64-result" style="display:none">
+      <div class="card-title">EUI-64 Result</div>
+      <div class="info-grid" id="eui64-info"></div>
+    </div>
+  </div>
+
+  <div id="ad-slot" data-ea-publisher="devnestio" data-ea-type="image"></div>
+</main>
+<script>
+// ---- IPv6 core ----
+
+function expandIPv6(addr) {
+  // strip zone ID (e.g. %eth0)
+  addr = addr.replace(/%.*$/, '').trim().toLowerCase();
+
+  // handle ::
+  let parts;
+  if (addr.includes('::')) {
+    const [left, right] = addr.split('::');
+    const leftParts = left ? left.split(':') : [];
+    const rightParts = right ? right.split(':') : [];
+    const missing = 8 - leftParts.length - rightParts.length;
+    parts = [...leftParts, ...Array(missing).fill('0'), ...rightParts];
+  } else {
+    parts = addr.split(':');
+  }
+
+  if (parts.length !== 8) return null;
+  if (parts.some(p => !/^[0-9a-f]{0,4}$/.test(p))) return null;
+
+  return parts.map(p => p.padStart(4, '0'));
+}
+
+function compressIPv6(groups) {
+  // find longest run of 0000
+  let bestStart = -1, bestLen = 0, curStart = -1, curLen = 0;
+  groups.forEach((g, i) => {
+    if (g === '0000') {
+      if (curStart === -1) { curStart = i; curLen = 1; }
+      else curLen++;
+      if (curLen > bestLen) { bestLen = curLen; bestStart = curStart; }
+    } else {
+      curStart = -1; curLen = 0;
+    }
+  });
+
+  const stripped = groups.map(g => g.replace(/^0+/, '') || '0');
+
+  if (bestLen < 2) return stripped.join(':');
+
+  const left = stripped.slice(0, bestStart).join(':');
+  const right = stripped.slice(bestStart + bestLen).join(':');
+  return (left ? left + '::' : '::') + right;
+}
+
+function groupsToBigInt(groups) {
+  return groups.reduce((acc, g) => (acc << 16n) | BigInt(parseInt(g, 16)), 0n);
+}
+
+function bigIntToGroups(n) {
+  const groups = [];
+  for (let i = 0; i < 8; i++) {
+    groups.unshift((n & 0xFFFFn).toString(16).padStart(4, '0'));
+    n >>= 16n;
+  }
+  return groups;
+}
+
+function prefixMask(len) {
+  if (len === 0) return 0n;
+  return ((1n << BigInt(len)) - 1n) << BigInt(128 - len);
+}
+
+function getAddressType(groups) {
+  const n = groupsToBigInt(groups);
+  if (n === 1n) return 'Loopback (::1)';
+  if (n === 0n) return 'Unspecified (::)';
+  if ((n >> 112n) === 0xfe80n) return 'Link-Local Unicast';
+  if ((n >> 112n) === 0xfec0n) return 'Site-Local Unicast (deprecated)';
+  if ((n >> 120n) === 0xffn) return 'Multicast';
+  if ((n >> 112n) === 0x2002n) return '6to4';
+  if (groups[0] === '2001' && groups[1] === '0db8') return 'Documentation (2001:db8::)';
+  if ((n >> 112n) >= 0x2000n && (n >> 112n) <= 0x3fffn) return 'Global Unicast';
+  if ((n >> 96n) === 0x64n) return 'IPv4-mapped IPv6';
+  return 'Other / Unknown';
+}
+
+function validateAndExpand(raw) {
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  const groups = expandIPv6(trimmed);
+  if (!groups) return null;
+  return groups;
+}
+
+function infoRows(rows) {
+  return rows.map(([label, val]) =>
+    `<span class="info-label">${label}</span><span class="info-val">${val}</span><button class="btn-sm" onclick="navigator.clipboard.writeText(${JSON.stringify(val)})">Copy</button>`
+  ).join('');
+}
+
+function calcAddress() {
+  const raw = document.getElementById('addr-input').value;
+  const inp = document.getElementById('addr-input');
+  const result = document.getElementById('addr-result');
+  inp.classList.remove('error');
+
+  const groups = validateAndExpand(raw);
+  if (!groups) {
+    inp.classList.add('error');
+    result.style.display = 'none';
+    return;
+  }
+
+  const expanded = groups.join(':');
+  const compressed = compressIPv6(groups);
+  const type = getAddressType(groups);
+  const n = groupsToBigInt(groups);
+  const binary = groups.map(g => parseInt(g, 16).toString(2).padStart(16, '0')).join(' ');
+  const hexVal = n.toString(16).toUpperCase().padStart(32, '0');
+  const reverseDns = groups.map(g => g.split('').join('.')).reverse().join('.') + '.ip6.arpa';
+
+  document.getElementById('addr-info').innerHTML = infoRows([
+    ['Compressed', compressed],
+    ['Expanded (Full)', expanded],
+    ['Type', type],
+    ['Binary', binary],
+    ['Hex (no colons)', hexVal],
+    ['Reverse DNS', reverseDns],
+  ]);
+  result.style.display = '';
+}
+
+function calcPrefix() {
+  const raw = document.getElementById('pfx-addr').value;
+  const len = parseInt(document.getElementById('pfx-len').value) || 0;
+  const result = document.getElementById('pfx-result');
+
+  if (len < 0 || len > 128) { result.style.display = 'none'; return; }
+  const groups = validateAndExpand(raw);
+  if (!groups) { result.style.display = 'none'; return; }
+
+  const n = groupsToBigInt(groups);
+  const mask = prefixMask(len);
+  const network = n & mask;
+  const hostMask = (1n << BigInt(128 - len)) - 1n;
+  const first = network;
+  const last = network | hostMask;
+  const hostCount = hostMask + 1n;
+
+  const networkGroups = bigIntToGroups(network);
+  const lastGroups = bigIntToGroups(last);
+
+  const networkAddr = compressIPv6(networkGroups) + '/' + len;
+  const firstHost = compressIPv6(bigIntToGroups(first));
+  const lastHost = compressIPv6(lastGroups);
+  const totalAddresses = hostCount.toString();
+
+  document.getElementById('pfx-info').innerHTML = infoRows([
+    ['Network Address', compressIPv6(networkGroups)],
+    ['CIDR Notation', networkAddr],
+    ['First Address', firstHost],
+    ['Last Address', lastHost],
+    ['Total Addresses', totalAddresses],
+    ['Prefix Length', '/' + len],
+  ]);
+
+  // Bit map
+  const allBits = groups.map(g => parseInt(g, 16).toString(2).padStart(16, '0')).join('');
+  const bitHtml = allBits.split('').map((b, i) => {
+    const cls = i < len ? 'bit-net' : 'bit-host';
+    return `<span class="${cls}">${b}</span>`;
+  }).join('') + `<br><span style="color:#64748b;font-size:10px">${'N'.repeat(len)}${'H'.repeat(128 - len)}</span>`;
+  document.getElementById('bit-map').innerHTML = bitHtml;
+  result.style.display = '';
+}
+
+function calcEui64() {
+  const mac = document.getElementById('mac-input').value.trim();
+  const prefix = document.getElementById('eui64-prefix').value.trim();
+  const result = document.getElementById('eui64-result');
+
+  const macClean = mac.replace(/[-:.\s]/g, '');
+  if (!/^[0-9a-fA-F]{12}$/.test(macClean)) { result.style.display = 'none'; return; }
+
+  const bytes = macClean.match(/.{2}/g).map(b => parseInt(b, 16));
+  // EUI-64: insert FF FE in middle, flip bit 6 of first byte
+  bytes[0] ^= 0x02;
+  const eui64Bytes = [...bytes.slice(0, 3), 0xFF, 0xFE, ...bytes.slice(3)];
+  const interfaceId = eui64Bytes.map(b => b.toString(16).padStart(2, '0')).join('');
+  const ifaceGroups = interfaceId.match(/.{4}/g);
+  const ifaceId = ifaceGroups.join(':');
+
+  let fullAddr = '';
+  if (prefix) {
+    const pfxGroups = validateAndExpand(prefix);
+    if (pfxGroups) {
+      const combined = [...pfxGroups.slice(0, 4), ...ifaceGroups];
+      fullAddr = compressIPv6(combined);
+    }
+  }
+
+  const linkLocal = compressIPv6(['fe80', '0000', '0000', '0000', ...ifaceGroups]);
+
+  const rows = [
+    ['EUI-64 Interface ID', ifaceId],
+    ['Link-Local Address', linkLocal],
+  ];
+  if (fullAddr) rows.push(['Global Address', fullAddr]);
+  rows.push(['Original MAC', macClean.match(/.{2}/g).join(':').toUpperCase()]);
+  rows.push(['Modified EUI-64', eui64Bytes.map(b => b.toString(16).padStart(2,'0')).join(':').toUpperCase()]);
+
+  document.getElementById('eui64-info').innerHTML = infoRows(rows);
+  result.style.display = '';
+}
+
+function setMode(m) {
+  ['address','prefix','eui64'].forEach(mode => {
+    document.getElementById('mode-' + mode).style.display = mode === m ? '' : 'none';
+    document.getElementById('tab-' + mode).classList.toggle('active', mode === m);
+  });
+}
+
+const EXAMPLES = [
+  '2001:db8::1', '::1', 'fe80::1', '::', 'ff02::1',
+  '2001:0db8:0000:0000:0000:0000:0000:0001',
+  '2001:db8:85a3::8a2e:370:7334', '::ffff:192.168.1.1',
+];
+document.getElementById('addr-chips').innerHTML = EXAMPLES.map(e =>
+  `<span class="chip" onclick="document.getElementById('addr-input').value='${e}';calcAddress()">${e}</span>`
+).join('');
+</script>
+</body>
+</html>

@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSS Specificity Calculator – Score & Comparison | DevNestio</title>
+  <meta name="description" content="Calculate CSS specificity scores for any selector. Compare multiple selectors, see breakdown by ID/class/element, and understand which rule wins." />
+  <meta property="og:title" content="CSS Specificity Calculator – Score & Comparison" />
+  <meta property="og:description" content="Calculate and compare CSS selector specificity. See (a,b,c) breakdown instantly — free online tool." />
+  <meta name="twitter:card" content="summary" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1117; --surface: #1a1d27; --surface2: #22253a;
+      --border: #2e3148; --accent: #f59e0b; --accent2: #4ecca3;
+      --text: #e8eaf6; --muted: #8b90b8; --radius: 10px;
+      --red: #f87171; --green: #4ade80; --blue: #60a5fa; --purple: #c084fc;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 1.2rem; font-weight: 700; }
+    header span { color: var(--accent2); font-size: 0.78rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 2px 10px; }
+    main { flex: 1; max-width: 860px; margin: 0 auto; padding: 28px 20px; width: 100%; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; margin-bottom: 16px; }
+    .card-title { font-size: 0.82rem; font-weight: 700; color: var(--accent2); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 16px; }
+    .input-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-start; }
+    .selector-wrap { flex: 1; position: relative; }
+    .selector-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 11px 14px; color: var(--text); font-family: 'Consolas', 'Monaco', monospace; font-size: 0.95rem; outline: none; transition: border-color 0.2s; }
+    .selector-input:focus { border-color: var(--accent2); }
+    .selector-input::placeholder { color: var(--muted); }
+    .btn { background: var(--accent2); color: #0f1117; border: none; border-radius: 8px; padding: 10px 18px; font-size: 0.88rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+    .btn:hover { opacity: 0.85; }
+    .btn-ghost { background: none; border: 1px solid var(--border); border-radius: 8px; padding: 9px 14px; color: var(--muted); font-size: 0.85rem; cursor: pointer; }
+    .btn-ghost:hover { border-color: var(--red); color: var(--red); }
+    .btn-add { background: var(--surface2); border: 1px dashed var(--border); border-radius: 8px; padding: 10px 18px; color: var(--accent2); font-size: 0.88rem; font-weight: 600; cursor: pointer; width: 100%; margin-bottom: 14px; transition: border-color 0.15s; }
+    .btn-add:hover { border-color: var(--accent2); }
+
+    /* Score display */
+    .score-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 16px; }
+    .score-col { text-align: center; }
+    .score-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+    .score-num { font-size: 2.4rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .score-num.id-color { color: var(--purple); }
+    .score-num.class-color { color: var(--blue); }
+    .score-num.elem-color { color: var(--green); }
+    .score-tuple { font-size: 1.1rem; text-align: center; color: var(--muted); margin-bottom: 16px; }
+    .score-tuple strong { color: var(--text); font-size: 1.3rem; }
+    .breakdown-list { display: flex; flex-direction: column; gap: 6px; }
+    .breakdown-item { display: flex; align-items: center; gap: 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 7px 12px; font-size: 0.85rem; }
+    .breakdown-token { font-family: monospace; font-size: 0.9rem; color: var(--accent); flex: 1; }
+    .breakdown-type { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 8px; border-radius: 4px; }
+    .type-id { background: #2a1a4a; color: var(--purple); }
+    .type-class { background: #1a2a4a; color: var(--blue); }
+    .type-elem { background: #1a3a1a; color: var(--green); }
+    .type-pseudo { background: #3a2a1a; color: var(--accent); }
+    .type-universal { background: #2a2a2a; color: var(--muted); }
+    .breakdown-score { font-size: 0.82rem; color: var(--muted); min-width: 50px; text-align: right; }
+
+    /* Comparison table */
+    .compare-table { width: 100%; border-collapse: collapse; }
+    .compare-table th { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    .compare-table td { padding: 10px 12px; border-bottom: 1px solid var(--surface2); font-size: 0.88rem; vertical-align: middle; }
+    .compare-table tr:last-child td { border-bottom: none; }
+    .compare-table tr.winner td { background: rgba(78,204,163,0.06); }
+    .selector-cell { font-family: monospace; font-size: 0.9rem; color: var(--text); max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .tuple-cell { font-family: monospace; color: var(--muted); }
+    .score-cell { font-weight: 700; }
+    .winner-badge { display: inline-flex; align-items: center; gap: 4px; background: rgba(78,204,163,0.15); color: var(--accent2); border: 1px solid rgba(78,204,163,0.3); border-radius: 4px; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; }
+    .bar-wrap { height: 6px; background: var(--surface2); border-radius: 3px; margin-top: 4px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 3px; background: var(--accent2); transition: width 0.4s; }
+
+    /* Reference */
+    .ref-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    @media(max-width: 600px) { .ref-grid { grid-template-columns: 1fr; } .score-grid { grid-template-columns: repeat(3, 1fr); } }
+    .ref-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+    .ref-cat { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 10px; }
+    .ref-item { display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; padding: 4px 0; border-bottom: 1px solid var(--border); }
+    .ref-item:last-child { border-bottom: none; }
+    .ref-sel { font-family: monospace; color: var(--text); }
+    .ref-score { color: var(--muted); font-size: 0.78rem; }
+
+    footer { text-align: center; padding: 20px; color: var(--muted); font-size: 0.78rem; border-top: 1px solid var(--border); }
+    footer a { color: var(--accent2); text-decoration: none; }
+
+    .no-results { color: var(--muted); font-style: italic; font-size: 0.88rem; padding: 8px 0; }
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>CSS Specificity Calculator</h1>
+  <span>CSS Selectors</span>
+</header>
+<main>
+
+  <!-- Input section -->
+  <div class="card">
+    <div class="card-title">Enter CSS Selectors</div>
+    <div id="selectorRows"></div>
+    <button class="btn-add" id="addBtn">+ Add Selector</button>
+    <div style="display:flex; gap:10px;">
+      <button class="btn" id="calcBtn">Calculate</button>
+      <button class="btn-ghost" id="clearBtn">Clear All</button>
+    </div>
+  </div>
+
+  <!-- Single selector detail -->
+  <div class="card" id="detailCard" style="display:none;">
+    <div class="card-title" id="detailTitle">Specificity Breakdown</div>
+    <div class="score-grid">
+      <div class="score-col">
+        <div class="score-label">IDs (a)</div>
+        <div class="score-num id-color" id="scoreA">0</div>
+      </div>
+      <div class="score-col">
+        <div class="score-label">Classes / Attrs / Pseudo-classes (b)</div>
+        <div class="score-num class-color" id="scoreB">0</div>
+      </div>
+      <div class="score-col">
+        <div class="score-label">Elements / Pseudo-elements (c)</div>
+        <div class="score-num elem-color" id="scoreC">0</div>
+      </div>
+    </div>
+    <div class="score-tuple" id="scoreTuple"></div>
+    <div class="breakdown-list" id="breakdownList"></div>
+  </div>
+
+  <!-- Comparison table -->
+  <div class="card" id="compareCard" style="display:none;">
+    <div class="section-header">
+      <div class="card-title" style="margin-bottom:0;">Selector Comparison</div>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="compare-table" id="compareTable">
+        <thead>
+          <tr>
+            <th>Selector</th>
+            <th>Tuple (a,b,c)</th>
+            <th>Score</th>
+            <th style="min-width:120px;">Relative</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="compareBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Reference -->
+  <div class="card">
+    <div class="card-title">Specificity Reference</div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-cat" style="color:var(--purple);">IDs (a) — Highest</div>
+        <div class="ref-item"><span class="ref-sel">#id</span><span class="ref-score">(1,0,0)</span></div>
+        <div class="ref-item"><span class="ref-sel">#nav #logo</span><span class="ref-score">(2,0,0)</span></div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-cat" style="color:var(--blue);">Classes, Attrs, Pseudo-classes (b)</div>
+        <div class="ref-item"><span class="ref-sel">.class</span><span class="ref-score">(0,1,0)</span></div>
+        <div class="ref-item"><span class="ref-sel">[type="text"]</span><span class="ref-score">(0,1,0)</span></div>
+        <div class="ref-item"><span class="ref-sel">:hover</span><span class="ref-score">(0,1,0)</span></div>
+        <div class="ref-item"><span class="ref-sel">:not(.x)</span><span class="ref-score">(0,1,0)</span></div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-cat" style="color:var(--green);">Elements & Pseudo-elements (c)</div>
+        <div class="ref-item"><span class="ref-sel">div</span><span class="ref-score">(0,0,1)</span></div>
+        <div class="ref-item"><span class="ref-sel">p a span</span><span class="ref-score">(0,0,3)</span></div>
+        <div class="ref-item"><span class="ref-sel">::before</span><span class="ref-score">(0,0,1)</span></div>
+        <div class="ref-item"><span class="ref-sel">* (universal)</span><span class="ref-score">(0,0,0)</span></div>
+      </div>
+    </div>
+    <div style="margin-top:14px; font-size:0.8rem; color:var(--muted);">
+      💡 <strong style="color:var(--text);">Inline styles</strong> add (1,0,0,0) and <strong style="color:var(--text);">!important</strong> overrides everything — neither is part of selector specificity.
+    </div>
+  </div>
+
+</main>
+<footer>
+  <a href="https://devnestio.pages.dev/">← Back to DevNestio Tools</a>
+</footer>
+
+<script>
+  const selectorRows = document.getElementById('selectorRows');
+  const addBtn = document.getElementById('addBtn');
+  const calcBtn = document.getElementById('calcBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const detailCard = document.getElementById('detailCard');
+  const detailTitle = document.getElementById('detailTitle');
+  const scoreA = document.getElementById('scoreA');
+  const scoreB = document.getElementById('scoreB');
+  const scoreC = document.getElementById('scoreC');
+  const scoreTuple = document.getElementById('scoreTuple');
+  const breakdownList = document.getElementById('breakdownList');
+  const compareCard = document.getElementById('compareCard');
+  const compareBody = document.getElementById('compareBody');
+
+  // Rows management
+  let rowCount = 0;
+  function addRow(value = '') {
+    rowCount++;
+    const id = `row-${rowCount}`;
+    const div = document.createElement('div');
+    div.className = 'input-row';
+    div.id = id;
+    div.innerHTML = `
+      <div class="selector-wrap">
+        <input class="selector-input" type="text" placeholder="e.g. #header .nav > a:hover" spellcheck="false" value="${escHtml(value)}" />
+      </div>
+      <button class="btn-ghost" onclick="removeRow('${id}')">✕</button>
+    `;
+    selectorRows.appendChild(div);
+    div.querySelector('input').focus();
+    div.querySelector('input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') calcBtn.click();
+    });
+  }
+
+  function removeRow(id) {
+    document.getElementById(id)?.remove();
+    if (selectorRows.children.length === 0) {
+      resetResults();
+    }
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // Specificity calculation
+  function calcSpecificity(sel) {
+    let a = 0, b = 0, c = 0;
+    const tokens = [];
+
+    // Remove comments
+    let s = sel.replace(/\/\*[\s\S]*?\*\//g, '');
+
+    // Strip pseudo-elements (count as c)
+    const pseudoEls = ['::before','::after','::first-line','::first-letter','::selection','::placeholder','::marker','::backdrop','::cue','::part','::slotted'];
+    for (const pe of pseudoEls) {
+      const cnt = (s.match(new RegExp(pe.replace('::', '::'), 'gi')) || []).length;
+      if (cnt) { c += cnt; tokens.push({ token: pe, type: 'elem', contribution: `(0,0,${cnt})` }); }
+      s = s.replace(new RegExp(pe.replace('::', '::'), 'gi'), '');
+    }
+
+    // :not(), :is(), :has(), :where() — count contents, not the pseudo itself
+    // :where() has zero specificity for itself
+    // For simplicity: count :not/:is/:has contents, skip :where
+    s = s.replace(/:where\([^)]*\)/gi, '');
+
+    // :not(), :is(), :has() — extract contents and count them
+    const notIsHas = /:(?:not|is|has)\(([^)]*)\)/gi;
+    let m;
+    while ((m = notIsHas.exec(s)) !== null) {
+      const inner = m[1];
+      const inner_spec = calcSpecificity(inner);
+      a += inner_spec.a; b += inner_spec.b; c += inner_spec.c;
+      if (inner_spec.a || inner_spec.b || inner_spec.c) {
+        tokens.push({ token: m[0], type: 'pseudo', contribution: `(${inner_spec.a},${inner_spec.b},${inner_spec.c})` });
+      }
+    }
+    s = s.replace(/:(?:not|is|has)\([^)]*\)/gi, '');
+
+    // :nth-child, :nth-of-type, etc. (count as b)
+    const nthRe = /:[\w-]+\([^)]*\)/gi;
+    let nthMatches = s.match(nthRe) || [];
+    for (const nm of nthMatches) {
+      b++;
+      tokens.push({ token: nm, type: 'class', contribution: '(0,1,0)' });
+    }
+    s = s.replace(nthRe, '');
+
+    // Remaining pseudo-classes (single colon, word char)
+    const pseudoClsRe = /:[\w-]+/gi;
+    let pcMatches = s.match(pseudoClsRe) || [];
+    for (const pc of pcMatches) {
+      b++;
+      tokens.push({ token: pc, type: 'class', contribution: '(0,1,0)' });
+    }
+    s = s.replace(pseudoClsRe, '');
+
+    // IDs
+    const idRe = /#[\w-]+/g;
+    let idMatches = s.match(idRe) || [];
+    for (const id of idMatches) {
+      a++;
+      tokens.push({ token: id, type: 'id', contribution: '(1,0,0)' });
+    }
+    s = s.replace(idRe, '');
+
+    // Classes
+    const clsRe = /\.[\w-]+/g;
+    let clsMatches = s.match(clsRe) || [];
+    for (const cls of clsMatches) {
+      b++;
+      tokens.push({ token: cls, type: 'class', contribution: '(0,1,0)' });
+    }
+    s = s.replace(clsRe, '');
+
+    // Attribute selectors
+    const attrRe = /\[[^\]]*\]/g;
+    let attrMatches = s.match(attrRe) || [];
+    for (const attr of attrMatches) {
+      b++;
+      tokens.push({ token: attr, type: 'class', contribution: '(0,1,0)' });
+    }
+    s = s.replace(attrRe, '');
+
+    // Universal selector
+    s = s.replace(/\*/g, '');
+
+    // Combinators
+    s = s.replace(/[>+~]/g, ' ');
+
+    // Elements
+    const elemRe = /[a-zA-Z][\w-]*/g;
+    let elemMatches = s.match(elemRe) || [];
+    for (const el of elemMatches) {
+      c++;
+      tokens.push({ token: el, type: 'elem', contribution: '(0,0,1)' });
+    }
+
+    return { a, b, c, tokens, score: a * 10000 + b * 100 + c };
+  }
+
+  function renderDetail(sel, spec) {
+    detailTitle.textContent = `Specificity Breakdown: ${sel}`;
+    scoreA.textContent = spec.a;
+    scoreB.textContent = spec.b;
+    scoreC.textContent = spec.c;
+    scoreTuple.innerHTML = `Specificity tuple: <strong>(${spec.a}, ${spec.b}, ${spec.c})</strong>`;
+
+    if (spec.tokens.length === 0) {
+      breakdownList.innerHTML = '<div class="no-results">No specific tokens found (universal selector or combinator only).</div>';
+    } else {
+      breakdownList.innerHTML = spec.tokens.map(t => `
+        <div class="breakdown-item">
+          <span class="breakdown-token">${escHtml(t.token)}</span>
+          <span class="breakdown-type type-${t.type}">${t.type === 'class' ? 'class/attr' : t.type === 'elem' ? 'element' : t.type === 'pseudo' ? 'pseudo' : 'ID'}</span>
+          <span class="breakdown-score">${t.contribution}</span>
+        </div>
+      `).join('');
+    }
+
+    detailCard.style.display = '';
+  }
+
+  function renderCompare(items) {
+    if (items.length < 2) { compareCard.style.display = 'none'; return; }
+    const maxScore = Math.max(...items.map(i => i.spec.score), 1);
+    const sorted = [...items].sort((a, b) => b.spec.score - a.spec.score);
+    const winnerScore = sorted[0].spec.score;
+
+    compareBody.innerHTML = sorted.map((item, idx) => {
+      const isWinner = item.spec.score === winnerScore;
+      const pct = (item.spec.score / maxScore * 100).toFixed(1);
+      return `
+        <tr class="${isWinner ? 'winner' : ''}">
+          <td class="selector-cell" title="${escHtml(item.sel)}">${escHtml(item.sel)}</td>
+          <td class="tuple-cell">(${item.spec.a},${item.spec.b},${item.spec.c})</td>
+          <td class="score-cell">${item.spec.score}</td>
+          <td>
+            <div style="font-size:0.78rem;color:var(--muted);margin-bottom:3px;">${pct}%</div>
+            <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%"></div></div>
+          </td>
+          <td>${isWinner ? '<span class="winner-badge">★ Wins</span>' : ''}</td>
+        </tr>
+      `;
+    }).join('');
+    compareCard.style.display = '';
+  }
+
+  function resetResults() {
+    detailCard.style.display = 'none';
+    compareCard.style.display = 'none';
+  }
+
+  // Calculate
+  calcBtn.addEventListener('click', () => {
+    const inputs = [...selectorRows.querySelectorAll('input')];
+    const selectors = inputs.map(i => i.value.trim()).filter(Boolean);
+    if (!selectors.length) return;
+
+    const results = selectors.map(sel => ({ sel, spec: calcSpecificity(sel) }));
+
+    // Show detail for first (or only) selector
+    renderDetail(results[0].sel, results[0].spec);
+
+    // Show comparison if multiple
+    renderCompare(results);
+  });
+
+  addBtn.addEventListener('click', () => addRow());
+  clearBtn.addEventListener('click', () => {
+    selectorRows.innerHTML = '';
+    resetResults();
+    addRow();
+  });
+
+  // Pre-populate with examples
+  addRow('div.container > p.intro a');
+  addRow('#main .nav li:hover');
+</script>
+
+<!-- 80 test cases
+TEST_ID: css-spec-001 - Page title "CSS Specificity Calculator"
+TEST_ID: css-spec-002 - Header badge "CSS Selectors"
+TEST_ID: css-spec-003 - Two default example selectors are pre-filled
+TEST_ID: css-spec-004 - Add Selector button adds a new input row
+TEST_ID: css-spec-005 - Remove (✕) button removes its row
+TEST_ID: css-spec-006 - Calculate button triggers calculation
+TEST_ID: css-spec-007 - Enter key in input triggers calculation
+TEST_ID: css-spec-008 - "#id" → (1,0,0), score=10000
+TEST_ID: css-spec-009 - ".class" → (0,1,0), score=100
+TEST_ID: css-spec-010 - "div" → (0,0,1), score=1
+TEST_ID: css-spec-011 - "*" → (0,0,0), score=0
+TEST_ID: css-spec-012 - "#id .class div" → (1,1,1), score=10101
+TEST_ID: css-spec-013 - "a:hover" → (0,1,1), score=101
+TEST_ID: css-spec-014 - "input[type='text']" → (0,1,1), score=101
+TEST_ID: css-spec-015 - "::before" → (0,0,1), score=1
+TEST_ID: css-spec-016 - "#nav #logo" → (2,0,0), score=20000
+TEST_ID: css-spec-017 - ".a .b .c" → (0,3,0), score=300
+TEST_ID: css-spec-018 - "div p span" → (0,0,3), score=3
+TEST_ID: css-spec-019 - ":not(.foo)" → counts .foo → (0,1,0)
+TEST_ID: css-spec-020 - ":where(.foo)" → zero specificity → (0,0,0)
+TEST_ID: css-spec-021 - ":is(#id)" → (1,0,0)
+TEST_ID: css-spec-022 - Score breakdown card shows (a,b,c) tuple
+TEST_ID: css-spec-023 - ID count shown in purple
+TEST_ID: css-spec-024 - Class count shown in blue
+TEST_ID: css-spec-025 - Element count shown in green
+TEST_ID: css-spec-026 - Breakdown list shows each token
+TEST_ID: css-spec-027 - Token labeled as "ID" for #id
+TEST_ID: css-spec-028 - Token labeled as "class/attr" for .class
+TEST_ID: css-spec-029 - Token labeled as "element" for div
+TEST_ID: css-spec-030 - Token labeled as "pseudo" for :not()
+TEST_ID: css-spec-031 - Each token shows contribution (a,b,c)
+TEST_ID: css-spec-032 - Two selectors shows comparison table
+TEST_ID: css-spec-033 - Comparison table has Selector column
+TEST_ID: css-spec-034 - Comparison table has Tuple column
+TEST_ID: css-spec-035 - Comparison table has Score column
+TEST_ID: css-spec-036 - Comparison table has Relative bar column
+TEST_ID: css-spec-037 - Winner row has "★ Wins" badge
+TEST_ID: css-spec-038 - Winner row has teal background tint
+TEST_ID: css-spec-039 - Bar width proportional to score
+TEST_ID: css-spec-040 - Highest score is 100% width bar
+TEST_ID: css-spec-041 - Comparison sorted by score descending
+TEST_ID: css-spec-042 - "#id" beats ".class" in comparison
+TEST_ID: css-spec-043 - "#id" beats "div" in comparison
+TEST_ID: css-spec-044 - ".class" beats "div" in comparison
+TEST_ID: css-spec-045 - Three selectors all appear in comparison
+TEST_ID: css-spec-046 - Clear All removes all rows
+TEST_ID: css-spec-047 - Clear All adds one fresh empty row
+TEST_ID: css-spec-048 - Clear All hides result cards
+TEST_ID: css-spec-049 - Comparison card hidden with only 1 selector
+TEST_ID: css-spec-050 - Result card hidden before first calculation
+TEST_ID: css-spec-051 - Reference card shows Specificity Reference
+TEST_ID: css-spec-052 - Reference shows ID section in purple
+TEST_ID: css-spec-053 - Reference shows Classes/Attrs/Pseudo-classes section in blue
+TEST_ID: css-spec-054 - Reference shows Elements/Pseudo-elements in green
+TEST_ID: css-spec-055 - "#id" listed in reference with (1,0,0)
+TEST_ID: css-spec-056 - ".class" listed with (0,1,0)
+TEST_ID: css-spec-057 - "[type=text]" listed with (0,1,0)
+TEST_ID: css-spec-058 - ":hover" listed with (0,1,0)
+TEST_ID: css-spec-059 - "div" listed with (0,0,1)
+TEST_ID: css-spec-060 - "::before" listed with (0,0,1)
+TEST_ID: css-spec-061 - Inline styles note visible in reference
+TEST_ID: css-spec-062 - !important note visible in reference
+TEST_ID: css-spec-063 - "div > p" combines and counts element tokens only
+TEST_ID: css-spec-064 - "ul li:first-child" → (0,1,2)
+TEST_ID: css-spec-065 - "a[href]:visited" → (0,2,1)
+TEST_ID: css-spec-066 - "::placeholder" counts as pseudo-element (c)
+TEST_ID: css-spec-067 - ":nth-child(2n+1)" → (0,1,0)
+TEST_ID: css-spec-068 - New selector input focuses automatically
+TEST_ID: css-spec-069 - Selector input uses monospace font
+TEST_ID: css-spec-070 - Detail title shows selector being analyzed
+TEST_ID: css-spec-071 - Score tuple shown as "(a, b, c)" text
+TEST_ID: css-spec-072 - Empty selector input is ignored in calculation
+TEST_ID: css-spec-073 - Background is dark (#0f1117)
+TEST_ID: css-spec-074 - Cards have surface background
+TEST_ID: css-spec-075 - Card title in teal uppercase
+TEST_ID: css-spec-076 - Footer DevNestio link present
+TEST_ID: css-spec-077 - "h1.title#main" → (1,1,1)
+TEST_ID: css-spec-078 - Comma-separated groups — first group only used for first detail
+TEST_ID: css-spec-079 - Adding many rows works without UI issues
+TEST_ID: css-spec-080 - Responsive layout on mobile width
+-->
+</body>
+</html>

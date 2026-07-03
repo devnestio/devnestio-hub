@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HTTP Headers Reference — devnestio</title>
+  <meta name="description" content="Searchable reference of 100+ HTTP request and response headers. Filter by category, see syntax, description, and example values. Browser-only." />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    header { background: #1a1d2e; border-bottom: 1px solid #2d3748; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+    header a { color: #7c85f3; text-decoration: none; font-size: 14px; }
+    header h1 { font-size: 18px; font-weight: 700; color: #fff; }
+    .container { max-width: 1000px; margin: 0 auto; padding: 24px 16px; }
+    .search-row { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .search-row input { flex: 1; min-width: 200px; background: #1a1d2e; border: 1px solid #2d3748; border-radius: 8px; padding: 10px 14px; color: #e2e8f0; font-size: 15px; }
+    .search-row input:focus { outline: none; border-color: #7c85f3; }
+    .cats { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
+    .cat-btn { background: #1a1d2e; border: 1px solid #2d3748; border-radius: 20px; padding: 5px 14px; font-size: 12px; cursor: pointer; color: #718096; }
+    .cat-btn.active { background: #7c85f3; border-color: #7c85f3; color: #fff; }
+    .dir-tabs { display: flex; gap: 6px; margin-bottom: 16px; }
+    .dir-tab { background: #1a1d2e; border: 1px solid #2d3748; border-radius: 6px; padding: 6px 16px; font-size: 13px; cursor: pointer; color: #718096; }
+    .dir-tab.active { background: #2d3748; color: #e2e8f0; border-color: #4a5568; }
+    #count { font-size: 13px; color: #718096; margin-bottom: 10px; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th { background: #1a1d2e; padding: 10px 14px; text-align: left; font-size: 12px; font-weight: 600; color: #a0aec0; text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid #2d3748; }
+    td { padding: 10px 14px; border-bottom: 1px solid #1a1d2e; font-size: 13px; vertical-align: top; }
+    tr:hover td { background: #1a1d2e; }
+    .name-cell { font-family: 'Courier New', monospace; font-size: 13px; color: #7ee787; white-space: nowrap; cursor: pointer; }
+    .name-cell:hover { color: #7c85f3; }
+    .dir-badge { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 700; letter-spacing: .04em; }
+    .dir-req { background: #1a365d; color: #90cdf4; }
+    .dir-res { background: #1a202c; color: #68d391; }
+    .dir-both { background: #322659; color: #b794f4; }
+    .cat-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; color: #a0aec0; background: #2d3748; }
+    .example-cell { font-family: 'Courier New', monospace; font-size: 11px; color: #fbd38d; max-width: 260px; word-break: break-all; }
+    .no-results { text-align: center; padding: 48px; color: #4a5568; font-size: 15px; }
+    .highlight { background: #b7791f; color: #fff; border-radius: 2px; padding: 0 2px; }
+  </style>
+</head>
+<body>
+<header>
+  <a href="/">← devnestio</a>
+  <h1>HTTP Headers Reference</h1>
+</header>
+<div class="container">
+  <div class="search-row">
+    <input type="search" id="search" placeholder="Search headers… (e.g. Content-Type, cache, auth)" oninput="render()" />
+  </div>
+  <div class="dir-tabs">
+    <div class="dir-tab active" onclick="setDir('all',this)">All</div>
+    <div class="dir-tab" onclick="setDir('request',this)">Request</div>
+    <div class="dir-tab" onclick="setDir('response',this)">Response</div>
+    <div class="dir-tab" onclick="setDir('both',this)">Both</div>
+  </div>
+  <div class="cats" id="cats"></div>
+  <div id="count"></div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Header</th>
+          <th>Direction</th>
+          <th>Category</th>
+          <th>Description</th>
+          <th>Example</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+  <div class="no-results" id="no-results" style="display:none">No headers matched.</div>
+</div>
+
+<script>
+const HEADERS = [
+  // Auth
+  { name: 'Authorization', dir: 'request', cat: 'Auth', desc: 'Credentials to authenticate a user with a server (e.g. Bearer token, Basic auth).', ex: 'Bearer eyJhbGc...' },
+  { name: 'WWW-Authenticate', dir: 'response', cat: 'Auth', desc: 'Defines the authentication method that should be used to access a resource.', ex: 'Basic realm="example"' },
+  { name: 'Proxy-Authorization', dir: 'request', cat: 'Auth', desc: 'Credentials to authenticate with an intermediate proxy.', ex: 'Basic dXNlcjpwYXNz' },
+  { name: 'Proxy-Authenticate', dir: 'response', cat: 'Auth', desc: 'Defines the authentication method for a proxy.', ex: 'Basic realm="proxy"' },
+
+  // Caching
+  { name: 'Cache-Control', dir: 'both', cat: 'Caching', desc: 'Directives for caching mechanisms in both requests and responses.', ex: 'max-age=3600, must-revalidate' },
+  { name: 'Expires', dir: 'response', cat: 'Caching', desc: 'Date/time after which the response is considered stale.', ex: 'Thu, 01 Jan 2026 00:00:00 GMT' },
+  { name: 'ETag', dir: 'response', cat: 'Caching', desc: 'Identifier for a specific version of a resource (for conditional requests).', ex: '"33a64df5"' },
+  { name: 'If-None-Match', dir: 'request', cat: 'Caching', desc: 'Makes request conditional; server returns 304 if ETag matches.', ex: '"33a64df5"' },
+  { name: 'If-Match', dir: 'request', cat: 'Caching', desc: 'Makes request conditional; server must match ETag or return 412.', ex: '"33a64df5"' },
+  { name: 'Last-Modified', dir: 'response', cat: 'Caching', desc: 'Date/time the resource was last modified.', ex: 'Mon, 10 Jun 2024 10:00:00 GMT' },
+  { name: 'If-Modified-Since', dir: 'request', cat: 'Caching', desc: 'Conditional request; returns 304 if resource unchanged since date.', ex: 'Mon, 10 Jun 2024 10:00:00 GMT' },
+  { name: 'If-Unmodified-Since', dir: 'request', cat: 'Caching', desc: 'Conditional request; continues only if resource unchanged since date.', ex: 'Mon, 10 Jun 2024 10:00:00 GMT' },
+  { name: 'Pragma', dir: 'both', cat: 'Caching', desc: 'HTTP/1.0 cache directive; use Cache-Control in HTTP/1.1.', ex: 'no-cache' },
+  { name: 'Vary', dir: 'response', cat: 'Caching', desc: 'Tells caches which request headers determine cacheability.', ex: 'Accept-Encoding, Accept-Language' },
+  { name: 'Age', dir: 'response', cat: 'Caching', desc: 'Seconds the object was in a proxy cache.', ex: '120' },
+
+  // Content
+  { name: 'Content-Type', dir: 'both', cat: 'Content', desc: 'Media type (MIME) of the resource or request body.', ex: 'application/json; charset=utf-8' },
+  { name: 'Content-Length', dir: 'both', cat: 'Content', desc: 'Size of the request/response body in bytes.', ex: '1348' },
+  { name: 'Content-Encoding', dir: 'both', cat: 'Content', desc: 'Encoding applied to the body (gzip, br, deflate).', ex: 'gzip' },
+  { name: 'Content-Language', dir: 'both', cat: 'Content', desc: 'Language(s) intended for the audience of the response.', ex: 'en-US' },
+  { name: 'Content-Location', dir: 'both', cat: 'Content', desc: 'Alternate location for the returned data.', ex: '/documents/foo.json' },
+  { name: 'Content-Disposition', dir: 'response', cat: 'Content', desc: 'Suggests filename and whether content should be displayed inline or downloaded.', ex: 'attachment; filename="file.pdf"' },
+  { name: 'Content-Range', dir: 'response', cat: 'Content', desc: 'Where in the full body a partial message belongs.', ex: 'bytes 200-1000/67589' },
+  { name: 'Content-Security-Policy', dir: 'response', cat: 'Security', desc: 'Controls which resources can be loaded, mitigating XSS.', ex: "default-src 'self'; script-src 'self' cdn.example.com" },
+  { name: 'Content-Security-Policy-Report-Only', dir: 'response', cat: 'Security', desc: 'Enables CSP in report-only mode without blocking resources.', ex: "default-src 'self'; report-uri /csp-report" },
+
+  // CORS
+  { name: 'Access-Control-Allow-Origin', dir: 'response', cat: 'CORS', desc: 'Specifies which origins are allowed in cross-origin requests.', ex: 'https://example.com' },
+  { name: 'Access-Control-Allow-Methods', dir: 'response', cat: 'CORS', desc: 'Allowed HTTP methods for cross-origin requests.', ex: 'GET, POST, PUT, DELETE' },
+  { name: 'Access-Control-Allow-Headers', dir: 'response', cat: 'CORS', desc: 'Allowed headers in cross-origin requests.', ex: 'Content-Type, Authorization' },
+  { name: 'Access-Control-Allow-Credentials', dir: 'response', cat: 'CORS', desc: 'Whether credentials (cookies, auth) are sent on cross-origin requests.', ex: 'true' },
+  { name: 'Access-Control-Expose-Headers', dir: 'response', cat: 'CORS', desc: 'Headers the browser can access in cross-origin response.', ex: 'X-Custom-Header, X-Request-Id' },
+  { name: 'Access-Control-Max-Age', dir: 'response', cat: 'CORS', desc: 'How long preflight results can be cached (seconds).', ex: '86400' },
+  { name: 'Access-Control-Request-Method', dir: 'request', cat: 'CORS', desc: 'Used in preflight to tell server which method will be used.', ex: 'POST' },
+  { name: 'Access-Control-Request-Headers', dir: 'request', cat: 'CORS', desc: 'Used in preflight to tell server which headers will be used.', ex: 'Content-Type, Authorization' },
+  { name: 'Origin', dir: 'request', cat: 'CORS', desc: 'Origin of the cross-site access request.', ex: 'https://example.com' },
+
+  // Connection
+  { name: 'Connection', dir: 'both', cat: 'Connection', desc: 'Controls whether the network connection stays open after the transaction.', ex: 'keep-alive' },
+  { name: 'Keep-Alive', dir: 'both', cat: 'Connection', desc: 'Parameters for persistent connections.', ex: 'timeout=5, max=1000' },
+  { name: 'Transfer-Encoding', dir: 'both', cat: 'Connection', desc: 'Form of encoding used to safely transfer the payload (chunked, gzip).', ex: 'chunked' },
+  { name: 'Upgrade', dir: 'both', cat: 'Connection', desc: 'Request to switch to a different protocol (WebSocket, HTTP/2).', ex: 'websocket' },
+  { name: 'TE', dir: 'request', cat: 'Connection', desc: 'Transfer encodings the client is willing to accept.', ex: 'trailers, deflate' },
+  { name: 'Trailer', dir: 'both', cat: 'Connection', desc: 'List of header fields present in trailers of chunked transfer.', ex: 'Expires' },
+
+  // Cookies
+  { name: 'Cookie', dir: 'request', cat: 'Cookies', desc: 'Stored HTTP cookies sent by the client to the server.', ex: 'session=abc123; theme=dark' },
+  { name: 'Set-Cookie', dir: 'response', cat: 'Cookies', desc: 'Server instructs the client to store a cookie.', ex: 'id=a3; Expires=Wed, 09 Jun 2026 10:18:14 GMT; HttpOnly' },
+  { name: 'Cookie2', dir: 'request', cat: 'Cookies', desc: 'Obsolete cookie header from RFC 2965.', ex: '$Version=1' },
+  { name: 'Set-Cookie2', dir: 'response', cat: 'Cookies', desc: 'Obsolete set-cookie header from RFC 2965.', ex: 'key=val; version=1' },
+
+  // Forwarding / Proxy
+  { name: 'Host', dir: 'request', cat: 'Routing', desc: 'Domain name of the server (required in HTTP/1.1).', ex: 'api.example.com:8080' },
+  { name: 'Forwarded', dir: 'request', cat: 'Routing', desc: 'Contains info from proxies that is altered or lost when proxied.', ex: 'for=192.0.2.60; proto=http; by=203.0.113.43' },
+  { name: 'X-Forwarded-For', dir: 'request', cat: 'Routing', desc: 'De facto standard for identifying the originating IP address.', ex: '129.78.138.66, 129.78.64.103' },
+  { name: 'X-Forwarded-Host', dir: 'request', cat: 'Routing', desc: 'Original host requested by the client in the Host header.', ex: 'example.com' },
+  { name: 'X-Forwarded-Proto', dir: 'request', cat: 'Routing', desc: 'Protocol (HTTP or HTTPS) used by the client.', ex: 'https' },
+  { name: 'X-Real-IP', dir: 'request', cat: 'Routing', desc: 'Real IP of the connecting client (set by some proxies).', ex: '198.51.100.42' },
+  { name: 'Via', dir: 'both', cat: 'Routing', desc: 'Informs the server of proxies through which the request was sent.', ex: '1.0 fred, 1.1 example.com (Apache/1.1)' },
+
+  // Request info
+  { name: 'Accept', dir: 'request', cat: 'Negotiation', desc: 'MIME types the client can process.', ex: 'text/html,application/xhtml+xml,application/json;q=0.9' },
+  { name: 'Accept-Encoding', dir: 'request', cat: 'Negotiation', desc: 'Compression algorithms the client understands.', ex: 'gzip, deflate, br' },
+  { name: 'Accept-Language', dir: 'request', cat: 'Negotiation', desc: 'Human languages the client prefers.', ex: 'en-US,en;q=0.9,ja;q=0.8' },
+  { name: 'Accept-Charset', dir: 'request', cat: 'Negotiation', desc: 'Character sets the client can understand (deprecated).', ex: 'utf-8, iso-8859-1;q=0.5' },
+  { name: 'Accept-Ranges', dir: 'response', cat: 'Negotiation', desc: 'Indicates if the server supports range requests.', ex: 'bytes' },
+  { name: 'Range', dir: 'request', cat: 'Negotiation', desc: 'Part of a resource to return (for partial content).', ex: 'bytes=200-1000' },
+
+  // Redirects
+  { name: 'Location', dir: 'response', cat: 'Redirect', desc: 'URL to redirect a page to (used with 3xx and 201 responses).', ex: 'https://www.example.com/new' },
+
+  // Security
+  { name: 'Strict-Transport-Security', dir: 'response', cat: 'Security', desc: 'Enforces HTTPS connections (HSTS).', ex: 'max-age=31536000; includeSubDomains' },
+  { name: 'X-Content-Type-Options', dir: 'response', cat: 'Security', desc: 'Prevents MIME type sniffing.', ex: 'nosniff' },
+  { name: 'X-Frame-Options', dir: 'response', cat: 'Security', desc: 'Controls if page can be rendered in a frame/iframe.', ex: 'DENY' },
+  { name: 'X-XSS-Protection', dir: 'response', cat: 'Security', desc: 'Enables XSS filter in older browsers (largely superseded by CSP).', ex: '1; mode=block' },
+  { name: 'Referrer-Policy', dir: 'response', cat: 'Security', desc: 'Governs how much referrer info is included in requests.', ex: 'strict-origin-when-cross-origin' },
+  { name: 'Permissions-Policy', dir: 'response', cat: 'Security', desc: 'Controls browser features and APIs (camera, microphone, geolocation).', ex: 'geolocation=(), camera=()' },
+  { name: 'Cross-Origin-Opener-Policy', dir: 'response', cat: 'Security', desc: 'Controls sharing of browsing context group with cross-origin docs.', ex: 'same-origin' },
+  { name: 'Cross-Origin-Resource-Policy', dir: 'response', cat: 'Security', desc: 'Prevents other origins from loading the response (defense against Spectre).', ex: 'same-origin' },
+  { name: 'Cross-Origin-Embedder-Policy', dir: 'response', cat: 'Security', desc: 'Controls embedding of cross-origin resources.', ex: 'require-corp' },
+
+  // Request metadata
+  { name: 'User-Agent', dir: 'request', cat: 'Metadata', desc: 'Identifies the browser, version, and OS of the client.', ex: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)…' },
+  { name: 'Referer', dir: 'request', cat: 'Metadata', desc: 'URL of the previous page that linked to the current request.', ex: 'https://www.google.com/' },
+  { name: 'Date', dir: 'both', cat: 'Metadata', desc: 'Date and time at which the message was sent.', ex: 'Wed, 21 Oct 2024 07:28:00 GMT' },
+  { name: 'Server', dir: 'response', cat: 'Metadata', desc: 'Name and version of the web server software.', ex: 'nginx/1.25.0' },
+  { name: 'X-Powered-By', dir: 'response', cat: 'Metadata', desc: 'Technology powering the server (often disabled for security).', ex: 'PHP/8.2.0' },
+  { name: 'X-Request-ID', dir: 'both', cat: 'Metadata', desc: 'Unique identifier for the request, useful for tracing.', ex: 'f7d8a9b2-1234-5678-abcd-ef1234567890' },
+  { name: 'Request-ID', dir: 'request', cat: 'Metadata', desc: 'Alternative request tracing header.', ex: 'req-abc123' },
+  { name: 'X-Correlation-ID', dir: 'both', cat: 'Metadata', desc: 'Correlation token to trace requests across microservices.', ex: '8f4dbb3a-e17a-4a6e-b88d-fa5b06d3d4a3' },
+
+  // Compression / encoding
+  { name: 'Accept-Post', dir: 'response', cat: 'Content', desc: 'Media types the server supports for HTTP POST requests.', ex: 'application/json, application/x-www-form-urlencoded' },
+  { name: 'Accept-Patch', dir: 'response', cat: 'Content', desc: 'Media types the server supports for HTTP PATCH requests.', ex: 'application/json-patch+json' },
+
+  // WebSocket
+  { name: 'Sec-WebSocket-Key', dir: 'request', cat: 'WebSocket', desc: 'Base64 key used in WebSocket handshake.', ex: 'dGhlIHNhbXBsZSBub25jZQ==' },
+  { name: 'Sec-WebSocket-Accept', dir: 'response', cat: 'WebSocket', desc: 'Confirms WebSocket handshake by transforming the client key.', ex: 's3pPLMBiTxaQ9kYGzzhZRbK+xOo=' },
+  { name: 'Sec-WebSocket-Version', dir: 'request', cat: 'WebSocket', desc: 'WebSocket protocol version (always 13).', ex: '13' },
+  { name: 'Sec-WebSocket-Protocol', dir: 'both', cat: 'WebSocket', desc: 'Sub-protocol the client wants to use.', ex: 'chat, superchat' },
+  { name: 'Sec-WebSocket-Extensions', dir: 'both', cat: 'WebSocket', desc: 'Extensions the client/server wishes to use.', ex: 'permessage-deflate' },
+
+  // Rate limiting
+  { name: 'X-RateLimit-Limit', dir: 'response', cat: 'Rate Limiting', desc: 'Maximum number of requests allowed per window.', ex: '100' },
+  { name: 'X-RateLimit-Remaining', dir: 'response', cat: 'Rate Limiting', desc: 'Remaining requests in the current window.', ex: '42' },
+  { name: 'X-RateLimit-Reset', dir: 'response', cat: 'Rate Limiting', desc: 'Timestamp when the rate limit window resets.', ex: '1719849600' },
+  { name: 'Retry-After', dir: 'response', cat: 'Rate Limiting', desc: 'How long to wait before making another request (seconds or date).', ex: '120' },
+  { name: 'RateLimit-Limit', dir: 'response', cat: 'Rate Limiting', desc: 'IETF standard rate-limit header (RFC 6585).', ex: '100;w=3600' },
+  { name: 'RateLimit-Remaining', dir: 'response', cat: 'Rate Limiting', desc: 'IETF standard remaining quota header.', ex: '50' },
+  { name: 'RateLimit-Reset', dir: 'response', cat: 'Rate Limiting', desc: 'IETF standard reset time header.', ex: '1719849600' },
+
+  // Fetch metadata
+  { name: 'Sec-Fetch-Site', dir: 'request', cat: 'Fetch Metadata', desc: 'Relationship between request origin and the resource origin.', ex: 'cross-site' },
+  { name: 'Sec-Fetch-Mode', dir: 'request', cat: 'Fetch Metadata', desc: 'Mode of the request (navigate, cors, no-cors, same-origin).', ex: 'navigate' },
+  { name: 'Sec-Fetch-User', dir: 'request', cat: 'Fetch Metadata', desc: 'Whether the request was triggered by a user action.', ex: '?1' },
+  { name: 'Sec-Fetch-Dest', dir: 'request', cat: 'Fetch Metadata', desc: 'Destination of the request (document, script, image, etc.).', ex: 'document' },
+
+  // Server push / hints
+  { name: 'Link', dir: 'response', cat: 'Performance', desc: 'Relationship of linked resources (preload, prefetch, canonical).', ex: '</style.css>; rel=preload; as=style' },
+  { name: 'Alt-Svc', dir: 'response', cat: 'Performance', desc: 'Advertises alternative services (HTTP/3 via QUIC).', ex: 'h3=":443"; ma=86400' },
+  { name: 'Early-Data', dir: 'request', cat: 'Performance', desc: 'Indicates request was sent in TLS early data (0-RTT).', ex: '1' },
+  { name: 'Priority', dir: 'request', cat: 'Performance', desc: 'Request priority hint (RFC 9218).', ex: 'u=1, i' },
+
+  // Misc
+  { name: 'Allow', dir: 'response', cat: 'Misc', desc: 'HTTP methods supported by the resource (returned with 405).', ex: 'GET, POST, HEAD' },
+  { name: 'Expect', dir: 'request', cat: 'Misc', desc: 'Expectations that the server needs to fulfill (Expect: 100-continue).', ex: '100-continue' },
+  { name: 'Max-Forwards', dir: 'request', cat: 'Misc', desc: 'Limits forwarding of TRACE/OPTIONS requests.', ex: '10' },
+  { name: 'Warning', dir: 'both', cat: 'Misc', desc: 'General warning information about possible problems (deprecated in 2022).', ex: '199 Miscellaneous warning' },
+  { name: 'X-DNS-Prefetch-Control', dir: 'response', cat: 'Performance', desc: 'Controls DNS prefetching in browsers.', ex: 'off' },
+  { name: 'Tk', dir: 'response', cat: 'Privacy', desc: 'Tracking status of the response (from Do Not Track spec).', ex: 'N' },
+  { name: 'DNT', dir: 'request', cat: 'Privacy', desc: 'Do Not Track preference of the user (1=opt out, 0=opt in).', ex: '1' },
+  { name: 'Save-Data', dir: 'request', cat: 'Performance', desc: 'Client preference for reduced data usage.', ex: 'on' },
+  { name: 'Sec-GPC', dir: 'request', cat: 'Privacy', desc: 'Global Privacy Control signal (1=opt out of data sale).', ex: '1' },
+];
+
+const CATS = ['All', ...new Set(HEADERS.map(h => h.cat))].filter(Boolean);
+
+let activeCat = 'All';
+let activeDir = 'all';
+
+function buildCats() {
+  const el = document.getElementById('cats');
+  el.innerHTML = '';
+  CATS.forEach(cat => {
+    const btn = document.createElement('div');
+    btn.className = 'cat-btn' + (cat === 'All' ? ' active' : '');
+    btn.textContent = cat;
+    btn.onclick = () => {
+      activeCat = cat;
+      document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      render();
+    };
+    el.appendChild(btn);
+  });
+}
+
+function setDir(d, el) {
+  activeDir = d;
+  document.querySelectorAll('.dir-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+function esc(s) {
+  return s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+
+function highlight(text, q) {
+  if (!q) return esc(text);
+  const escaped = esc(text);
+  const escapedQ = esc(q).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return escaped.replace(new RegExp(`(${escapedQ})`, 'gi'), '<span class="highlight">$1</span>');
+}
+
+function render() {
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  let filtered = HEADERS;
+  if (activeCat !== 'All') filtered = filtered.filter(h => h.cat === activeCat);
+  if (activeDir !== 'all') filtered = filtered.filter(h => h.dir === activeDir || h.dir === 'both');
+  if (activeDir === 'both') filtered = filtered.filter(h => h.dir === 'both');
+  if (q) filtered = filtered.filter(h =>
+    h.name.toLowerCase().includes(q) ||
+    h.desc.toLowerCase().includes(q) ||
+    h.cat.toLowerCase().includes(q) ||
+    h.ex.toLowerCase().includes(q)
+  );
+
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  document.getElementById('no-results').style.display = filtered.length ? 'none' : '';
+
+  filtered.forEach(h => {
+    const dirLabel = h.dir === 'request' ? 'Request' : h.dir === 'response' ? 'Response' : 'Both';
+    const dirClass = h.dir === 'request' ? 'dir-req' : h.dir === 'response' ? 'dir-res' : 'dir-both';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="name-cell" title="Click to copy" onclick="navigator.clipboard.writeText('${h.name}')">${highlight(h.name, q)}</td>
+      <td><span class="dir-badge ${dirClass}">${dirLabel}</span></td>
+      <td><span class="cat-badge">${h.cat}</span></td>
+      <td>${highlight(h.desc, q)}</td>
+      <td class="example-cell">${highlight(h.ex, q)}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('count').textContent = `Showing ${filtered.length} of ${HEADERS.length} headers`;
+}
+
+buildCats();
+render();
+</script>
+</body>
+</html>

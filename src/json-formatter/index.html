@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JSON Formatter & Validator — devnestio</title>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#0f1117;color:#e2e8f0;min-height:100vh;display:flex;flex-direction:column}
+header{padding:20px 24px;border-bottom:1px solid #1e2535;flex-shrink:0}
+h1{font-size:1.4rem;font-weight:700;color:#f8fafc}
+h1 span{color:#4ade80}
+.desc{color:#94a3b8;margin-top:3px;font-size:.85rem}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;padding:12px 24px;border-bottom:1px solid #1e2535;align-items:center;flex-shrink:0}
+.btn{padding:6px 14px;border-radius:6px;border:1px solid #334155;background:#1e2535;color:#e2e8f0;font-size:.82rem;cursor:pointer;font-weight:500}
+.btn:hover{border-color:#60a5fa;color:#60a5fa}
+.btn-primary{background:#16a34a;border-color:#16a34a;color:#fff}
+.btn-primary:hover{background:#15803d;border-color:#15803d;color:#fff}
+.btn-danger{background:#1e2535;border-color:#dc2626;color:#f87171}
+.btn-danger:hover{background:#450a0a}
+.indent-wrap{display:flex;align-items:center;gap:6px;color:#94a3b8;font-size:.82rem}
+#indent{width:52px;background:#1e2535;border:1px solid #334155;color:#e2e8f0;padding:4px 8px;border-radius:4px;font-size:.82rem}
+.status-bar{padding:6px 24px;font-size:.78rem;font-weight:500;flex-shrink:0;display:flex;align-items:center;gap:8px}
+.status-ok{color:#4ade80}
+.status-err{color:#f87171}
+.panels{display:grid;grid-template-columns:1fr 1fr;flex:1;min-height:0;gap:0}
+@media(max-width:700px){.panels{grid-template-columns:1fr}}
+.panel{display:flex;flex-direction:column;border-right:1px solid #1e2535}
+.panel:last-child{border-right:none}
+.panel-label{padding:6px 16px;font-size:.73rem;font-weight:600;text-transform:uppercase;color:#64748b;background:#0f1117;border-bottom:1px solid #1e2535;letter-spacing:.07em;flex-shrink:0}
+textarea{flex:1;background:#141924;color:#e2e8f0;border:none;resize:none;padding:16px;font-family:'Courier New',monospace;font-size:.83rem;line-height:1.6;outline:none;min-height:300px}
+textarea::placeholder{color:#334155}
+.output{flex:1;background:#0f1117;padding:16px;font-family:'Courier New',monospace;font-size:.83rem;line-height:1.6;overflow:auto;white-space:pre;min-height:300px;cursor:default}
+.json-key{color:#7dd3fc}
+.json-str{color:#4ade80}
+.json-num{color:#fb923c}
+.json-bool{color:#c4b5fd}
+.json-null{color:#94a3b8}
+.json-err{color:#f87171}
+</style>
+</head>
+<body>
+<header>
+  <h1>JSON <span>Formatter</span> & Validator</h1>
+  <p class="desc">Paste JSON to format, validate, minify, or sort keys — all in-browser, nothing sent to a server</p>
+</header>
+<div class="toolbar">
+  <button class="btn btn-primary" onclick="format()">Format / Validate</button>
+  <button class="btn" onclick="minify()">Minify</button>
+  <button class="btn" onclick="sortKeys()">Sort Keys</button>
+  <button class="btn" onclick="copyOutput()">Copy Output</button>
+  <button class="btn btn-danger" onclick="clearAll()">Clear</button>
+  <div class="indent-wrap">
+    Indent: <input type="number" id="indent" value="2" min="0" max="8">
+  </div>
+</div>
+<div class="status-bar" id="status"></div>
+<div class="panels">
+  <div class="panel">
+    <div class="panel-label">Input</div>
+    <textarea id="input" placeholder='Paste JSON here, e.g. {"key":"value","num":42}' oninput="onInput()"></textarea>
+  </div>
+  <div class="panel">
+    <div class="panel-label">Output</div>
+    <div class="output" id="output"></div>
+  </div>
+</div>
+<script>
+let lastParsed = null;
+
+function setStatus(msg, ok) {
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = 'status-bar ' + (ok ? 'status-ok' : 'status-err');
+}
+
+function getIndent() {
+  const v = parseInt(document.getElementById('indent').value);
+  return isNaN(v) ? 2 : Math.max(0, Math.min(8, v));
+}
+
+function highlight(json) {
+  return json
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/("(\\u[a-fA-F0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function(match) {
+      let cls = 'json-num';
+      if (/^"/.test(match)) {
+        cls = /:$/.test(match) ? 'json-key' : 'json-str';
+      } else if (/true|false/.test(match)) {
+        cls = 'json-bool';
+      } else if (/null/.test(match)) {
+        cls = 'json-null';
+      }
+      return '<span class="' + cls + '">' + match + '</span>';
+    });
+}
+
+function parse(text) {
+  try {
+    const parsed = JSON.parse(text);
+    lastParsed = parsed;
+    return { ok: true, parsed };
+  } catch (e) {
+    lastParsed = null;
+    return { ok: false, error: e.message };
+  }
+}
+
+function format() {
+  const text = document.getElementById('input').value.trim();
+  if (!text) { document.getElementById('output').innerHTML = ''; setStatus('', true); return; }
+  const result = parse(text);
+  if (!result.ok) {
+    document.getElementById('output').innerHTML = '<span class="json-err">Error: ' + escHtml(result.error) + '</span>';
+    setStatus('✗ Invalid JSON — ' + result.error, false);
+    return;
+  }
+  const formatted = JSON.stringify(result.parsed, null, getIndent());
+  document.getElementById('output').innerHTML = highlight(formatted);
+  setStatus('✓ Valid JSON — ' + countStats(result.parsed), true);
+}
+
+function minify() {
+  const text = document.getElementById('input').value.trim();
+  if (!text) return;
+  const result = parse(text);
+  if (!result.ok) { setStatus('✗ Cannot minify — ' + result.error, false); return; }
+  const minified = JSON.stringify(result.parsed);
+  document.getElementById('output').innerHTML = highlight(minified);
+  setStatus('✓ Minified — ' + minified.length + ' chars', true);
+}
+
+function deepSortKeys(obj) {
+  if (Array.isArray(obj)) return obj.map(deepSortKeys);
+  if (obj !== null && typeof obj === 'object') {
+    return Object.fromEntries(
+      Object.entries(obj).sort(([a],[b]) => a.localeCompare(b)).map(([k,v]) => [k, deepSortKeys(v)])
+    );
+  }
+  return obj;
+}
+
+function sortKeys() {
+  const text = document.getElementById('input').value.trim();
+  if (!text) return;
+  const result = parse(text);
+  if (!result.ok) { setStatus('✗ Cannot sort — ' + result.error, false); return; }
+  const sorted = deepSortKeys(result.parsed);
+  const formatted = JSON.stringify(sorted, null, getIndent());
+  document.getElementById('output').innerHTML = highlight(formatted);
+  setStatus('✓ Keys sorted alphabetically', true);
+}
+
+function copyOutput() {
+  const output = document.getElementById('output');
+  const text = output.innerText;
+  if (!text) return;
+  navigator.clipboard.writeText(text);
+  const btn = document.querySelector('[onclick="copyOutput()"]');
+  const orig = btn.textContent;
+  btn.textContent = 'Copied!';
+  setTimeout(() => btn.textContent = orig, 1400);
+}
+
+function clearAll() {
+  document.getElementById('input').value = '';
+  document.getElementById('output').innerHTML = '';
+  document.getElementById('status').textContent = '';
+  lastParsed = null;
+}
+
+function countStats(obj) {
+  if (Array.isArray(obj)) {
+    return obj.length + ' items';
+  }
+  if (obj !== null && typeof obj === 'object') {
+    return Object.keys(obj).length + ' keys';
+  }
+  return typeof obj;
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+let debounceTimer;
+function onInput() {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(format, 300);
+}
+
+// Load sample on first visit
+document.getElementById('input').value = JSON.stringify({
+  "name": "devnestio",
+  "version": "1.0.0",
+  "features": ["format", "validate", "minify", "sort"],
+  "active": true,
+  "count": 155,
+  "meta": { "author": "devnestio", "license": "MIT" }
+}, null, 2);
+format();
+</script>
+</body>
+</html>

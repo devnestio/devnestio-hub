@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ANSI Color Code Generator — Terminal Escape Codes | DevNestio</title>
+  <meta name="description" content="Generate ANSI terminal escape codes for colored and styled output. Supports 8/256/truecolor modes, bold, italic, underline, blink, and more. Preview text live." />
+  <meta property="og:title" content="ANSI Color Code Generator | DevNestio" />
+  <meta property="og:description" content="Build ANSI escape sequences for terminal output with live preview. 8-color, 256-color, and RGB truecolor modes." />
+  <meta property="og:url" content="https://devnestio.pages.dev/ansi-color-gen/" />
+  <meta name="twitter:card" content="summary" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    #privacy-banner { background: #1e293b; border-bottom: 1px solid #334155; padding: 8px 16px; font-size: 12px; color: #94a3b8; text-align: center; }
+    header { background: #1e293b; border-bottom: 1px solid #334155; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+    header a { color: #64748b; font-size: 13px; text-decoration: none; margin-left: auto; }
+    header a:hover { color: #94a3b8; }
+    .badge { background: #f59e0b; color: #000; font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+    main { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 18px; margin-bottom: 16px; }
+    .card-title { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 14px; }
+    .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .col { flex: 1; min-width: 200px; }
+    label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 5px; font-weight: 600; }
+    input[type=text], textarea, select { width: 100%; padding: 8px 12px; background: #0f1117; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 14px; outline: none; font-family: inherit; }
+    input[type=text]:focus, textarea:focus, select:focus { border-color: #f59e0b; }
+    input[type=color] { width: 48px; height: 36px; padding: 2px; background: #0f1117; border: 1px solid #334155; border-radius: 6px; cursor: pointer; }
+    .mode-tabs { display: flex; gap: 4px; margin-bottom: 14px; }
+    .mode-tab { padding: 5px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid #334155; background: #0f1117; color: #64748b; }
+    .mode-tab.active { background: #f59e0b; border-color: #f59e0b; color: #000; }
+    .style-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+    .style-chk { display: flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 6px; border: 1px solid #334155; background: #0f1117; cursor: pointer; font-size: 12px; color: #94a3b8; user-select: none; }
+    .style-chk.on { border-color: #f59e0b; background: rgba(245,158,11,0.1); color: #f59e0b; }
+    .palette-8 { display: flex; gap: 4px; flex-wrap: wrap; }
+    .swatch { width: 32px; height: 32px; border-radius: 5px; cursor: pointer; border: 2px solid transparent; position: relative; }
+    .swatch.selected { border-color: #f59e0b; }
+    .swatch:hover { opacity: 0.85; }
+    .palette-256 { display: grid; grid-template-columns: repeat(32, 1fr); gap: 2px; }
+    .swatch-sm { width: 100%; aspect-ratio: 1; border-radius: 2px; cursor: pointer; border: 1px solid transparent; }
+    .swatch-sm.selected { border-color: #fff; outline: 1px solid #f59e0b; }
+    .preview-box { font-family: 'Menlo', 'Courier New', monospace; font-size: 16px; padding: 20px; background: #000; border-radius: 8px; min-height: 60px; line-height: 1.6; white-space: pre-wrap; }
+    .code-box { background: #0f1117; border: 1px solid #334155; border-radius: 6px; padding: 12px; font-family: monospace; font-size: 13px; color: #e2e8f0; white-space: pre-wrap; word-break: break-all; position: relative; }
+    .copy-btn { position: absolute; top: 8px; right: 8px; padding: 3px 10px; border-radius: 5px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid #334155; background: #1e293b; color: #64748b; }
+    .copy-btn:hover { border-color: #f59e0b; color: #f59e0b; }
+    .rgb-row { display: flex; gap: 8px; align-items: center; }
+    .rgb-num { width: 60px; padding: 6px 8px; background: #0f1117; border: 1px solid #334155; border-radius: 5px; color: #e2e8f0; font-size: 13px; text-align: center; outline: none; }
+    .rgb-num:focus { border-color: #f59e0b; }
+    .section-label { font-size: 11px; color: #64748b; margin-bottom: 6px; font-weight: 700; text-transform: uppercase; }
+    .fg-bg-tabs { display: flex; gap: 4px; margin-bottom: 10px; }
+    .fg-bg-tab { padding: 3px 10px; border-radius: 5px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid #334155; background: #0f1117; color: #64748b; }
+    .fg-bg-tab.active { background: #f59e0b; border-color: #f59e0b; color: #000; }
+    #ad-slot { margin: 20px auto; text-align: center; }
+  </style>
+</head>
+<body>
+<div id="privacy-banner">🔒 All processing happens in your browser. No data is sent to any server.</div>
+<header>
+  <span class="badge">FREE</span>
+  <h1>ANSI Color Code Generator</h1>
+  <a href="https://devnestio.pages.dev">← All Tools</a>
+</header>
+<main>
+
+  <!-- Text input -->
+  <div class="card">
+    <div class="card-title">Sample Text</div>
+    <input type="text" id="sample-text" value="Hello, Terminal!" oninput="update()" />
+  </div>
+
+  <!-- Text Styles -->
+  <div class="card">
+    <div class="card-title">Text Styles</div>
+    <div class="style-grid" id="style-grid">
+      <div class="style-chk" data-code="1" onclick="toggleStyle(this)"><b>Bold</b></div>
+      <div class="style-chk" data-code="2" onclick="toggleStyle(this)"><span style="opacity:.6">Dim</span></div>
+      <div class="style-chk" data-code="3" onclick="toggleStyle(this)"><i>Italic</i></div>
+      <div class="style-chk" data-code="4" onclick="toggleStyle(this)"><u>Underline</u></div>
+      <div class="style-chk" data-code="5" onclick="toggleStyle(this)">Blink</div>
+      <div class="style-chk" data-code="7" onclick="toggleStyle(this)">Reverse</div>
+      <div class="style-chk" data-code="8" onclick="toggleStyle(this)">Hidden</div>
+      <div class="style-chk" data-code="9" onclick="toggleStyle(this)"><s>Strike</s></div>
+    </div>
+  </div>
+
+  <!-- Color Mode -->
+  <div class="card">
+    <div class="card-title">Color</div>
+    <div class="mode-tabs">
+      <button class="mode-tab active" onclick="setMode('8')" id="tab-8">8 Color</button>
+      <button class="mode-tab" onclick="setMode('256')" id="tab-256">256 Color</button>
+      <button class="mode-tab" onclick="setMode('rgb')" id="tab-rgb">RGB / True Color</button>
+      <button class="mode-tab" onclick="setMode('none')" id="tab-none">No Color</button>
+    </div>
+
+    <div id="fg-bg-sel">
+      <div class="fg-bg-tabs">
+        <button class="fg-bg-tab active" onclick="setFgBg('fg')" id="fbtab-fg">Foreground</button>
+        <button class="fg-bg-tab" onclick="setFgBg('bg')" id="fbtab-bg">Background</button>
+      </div>
+    </div>
+
+    <!-- 8-color palette -->
+    <div id="palette-8-wrap">
+      <div class="section-label">Standard</div>
+      <div class="palette-8" id="palette-8"></div>
+      <div class="section-label" style="margin-top:10px">Bright</div>
+      <div class="palette-8" id="palette-8b"></div>
+    </div>
+
+    <!-- 256-color palette -->
+    <div id="palette-256-wrap" style="display:none">
+      <div class="palette-256" id="palette-256"></div>
+      <div style="margin-top:8px;font-size:12px;color:#64748b" id="sel-256-label">Selected: —</div>
+    </div>
+
+    <!-- RGB -->
+    <div id="palette-rgb-wrap" style="display:none">
+      <div class="rgb-row">
+        <label style="margin:0;min-width:20px">R</label>
+        <input type="range" min="0" max="255" value="255" id="rgb-r" oninput="syncRgb('r')" style="flex:1" />
+        <input class="rgb-num" type="number" min="0" max="255" value="255" id="rgb-r-n" oninput="syncRgb('rn')" />
+      </div>
+      <div class="rgb-row" style="margin-top:6px">
+        <label style="margin:0;min-width:20px">G</label>
+        <input type="range" min="0" max="255" value="128" id="rgb-g" oninput="syncRgb('g')" style="flex:1" />
+        <input class="rgb-num" type="number" min="0" max="255" value="128" id="rgb-g-n" oninput="syncRgb('gn')" />
+      </div>
+      <div class="rgb-row" style="margin-top:6px">
+        <label style="margin:0;min-width:20px">B</label>
+        <input type="range" min="0" max="255" value="0" id="rgb-b" oninput="syncRgb('b')" style="flex:1" />
+        <input class="rgb-num" type="number" min="0" max="255" value="0" id="rgb-b-n" oninput="syncRgb('bn')" />
+      </div>
+      <div style="margin-top:8px;display:flex;align-items:center;gap:10px">
+        <input type="color" id="rgb-picker" value="#ff8000" oninput="syncColorPicker()" />
+        <span style="font-size:13px;color:#94a3b8">Or pick from color wheel</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preview -->
+  <div class="card">
+    <div class="card-title">Preview</div>
+    <div class="preview-box" id="preview">Hello, Terminal!</div>
+  </div>
+
+  <!-- Generated Code -->
+  <div class="card">
+    <div class="card-title">Generated Escape Sequences</div>
+    <div style="margin-bottom:10px">
+      <div class="section-label">Shell / Bash (echo -e)</div>
+      <div class="code-box" id="code-bash" style="padding-right:70px">
+        <button class="copy-btn" onclick="copyCode('bash')">Copy</button>
+        <span id="bash-code"></span>
+      </div>
+    </div>
+    <div style="margin-bottom:10px">
+      <div class="section-label">Python (print)</div>
+      <div class="code-box" id="code-python" style="padding-right:70px">
+        <button class="copy-btn" onclick="copyCode('python')">Copy</button>
+        <span id="python-code"></span>
+      </div>
+    </div>
+    <div>
+      <div class="section-label">Raw Escape Sequence (ESC = \\e)</div>
+      <div class="code-box" id="code-raw" style="padding-right:70px">
+        <button class="copy-btn" onclick="copyCode('raw')">Copy</button>
+        <span id="raw-code"></span>
+      </div>
+    </div>
+  </div>
+
+  <div id="ad-slot" data-ea-publisher="devnestio" data-ea-type="image"></div>
+</main>
+<script>
+const ANSI_8 = [
+  { name:'Black',   fg:30, bg:40,  hex:'#000000' },
+  { name:'Red',     fg:31, bg:41,  hex:'#aa0000' },
+  { name:'Green',   fg:32, bg:42,  hex:'#00aa00' },
+  { name:'Yellow',  fg:33, bg:43,  hex:'#aa5500' },
+  { name:'Blue',    fg:34, bg:44,  hex:'#0000aa' },
+  { name:'Magenta', fg:35, bg:45,  hex:'#aa00aa' },
+  { name:'Cyan',    fg:36, bg:46,  hex:'#00aaaa' },
+  { name:'White',   fg:37, bg:47,  hex:'#aaaaaa' },
+];
+const ANSI_8B = [
+  { name:'Bright Black',   fg:90, bg:100, hex:'#555555' },
+  { name:'Bright Red',     fg:91, bg:101, hex:'#ff5555' },
+  { name:'Bright Green',   fg:92, bg:102, hex:'#55ff55' },
+  { name:'Bright Yellow',  fg:93, bg:103, hex:'#ffff55' },
+  { name:'Bright Blue',    fg:94, bg:104, hex:'#5555ff' },
+  { name:'Bright Magenta', fg:95, bg:105, hex:'#ff55ff' },
+  { name:'Bright Cyan',    fg:96, bg:106, hex:'#55ffff' },
+  { name:'Bright White',   fg:97, bg:107, hex:'#ffffff' },
+];
+
+let colorMode = '8';
+let fgBg = 'fg';
+let selectedFg = { type: 'none' };
+let selectedBg = { type: 'none' };
+let styles = new Set();
+
+function get256Color(i) {
+  if (i < 8) return ANSI_8[i].hex;
+  if (i < 16) return ANSI_8B[i - 8].hex;
+  if (i < 232) {
+    const n = i - 16;
+    const lvl = [0, 95, 135, 175, 215, 255];
+    const r = lvl[Math.floor(n / 36)];
+    const g = lvl[Math.floor((n % 36) / 6)];
+    const b = lvl[n % 6];
+    return `rgb(${r},${g},${b})`;
+  }
+  const v = (i - 232) * 10 + 8;
+  return `rgb(${v},${v},${v})`;
+}
+
+function buildPalette8() {
+  const p = document.getElementById('palette-8');
+  const pb = document.getElementById('palette-8b');
+  ANSI_8.forEach((c, i) => {
+    const d = document.createElement('div');
+    d.className = 'swatch';
+    d.style.background = c.hex;
+    d.title = c.name;
+    d.dataset.idx = i;
+    d.onclick = () => select8(i, false);
+    p.appendChild(d);
+  });
+  ANSI_8B.forEach((c, i) => {
+    const d = document.createElement('div');
+    d.className = 'swatch';
+    d.style.background = c.hex;
+    d.title = c.name;
+    d.dataset.idx = i + 8;
+    d.onclick = () => select8(i + 8, true);
+    pb.appendChild(d);
+  });
+}
+
+function select8(i, bright) {
+  const arr = bright ? ANSI_8B : ANSI_8;
+  const ci = bright ? i - 8 : i;
+  const c = arr[ci];
+  if (fgBg === 'fg') selectedFg = { type: '8', fg: c.fg, bg: c.bg, hex: c.hex };
+  else selectedBg = { type: '8', fg: c.fg, bg: c.bg, hex: c.hex };
+  document.querySelectorAll('#palette-8 .swatch, #palette-8b .swatch').forEach(s => {
+    s.classList.toggle('selected', parseInt(s.dataset.idx) === i);
+  });
+  update();
+}
+
+function buildPalette256() {
+  const p = document.getElementById('palette-256');
+  for (let i = 0; i < 256; i++) {
+    const d = document.createElement('div');
+    d.className = 'swatch-sm';
+    d.style.background = get256Color(i);
+    d.title = `Color ${i}`;
+    d.dataset.idx = i;
+    d.onclick = () => select256(i);
+    p.appendChild(d);
+  }
+}
+
+function select256(i) {
+  if (fgBg === 'fg') selectedFg = { type: '256', idx: i };
+  else selectedBg = { type: '256', idx: i };
+  document.querySelectorAll('#palette-256 .swatch-sm').forEach(s => {
+    s.classList.toggle('selected', parseInt(s.dataset.idx) === i);
+  });
+  document.getElementById('sel-256-label').textContent = `Selected: Color ${i}`;
+  update();
+}
+
+function syncRgb(from) {
+  const r = document.getElementById('rgb-r');
+  const g = document.getElementById('rgb-g');
+  const b = document.getElementById('rgb-b');
+  const rn = document.getElementById('rgb-r-n');
+  const gn = document.getElementById('rgb-g-n');
+  const bn = document.getElementById('rgb-b-n');
+  const picker = document.getElementById('rgb-picker');
+  if (from === 'r') rn.value = r.value;
+  else if (from === 'rn') r.value = rn.value;
+  else if (from === 'g') gn.value = g.value;
+  else if (from === 'gn') g.value = gn.value;
+  else if (from === 'b') bn.value = b.value;
+  else if (from === 'bn') b.value = bn.value;
+  const rv = parseInt(r.value), gv = parseInt(g.value), bv = parseInt(b.value);
+  picker.value = '#' + [rv,gv,bv].map(x => x.toString(16).padStart(2,'0')).join('');
+  setRgbColor(rv, gv, bv);
+}
+
+function syncColorPicker() {
+  const hex = document.getElementById('rgb-picker').value;
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  document.getElementById('rgb-r').value = r; document.getElementById('rgb-r-n').value = r;
+  document.getElementById('rgb-g').value = g; document.getElementById('rgb-g-n').value = g;
+  document.getElementById('rgb-b').value = b; document.getElementById('rgb-b-n').value = b;
+  setRgbColor(r, g, b);
+}
+
+function setRgbColor(r, g, b) {
+  if (fgBg === 'fg') selectedFg = { type: 'rgb', r, g, b };
+  else selectedBg = { type: 'rgb', r, g, b };
+  update();
+}
+
+function setMode(m) {
+  colorMode = m;
+  ['8','256','rgb','none'].forEach(x => {
+    document.getElementById('tab-' + x).classList.toggle('active', x === m);
+  });
+  document.getElementById('palette-8-wrap').style.display = m === '8' ? '' : 'none';
+  document.getElementById('palette-256-wrap').style.display = m === '256' ? '' : 'none';
+  document.getElementById('palette-rgb-wrap').style.display = m === 'rgb' ? '' : 'none';
+  document.getElementById('fg-bg-sel').style.display = m === 'none' ? 'none' : '';
+  if (m === 'none') { selectedFg = { type:'none' }; selectedBg = { type:'none' }; }
+  update();
+}
+
+function setFgBg(v) {
+  fgBg = v;
+  document.getElementById('fbtab-fg').classList.toggle('active', v === 'fg');
+  document.getElementById('fbtab-bg').classList.toggle('active', v === 'bg');
+}
+
+function toggleStyle(el) {
+  const code = el.dataset.code;
+  if (styles.has(code)) { styles.delete(code); el.classList.remove('on'); }
+  else { styles.add(code); el.classList.add('on'); }
+  update();
+}
+
+function buildAnsiCodes() {
+  const parts = [...styles];
+  const fg = selectedFg;
+  const bg = selectedBg;
+  if (fg.type === '8') parts.push(String(fg.fg));
+  else if (fg.type === '256') parts.push('38', '5', String(fg.idx));
+  else if (fg.type === 'rgb') parts.push('38', '2', String(fg.r), String(fg.g), String(fg.b));
+  if (bg.type === '8') parts.push(String(bg.bg));
+  else if (bg.type === '256') parts.push('48', '5', String(bg.idx));
+  else if (bg.type === 'rgb') parts.push('48', '2', String(bg.r), String(bg.g), String(bg.b));
+  return parts;
+}
+
+function getCssStyle() {
+  const fg = selectedFg;
+  const bg = selectedBg;
+  let css = '';
+  if (fg.type === '8') css += `color:${fg.hex};`;
+  else if (fg.type === '256') css += `color:${get256Color(fg.idx)};`;
+  else if (fg.type === 'rgb') css += `color:rgb(${fg.r},${fg.g},${fg.b});`;
+  if (bg.type === '8') css += `background:${bg.hex};`;
+  else if (bg.type === '256') css += `background:${get256Color(bg.idx)};`;
+  else if (bg.type === 'rgb') css += `background:rgb(${bg.r},${bg.g},${bg.b});`;
+  if (styles.has('1')) css += 'font-weight:bold;';
+  if (styles.has('2')) css += 'opacity:0.6;';
+  if (styles.has('3')) css += 'font-style:italic;';
+  if (styles.has('4')) css += 'text-decoration:underline;';
+  if (styles.has('7')) { /* reverse */ }
+  if (styles.has('9')) css += 'text-decoration:line-through;';
+  return css;
+}
+
+function update() {
+  const text = document.getElementById('sample-text').value || 'Hello, Terminal!';
+  const parts = buildAnsiCodes();
+  const openSeq = parts.length ? `\x1b[${parts.join(';')}m` : '';
+  const closeSeq = parts.length ? `\x1b[0m` : '';
+  const openEsc = parts.length ? `\\e[${parts.join(';')}m` : '';
+  const closeEsc = parts.length ? `\\e[0m` : '';
+
+  // Preview (CSS approximation)
+  const css = getCssStyle();
+  document.getElementById('preview').innerHTML = css
+    ? `<span style="${css}">${text.replace(/</g,'&lt;')}</span>`
+    : text.replace(/</g,'&lt;');
+
+  document.getElementById('bash-code').textContent = parts.length
+    ? `echo -e "${openEsc}${text}${closeEsc}"`
+    : `echo "${text}"`;
+
+  document.getElementById('python-code').textContent = parts.length
+    ? `print("\\033[${parts.join(';')}m${text}\\033[0m")`
+    : `print("${text}")`;
+
+  document.getElementById('raw-code').textContent = parts.length
+    ? `${openEsc}${text}${closeEsc}`
+    : text;
+}
+
+function copyCode(type) {
+  const map = { bash: 'bash-code', python: 'python-code', raw: 'raw-code' };
+  const txt = document.getElementById(map[type]).textContent;
+  navigator.clipboard.writeText(txt);
+}
+
+buildPalette8();
+buildPalette256();
+// init RGB
+setRgbColor(255, 128, 0);
+update();
+</script>
+</body>
+</html>

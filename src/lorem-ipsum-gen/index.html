@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lorem Ipsum Generator – Paragraphs, Sentences, Words | DevNestio</title>
+  <meta name="description" content="Generate lorem ipsum placeholder text instantly. Choose paragraphs, sentences, or words. HTML or plain text, custom count, start with classic opening. Free, no ads." />
+  <link rel="canonical" href="https://devnestio.pages.dev/lorem-ipsum-gen/" />
+  <meta property="og:title" content="Lorem Ipsum Generator – Paragraphs, Sentences & Words" />
+  <meta property="og:description" content="Generate lorem ipsum placeholder text. Paragraphs, sentences, or words — plain text or HTML. Instant copy." />
+  <meta property="og:url" content="https://devnestio.pages.dev/lorem-ipsum-gen/" />
+  <meta property="og:type" content="website" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1117; --surface: #1a1d27; --surface2: #22263a; --border: #2e3248;
+      --text: #e2e8f0; --muted: #8892a4;
+      --accent: #34d399; --blue: #60a5fa; --yellow: #fbbf24; --red: #f87171;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1.1rem 1.5rem; }
+    header h1 { font-size: 1.35rem; font-weight: 700; color: var(--accent); }
+    header p { font-size: .85rem; color: var(--muted); margin-top: .2rem; }
+    .main { max-width: 860px; margin: 0 auto; padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; }
+
+    /* Controls */
+    .controls-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.1rem; display: flex; flex-direction: column; gap: .85rem; }
+    .section-label { font-size: .78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: .35rem; }
+    .row { display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; }
+    .type-pills { display: flex; gap: .4rem; }
+    .pill { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); border-radius: 20px; padding: .3rem .85rem; font-size: .82rem; cursor: pointer; transition: all .15s; }
+    .pill.active { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 600; }
+
+    .count-row { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; }
+    .count-label { font-size: .82rem; color: var(--muted); }
+    .count-input { background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: .3rem .6rem; font-size: .9rem; width: 70px; outline: none; text-align: center; transition: border-color .2s; }
+    .count-input:focus { border-color: var(--accent); }
+    .count-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); border-radius: 6px; padding: .25rem .55rem; font-size: .82rem; cursor: pointer; transition: all .15s; }
+    .count-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .checkbox-row { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .check-label { display: flex; align-items: center; gap: .4rem; font-size: .82rem; color: var(--muted); cursor: pointer; user-select: none; }
+    .check-label input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer; }
+    .check-label:hover { color: var(--text); }
+
+    /* Generate btn */
+    .generate-btn { background: var(--accent); border: none; color: #000; font-size: .9rem; font-weight: 700; border-radius: 8px; padding: .6rem 1.5rem; cursor: pointer; transition: opacity .15s; }
+    .generate-btn:hover { opacity: .85; }
+
+    /* Output */
+    .output-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .output-header { padding: .6rem 1rem; background: var(--surface2); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; gap: .5rem; flex-wrap: wrap; }
+    .output-meta { font-size: .78rem; color: var(--muted); }
+    .output-actions { display: flex; gap: .4rem; }
+    .btn { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); border-radius: 6px; padding: .3rem .7rem; font-size: .78rem; cursor: pointer; transition: all .15s; }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn.copied { border-color: var(--accent); color: var(--accent); }
+    textarea#output { width: 100%; min-height: 280px; background: var(--surface2); border: none; color: var(--text); font-family: Georgia, 'Times New Roman', serif; font-size: .9rem; line-height: 1.75; padding: 1rem 1.1rem; resize: vertical; outline: none; }
+    .empty-state { padding: 3rem; text-align: center; color: var(--muted); font-size: .9rem; }
+
+    /* Quick counts */
+    .quick-row { display: flex; gap: .4rem; flex-wrap: wrap; margin-top: .1rem; }
+    .quick-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); border-radius: 5px; padding: .2rem .55rem; font-size: .75rem; cursor: pointer; transition: all .15s; }
+    .quick-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Info box */
+    .info-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.1rem; }
+    .info-card h2 { font-size: .78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: .65rem; }
+    .info-card p { font-size: .82rem; color: var(--muted); line-height: 1.65; }
+    .info-card p + p { margin-top: .5rem; }
+    .highlight { color: var(--accent); font-style: italic; }
+
+    @media (max-width: 600px) { .row { flex-direction: column; align-items: flex-start; } }
+    footer { text-align: center; padding: 1.5rem; color: var(--muted); font-size: .8rem; border-top: 1px solid var(--border); margin-top: .5rem; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Lorem Ipsum Generator</h1>
+  <p>Generate placeholder text — paragraphs, sentences, or words</p>
+</header>
+
+<div class="main">
+  <div class="controls-card">
+    <!-- Type selector -->
+    <div>
+      <div class="section-label">Generate</div>
+      <div class="type-pills">
+        <button class="pill active" data-type="paragraphs" onclick="setType('paragraphs')">Paragraphs</button>
+        <button class="pill" data-type="sentences" onclick="setType('sentences')">Sentences</button>
+        <button class="pill" data-type="words" onclick="setType('words')">Words</button>
+      </div>
+    </div>
+
+    <!-- Count -->
+    <div>
+      <div class="section-label">Count</div>
+      <div class="count-row">
+        <button class="count-btn" onclick="adjustCount(-1)">−</button>
+        <input type="number" id="countInput" class="count-input" value="5" min="1" max="100" oninput="generate()" />
+        <button class="count-btn" onclick="adjustCount(1)">+</button>
+        <span class="count-label" id="countLabel">paragraphs</span>
+      </div>
+      <div class="quick-row" id="quickRow">
+        <button class="quick-btn" onclick="setCount(1)">1</button>
+        <button class="quick-btn" onclick="setCount(3)">3</button>
+        <button class="quick-btn" onclick="setCount(5)">5</button>
+        <button class="quick-btn" onclick="setCount(10)">10</button>
+        <button class="quick-btn" onclick="setCount(20)">20</button>
+      </div>
+    </div>
+
+    <!-- Options -->
+    <div>
+      <div class="section-label">Options</div>
+      <div class="checkbox-row">
+        <label class="check-label">
+          <input type="checkbox" id="startClassic" checked onchange="generate()" />
+          Start with "Lorem ipsum…"
+        </label>
+        <label class="check-label">
+          <input type="checkbox" id="htmlMode" onchange="generate()" />
+          Wrap in &lt;p&gt; tags
+        </label>
+      </div>
+    </div>
+
+    <button class="generate-btn" onclick="generate()">Generate</button>
+  </div>
+
+  <!-- Output -->
+  <div class="output-card">
+    <div class="output-header">
+      <span class="output-meta" id="outputMeta">—</span>
+      <div class="output-actions">
+        <button class="btn" id="copyBtn" onclick="copyOutput()">Copy</button>
+        <button class="btn" onclick="generate()">Regenerate</button>
+      </div>
+    </div>
+    <textarea id="output" readonly placeholder="Click Generate to create lorem ipsum text…"></textarea>
+  </div>
+
+  <!-- About -->
+  <div class="info-card">
+    <h2>About Lorem Ipsum</h2>
+    <p>Lorem ipsum is derived from <span class="highlight">"de Finibus Bonorum et Malorum"</span> by Cicero (45 BC). The scrambled Latin has been the industry standard placeholder text since the 1500s when an unknown printer took a galley of type and scrambled it to make a type specimen book.</p>
+    <p>It was popularised in the 1960s with Letraset sheets and later with desktop publishing software. It is used because its distribution of letters and word lengths approximates natural language, making layouts look realistic without distracting readable content.</p>
+  </div>
+</div>
+
+<footer>
+  DevNestio Lorem Ipsum Generator · <a href="https://devnestio.pages.dev/" style="color:var(--accent)">More Tools</a>
+</footer>
+
+<script>
+const WORDS = [
+  'lorem','ipsum','dolor','sit','amet','consectetur','adipiscing','elit',
+  'sed','do','eiusmod','tempor','incididunt','ut','labore','et','dolore',
+  'magna','aliqua','enim','ad','minim','veniam','quis','nostrud','exercitation',
+  'ullamco','laboris','nisi','aliquip','ex','ea','commodo','consequat',
+  'duis','aute','irure','in','reprehenderit','voluptate','velit','esse',
+  'cillum','eu','fugiat','nulla','pariatur','excepteur','sint','occaecat',
+  'cupidatat','non','proident','sunt','culpa','qui','officia','deserunt',
+  'mollit','anim','id','est','laborum','perspiciatis','unde','omnis','iste',
+  'natus','error','voluptatem','accusantium','doloremque','laudantium','totam',
+  'rem','aperiam','eaque','ipsa','quae','ab','illo','inventore','veritatis',
+  'beatae','vitae','dicta','explicabo','nemo','ipsam','quia','voluptas',
+  'aspernatur','aut','odit','fugit','consequuntur','magni','dolores','eos',
+  'ratione','sequi','nesciunt','neque','porro','quisquam','dolorem','adipisci',
+  'numquam','eius','modi','tempora','incidunt','magnam','aliquam','quaerat',
+  'facilis','provident','fuga','suscipit','recusandae','itaque','earum','rerum',
+  'hic','tenetur','sapiente','delectus','reiciendis','voluptatibus','maiores',
+  'alias','perferendis','doloribus','asperiores','repellat','minima','nostrum',
+  'exercitationem','ullam','corporis','quidem','blanditiis','praesentium',
+  'deleniti','atque','corrupti','quos','quas','molestias','excepturi',
+  'occaecati','cupiditate','similique','placeat','nihil','obcaecati','saepe',
+  'eveniet','voluptates','repudiandae','temporibus',
+  'debitis','officiis','necessitatibus','distinctio','expedita','summo'
+];
+
+const CLASSIC_OPENING = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.';
+
+let currentType = 'paragraphs';
+
+function setType(type) {
+  currentType = type;
+  document.querySelectorAll('.pill').forEach(p => p.classList.toggle('active', p.dataset.type === type));
+  document.getElementById('countLabel').textContent = type;
+  generate();
+}
+
+function adjustCount(delta) {
+  const inp = document.getElementById('countInput');
+  const v = Math.max(1, Math.min(100, parseInt(inp.value || 1) + delta));
+  inp.value = v;
+  generate();
+}
+
+function setCount(n) {
+  document.getElementById('countInput').value = n;
+  generate();
+}
+
+function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+function randomWord(capitalize) {
+  const w = WORDS[randInt(0, WORDS.length - 1)];
+  return capitalize ? w.charAt(0).toUpperCase() + w.slice(1) : w;
+}
+
+function randomSentence() {
+  const len = randInt(8, 18);
+  const words = [randomWord(true)];
+  for (let i = 1; i < len; i++) {
+    if (i > 0 && i % randInt(4, 7) === 0) words.push(',');
+    words.push(randomWord(false));
+  }
+  let s = words.join(' ').replace(/ ,/g, ',');
+  return s.replace(/,$/, '') + '.';
+}
+
+function randomParagraph(isFirst, startClassic) {
+  const sentences = [];
+  const count = randInt(4, 7);
+  for (let i = 0; i < count; i++) {
+    if (i === 0 && isFirst && startClassic) sentences.push(CLASSIC_OPENING);
+    else sentences.push(randomSentence());
+  }
+  return sentences.join(' ');
+}
+
+function generate() {
+  const count = Math.max(1, Math.min(100, parseInt(document.getElementById('countInput').value) || 1));
+  const startClassic = document.getElementById('startClassic').checked;
+  const htmlMode = document.getElementById('htmlMode').checked;
+  const type = currentType;
+
+  let result = '';
+  let wordCount = 0, sentenceCount = 0, paraCount = 0;
+
+  if (type === 'paragraphs') {
+    const paras = [];
+    for (let i = 0; i < count; i++) {
+      const p = randomParagraph(i === 0, startClassic);
+      paras.push(htmlMode ? `<p>${p}</p>` : p);
+      wordCount += p.split(/\s+/).length;
+      sentenceCount += (p.match(/\./g) || []).length;
+      paraCount++;
+    }
+    result = paras.join(htmlMode ? '\n' : '\n\n');
+  } else if (type === 'sentences') {
+    const sents = [];
+    for (let i = 0; i < count; i++) {
+      const s = (i === 0 && startClassic) ? CLASSIC_OPENING : randomSentence();
+      sents.push(s);
+      wordCount += s.split(/\s+/).length;
+      sentenceCount++;
+    }
+    const text = sents.join(' ');
+    result = htmlMode ? `<p>${text}</p>` : text;
+    paraCount = 1;
+  } else {
+    const words = [];
+    if (startClassic) {
+      const classicWords = CLASSIC_OPENING.replace(/[.,]/g, '').split(' ');
+      for (let i = 0; i < Math.min(count, classicWords.length); i++) words.push(classicWords[i]);
+    }
+    while (words.length < count) words.push(randomWord(words.length === 0 && !startClassic));
+    const text = words.slice(0, count).join(' ');
+    result = htmlMode ? `<p>${text}</p>` : text;
+    wordCount = words.slice(0, count).length;
+    sentenceCount = 0;
+    paraCount = 1;
+  }
+
+  document.getElementById('output').value = result;
+  const chars = result.length;
+  let meta = `${chars.toLocaleString()} chars · ${wordCount.toLocaleString()} words`;
+  if (type !== 'words') meta += ` · ${sentenceCount} sentences`;
+  if (type === 'paragraphs') meta += ` · ${paraCount} paragraphs`;
+  document.getElementById('outputMeta').textContent = meta;
+}
+
+function copyOutput() {
+  const text = document.getElementById('output').value;
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+  });
+}
+
+// Initialize
+generate();
+</script>
+</body>
+</html>

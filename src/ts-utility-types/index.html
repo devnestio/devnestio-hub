@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TypeScript Utility Types Reference – devnestio</title>
+  <meta name="description" content="Complete interactive reference for all TypeScript built-in utility types. Covers Partial, Required, Readonly, Record, Pick, Omit, Exclude, Extract, NonNullable, ReturnType, Parameters, Awaited, and string manipulation types with syntax and examples." />
+  <link rel="canonical" href="https://devnestio.pages.dev/ts-utility-types/" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    header { background: #1a1d2e; border-bottom: 1px solid #2d3748; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+    header a { color: #7c85f3; text-decoration: none; font-size: 14px; }
+    header h1 { font-size: 18px; font-weight: 700; color: #fff; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+    .controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+    .search-box { flex: 1; min-width: 200px; background: #1a1d2e; border: 1px solid #2d3748; border-radius: 8px; padding: 9px 14px; color: #e2e8f0; font-size: 14px; outline: none; }
+    .search-box:focus { border-color: #7c85f3; }
+    .filter-btn { background: #1a1d2e; border: 1px solid #2d3748; border-radius: 6px; padding: 7px 14px; color: #a0aec0; font-size: 13px; cursor: pointer; white-space: nowrap; }
+    .filter-btn.active { border-color: #7c85f3; color: #7c85f3; background: rgba(124,133,243,.1); }
+    .stats { font-size: 13px; color: #718096; margin-left: auto; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(480px, 1fr)); gap: 16px; }
+    @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+    .card { background: #1a1d2e; border: 1px solid #2d3748; border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+    .card-name { font-size: 17px; font-weight: 700; color: #7c85f3; font-family: 'Courier New', monospace; }
+    .card-cat { font-size: 11px; background: rgba(124,133,243,.15); color: #7c85f3; padding: 3px 8px; border-radius: 20px; white-space: nowrap; }
+    .card-desc { font-size: 14px; color: #a0aec0; line-height: 1.6; }
+    .syntax-block { background: #0f1117; border: 1px solid #2d3748; border-radius: 6px; padding: 10px 12px; font-family: 'Courier New', monospace; font-size: 13px; color: #7ee787; position: relative; }
+    .example-block { background: #0a0d1a; border: 1px solid #1e2435; border-radius: 6px; padding: 10px 12px; font-family: 'Courier New', monospace; font-size: 12px; color: #c3dafe; white-space: pre; overflow-x: auto; position: relative; }
+    .block-label { font-size: 10px; color: #4a5568; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+    .copy-btn { position: absolute; top: 8px; right: 8px; background: #2d3748; border: none; border-radius: 4px; padding: 3px 8px; font-size: 11px; color: #a0aec0; cursor: pointer; }
+    .copy-btn:hover { background: #3d4a5c; color: #e2e8f0; }
+    .copy-btn.copied { background: #276749; color: #68d391; }
+    .added-tag { font-size: 11px; color: #718096; }
+    .no-results { text-align: center; color: #718096; padding: 60px 0; font-size: 15px; }
+    .section-note { background: rgba(124,133,243,.08); border: 1px solid rgba(124,133,243,.2); border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; font-size: 14px; color: #a0aec0; line-height: 1.6; }
+    .section-note code { background: #0f1117; border-radius: 4px; padding: 1px 5px; font-family: monospace; color: #7c85f3; }
+  </style>
+</head>
+<body>
+<header>
+  <a href="https://devnestio.pages.dev/">← devnestio</a>
+  <h1>TypeScript Utility Types Reference</h1>
+</header>
+<div class="container">
+  <div class="section-note">
+    TypeScript ships <strong>22 built-in utility types</strong> that transform existing types without re-declaring them.
+    Available in TypeScript ≥ 2.1 (some require ≥ 4.5 / 5.4 — see <span class="added-tag">Added</span> tags).
+  </div>
+  <div class="controls">
+    <input class="search-box" id="search" placeholder="Search types…" autocomplete="off" />
+    <button class="filter-btn active" data-cat="All">All</button>
+    <button class="filter-btn" data-cat="Object">Object</button>
+    <button class="filter-btn" data-cat="Union">Union</button>
+    <button class="filter-btn" data-cat="Function">Function</button>
+    <button class="filter-btn" data-cat="String">String</button>
+    <button class="filter-btn" data-cat="Async">Async</button>
+    <span class="stats" id="stats"></span>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div class="no-results" id="noResults" style="display:none">No types match your search.</div>
+</div>
+<script>
+const TYPES = [
+  {
+    name: 'Partial<T>',
+    cat: 'Object',
+    ts: '2.1',
+    desc: 'Constructs a type with all properties of T set to optional. Useful for update payloads where not every field is required.',
+    syntax: 'type Partial<T> = { [P in keyof T]?: T[P]; }',
+    example: `interface User { id: number; name: string; email: string; }
+
+type UserUpdate = Partial<User>;
+// { id?: number; name?: string; email?: string; }
+
+function updateUser(id: number, changes: Partial<User>) { /* ... */ }`
+  },
+  {
+    name: 'Required<T>',
+    cat: 'Object',
+    ts: '2.8',
+    desc: 'Constructs a type with all properties of T set to required, removing optional modifiers. Opposite of Partial.',
+    syntax: 'type Required<T> = { [P in keyof T]-?: T[P]; }',
+    example: `interface Config { host?: string; port?: number; debug?: boolean; }
+
+type StrictConfig = Required<Config>;
+// { host: string; port: number; debug: boolean; }
+
+function init(cfg: Required<Config>) { /* ... */ }`
+  },
+  {
+    name: 'Readonly<T>',
+    cat: 'Object',
+    ts: '2.1',
+    desc: 'Constructs a type with all properties of T set to readonly, preventing reassignment after creation.',
+    syntax: 'type Readonly<T> = { readonly [P in keyof T]: T[P]; }',
+    example: `interface Point { x: number; y: number; }
+
+const origin: Readonly<Point> = { x: 0, y: 0 };
+// origin.x = 1; // Error: cannot assign to 'x'
+
+const DEFAULTS = Object.freeze({ color: 'blue', size: 12 });
+type Defaults = Readonly<typeof DEFAULTS>;`
+  },
+  {
+    name: 'Record<K, V>',
+    cat: 'Object',
+    ts: '2.1',
+    desc: 'Constructs an object type with keys of type K and values of type V. Cleaner than index signatures for known key sets.',
+    syntax: 'type Record<K extends keyof any, V> = { [P in K]: V; }',
+    example: `type Role = 'admin' | 'editor' | 'viewer';
+type Permissions = Record<Role, string[]>;
+
+const perms: Permissions = {
+  admin: ['read', 'write', 'delete'],
+  editor: ['read', 'write'],
+  viewer: ['read'],
+};
+
+type PageMap = Record<string, { title: string; url: string }>;`
+  },
+  {
+    name: 'Pick<T, K>',
+    cat: 'Object',
+    ts: '2.1',
+    desc: 'Constructs a type by picking the set of properties K from T. Creates a subset type without the unwanted fields.',
+    syntax: 'type Pick<T, K extends keyof T> = { [P in K]: T[P]; }',
+    example: `interface Article {
+  id: number; title: string;
+  body: string; authorId: number; createdAt: Date;
+}
+
+type ArticlePreview = Pick<Article, 'id' | 'title' | 'createdAt'>;
+// { id: number; title: string; createdAt: Date; }
+
+function getPreview(a: Article): ArticlePreview {
+  return { id: a.id, title: a.title, createdAt: a.createdAt };
+}`
+  },
+  {
+    name: 'Omit<T, K>',
+    cat: 'Object',
+    ts: '3.5',
+    desc: 'Constructs a type by picking all properties from T then removing K. The inverse of Pick — exclude what you don\'t want.',
+    syntax: 'type Omit<T, K extends keyof any> = Pick<T, Exclude<keyof T, K>>',
+    example: `interface Post {
+  id: number; title: string;
+  body: string; authorId: number; createdAt: Date;
+}
+
+type NewPost = Omit<Post, 'id' | 'createdAt'>;
+// { title: string; body: string; authorId: number; }
+
+type PublicUser = Omit<User, 'passwordHash' | 'salt'>;`
+  },
+  {
+    name: 'Exclude<T, U>',
+    cat: 'Union',
+    ts: '2.8',
+    desc: 'Constructs a type by excluding from union type T all members assignable to U. Narrows union types by removing unwanted variants.',
+    syntax: 'type Exclude<T, U> = T extends U ? never : T',
+    example: `type Status = 'active' | 'inactive' | 'banned' | 'pending';
+type AllowedStatus = Exclude<Status, 'banned'>;
+// 'active' | 'inactive' | 'pending'
+
+type NonString = Exclude<string | number | boolean, string>;
+// number | boolean
+
+type NoNull<T> = Exclude<T, null | undefined>;`
+  },
+  {
+    name: 'Extract<T, U>',
+    cat: 'Union',
+    ts: '2.8',
+    desc: 'Constructs a type by extracting from union type T all members assignable to U. Opposite of Exclude — keeps only matching variants.',
+    syntax: 'type Extract<T, U> = T extends U ? T : never',
+    example: `type Shape = 'circle' | 'square' | 'triangle' | 'rectangle';
+type Quad = Extract<Shape, 'square' | 'rectangle'>;
+// 'square' | 'rectangle'
+
+type StringOrNumber = Extract<string | number | boolean | null, string | number>;
+// string | number
+
+type ClickEvent = Extract<Event, MouseEvent | PointerEvent>;`
+  },
+  {
+    name: 'NonNullable<T>',
+    cat: 'Union',
+    ts: '2.8',
+    desc: 'Constructs a type by removing null and undefined from T. Useful for narrowing types after null checks.',
+    syntax: 'type NonNullable<T> = T & {}',
+    example: `type MaybeString = string | null | undefined;
+type DefiniteString = NonNullable<MaybeString>;
+// string
+
+function process<T>(value: T): NonNullable<T> {
+  if (value == null) throw new Error('unexpected null');
+  return value as NonNullable<T>;
+}
+
+type Clean<T> = { [K in keyof T]: NonNullable<T[K]> };`
+  },
+  {
+    name: 'ReturnType<T>',
+    cat: 'Function',
+    ts: '2.8',
+    desc: 'Constructs a type consisting of the return type of function type T. Useful for deriving types from factory functions.',
+    syntax: 'type ReturnType<T extends (...args: any) => any> = T extends (...args: any) => infer R ? R : any',
+    example: `function createUser() {
+  return { id: 1, name: 'Alice', role: 'admin' as const };
+}
+
+type User = ReturnType<typeof createUser>;
+// { id: number; name: string; role: "admin" }
+
+const result = someApiCall();
+type ApiResult = ReturnType<typeof someApiCall>;`
+  },
+  {
+    name: 'Parameters<T>',
+    cat: 'Function',
+    ts: '3.1',
+    desc: 'Constructs a tuple type from the parameter types of a function type T. Useful for wrapping or proxying functions.',
+    syntax: 'type Parameters<T extends (...args: any) => any> = T extends (...args: infer P) => any ? P : never',
+    example: `function createPost(title: string, body: string, tags: string[]) { /* ... */ }
+
+type PostArgs = Parameters<typeof createPost>;
+// [title: string, body: string, tags: string[]]
+
+function wrapFn<T extends (...args: any[]) => any>(
+  fn: T,
+  ...args: Parameters<T>
+): ReturnType<T> {
+  return fn(...args);
+}`
+  },
+  {
+    name: 'ConstructorParameters<T>',
+    cat: 'Function',
+    ts: '3.1',
+    desc: 'Constructs a tuple type from the parameter types of a constructor function type T.',
+    syntax: 'type ConstructorParameters<T extends abstract new (...args: any) => any> = T extends abstract new (...args: infer P) => any ? P : never',
+    example: `class Database {
+  constructor(host: string, port: number, db: string) {}
+}
+
+type DbArgs = ConstructorParameters<typeof Database>;
+// [host: string, port: number, db: string]
+
+function createInstance<T extends new (...args: any[]) => any>(
+  cls: T,
+  ...args: ConstructorParameters<T>
+): InstanceType<T> {
+  return new cls(...args);
+}`
+  },
+  {
+    name: 'InstanceType<T>',
+    cat: 'Function',
+    ts: '2.8',
+    desc: 'Constructs a type consisting of the instance type of a constructor function type T. Works with class constructors.',
+    syntax: 'type InstanceType<T extends abstract new (...args: any) => any> = T extends abstract new (...args: any) => infer R ? R : any',
+    example: `class HttpClient {
+  get(url: string) { return fetch(url); }
+  post(url: string, body: unknown) { return fetch(url, { method: 'POST' }); }
+}
+
+type Client = InstanceType<typeof HttpClient>;
+// HttpClient
+
+function useClient(c: InstanceType<typeof HttpClient>) { /* ... */ }
+
+type AnyInstance<T extends new (...a: any[]) => any> = InstanceType<T>;`
+  },
+  {
+    name: 'Awaited<T>',
+    cat: 'Async',
+    ts: '4.5',
+    desc: 'Recursively unwraps the type wrapped in Promise<> or thenable objects. Handles deeply nested promises.',
+    syntax: 'type Awaited<T> = T extends null | undefined ? T : T extends object & { then(onfulfilled: infer F, ...args: infer _): any; } ? F extends ((value: infer V, ...args: infer _) => any) ? Awaited<V> : never : T',
+    example: `type A = Awaited<Promise<string>>;           // string
+type B = Awaited<Promise<Promise<number>>>;  // number
+type C = Awaited<string>;                    // string (passthrough)
+
+async function fetchUser(): Promise<User> { /* ... */ }
+type FetchedUser = Awaited<ReturnType<typeof fetchUser>>;
+// User
+
+type DeepUnwrap<T> = Awaited<T>;`
+  },
+  {
+    name: 'ThisParameterType<T>',
+    cat: 'Function',
+    ts: '3.3',
+    desc: 'Extracts the type of the this parameter for a function type, or unknown if the function type has no this parameter.',
+    syntax: 'type ThisParameterType<T> = T extends (this: infer U, ...args: never) => any ? U : unknown',
+    example: `function greet(this: { name: string }, greeting: string) {
+  return \`\${greeting}, \${this.name}!\`;
+}
+
+type Context = ThisParameterType<typeof greet>;
+// { name: string }
+
+interface Describable { description: string; }
+function describe(this: Describable) { return this.description; }
+type DescContext = ThisParameterType<typeof describe>; // Describable`
+  },
+  {
+    name: 'OmitThisParameter<T>',
+    cat: 'Function',
+    ts: '3.3',
+    desc: 'Removes the this parameter from a function type T. Useful when you bind a function and want to reflect the type change.',
+    syntax: 'type OmitThisParameter<T> = unknown extends ThisParameterType<T> ? T : T extends (...args: infer A) => infer R ? (...args: A) => R : T',
+    example: `function formatName(this: { locale: string }, name: string) {
+  return name.toLocaleLowerCase(this.locale);
+}
+
+type Formatter = OmitThisParameter<typeof formatName>;
+// (name: string) => string
+
+const bound = formatName.bind({ locale: 'en-US' });
+// bound: OmitThisParameter<typeof formatName>`
+  },
+  {
+    name: 'ThisType<T>',
+    cat: 'Function',
+    ts: '2.3',
+    desc: 'Marker type that designates the type of this inside method definitions in object literals. Requires --noImplicitThis.',
+    syntax: 'interface ThisType<T> { }  // marker, no members',
+    example: `interface State { count: number; label: string; }
+interface Methods {
+  increment(): void;
+  reset(): void;
+}
+
+type Component = State & ThisType<State & Methods>;
+
+const comp: Component & Methods = {
+  count: 0, label: 'counter',
+  increment() { this.count++; },   // this: State & Methods
+  reset() { this.count = 0; },
+};`
+  },
+  {
+    name: 'NoInfer<T>',
+    cat: 'Object',
+    ts: '5.4',
+    desc: 'Blocks TypeScript from using a type position as an inference site. Forces callers to specify a type or use another site for inference.',
+    syntax: 'type NoInfer<T> = intrinsic',
+    example: `// Without NoInfer — 'default' widens the inferred type
+function createStore<T>(initial: T, fallback: T): T { return initial ?? fallback; }
+createStore(42, "string"); // Error only if T already inferred
+
+// With NoInfer — fallback cannot influence T inference
+function createStore2<T>(initial: T, fallback: NoInfer<T>): T {
+  return initial ?? fallback;
+}
+createStore2(42, "string"); // Error: string not assignable to number`
+  },
+  {
+    name: 'Uppercase<S>',
+    cat: 'String',
+    ts: '4.1',
+    desc: 'Converts each character in a string literal type to its uppercase equivalent. Intrinsic — implemented in the compiler.',
+    syntax: 'type Uppercase<S extends string> = intrinsic',
+    example: `type Greeting = Uppercase<'hello world'>;
+// 'HELLO WORLD'
+
+type EventName = 'click' | 'focus' | 'blur';
+type EventConst = Uppercase<EventName>;
+// 'CLICK' | 'FOCUS' | 'BLUR'
+
+type EnvKey<K extends string> = \`VITE_\${Uppercase<K>}\`;
+type Key = EnvKey<'apiUrl'>; // 'VITE_APIURL'`
+  },
+  {
+    name: 'Lowercase<S>',
+    cat: 'String',
+    ts: '4.1',
+    desc: 'Converts each character in a string literal type to its lowercase equivalent.',
+    syntax: 'type Lowercase<S extends string> = intrinsic',
+    example: `type Shout = 'HELLO' | 'WORLD';
+type Quiet = Lowercase<Shout>;
+// 'hello' | 'world'
+
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
+type LowerMethod = Lowercase<HttpMethod>;
+// 'get' | 'post' | 'put' | 'delete'
+
+type CssVar<K extends string> = \`--\${Lowercase<K>}\`;`
+  },
+  {
+    name: 'Capitalize<S>',
+    cat: 'String',
+    ts: '4.1',
+    desc: 'Converts the first character in a string literal type to uppercase. Useful for building getter/setter or camelCase names.',
+    syntax: 'type Capitalize<S extends string> = intrinsic',
+    example: `type Name = Capitalize<'firstName'>;
+// 'FirstName'
+
+type Getter<K extends string> = \`get\${Capitalize<K>}\`;
+type GetName = Getter<'name'>; // 'getName'
+type GetAge = Getter<'age'>;   // 'getAge'
+
+type Keys = 'id' | 'name' | 'createdAt';
+type Caps = Capitalize<Keys>; // 'Id' | 'Name' | 'CreatedAt'`
+  },
+  {
+    name: 'Uncapitalize<S>',
+    cat: 'String',
+    ts: '4.1',
+    desc: 'Converts the first character in a string literal type to lowercase.',
+    syntax: 'type Uncapitalize<S extends string> = intrinsic',
+    example: `type PascalKey = 'UserName' | 'CreatedAt';
+type CamelKey = Uncapitalize<PascalKey>;
+// 'userName' | 'createdAt'
+
+type PropKey<K extends string> = Uncapitalize<K>;
+type Event = Uncapitalize<'Click' | 'Focus'>; // 'click' | 'focus'
+
+// Undo accidental Capitalize
+type Back = Uncapitalize<Capitalize<'hello'>>; // 'hello'`
+  },
+];
+
+const cats = ['All', 'Object', 'Union', 'Function', 'String', 'Async'];
+let activeCat = 'All';
+let searchVal = '';
+
+function copy(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+  });
+}
+
+function renderCard(t) {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `
+    <div class="card-header">
+      <span class="card-name">${t.name}</span>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <span class="added-tag">TS ${t.ts}+</span>
+        <span class="card-cat">${t.cat}</span>
+      </div>
+    </div>
+    <div class="card-desc">${t.desc}</div>
+    <div>
+      <div class="block-label">Syntax</div>
+      <div class="syntax-block" style="position:relative">
+        <span>${t.syntax}</span>
+        <button class="copy-btn" onclick="copy(this, ${JSON.stringify(t.syntax)})">Copy</button>
+      </div>
+    </div>
+    <div>
+      <div class="block-label">Example</div>
+      <div class="example-block" style="position:relative">
+<span style="white-space:pre">${t.example.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>
+        <button class="copy-btn" onclick="copy(this, ${JSON.stringify(t.example)})">Copy</button>
+      </div>
+    </div>`;
+  return card;
+}
+
+function render() {
+  const grid = document.getElementById('grid');
+  const noRes = document.getElementById('noResults');
+  const stats = document.getElementById('stats');
+  grid.innerHTML = '';
+  const q = searchVal.toLowerCase();
+  const filtered = TYPES.filter(t => {
+    const catOk = activeCat === 'All' || t.cat === activeCat;
+    const searchOk = !q || t.name.toLowerCase().includes(q) || t.desc.toLowerCase().includes(q) || t.cat.toLowerCase().includes(q);
+    return catOk && searchOk;
+  });
+  stats.textContent = `${filtered.length} / ${TYPES.length} types`;
+  if (filtered.length === 0) { noRes.style.display = ''; return; }
+  noRes.style.display = 'none';
+  filtered.forEach(t => grid.appendChild(renderCard(t)));
+}
+
+document.getElementById('search').addEventListener('input', e => { searchVal = e.target.value; render(); });
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    activeCat = btn.dataset.cat;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  });
+});
+render();
+</script>
+</body>
+</html>

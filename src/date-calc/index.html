@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Date Calculator — devnestio</title>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#0f1117;color:#e2e8f0;min-height:100vh}
+header{padding:24px 32px;border-bottom:1px solid #1e2535}
+h1{font-size:1.5rem;font-weight:700;color:#f8fafc}
+h1 span{color:#60a5fa}
+.desc{color:#94a3b8;margin-top:4px;font-size:.9rem}
+.main{max-width:800px;margin:0 auto;padding:32px}
+.tabs{display:flex;gap:0;border-radius:8px;overflow:hidden;border:1px solid #334155;margin-bottom:24px}
+.tab{flex:1;padding:10px;text-align:center;cursor:pointer;font-size:.85rem;font-weight:600;background:#1e2535;color:#64748b;border:none}
+.tab.active{background:#2563eb;color:#fff}
+.card{background:#141924;border:1px solid #1e2535;border-radius:10px;padding:24px;margin-bottom:16px}
+.field-row{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.field{flex:1;min-width:150px}
+label{display:block;font-size:.82rem;color:#94a3b8;margin-bottom:5px}
+input[type=date],input[type=number],select{width:100%;background:#1e2535;border:1px solid #334155;color:#e2e8f0;padding:9px 12px;border-radius:6px;font-size:.9rem;outline:none;appearance:none}
+input[type=date]:focus,input[type=number]:focus,select:focus{border-color:#60a5fa}
+.result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:16px}
+.result-card{background:#1e2535;border:1px solid #334155;border-radius:8px;padding:14px;text-align:center}
+.result-val{font-size:1.6rem;font-weight:700;color:#60a5fa;font-variant-numeric:tabular-nums}
+.result-label{font-size:.78rem;color:#64748b;margin-top:4px}
+.result-single{background:#1e2535;border:1px solid #334155;border-radius:8px;padding:16px;margin-top:16px}
+.result-single .date-display{font-size:1.3rem;font-weight:700;color:#60a5fa;margin-bottom:8px}
+.detail-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #1e2535;font-size:.85rem}
+.detail-row:last-child{border:none}
+.detail-label{color:#94a3b8}
+.detail-val{color:#e2e8f0;font-family:monospace}
+.copy-btn{background:#1e2535;border:1px solid #334155;color:#64748b;padding:4px 10px;border-radius:4px;font-size:.75rem;cursor:pointer;margin-top:8px}
+.copy-btn:hover{background:#334155;color:#e2e8f0}
+.btn{display:inline-block;padding:10px 24px;background:#2563eb;color:#fff;border:none;border-radius:6px;font-size:.9rem;font-weight:600;cursor:pointer;margin-top:4px}
+.btn:hover{background:#1d4ed8}
+.section-label{font-size:.8rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px}
+.add-sub-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.add-sub-grid .field{min-width:auto}
+.panel{display:none}
+.panel.active{display:block}
+</style>
+</head>
+<body>
+<header>
+  <h1>Date <span>Calculator</span></h1>
+  <p class="desc">Calculate days between dates or add/subtract durations from a date</p>
+</header>
+<div class="main">
+  <div class="tabs">
+    <button class="tab active" onclick="showPanel('diff')">Days Between Dates</button>
+    <button class="tab" onclick="showPanel('add')">Add / Subtract Duration</button>
+  </div>
+
+  <div class="panel active" id="panel-diff">
+    <div class="card">
+      <div class="section-label">Select two dates</div>
+      <div class="field-row">
+        <div class="field">
+          <label>Start Date</label>
+          <input type="date" id="diff-start">
+        </div>
+        <div class="field">
+          <label>End Date</label>
+          <input type="date" id="diff-end">
+        </div>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer;margin-bottom:12px">
+        <input type="checkbox" id="diff-biz" style="width:auto;accent-color:#2563eb"> Exclude weekends (business days only)
+      </label>
+      <button class="btn" onclick="calcDiff()">Calculate</button>
+      <div class="result-grid" id="diff-results" style="margin-top:16px"></div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-add">
+    <div class="card">
+      <div class="section-label">Base date</div>
+      <div class="field-row">
+        <div class="field">
+          <label>Date</label>
+          <input type="date" id="add-date">
+        </div>
+        <div class="field">
+          <label>Operation</label>
+          <select id="add-op">
+            <option value="add">Add (+)</option>
+            <option value="sub">Subtract (−)</option>
+          </select>
+        </div>
+      </div>
+      <div class="section-label">Duration</div>
+      <div class="add-sub-grid">
+        <div class="field"><label>Years</label><input type="number" id="add-years" value="0" min="0"></div>
+        <div class="field"><label>Months</label><input type="number" id="add-months" value="0" min="0"></div>
+        <div class="field"><label>Weeks</label><input type="number" id="add-weeks" value="0" min="0"></div>
+        <div class="field"><label>Days</label><input type="number" id="add-days" value="0" min="0"></div>
+      </div>
+      <button class="btn" onclick="calcAdd()">Calculate</button>
+      <div id="add-result"></div>
+    </div>
+  </div>
+</div>
+<script>
+const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const today=new Date();
+const fmt=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+document.getElementById('diff-start').value=fmt(new Date(today.getFullYear(),today.getMonth(),1));
+document.getElementById('diff-end').value=fmt(today);
+document.getElementById('add-date').value=fmt(today);
+
+function showPanel(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  document.querySelectorAll('.tab')[id==='diff'?0:1].classList.add('active');
+}
+
+function parseLocalDate(s){
+  const [y,m,d]=s.split('-').map(Number);
+  return new Date(y,m-1,d);
+}
+
+function countBusinessDays(start,end){
+  let count=0;
+  const d=new Date(start);
+  while(d<=end){
+    const day=d.getDay();
+    if(day!==0&&day!==6) count++;
+    d.setDate(d.getDate()+1);
+  }
+  return count;
+}
+
+function calcDiff(){
+  const s=document.getElementById('diff-start').value;
+  const e=document.getElementById('diff-end').value;
+  if(!s||!e){return;}
+  const start=parseLocalDate(s);
+  const end=parseLocalDate(e);
+  const ms=end-start;
+  const totalDays=Math.round(ms/86400000);
+  const absDays=Math.abs(totalDays);
+  const biz=document.getElementById('diff-biz').checked;
+  let bizDays=0;
+  if(biz){
+    const [a,b]=totalDays>=0?[start,end]:[end,start];
+    bizDays=countBusinessDays(a,b);
+  }
+  const weeks=Math.floor(absDays/7);
+  const remDays=absDays%7;
+  const months=Math.abs((end.getFullYear()-start.getFullYear())*12+(end.getMonth()-start.getMonth()));
+  const sign=totalDays<0?'−':'';
+  const items=[
+    {val:`${sign}${absDays}`,label:'Total Days'},
+    {val:`${sign}${weeks}w ${remDays}d`,label:'Weeks & Days'},
+    {val:`~${sign}${months}`,label:'Months'},
+    ...(biz?[{val:`${sign}${bizDays}`,label:'Business Days'}]:[]),
+  ];
+  document.getElementById('diff-results').innerHTML=items.map(i=>`
+    <div class="result-card">
+      <div class="result-val">${i.val}</div>
+      <div class="result-label">${i.label}</div>
+    </div>`).join('');
+}
+
+function calcAdd(){
+  const s=document.getElementById('add-date').value;
+  if(!s) return;
+  const op=document.getElementById('add-op').value;
+  const years=parseInt(document.getElementById('add-years').value)||0;
+  const months=parseInt(document.getElementById('add-months').value)||0;
+  const weeks=parseInt(document.getElementById('add-weeks').value)||0;
+  const days=parseInt(document.getElementById('add-days').value)||0;
+  const dir=op==='add'?1:-1;
+  const d=parseLocalDate(s);
+  d.setFullYear(d.getFullYear()+dir*years);
+  d.setMonth(d.getMonth()+dir*months);
+  d.setDate(d.getDate()+dir*(weeks*7+days));
+  const dateStr=fmt(d);
+  const dayName=DAYS[d.getDay()];
+  const longDate=`${dayName}, ${MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+  const iso=d.toISOString().slice(0,10);
+  const unix=Math.floor(d.getTime()/1000);
+  document.getElementById('add-result').innerHTML=`
+    <div class="result-single">
+      <div class="date-display">${longDate}</div>
+      <div class="detail-row"><span class="detail-label">ISO 8601</span><span class="detail-val">${iso}</span></div>
+      <div class="detail-row"><span class="detail-label">Short</span><span class="detail-val">${dateStr}</span></div>
+      <div class="detail-row"><span class="detail-label">Day of week</span><span class="detail-val">${dayName}</span></div>
+      <div class="detail-row"><span class="detail-label">Unix timestamp</span><span class="detail-val">${unix}</span></div>
+      <div class="detail-row"><span class="detail-label">Week number</span><span class="detail-val">${getWeekNumber(d)}</span></div>
+      <button class="copy-btn" onclick="navigator.clipboard.writeText('${dateStr}')">Copy ${dateStr}</button>
+    </div>`;
+}
+
+function getWeekNumber(d){
+  const date=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+  date.setUTCDate(date.getUTCDate()+4-(date.getUTCDay()||7));
+  const yearStart=new Date(Date.UTC(date.getUTCFullYear(),0,1));
+  return Math.ceil((((date-yearStart)/86400000)+1)/7);
+}
+
+calcDiff();
+</script>
+</body>
+</html>

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Line Sorter, Deduplicator & Filter | DevNestio</title>
+  <meta name="description" content="Sort, deduplicate, filter, reverse, and transform text lines in your browser. Supports numeric sort, case-insensitive, shuffle, prefix/suffix, and regex filter." />
+  <meta property="og:title" content="Line Sorter, Deduplicator & Filter | DevNestio" />
+  <meta property="og:description" content="Sort text lines alphabetically or numerically, remove duplicates, filter by regex, shuffle, reverse, add prefix/suffix, and trim whitespace. Browser-only." />
+  <meta property="og:url" content="https://devnestio.pages.dev/line-sorter/" />
+  <meta name="twitter:card" content="summary" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    #privacy-banner { background: #1e293b; border-bottom: 1px solid #334155; padding: 8px 16px; font-size: 12px; color: #94a3b8; text-align: center; }
+    header { background: #1e293b; border-bottom: 1px solid #334155; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+    header a { color: #64748b; font-size: 13px; text-decoration: none; margin-left: auto; }
+    header a:hover { color: #94a3b8; }
+    .badge { background: #9333ea; color: #fff; font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+    main { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+    .ops { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 14px 16px; }
+    .op-group { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .op-sep { width: 1px; height: 28px; background: #334155; margin: 0 4px; }
+    .btn { padding: 7px 14px; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; }
+    .btn-primary { background: #9333ea; color: #fff; }
+    .btn-primary:hover { background: #7e22ce; }
+    .btn-secondary { background: #334155; color: #e2e8f0; }
+    .btn-secondary:hover { background: #475569; }
+    .opt { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #94a3b8; }
+    .opt input[type="checkbox"] { accent-color: #9333ea; cursor: pointer; }
+    .opt input[type="text"] { width: 120px; padding: 4px 8px; background: #0f1117; border: 1px solid #334155; border-radius: 5px; color: #e2e8f0; font-size: 12px; font-family: monospace; outline: none; }
+    .opt input[type="text"]:focus { border-color: #9333ea; }
+    .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 700px) { .layout { grid-template-columns: 1fr; } }
+    .panel { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 16px; }
+    .panel-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .panel-hdr h2 { font-size: 13px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em; }
+    textarea { width: 100%; padding: 10px 12px; background: #0f1117; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 13px; font-family: 'JetBrains Mono', monospace; outline: none; resize: vertical; min-height: 400px; line-height: 1.6; }
+    textarea:focus { border-color: #9333ea; }
+    .btn-row { display: flex; gap: 8px; margin-top: 10px; }
+    .stats-bar { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 8px; font-size: 11px; color: #64748b; }
+    .stats-bar strong { color: #94a3b8; }
+    .filter-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .filter-row label { font-size: 12px; color: #94a3b8; white-space: nowrap; }
+    .filter-row input { flex: 1; min-width: 150px; padding: 5px 9px; background: #0f1117; border: 1px solid #334155; border-radius: 5px; color: #e2e8f0; font-size: 12px; font-family: monospace; outline: none; }
+    .filter-row input:focus { border-color: #9333ea; }
+    .filter-row input.invalid { border-color: #f87171; }
+    #ad-slot { margin: 20px auto; text-align: center; }
+  </style>
+</head>
+<body>
+<div id="privacy-banner">🔒 All processing happens in your browser. No data is sent to any server.</div>
+<header>
+  <span class="badge">FREE</span>
+  <h1>Line Sorter & Transformer</h1>
+  <a href="https://devnestio.pages.dev">← All Tools</a>
+</header>
+<main>
+  <div class="ops">
+    <div class="op-group">
+      <button class="btn btn-primary" onclick="sortLines('asc')">Sort A→Z</button>
+      <button class="btn btn-primary" onclick="sortLines('desc')">Sort Z→A</button>
+      <button class="btn btn-secondary" onclick="sortLines('num-asc')">Sort 0→9</button>
+      <button class="btn btn-secondary" onclick="sortLines('num-desc')">Sort 9→0</button>
+      <button class="btn btn-secondary" onclick="sortLines('len-asc')">By length ↑</button>
+      <button class="btn btn-secondary" onclick="sortLines('shuffle')">Shuffle</button>
+      <button class="btn btn-secondary" onclick="sortLines('reverse')">Reverse</button>
+    </div>
+    <div class="op-sep"></div>
+    <div class="op-group">
+      <button class="btn btn-secondary" onclick="dedup()">Deduplicate</button>
+      <button class="btn btn-secondary" onclick="trimLines()">Trim</button>
+      <button class="btn btn-secondary" onclick="removeEmpty()">Remove empty</button>
+    </div>
+    <div class="op-sep"></div>
+    <div class="op-group">
+      <div class="opt">
+        <input type="checkbox" id="opt-ci" />
+        <label for="opt-ci">Case-insensitive</label>
+      </div>
+      <div class="opt">
+        <input type="checkbox" id="opt-trim-auto" checked />
+        <label for="opt-trim-auto">Auto-trim</label>
+      </div>
+    </div>
+    <div class="op-sep"></div>
+    <div class="op-group">
+      <div class="opt">
+        <label>Prefix:</label>
+        <input type="text" id="opt-prefix" placeholder="e.g. - " />
+      </div>
+      <div class="opt">
+        <label>Suffix:</label>
+        <input type="text" id="opt-suffix" placeholder="e.g. ," />
+      </div>
+      <button class="btn btn-secondary" onclick="addPrefixSuffix()">Apply</button>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+    <div class="filter-row">
+      <label>Filter (regex):</label>
+      <input type="text" id="filter-regex" placeholder="e.g. ^https?://" id="filter-regex" />
+      <div class="opt"><input type="checkbox" id="filter-invert" /><label for="filter-invert">Invert</label></div>
+      <button class="btn btn-secondary" onclick="filterLines()">Filter</button>
+    </div>
+    <div class="filter-row" style="margin-left:auto">
+      <label>Find:</label>
+      <input type="text" id="find-str" placeholder="find text" />
+      <label>Replace:</label>
+      <input type="text" id="replace-str" placeholder="replace with" />
+      <div class="opt"><input type="checkbox" id="find-regex" /><label for="find-regex">Regex</label></div>
+      <button class="btn btn-secondary" onclick="findReplace()">Replace</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="panel">
+      <div class="panel-hdr">
+        <h2>Input</h2>
+        <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px" onclick="clearInput()">Clear</button>
+      </div>
+      <textarea id="input-area" spellcheck="false" placeholder="Paste lines here, one per line…
+
+apple
+banana
+cherry
+apple
+Date
+cherry"></textarea>
+      <div class="stats-bar" id="in-stats">0 lines · 0 chars</div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-hdr">
+        <h2>Output</h2>
+        <span id="out-diff" style="font-size:11px;color:#64748b"></span>
+      </div>
+      <textarea id="output-area" spellcheck="false" readonly placeholder="Result will appear here…"></textarea>
+      <div class="stats-bar" id="out-stats">0 lines · 0 chars</div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="copyOutput()">Copy</button>
+        <button class="btn btn-secondary" onclick="useOutputAsInput()">← Use as input</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="ad-slot" data-ea-publisher="devnestio" data-ea-type="image"></div>
+</main>
+<script>
+function getLines(id) {
+  return document.getElementById(id).value.split('\n');
+}
+
+function setOutput(lines) {
+  const out = lines.join('\n');
+  document.getElementById('output-area').value = out;
+  updateStats('out-stats', lines, out);
+  const inLines = getLines('input-area').length;
+  const diff = lines.length - inLines;
+  const el = document.getElementById('out-diff');
+  if (diff === 0) el.textContent = '';
+  else el.textContent = (diff > 0 ? '+' : '') + diff + ' lines';
+  el.style.color = diff < 0 ? '#4ade80' : diff > 0 ? '#f87171' : '#64748b';
+}
+
+function updateStats(id, lines, text) {
+  const nonEmpty = lines.filter(l => l.trim()).length;
+  document.getElementById(id).innerHTML = `<strong>${lines.length}</strong> lines · <strong>${nonEmpty}</strong> non-empty · <strong>${text.length}</strong> chars`;
+}
+
+function prep(lines) {
+  if (document.getElementById('opt-trim-auto').checked) lines = lines.map(l => l.trim());
+  return lines;
+}
+
+function ci(s) {
+  return document.getElementById('opt-ci').checked ? s.toLowerCase() : s;
+}
+
+function sortLines(mode) {
+  let lines = prep(getLines('input-area'));
+  switch(mode) {
+    case 'asc':      lines.sort((a, b) => ci(a).localeCompare(ci(b))); break;
+    case 'desc':     lines.sort((a, b) => ci(b).localeCompare(ci(a))); break;
+    case 'num-asc':  lines.sort((a, b) => parseFloat(a) - parseFloat(b)); break;
+    case 'num-desc': lines.sort((a, b) => parseFloat(b) - parseFloat(a)); break;
+    case 'len-asc':  lines.sort((a, b) => a.length - b.length); break;
+    case 'shuffle':  for (let i = lines.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [lines[i], lines[j]] = [lines[j], lines[i]]; } break;
+    case 'reverse':  lines.reverse(); break;
+  }
+  setOutput(lines);
+}
+
+function dedup() {
+  const lines = prep(getLines('input-area'));
+  const seen = new Set();
+  const result = lines.filter(l => {
+    const key = ci(l);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  setOutput(result);
+}
+
+function trimLines() {
+  setOutput(getLines('input-area').map(l => l.trim()));
+}
+
+function removeEmpty() {
+  setOutput(prep(getLines('input-area')).filter(l => l.trim() !== ''));
+}
+
+function filterLines() {
+  const pat = document.getElementById('filter-regex').value;
+  const invert = document.getElementById('filter-invert').checked;
+  const inp = document.getElementById('filter-regex');
+  try {
+    const re = new RegExp(pat, document.getElementById('opt-ci').checked ? 'i' : '');
+    inp.className = '';
+    const lines = prep(getLines('input-area'));
+    setOutput(lines.filter(l => invert ? !re.test(l) : re.test(l)));
+  } catch(e) {
+    inp.className = 'invalid';
+  }
+}
+
+function findReplace() {
+  const findStr = document.getElementById('find-str').value;
+  const replStr = document.getElementById('replace-str').value;
+  const useRegex = document.getElementById('find-regex').checked;
+  const flags = 'g' + (document.getElementById('opt-ci').checked ? 'i' : '');
+  const lines = getLines('input-area').map(l => {
+    try {
+      const pat = useRegex ? new RegExp(findStr, flags) : new RegExp(escRegex(findStr), flags);
+      return l.replace(pat, replStr);
+    } catch(e) { return l; }
+  });
+  setOutput(lines);
+}
+
+function addPrefixSuffix() {
+  const prefix = document.getElementById('opt-prefix').value;
+  const suffix = document.getElementById('opt-suffix').value;
+  const lines = prep(getLines('input-area')).filter(l => l !== '' || false);
+  setOutput(lines.map(l => prefix + l + suffix));
+}
+
+function copyOutput() {
+  navigator.clipboard.writeText(document.getElementById('output-area').value);
+}
+
+function useOutputAsInput() {
+  const out = document.getElementById('output-area').value;
+  document.getElementById('input-area').value = out;
+  document.getElementById('output-area').value = '';
+  document.getElementById('out-diff').textContent = '';
+  updateInputStats();
+}
+
+function clearInput() {
+  document.getElementById('input-area').value = '';
+  document.getElementById('output-area').value = '';
+  document.getElementById('in-stats').innerHTML = '0 lines · 0 chars';
+  document.getElementById('out-stats').innerHTML = '0 lines · 0 chars';
+  document.getElementById('out-diff').textContent = '';
+}
+
+function updateInputStats() {
+  const lines = getLines('input-area');
+  updateStats('in-stats', lines, document.getElementById('input-area').value);
+}
+
+function escRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+document.getElementById('input-area').addEventListener('input', updateInputStats);
+
+// Sample data
+document.getElementById('input-area').value = 'banana\napple\nCherry\napple\ndate\nBANANA\nfig\ncherry';
+updateInputStats();
+</script>
+</body>
+</html>

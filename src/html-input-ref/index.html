@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML Input Types Reference — devnestio</title>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#0f1117;color:#e2e8f0;min-height:100vh}
+header{padding:24px 32px;border-bottom:1px solid #1e2535}
+h1{font-size:1.5rem;font-weight:700;color:#f8fafc}
+h1 span{color:#60a5fa}
+.desc{color:#94a3b8;margin-top:4px;font-size:.9rem}
+.controls{display:flex;gap:12px;flex-wrap:wrap;padding:16px 32px;border-bottom:1px solid #1e2535;align-items:center}
+.search-wrap{position:relative;flex:1;min-width:200px}
+.search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#64748b}
+#search{width:100%;background:#1e2535;border:1px solid #334155;color:#e2e8f0;padding:8px 12px 8px 34px;border-radius:6px;font-size:.9rem;outline:none}
+#search:focus{border-color:#60a5fa}
+.cat-filters{display:flex;gap:8px;flex-wrap:wrap}
+.cat-btn{padding:5px 12px;border-radius:99px;border:1px solid #334155;background:#1e2535;color:#94a3b8;font-size:.8rem;cursor:pointer}
+.cat-btn.active,.cat-btn:hover{background:#2563eb;border-color:#2563eb;color:#fff}
+.content{max-width:1000px;margin:0 auto;padding:24px 32px}
+.item{background:#141924;border:1px solid #1e2535;border-radius:10px;margin-bottom:16px;overflow:hidden;transition:border-color .15s}
+.item:hover{border-color:#334155}
+.item-header{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid #1e2535}
+.type-badge{background:#1e3a5f;border:1px solid #1d4ed8;color:#93c5fd;padding:3px 10px;border-radius:4px;font-family:monospace;font-size:.85rem;font-weight:700}
+.item-title{font-weight:600;color:#f8fafc}
+.item-desc{color:#94a3b8;font-size:.85rem;margin-left:auto;max-width:400px;text-align:right}
+.item-body{display:grid;grid-template-columns:1fr 1fr;gap:0}
+@media(max-width:600px){.item-body{grid-template-columns:1fr}}
+.item-demo{padding:16px 18px;border-right:1px solid #1e2535}
+.item-code{padding:16px 18px;position:relative}
+.demo-label,.code-label{font-size:.75rem;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.demo input,.demo select,.demo textarea{
+  background:#1e2535;border:1px solid #334155;color:#e2e8f0;
+  padding:8px 10px;border-radius:6px;font-size:.9rem;outline:none;
+  accent-color:#2563eb;max-width:100%}
+.demo input:focus{border-color:#60a5fa}
+pre{background:#0f1117;border:1px solid #1e2535;border-radius:6px;padding:10px;overflow:auto;font-size:.8rem;line-height:1.5}
+code{font-family:'Courier New',monospace;color:#7dd3fc}
+.copy-btn{position:absolute;top:16px;right:16px;background:#1e2535;border:1px solid #334155;color:#64748b;padding:4px 10px;border-radius:4px;font-size:.75rem;cursor:pointer}
+.copy-btn:hover{background:#334155;color:#e2e8f0}
+.attrs{padding:12px 18px;border-top:1px solid #1e2535}
+.attrs-label{font-size:.75rem;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.attr-list{display:flex;gap:8px;flex-wrap:wrap}
+.attr-chip{background:#1e2535;border:1px solid #334155;border-radius:4px;padding:3px 8px;font-family:monospace;font-size:.78rem;color:#c4b5fd}
+.no-results{text-align:center;color:#64748b;padding:48px}
+</style>
+</head>
+<body>
+<header>
+  <h1>HTML Input <span>Types Reference</span></h1>
+  <p class="desc">All 22 HTML input types with live demos, code snippets, and key attributes</p>
+</header>
+<div class="controls">
+  <div class="search-wrap">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="search" placeholder="Search input types…">
+  </div>
+  <div class="cat-filters" id="cats"></div>
+</div>
+<div class="content" id="content"></div>
+<script>
+const INPUTS = [
+  {type:'text',cat:'Text',title:'Text',desc:'Single-line text input',
+   demo:'<input type="text" placeholder="Enter text…">',
+   attrs:['value','placeholder','maxlength','minlength','pattern','required','readonly','disabled','size','autocomplete','list']},
+  {type:'password',cat:'Text',title:'Password',desc:'Masked text for sensitive input',
+   demo:'<input type="password" placeholder="Password…">',
+   attrs:['value','minlength','maxlength','required','autocomplete','pattern']},
+  {type:'email',cat:'Text',title:'Email',desc:'Email address with built-in validation',
+   demo:'<input type="email" placeholder="user@example.com">',
+   attrs:['value','placeholder','multiple','required','pattern','maxlength']},
+  {type:'url',cat:'Text',title:'URL',desc:'Web address with URL format validation',
+   demo:'<input type="url" placeholder="https://example.com">',
+   attrs:['value','placeholder','required','pattern','maxlength']},
+  {type:'search',cat:'Text',title:'Search',desc:'Search field (may show clear button)',
+   demo:'<input type="search" placeholder="Search…">',
+   attrs:['value','placeholder','required','maxlength','list']},
+  {type:'tel',cat:'Text',title:'Tel',desc:'Telephone number (no built-in validation)',
+   demo:'<input type="tel" placeholder="+1 555 000 0000">',
+   attrs:['value','placeholder','pattern','required','maxlength']},
+  {type:'number',cat:'Numeric',title:'Number',desc:'Numeric input with spin buttons',
+   demo:'<input type="number" min="0" max="100" step="1" value="42">',
+   attrs:['value','min','max','step','required','placeholder']},
+  {type:'range',cat:'Numeric',title:'Range',desc:'Slider for selecting a numeric value',
+   demo:'<input type="range" min="0" max="100" step="5" value="60">',
+   attrs:['min','max','step','value','list']},
+  {type:'date',cat:'Date & Time',title:'Date',desc:'Date picker (year-month-day)',
+   demo:'<input type="date">',
+   attrs:['value','min','max','step','required']},
+  {type:'time',cat:'Date & Time',title:'Time',desc:'Time picker (hours and minutes)',
+   demo:'<input type="time">',
+   attrs:['value','min','max','step','required']},
+  {type:'datetime-local',cat:'Date & Time',title:'Datetime-local',desc:'Date and time picker without timezone',
+   demo:'<input type="datetime-local">',
+   attrs:['value','min','max','step','required']},
+  {type:'month',cat:'Date & Time',title:'Month',desc:'Year and month picker',
+   demo:'<input type="month">',
+   attrs:['value','min','max','required']},
+  {type:'week',cat:'Date & Time',title:'Week',desc:'Week number and year picker',
+   demo:'<input type="week">',
+   attrs:['value','min','max','required']},
+  {type:'color',cat:'Selector',title:'Color',desc:'Color picker returning a hex value',
+   demo:'<input type="color" value="#2563eb">',
+   attrs:['value','list']},
+  {type:'checkbox',cat:'Selection',title:'Checkbox',desc:'Boolean on/off toggle',
+   demo:'<label><input type="checkbox" checked> Accept terms</label>',
+   attrs:['checked','value','required','disabled','indeterminate']},
+  {type:'radio',cat:'Selection',title:'Radio',desc:'One selection from a group',
+   demo:'<label><input type="radio" name="r" value="a" checked> Option A</label> <label><input type="radio" name="r" value="b"> Option B</label>',
+   attrs:['checked','value','name','required','disabled']},
+  {type:'file',cat:'File',title:'File',desc:'File picker dialog',
+   demo:'<input type="file" accept=".pdf,.png,.jpg">',
+   attrs:['accept','multiple','required','capture']},
+  {type:'hidden',cat:'Other',title:'Hidden',desc:'Hidden field not visible to users',
+   demo:'<span style="color:#64748b;font-style:italic">Not rendered</span><input type="hidden" name="token" value="abc123">',
+   attrs:['value','name']},
+  {type:'submit',cat:'Button',title:'Submit',desc:'Submits the form',
+   demo:'<input type="submit" value="Submit Form">',
+   attrs:['value','form','formaction','formmethod','formnovalidate','disabled']},
+  {type:'reset',cat:'Button',title:'Reset',desc:'Resets all form fields to defaults',
+   demo:'<input type="reset" value="Reset">',
+   attrs:['value','disabled','form']},
+  {type:'button',cat:'Button',title:'Button',desc:'Generic button with no default behavior',
+   demo:'<input type="button" value="Click Me">',
+   attrs:['value','disabled','form']},
+  {type:'image',cat:'Button',title:'Image',desc:'Graphical submit button',
+   demo:'<input type="image" alt="Submit" src="" style="border:1px dashed #334155;padding:8px;border-radius:4px;color:#64748b" onerror="this.style.opacity=0.5">',
+   attrs:['src','alt','width','height','formaction','formmethod']},
+];
+
+const CATS=['All',...new Set(INPUTS.map(i=>i.cat))];
+let activeCat='All', query='';
+
+function render(){
+  const visible=INPUTS.filter(i=>{
+    const mc=activeCat==='All'||i.cat===activeCat;
+    const mq=!query||i.type.includes(query)||i.title.toLowerCase().includes(query)||i.desc.toLowerCase().includes(query);
+    return mc&&mq;
+  });
+  const el=document.getElementById('content');
+  if(!visible.length){el.innerHTML='<div class="no-results">No results</div>';return;}
+  el.innerHTML=visible.map(inp=>{
+    const code=`<input type="${inp.type}" ${inp.type==='checkbox'||inp.type==='radio'?'checked ':inp.type==='range'?'min="0" max="100" value="60" ':inp.type==='color'?'value="#2563eb" ':inp.type==='number'?'min="0" max="100" value="42" ':''}${['text','email','url','search','tel','password'].includes(inp.type)?'placeholder="…" ':''}>`;
+    return `<div class="item">
+      <div class="item-header">
+        <span class="type-badge">type="${inp.type}"</span>
+        <span class="item-title">${inp.title}</span>
+        <span class="item-desc">${inp.desc}</span>
+      </div>
+      <div class="item-body">
+        <div class="item-demo">
+          <div class="demo-label">Live Demo</div>
+          <div class="demo">${inp.demo}</div>
+        </div>
+        <div class="item-code">
+          <div class="code-label">HTML</div>
+          <pre><code>${escHtml(code)}</code></pre>
+          <button class="copy-btn" onclick="cp(${JSON.stringify(code)},this)">Copy</button>
+        </div>
+      </div>
+      <div class="attrs">
+        <div class="attrs-label">Key Attributes</div>
+        <div class="attr-list">${inp.attrs.map(a=>`<span class="attr-chip">${a}</span>`).join('')}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function cp(text,btn){
+  navigator.clipboard.writeText(text);
+  btn.textContent='Copied!';
+  setTimeout(()=>btn.textContent='Copy',1500);
+}
+
+document.getElementById('cats').innerHTML=CATS.map(c=>`
+  <button class="cat-btn${c==='All'?' active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
+function setCat(c){
+  activeCat=c;
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.toggle('active',b.textContent===c));
+  render();
+}
+document.getElementById('search').addEventListener('input',e=>{
+  query=e.target.value.toLowerCase();
+  render();
+});
+render();
+</script>
+</body>
+</html>

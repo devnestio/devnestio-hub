@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSS Clip Path Generator — devnestio</title>
+  <meta name="description" content="Build CSS clip-path shapes visually. Drag handles for polygon, circle, ellipse, and inset shapes. Live preview with copy-ready CSS output." />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    header { background: #1a1d2e; border-bottom: 1px solid #2d3748; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+    header a { color: #7c85f3; text-decoration: none; font-size: 14px; }
+    header h1 { font-size: 18px; font-weight: 700; color: #fff; }
+    .container { max-width: 960px; margin: 0 auto; padding: 24px 16px; display: grid; grid-template-columns: 280px 1fr; gap: 24px; }
+    @media (max-width: 700px) { .container { grid-template-columns: 1fr; } }
+    .panel { background: #1a1d2e; border: 1px solid #2d3748; border-radius: 10px; padding: 18px; }
+    .panel h2 { font-size: 13px; font-weight: 600; color: #a0aec0; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 14px; }
+    .shape-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+    .shape-tab { background: #0f1117; border: 1px solid #2d3748; border-radius: 6px; padding: 6px 12px; font-size: 12px; cursor: pointer; color: #718096; }
+    .shape-tab.active { background: #7c85f3; border-color: #7c85f3; color: #fff; }
+    .presets { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .preset-btn { background: #0f1117; border: 1px solid #2d3748; border-radius: 6px; padding: 5px 10px; font-size: 11px; color: #a0aec0; cursor: pointer; }
+    .preset-btn:hover { border-color: #7c85f3; color: #7c85f3; }
+    .field { margin-bottom: 12px; }
+    .field label { display: flex; justify-content: space-between; font-size: 12px; color: #a0aec0; margin-bottom: 4px; }
+    .field label span { color: #7c85f3; font-weight: 700; }
+    .field input[type=range] { width: 100%; accent-color: #7c85f3; }
+    .points-list { max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+    .point-row { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+    .point-row span { color: #7c85f3; font-weight: 700; width: 20px; }
+    .point-row input { width: 60px; background: #0f1117; border: 1px solid #2d3748; border-radius: 4px; padding: 4px 6px; color: #e2e8f0; font-size: 12px; }
+    .point-row .del-btn { background: #e53e3e; border: none; border-radius: 4px; padding: 3px 8px; color: #fff; cursor: pointer; font-size: 11px; }
+    .add-point-btn { background: #2d3748; border: none; border-radius: 6px; padding: 6px 12px; color: #e2e8f0; cursor: pointer; font-size: 12px; margin-top: 8px; }
+    .canvas-wrap { position: relative; user-select: none; }
+    canvas { display: block; border-radius: 8px; border: 1px solid #2d3748; cursor: crosshair; }
+    .preview-box { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 8px; overflow: hidden; pointer-events: none; }
+    .preview-img { width: 100%; height: 100%; background: linear-gradient(135deg, #7c85f3 0%, #a855f7 50%, #ec4899 100%); }
+    .output-box { background: #0f1117; border: 1px solid #2d3748; border-radius: 8px; padding: 12px; font-family: 'Courier New', monospace; font-size: 13px; color: #7ee787; word-break: break-all; margin-bottom: 10px; min-height: 48px; }
+    .btn-row { display: flex; gap: 8px; }
+    .btn { background: #7c85f3; color: #fff; border: none; border-radius: 6px; padding: 7px 14px; font-size: 13px; cursor: pointer; font-weight: 600; }
+    .btn-secondary { background: #2d3748; }
+    .btn-secondary:hover { background: #3d4a5c; }
+    .btn-sm { padding: 5px 10px; font-size: 12px; border-radius: 4px; }
+    .copied { background: #276749 !important; }
+    .hint { font-size: 11px; color: #4a5568; margin-top: 8px; }
+  </style>
+</head>
+<body>
+<header>
+  <a href="/">← devnestio</a>
+  <h1>CSS Clip Path Generator</h1>
+</header>
+<div class="container">
+  <div style="display:flex;flex-direction:column;gap:16px;">
+    <div class="panel">
+      <h2>Shape</h2>
+      <div class="shape-tabs">
+        <div class="shape-tab active" onclick="setShape('polygon',this)">polygon()</div>
+        <div class="shape-tab" onclick="setShape('circle',this)">circle()</div>
+        <div class="shape-tab" onclick="setShape('ellipse',this)">ellipse()</div>
+        <div class="shape-tab" onclick="setShape('inset',this)">inset()</div>
+      </div>
+
+      <div id="polygon-presets" class="presets">
+        <div class="preset-btn" onclick="applyPolygonPreset('triangle')">Triangle</div>
+        <div class="preset-btn" onclick="applyPolygonPreset('diamond')">Diamond</div>
+        <div class="preset-btn" onclick="applyPolygonPreset('pentagon')">Pentagon</div>
+        <div class="preset-btn" onclick="applyPolygonPreset('hexagon')">Hexagon</div>
+        <div class="preset-btn" onclick="applyPolygonPreset('star')">Star</div>
+        <div class="preset-btn" onclick="applyPolygonPreset('arrow')">Arrow</div>
+        <div class="preset-btn" onclick="applyPolygonPreset('chevron')">Chevron</div>
+        <div class="preset-btn" onclick="applyPolygonPreset('parallelogram')">Parallelogram</div>
+      </div>
+
+      <div id="polygon-controls">
+        <div class="points-list" id="points-list"></div>
+        <button class="add-point-btn" onclick="addPoint()">+ Add Point</button>
+        <p class="hint">Click canvas to add point. Drag handles to move.</p>
+      </div>
+
+      <div id="circle-controls" style="display:none">
+        <div class="field">
+          <label>Radius <span id="circle-r-val">50%</span></label>
+          <input type="range" id="circle-r" min="1" max="100" value="50" oninput="document.getElementById('circle-r-val').textContent=this.value+'%';renderShape()">
+        </div>
+        <div class="field">
+          <label>Center X <span id="circle-cx-val">50%</span></label>
+          <input type="range" id="circle-cx" min="0" max="100" value="50" oninput="document.getElementById('circle-cx-val').textContent=this.value+'%';renderShape()">
+        </div>
+        <div class="field">
+          <label>Center Y <span id="circle-cy-val">50%</span></label>
+          <input type="range" id="circle-cy" min="0" max="100" value="50" oninput="document.getElementById('circle-cy-val').textContent=this.value+'%';renderShape()">
+        </div>
+      </div>
+
+      <div id="ellipse-controls" style="display:none">
+        <div class="field">
+          <label>Radius X <span id="ellipse-rx-val">50%</span></label>
+          <input type="range" id="ellipse-rx" min="1" max="100" value="50" oninput="document.getElementById('ellipse-rx-val').textContent=this.value+'%';renderShape()">
+        </div>
+        <div class="field">
+          <label>Radius Y <span id="ellipse-ry-val">30%</span></label>
+          <input type="range" id="ellipse-ry" min="1" max="100" value="30" oninput="document.getElementById('ellipse-ry-val').textContent=this.value+'%';renderShape()">
+        </div>
+        <div class="field">
+          <label>Center X <span id="ellipse-cx-val">50%</span></label>
+          <input type="range" id="ellipse-cx" min="0" max="100" value="50" oninput="document.getElementById('ellipse-cx-val').textContent=this.value+'%';renderShape()">
+        </div>
+        <div class="field">
+          <label>Center Y <span id="ellipse-cy-val">50%</span></label>
+          <input type="range" id="ellipse-cy" min="0" max="100" value="50" oninput="document.getElementById('ellipse-cy-val').textContent=this.value+'%';renderShape()">
+        </div>
+      </div>
+
+      <div id="inset-controls" style="display:none">
+        <div class="field">
+          <label>Top <span id="inset-t-val">10%</span></label>
+          <input type="range" id="inset-t" min="0" max="49" value="10" oninput="document.getElementById('inset-t-val').textContent=this.value+'%';renderShape()">
+        </div>
+        <div class="field">
+          <label>Right <span id="inset-r-val">10%</span></label>
+          <input type="range" id="inset-r" min="0" max="49" value="10" oninput="document.getElementById('inset-r-val').textContent=this.value+'%';renderShape()">
+        </div>
+        <div class="field">
+          <label>Bottom <span id="inset-b-val">10%</span></label>
+          <input type="range" id="inset-b" min="0" max="49" value="10" oninput="document.getElementById('inset-b-val').textContent=this.value+'%';renderShape()">
+        </div>
+        <div class="field">
+          <label>Left <span id="inset-l-val">10%</span></label>
+          <input type="range" id="inset-l" min="0" max="49" value="10" oninput="document.getElementById('inset-l-val').textContent=this.value+'%';renderShape()">
+        </div>
+        <div class="field">
+          <label>Border Radius <span id="inset-br-val">0%</span></label>
+          <input type="range" id="inset-br" min="0" max="50" value="0" oninput="document.getElementById('inset-br-val').textContent=this.value+'%';renderShape()">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:16px;">
+    <div class="panel">
+      <h2>Preview</h2>
+      <div class="canvas-wrap">
+        <canvas id="canvas" width="560" height="340"></canvas>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>CSS Output</h2>
+      <div class="output-box" id="output-box"></div>
+      <div class="btn-row">
+        <button class="btn btn-secondary btn-sm" onclick="copyCSS()">Copy CSS</button>
+        <button class="btn btn-secondary btn-sm" onclick="copyValue()">Copy value only</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let shape = 'polygon';
+let points = [[50,0],[100,100],[0,100]]; // triangle default
+let dragging = -1;
+let dragOffX = 0, dragOffY = 0;
+
+const POLYGON_PRESETS = {
+  triangle: [[50,0],[100,100],[0,100]],
+  diamond: [[50,0],[100,50],[50,100],[0,50]],
+  pentagon: [[50,0],[100,38],[82,100],[18,100],[0,38]],
+  hexagon: [[25,0],[75,0],[100,50],[75,100],[25,100],[0,50]],
+  star: [[50,0],[61,35],[98,35],[68,57],[79,91],[50,70],[21,91],[32,57],[2,35],[39,35]],
+  arrow: [[0,20],[60,20],[60,0],[100,50],[60,100],[60,80],[0,80]],
+  chevron: [[0,0],[75,0],[100,50],[75,100],[0,100],[25,50]],
+  parallelogram: [[25,0],[100,0],[75,100],[0,100]],
+};
+
+function setShape(s, el) {
+  shape = s;
+  document.querySelectorAll('.shape-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  ['polygon','circle','ellipse','inset'].forEach(n => {
+    document.getElementById(n + '-controls').style.display = n === s ? '' : 'none';
+    const presets = document.getElementById(n + '-presets');
+    if (presets) presets.style.display = n === s ? '' : 'none';
+  });
+  renderShape();
+}
+
+function applyPolygonPreset(name) {
+  points = POLYGON_PRESETS[name].map(p => [...p]);
+  renderPointInputs();
+  renderShape();
+}
+
+function addPoint() {
+  points.push([50, 50]);
+  renderPointInputs();
+  renderShape();
+}
+
+function renderPointInputs() {
+  const el = document.getElementById('points-list');
+  el.innerHTML = '';
+  points.forEach((p, i) => {
+    const row = document.createElement('div');
+    row.className = 'point-row';
+    row.innerHTML = `
+      <span>${i+1}</span>
+      X<input type="number" min="0" max="100" value="${p[0]}" oninput="points[${i}][0]=+this.value;renderShape()">
+      Y<input type="number" min="0" max="100" value="${p[1]}" oninput="points[${i}][1]=+this.value;renderShape()">
+      ${points.length > 3 ? `<button class="del-btn" onclick="removePoint(${i})">✕</button>` : ''}`;
+    el.appendChild(row);
+  });
+}
+
+function removePoint(i) {
+  points.splice(i, 1);
+  renderPointInputs();
+  renderShape();
+}
+
+function buildClipPath() {
+  if (shape === 'polygon') {
+    const pts = points.map(p => `${p[0]}% ${p[1]}%`).join(', ');
+    return `polygon(${pts})`;
+  }
+  if (shape === 'circle') {
+    const r = document.getElementById('circle-r').value;
+    const cx = document.getElementById('circle-cx').value;
+    const cy = document.getElementById('circle-cy').value;
+    return `circle(${r}% at ${cx}% ${cy}%)`;
+  }
+  if (shape === 'ellipse') {
+    const rx = document.getElementById('ellipse-rx').value;
+    const ry = document.getElementById('ellipse-ry').value;
+    const cx = document.getElementById('ellipse-cx').value;
+    const cy = document.getElementById('ellipse-cy').value;
+    return `ellipse(${rx}% ${ry}% at ${cx}% ${cy}%)`;
+  }
+  if (shape === 'inset') {
+    const t = document.getElementById('inset-t').value;
+    const r = document.getElementById('inset-r').value;
+    const b = document.getElementById('inset-b').value;
+    const l = document.getElementById('inset-l').value;
+    const br = document.getElementById('inset-br').value;
+    const insetVal = `${t}% ${r}% ${b}% ${l}%`;
+    return br > 0 ? `inset(${insetVal} round ${br}%)` : `inset(${insetVal})`;
+  }
+}
+
+function renderShape() {
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const clipValue = buildClipPath();
+  document.getElementById('output-box').textContent = `clip-path: ${clipValue};`;
+
+  // Draw dimmed background
+  ctx.fillStyle = '#0f1117';
+  ctx.fillRect(0, 0, W, H);
+
+  // Draw shape path
+  ctx.save();
+  ctx.beginPath();
+  if (shape === 'polygon') {
+    points.forEach(([px, py], i) => {
+      const x = px / 100 * W, y = py / 100 * H;
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.closePath();
+  } else if (shape === 'circle') {
+    const r = +document.getElementById('circle-r').value / 100;
+    const cx = +document.getElementById('circle-cx').value / 100 * W;
+    const cy = +document.getElementById('circle-cy').value / 100 * H;
+    ctx.arc(cx, cy, r * Math.min(W, H), 0, Math.PI * 2);
+  } else if (shape === 'ellipse') {
+    const rx = +document.getElementById('ellipse-rx').value / 100 * W;
+    const ry = +document.getElementById('ellipse-ry').value / 100 * H;
+    const cx = +document.getElementById('ellipse-cx').value / 100 * W;
+    const cy = +document.getElementById('ellipse-cy').value / 100 * H;
+    ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+  } else if (shape === 'inset') {
+    const t = +document.getElementById('inset-t').value / 100 * H;
+    const r = +document.getElementById('inset-r').value / 100 * W;
+    const b = +document.getElementById('inset-b').value / 100 * H;
+    const l = +document.getElementById('inset-l').value / 100 * W;
+    const br = +document.getElementById('inset-br').value / 100 * Math.min(W, H);
+    const x = l, y = t, w = W - l - r, h = H - t - b;
+    if (br > 0) {
+      ctx.roundRect(x, y, w, h, br);
+    } else {
+      ctx.rect(x, y, w, h);
+    }
+  }
+
+  // Fill with gradient
+  const grad = ctx.createLinearGradient(0, 0, W, H);
+  grad.addColorStop(0, '#7c85f3');
+  grad.addColorStop(0.5, '#a855f7');
+  grad.addColorStop(1, '#ec4899');
+  ctx.fillStyle = grad;
+  ctx.fill();
+  ctx.restore();
+
+  // Draw outline
+  ctx.strokeStyle = '#7c85f3';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Draw handles for polygon
+  if (shape === 'polygon') {
+    points.forEach(([px, py], i) => {
+      const x = px / 100 * W, y = py / 100 * H;
+      ctx.fillStyle = '#7c85f3';
+      ctx.beginPath();
+      ctx.arc(x, y, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    });
+  }
+}
+
+const canvas = document.getElementById('canvas');
+
+canvas.addEventListener('mousedown', e => {
+  if (shape !== 'polygon') return;
+  const rect = canvas.getBoundingClientRect();
+  const mx = (e.clientX - rect.left) / rect.width * 100;
+  const my = (e.clientY - rect.top) / rect.height * 100;
+  const hit = points.findIndex(([px, py]) =>
+    Math.hypot(px - mx, py - my) < 4
+  );
+  if (hit >= 0) { dragging = hit; return; }
+  // Add new point on click in empty area
+  points.push([Math.round(mx), Math.round(my)]);
+  renderPointInputs();
+  renderShape();
+});
+
+canvas.addEventListener('mousemove', e => {
+  if (dragging < 0) return;
+  const rect = canvas.getBoundingClientRect();
+  const mx = Math.max(0, Math.min(100, (e.clientX - rect.left) / rect.width * 100));
+  const my = Math.max(0, Math.min(100, (e.clientY - rect.top) / rect.height * 100));
+  points[dragging] = [Math.round(mx), Math.round(my)];
+  renderPointInputs();
+  renderShape();
+});
+
+canvas.addEventListener('mouseup', () => { dragging = -1; });
+canvas.addEventListener('mouseleave', () => { dragging = -1; });
+
+function copyCSS() {
+  navigator.clipboard.writeText(document.getElementById('output-box').textContent).then(() => {
+    const btn = document.querySelector('.copy-css-btn') || document.querySelectorAll('.btn-secondary')[0];
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy CSS'; btn.classList.remove('copied'); }, 1500);
+  });
+}
+
+function copyValue() {
+  navigator.clipboard.writeText(buildClipPath()).then(() => {
+    const btn = document.querySelectorAll('.btn-secondary')[1];
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy value only'; btn.classList.remove('copied'); }, 1500);
+  });
+}
+
+// Suppress roundRect warning in older engines
+if (!CanvasRenderingContext2D.prototype.roundRect) {
+  CanvasRenderingContext2D.prototype.roundRect = function(x,y,w,h,r) {
+    this.moveTo(x+r,y); this.arcTo(x+w,y,x+w,y+h,r); this.arcTo(x+w,y+h,x,y+h,r);
+    this.arcTo(x,y+h,x,y,r); this.arcTo(x,y,x+w,y,r); this.closePath();
+  };
+}
+
+renderPointInputs();
+renderShape();
+</script>
+</body>
+</html>

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSS Selectors Reference — devnestio</title>
+  <meta name="description" content="Searchable CSS selectors reference. Covers basic, combinator, attribute, pseudo-class, and pseudo-element selectors with examples and browser support notes." />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    header { background: #1a1d2e; border-bottom: 1px solid #2d3748; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+    header a { color: #7c85f3; text-decoration: none; font-size: 14px; }
+    header h1 { font-size: 18px; font-weight: 700; color: #fff; }
+    .container { max-width: 1020px; margin: 0 auto; padding: 24px 16px; }
+    .toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .toolbar input { flex: 1; min-width: 200px; background: #1a1d2e; border: 1px solid #2d3748; border-radius: 8px; padding: 9px 14px; color: #e2e8f0; font-size: 14px; }
+    .toolbar input:focus { outline: none; border-color: #7c85f3; }
+    .cats { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .cat-btn { background: #1a1d2e; border: 1px solid #2d3748; border-radius: 20px; padding: 5px 14px; font-size: 12px; cursor: pointer; color: #718096; }
+    .cat-btn.active { background: #7c85f3; border-color: #7c85f3; color: #fff; }
+    #count { font-size: 13px; color: #718096; margin-bottom: 10px; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th { background: #1a1d2e; padding: 9px 14px; text-align: left; font-size: 11px; font-weight: 700; color: #a0aec0; text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid #2d3748; }
+    td { padding: 9px 14px; border-bottom: 1px solid #1a1d2e; vertical-align: top; font-size: 13px; }
+    tr:hover td { background: #1a1d2e; }
+    .sel-cell { font-family: 'Courier New', monospace; font-size: 13px; color: #7ee787; white-space: nowrap; cursor: pointer; }
+    .sel-cell:hover { color: #7c85f3; }
+    .cat-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+    .cat-basic { background: #1a365d; color: #90cdf4; }
+    .cat-combinator { background: #1c3a1e; color: #68d391; }
+    .cat-attribute { background: #2d1b69; color: #b794f4; }
+    .cat-pseudo-class { background: #744210; color: #f6ad55; }
+    .cat-pseudo-element { background: #742a2a; color: #fc8181; }
+    .ex-cell { font-family: 'Courier New', monospace; font-size: 11px; color: #fbd38d; }
+    .support-cell { font-size: 11px; }
+    .sup-all { color: #68d391; }
+    .sup-modern { color: #f6ad55; }
+    .sup-limited { color: #fc8181; }
+    .desc-cell { color: #a0aec0; font-size: 12px; max-width: 320px; }
+    .no-results { text-align: center; padding: 40px; color: #4a5568; }
+    .hl { background: #b7791f; color: #fff; border-radius: 2px; padding: 0 2px; }
+  </style>
+</head>
+<body>
+<header>
+  <a href="/">← devnestio</a>
+  <h1>CSS Selectors Reference</h1>
+</header>
+<div class="container">
+  <div class="toolbar">
+    <input type="search" id="search" placeholder="Search selectors, e.g. :hover, nth-child, attribute…" oninput="render()" />
+  </div>
+  <div class="cats" id="cats"></div>
+  <div id="count"></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Selector</th><th>Category</th><th>Description</th><th>Example</th><th>Support</th></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+  <div class="no-results" id="no-results" style="display:none">No selectors matched.</div>
+</div>
+<script>
+const SELECTORS = [
+  // Basic
+  { sel: '*', cat: 'Basic', desc: 'Universal selector — matches every element.', ex: '* { box-sizing: border-box; }', sup: 'all' },
+  { sel: 'element', cat: 'Basic', desc: 'Type selector — matches all elements of a given tag name.', ex: 'p { color: red; }', sup: 'all' },
+  { sel: '.class', cat: 'Basic', desc: 'Class selector — matches elements with the specified class attribute.', ex: '.btn { padding: 8px; }', sup: 'all' },
+  { sel: '#id', cat: 'Basic', desc: 'ID selector — matches the element with the given id attribute.', ex: '#header { height: 60px; }', sup: 'all' },
+  { sel: 'A, B', cat: 'Basic', desc: 'Selector list — matches elements that match A or B.', ex: 'h1, h2, h3 { font-weight: 700; }', sup: 'all' },
+  // Combinators
+  { sel: 'A B', cat: 'Combinator', desc: 'Descendant combinator — matches B that is a descendant of A.', ex: 'nav a { color: white; }', sup: 'all' },
+  { sel: 'A > B', cat: 'Combinator', desc: 'Child combinator — matches B that is a direct child of A.', ex: 'ul > li { list-style: none; }', sup: 'all' },
+  { sel: 'A + B', cat: 'Combinator', desc: 'Adjacent sibling — matches B immediately following A.', ex: 'h1 + p { margin-top: 0; }', sup: 'all' },
+  { sel: 'A ~ B', cat: 'Combinator', desc: 'General sibling — matches B that follows A as a sibling.', ex: 'h1 ~ p { color: gray; }', sup: 'all' },
+  { sel: 'A || B', cat: 'Combinator', desc: 'Column combinator — matches B in a column represented by A (grid).', ex: 'col.selected || td {}', sup: 'limited' },
+  // Attribute
+  { sel: '[attr]', cat: 'Attribute', desc: 'Matches elements with the given attribute.', ex: '[disabled] { opacity: .5; }', sup: 'all' },
+  { sel: '[attr=val]', cat: 'Attribute', desc: 'Matches elements where attr equals val exactly.', ex: '[type="submit"] {}', sup: 'all' },
+  { sel: '[attr~=val]', cat: 'Attribute', desc: 'Matches elements where attr contains val as a word.', ex: '[class~="active"] {}', sup: 'all' },
+  { sel: '[attr|=val]', cat: 'Attribute', desc: 'Matches elements where attr is val or starts with val-.', ex: '[lang|="en"] {}', sup: 'all' },
+  { sel: '[attr^=val]', cat: 'Attribute', desc: 'Matches elements where attr starts with val.', ex: '[href^="https"] {}', sup: 'all' },
+  { sel: '[attr$=val]', cat: 'Attribute', desc: 'Matches elements where attr ends with val.', ex: '[href$=".pdf"] {}', sup: 'all' },
+  { sel: '[attr*=val]', cat: 'Attribute', desc: 'Matches elements where attr contains val as a substring.', ex: '[class*="btn"] {}', sup: 'all' },
+  { sel: '[attr operator val i]', cat: 'Attribute', desc: 'Case-insensitive flag. Makes value matching case-insensitive.', ex: '[type="TEXT" i] {}', sup: 'modern' },
+  // Pseudo-classes — link/user action
+  { sel: ':link', cat: 'Pseudo-class', desc: 'Unvisited links.', ex: 'a:link { color: blue; }', sup: 'all' },
+  { sel: ':visited', cat: 'Pseudo-class', desc: 'Visited links.', ex: 'a:visited { color: purple; }', sup: 'all' },
+  { sel: ':hover', cat: 'Pseudo-class', desc: 'Element under the mouse pointer.', ex: 'button:hover { opacity: .8; }', sup: 'all' },
+  { sel: ':active', cat: 'Pseudo-class', desc: 'Element being activated (clicked).', ex: 'button:active { transform: scale(.98); }', sup: 'all' },
+  { sel: ':focus', cat: 'Pseudo-class', desc: 'Element that has keyboard focus.', ex: 'input:focus { border-color: blue; }', sup: 'all' },
+  { sel: ':focus-visible', cat: 'Pseudo-class', desc: 'Focus ring shown only via keyboard navigation.', ex: ':focus-visible { outline: 2px solid blue; }', sup: 'modern' },
+  { sel: ':focus-within', cat: 'Pseudo-class', desc: 'Matches element or any descendant that has focus.', ex: 'form:focus-within { border-color: blue; }', sup: 'modern' },
+  // Structural
+  { sel: ':root', cat: 'Pseudo-class', desc: 'Root element of the document (html in HTML).', ex: ':root { --color: #fff; }', sup: 'all' },
+  { sel: ':empty', cat: 'Pseudo-class', desc: 'Matches elements with no children.', ex: 'p:empty { display: none; }', sup: 'all' },
+  { sel: ':first-child', cat: 'Pseudo-class', desc: 'First child element of its parent.', ex: 'li:first-child { font-weight: bold; }', sup: 'all' },
+  { sel: ':last-child', cat: 'Pseudo-class', desc: 'Last child element of its parent.', ex: 'li:last-child { border: none; }', sup: 'all' },
+  { sel: ':only-child', cat: 'Pseudo-class', desc: 'Element that is the only child of its parent.', ex: 'li:only-child { display: block; }', sup: 'all' },
+  { sel: ':first-of-type', cat: 'Pseudo-class', desc: 'First sibling of its element type.', ex: 'p:first-of-type { font-size: 1.2em; }', sup: 'all' },
+  { sel: ':last-of-type', cat: 'Pseudo-class', desc: 'Last sibling of its element type.', ex: 'p:last-of-type { margin-bottom: 0; }', sup: 'all' },
+  { sel: ':only-of-type', cat: 'Pseudo-class', desc: 'Only sibling of its element type.', ex: 'img:only-of-type { display: block; }', sup: 'all' },
+  { sel: ':nth-child(n)', cat: 'Pseudo-class', desc: 'Matches elements at position n in parent (1-indexed). Supports odd, even, An+B.', ex: 'tr:nth-child(odd) { background: #f5f5f5; }', sup: 'all' },
+  { sel: ':nth-last-child(n)', cat: 'Pseudo-class', desc: 'Like :nth-child but counting from the end.', ex: 'li:nth-last-child(2) {}', sup: 'all' },
+  { sel: ':nth-of-type(n)', cat: 'Pseudo-class', desc: 'nth sibling of its type.', ex: 'p:nth-of-type(2) { color: red; }', sup: 'all' },
+  { sel: ':nth-last-of-type(n)', cat: 'Pseudo-class', desc: 'nth sibling of its type counting from end.', ex: 'p:nth-last-of-type(1) {}', sup: 'all' },
+  // Form
+  { sel: ':enabled', cat: 'Pseudo-class', desc: 'Enabled form elements.', ex: 'input:enabled { opacity: 1; }', sup: 'all' },
+  { sel: ':disabled', cat: 'Pseudo-class', desc: 'Disabled form elements.', ex: 'input:disabled { opacity: .4; }', sup: 'all' },
+  { sel: ':checked', cat: 'Pseudo-class', desc: 'Checked checkboxes, radio buttons, or selected options.', ex: 'input:checked + label { font-weight: bold; }', sup: 'all' },
+  { sel: ':required', cat: 'Pseudo-class', desc: 'Form elements with the required attribute.', ex: 'input:required { border-color: red; }', sup: 'all' },
+  { sel: ':optional', cat: 'Pseudo-class', desc: 'Form elements without the required attribute.', ex: 'input:optional { border-color: gray; }', sup: 'all' },
+  { sel: ':valid', cat: 'Pseudo-class', desc: 'Form elements whose value is valid per their constraints.', ex: 'input:valid { border-color: green; }', sup: 'all' },
+  { sel: ':invalid', cat: 'Pseudo-class', desc: 'Form elements whose value is invalid.', ex: 'input:invalid { border-color: red; }', sup: 'all' },
+  { sel: ':in-range', cat: 'Pseudo-class', desc: 'Inputs whose value is within the specified min/max range.', ex: 'input:in-range { color: green; }', sup: 'modern' },
+  { sel: ':out-of-range', cat: 'Pseudo-class', desc: 'Inputs whose value is outside the min/max range.', ex: 'input:out-of-range { color: red; }', sup: 'modern' },
+  { sel: ':placeholder-shown', cat: 'Pseudo-class', desc: 'Input currently showing placeholder text.', ex: 'input:placeholder-shown { border-style: dashed; }', sup: 'modern' },
+  { sel: ':read-only', cat: 'Pseudo-class', desc: 'Elements that are read-only.', ex: 'input:read-only { background: #f5f5f5; }', sup: 'modern' },
+  { sel: ':read-write', cat: 'Pseudo-class', desc: 'Elements that are editable.', ex: 'input:read-write { background: white; }', sup: 'modern' },
+  { sel: ':indeterminate', cat: 'Pseudo-class', desc: 'Checkboxes in an indeterminate state.', ex: 'input:indeterminate + label { opacity: .7; }', sup: 'modern' },
+  // Logical / functional
+  { sel: ':not(selector)', cat: 'Pseudo-class', desc: 'Negation — matches elements that do NOT match the selector.', ex: 'p:not(.intro) { color: gray; }', sup: 'all' },
+  { sel: ':is(A, B, C)', cat: 'Pseudo-class', desc: 'Matches any element matching A, B, or C. Forgiving selector list.', ex: ':is(h1, h2, h3) + p {}', sup: 'modern' },
+  { sel: ':where(A, B)', cat: 'Pseudo-class', desc: 'Like :is() but contributes zero specificity.', ex: ':where(section, article) p {}', sup: 'modern' },
+  { sel: ':has(selector)', cat: 'Pseudo-class', desc: 'Relational pseudo-class — parent of elements matching selector.', ex: 'figure:has(figcaption) {}', sup: 'modern' },
+  { sel: ':any-link', cat: 'Pseudo-class', desc: 'Matches any anchor with href (:link or :visited).', ex: ':any-link { text-decoration: underline; }', sup: 'modern' },
+  { sel: ':target', cat: 'Pseudo-class', desc: 'Matches element whose id matches the URL fragment.', ex: ':target { background: yellow; }', sup: 'all' },
+  { sel: ':lang(code)', cat: 'Pseudo-class', desc: 'Matches elements in a specified language.', ex: ':lang(fr) { quotes: "«" "»"; }', sup: 'all' },
+  { sel: ':scope', cat: 'Pseudo-class', desc: 'Matches element that is the scope of a style rule.', ex: '.parent :scope > li {}', sup: 'modern' },
+  { sel: ':defined', cat: 'Pseudo-class', desc: 'Matches any defined element (including custom elements).', ex: 'my-element:defined { display: block; }', sup: 'modern' },
+  { sel: ':dir(ltr|rtl)', cat: 'Pseudo-class', desc: 'Matches element with a specific text directionality.', ex: ':dir(rtl) { text-align: right; }', sup: 'limited' },
+  { sel: ':fullscreen', cat: 'Pseudo-class', desc: 'Matches element currently in fullscreen mode.', ex: ':fullscreen { background: black; }', sup: 'modern' },
+  { sel: ':modal', cat: 'Pseudo-class', desc: 'Matches elements in a modal state (e.g. dialog).', ex: 'dialog:modal { backdrop-filter: blur(4px); }', sup: 'modern' },
+  { sel: ':popover-open', cat: 'Pseudo-class', desc: 'Matches popovers that are currently open.', ex: '[popover]:popover-open {}', sup: 'modern' },
+  // Pseudo-elements
+  { sel: '::before', cat: 'Pseudo-element', desc: 'Generated content before the element\'s content.', ex: '.icon::before { content: "→"; }', sup: 'all' },
+  { sel: '::after', cat: 'Pseudo-element', desc: 'Generated content after the element\'s content.', ex: '.clearfix::after { content: ""; display: block; clear: both; }', sup: 'all' },
+  { sel: '::first-line', cat: 'Pseudo-element', desc: 'First formatted line of a block element.', ex: 'p::first-line { font-variant: small-caps; }', sup: 'all' },
+  { sel: '::first-letter', cat: 'Pseudo-element', desc: 'First letter of the first formatted line.', ex: 'p::first-letter { font-size: 2em; float: left; }', sup: 'all' },
+  { sel: '::placeholder', cat: 'Pseudo-element', desc: 'Placeholder text of an input or textarea.', ex: 'input::placeholder { color: #999; }', sup: 'modern' },
+  { sel: '::selection', cat: 'Pseudo-element', desc: 'Part of a document highlighted by the user.', ex: '::selection { background: #7c85f3; color: #fff; }', sup: 'modern' },
+  { sel: '::marker', cat: 'Pseudo-element', desc: 'List item marker (bullet or number).', ex: 'li::marker { color: #7c85f3; }', sup: 'modern' },
+  { sel: '::backdrop', cat: 'Pseudo-element', desc: 'Backdrop behind a dialog or fullscreen element.', ex: 'dialog::backdrop { background: rgba(0,0,0,.5); }', sup: 'modern' },
+  { sel: '::file-selector-button', cat: 'Pseudo-element', desc: 'The button of an <input type="file"> element.', ex: 'input::file-selector-button { padding: 6px 12px; }', sup: 'modern' },
+  { sel: '::cue', cat: 'Pseudo-element', desc: 'WebVTT cues for video subtitles.', ex: 'video::cue { color: yellow; }', sup: 'modern' },
+  { sel: '::slotted()', cat: 'Pseudo-element', desc: 'Elements assigned to a slot in a Shadow DOM.', ex: '::slotted(p) { color: blue; }', sup: 'modern' },
+  { sel: '::part()', cat: 'Pseudo-element', desc: 'Element with a matching part attribute in a Shadow DOM.', ex: 'my-el::part(button) {}', sup: 'modern' },
+];
+
+const CATS = ['All', ...new Set(SELECTORS.map(s => s.cat))];
+let activeCat = 'All';
+
+function buildCats() {
+  const el = document.getElementById('cats');
+  CATS.forEach(cat => {
+    const btn = document.createElement('div');
+    btn.className = 'cat-btn' + (cat === 'All' ? ' active' : '');
+    btn.textContent = cat;
+    btn.onclick = () => {
+      activeCat = cat;
+      document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      render();
+    };
+    el.appendChild(btn);
+  });
+}
+
+function catClass(cat) {
+  return { 'Basic': 'cat-basic', 'Combinator': 'cat-combinator', 'Attribute': 'cat-attribute', 'Pseudo-class': 'cat-pseudo-class', 'Pseudo-element': 'cat-pseudo-element' }[cat] || '';
+}
+
+function supLabel(sup) {
+  if (sup === 'all') return '<span class="sup-all">All browsers</span>';
+  if (sup === 'modern') return '<span class="sup-modern">Modern browsers</span>';
+  return '<span class="sup-limited">Limited support</span>';
+}
+
+function hl(text, q) {
+  if (!q || !text) return text;
+  const eq = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return String(text).replace(new RegExp(`(${eq})`, 'gi'), '<span class="hl">$1</span>');
+}
+
+function render() {
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  let filtered = SELECTORS;
+  if (activeCat !== 'All') filtered = filtered.filter(s => s.cat === activeCat);
+  if (q) filtered = filtered.filter(s =>
+    s.sel.toLowerCase().includes(q) ||
+    s.desc.toLowerCase().includes(q) ||
+    s.cat.toLowerCase().includes(q) ||
+    s.ex.toLowerCase().includes(q)
+  );
+
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  document.getElementById('no-results').style.display = filtered.length ? 'none' : '';
+  filtered.forEach(s => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="sel-cell" title="Click to copy" onclick="navigator.clipboard.writeText('${s.sel.replace(/'/g, "\\'")}')">${hl(s.sel, q)}</td>
+      <td><span class="cat-badge ${catClass(s.cat)}">${s.cat}</span></td>
+      <td class="desc-cell">${hl(s.desc, q)}</td>
+      <td class="ex-cell">${hl(s.ex, q)}</td>
+      <td class="support-cell">${supLabel(s.sup)}</td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('count').textContent = `Showing ${filtered.length} of ${SELECTORS.length} selectors`;
+}
+
+buildCats();
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Color Contrast Checker – WCAG AA/AAA Compliance | DevNestio</title>
+  <meta name="description" content="Check foreground/background color contrast ratio for WCAG AA and AAA accessibility compliance. Live preview, hex/RGB input, contrast ratio display." />
+  <link rel="canonical" href="https://devnestio.pages.dev/color-contrast-checker/" />
+  <meta property="og:title" content="Color Contrast Checker – WCAG AA/AAA Compliance" />
+  <meta property="og:description" content="Check color contrast ratio for WCAG AA and AAA compliance. Live preview and hex/RGB input." />
+  <meta property="og:url" content="https://devnestio.pages.dev/color-contrast-checker/" />
+  <meta property="og:type" content="website" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1117; --surface: #1a1d27; --surface2: #22263a; --border: #2e3248;
+      --text: #e2e8f0; --muted: #8892a4;
+      --pass: #4ade80; --fail: #f87171; --warn: #fbbf24;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1.2rem 1.5rem; }
+    header h1 { font-size: 1.4rem; font-weight: 700; color: #c084fc; }
+    header p { font-size: .85rem; color: var(--muted); margin-top: .25rem; }
+    .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; padding: 1.5rem; max-width: 1100px; margin: 0 auto; }
+    @media (max-width: 700px) { .layout { grid-template-columns: 1fr; } }
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.4rem; }
+    .panel h2 { font-size: .95rem; font-weight: 600; color: var(--muted); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: .05em; }
+    .color-row { margin-bottom: 1.1rem; }
+    label { display: block; font-size: .85rem; color: var(--muted); margin-bottom: .35rem; }
+    .color-input-group { display: flex; gap: .5rem; align-items: center; }
+    input[type="color"] { width: 44px; height: 44px; border: 2px solid var(--border); border-radius: 8px; background: none; cursor: pointer; padding: 2px; flex-shrink: 0; }
+    input[type="color"]:focus { outline: 2px solid #c084fc; }
+    input[type="text"] { flex: 1; background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: .5rem .75rem; font-family: monospace; font-size: .95rem; outline: none; transition: border-color .2s; }
+    input[type="text"]:focus { border-color: #c084fc; }
+    .swap-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: .5rem .9rem; cursor: pointer; font-size: 1rem; transition: all .15s; width: 100%; margin-top: .75rem; }
+    .swap-btn:hover { background: #c084fc22; border-color: #c084fc; color: #c084fc; }
+    .ratio-display { text-align: center; padding: 1.5rem; }
+    .ratio-number { font-size: 3.5rem; font-weight: 800; line-height: 1; font-family: monospace; }
+    .ratio-label { font-size: .85rem; color: var(--muted); margin-top: .4rem; }
+    .wcag-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin-top: 1.2rem; }
+    .wcag-item { background: var(--surface2); border-radius: 8px; padding: .75rem; text-align: center; }
+    .wcag-level { font-size: .75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: .35rem; }
+    .wcag-status { font-size: .95rem; font-weight: 700; padding: .3rem .7rem; border-radius: 5px; display: inline-block; }
+    .wcag-status.pass { background: #4ade8022; color: var(--pass); }
+    .wcag-status.fail { background: #f8717122; color: var(--fail); }
+    .wcag-desc { font-size: .72rem; color: var(--muted); margin-top: .3rem; }
+    .preview-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .preview-panel h2 { font-size: .95rem; font-weight: 600; color: var(--muted); padding: 1.4rem 1.4rem .75rem; text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid var(--border); }
+    .preview-area { padding: 2rem; }
+    .preview-box { border-radius: 10px; padding: 2rem; margin-bottom: .75rem; }
+    .preview-box .p-heading { font-size: 1.4rem; font-weight: 700; margin-bottom: .5rem; }
+    .preview-box .p-body { font-size: 1rem; line-height: 1.6; }
+    .preview-box .p-small { font-size: .8rem; margin-top: .5rem; }
+    .preview-box .p-btn { display: inline-block; padding: .5rem 1.2rem; border-radius: 6px; font-size: .9rem; font-weight: 600; margin-top: .75rem; }
+    .info-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.4rem; }
+    .info-panel h2 { font-size: .95rem; font-weight: 600; color: var(--muted); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: .05em; }
+    .info-table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+    .info-table th, .info-table td { padding: .5rem .6rem; text-align: left; border-bottom: 1px solid var(--border); }
+    .info-table th { color: var(--muted); font-weight: 600; }
+    .info-table td { color: var(--text); }
+    .info-table tr:last-child td, .info-table tr:last-child th { border-bottom: none; }
+    .rgb-display { font-size: .82rem; color: var(--muted); margin-top: .75rem; display: flex; gap: .5rem; flex-wrap: wrap; }
+    .rgb-chip { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: .2rem .5rem; font-family: monospace; }
+    footer { text-align: center; padding: 2rem; color: var(--muted); font-size: .8rem; border-top: 1px solid var(--border); margin-top: .5rem; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>🎨 Color Contrast Checker</h1>
+  <p>WCAG AA / AAA compliance · Live preview · Hex &amp; RGB input</p>
+</header>
+
+<div class="layout">
+  <!-- Input Panel -->
+  <div class="panel">
+    <h2>Colors</h2>
+    <div class="color-row">
+      <label>Foreground (Text)</label>
+      <div class="color-input-group">
+        <input type="color" id="fgPicker" value="#e2e8f0" />
+        <input type="text" id="fgHex" value="#e2e8f0" maxlength="9" placeholder="#000000" />
+      </div>
+    </div>
+    <div class="color-row">
+      <label>Background</label>
+      <div class="color-input-group">
+        <input type="color" id="bgPicker" value="#0f1117" />
+        <input type="text" id="bgHex" value="#0f1117" maxlength="9" placeholder="#ffffff" />
+      </div>
+    </div>
+    <button class="swap-btn" id="swapBtn">⇅ Swap Colors</button>
+
+    <div class="ratio-display">
+      <div class="ratio-number" id="ratioNum">—</div>
+      <div class="ratio-label">Contrast Ratio</div>
+    </div>
+
+    <div class="wcag-grid">
+      <div class="wcag-item">
+        <div class="wcag-level">AA Normal</div>
+        <div class="wcag-status" id="aa-normal">—</div>
+        <div class="wcag-desc">≥ 4.5:1</div>
+      </div>
+      <div class="wcag-item">
+        <div class="wcag-level">AA Large</div>
+        <div class="wcag-status" id="aa-large">—</div>
+        <div class="wcag-desc">≥ 3:1 (18pt / 14pt bold)</div>
+      </div>
+      <div class="wcag-item">
+        <div class="wcag-level">AAA Normal</div>
+        <div class="wcag-status" id="aaa-normal">—</div>
+        <div class="wcag-desc">≥ 7:1</div>
+      </div>
+      <div class="wcag-item">
+        <div class="wcag-level">AAA Large</div>
+        <div class="wcag-status" id="aaa-large">—</div>
+        <div class="wcag-desc">≥ 4.5:1</div>
+      </div>
+    </div>
+
+    <div class="rgb-display" id="rgbDisplay"></div>
+  </div>
+
+  <!-- Preview Panel -->
+  <div class="preview-panel">
+    <h2>Live Preview</h2>
+    <div class="preview-area">
+      <div class="preview-box" id="previewBox">
+        <div class="p-heading">The quick brown fox</div>
+        <div class="p-body">Accessible text ensures everyone can read your content, regardless of visual ability. Good contrast matters.</div>
+        <div class="p-small">Small text is harder to read — aim for WCAG AA or higher.</div>
+        <span class="p-btn" id="previewBtn">Button</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info Panel -->
+  <div class="info-panel" style="grid-column: 1 / -1;">
+    <h2>WCAG 2.1 Contrast Requirements</h2>
+    <table class="info-table">
+      <thead><tr><th>Level</th><th>Text Size</th><th>Min Ratio</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>AA</td><td>Normal text</td><td>4.5:1</td><td>Default for body text, UI labels</td></tr>
+        <tr><td>AA</td><td>Large text</td><td>3:1</td><td>18pt (24px) regular or 14pt (18.67px) bold</td></tr>
+        <tr><td>AAA</td><td>Normal text</td><td>7:1</td><td>Enhanced — recommended for critical UI</td></tr>
+        <tr><td>AAA</td><td>Large text</td><td>4.5:1</td><td>Enhanced for large text</td></tr>
+        <tr><td>—</td><td>Non-text contrast</td><td>3:1</td><td>UI components, icons, focus indicators</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<footer>
+  <p>DevNestio Color Contrast Checker · <a href="https://devnestio.pages.dev/" style="color:#c084fc">More Tools</a></p>
+</footer>
+
+<script>
+// WCAG relative luminance
+function hexToRgb(hex) {
+  hex = hex.replace(/^#/, '');
+  if (hex.length === 3) hex = hex.split('').map(c => c+c).join('');
+  if (hex.length !== 6) return null;
+  const n = parseInt(hex, 16);
+  if (isNaN(n)) return null;
+  return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+}
+
+function linearize(c) {
+  c /= 255;
+  return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+}
+
+function luminance(rgb) {
+  return 0.2126 * linearize(rgb.r) + 0.7152 * linearize(rgb.g) + 0.0722 * linearize(rgb.b);
+}
+
+function contrastRatio(l1, l2) {
+  const lighter = Math.max(l1, l2);
+  const darker = Math.min(l1, l2);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+function passStatus(pass) {
+  return `<span class="wcag-status ${pass ? 'pass' : 'fail'}">${pass ? '✓ Pass' : '✗ Fail'}</span>`;
+}
+
+function update() {
+  const fgHex = document.getElementById('fgHex').value.trim();
+  const bgHex = document.getElementById('bgHex').value.trim();
+
+  const fg = hexToRgb(fgHex);
+  const bg = hexToRgb(bgHex);
+
+  if (!fg || !bg) {
+    document.getElementById('ratioNum').textContent = '—';
+    ['aa-normal','aa-large','aaa-normal','aaa-large'].forEach(id => {
+      document.getElementById(id).innerHTML = '—';
+      document.getElementById(id).className = 'wcag-status';
+    });
+    return;
+  }
+
+  const fgL = luminance(fg);
+  const bgL = luminance(bg);
+  const ratio = contrastRatio(fgL, bgL);
+  const ratioStr = ratio.toFixed(2);
+
+  // Update ratio display with color coding
+  const ratioEl = document.getElementById('ratioNum');
+  ratioEl.textContent = ratioStr + ':1';
+  ratioEl.style.color = ratio >= 7 ? '#4ade80' : ratio >= 4.5 ? '#60a5fa' : ratio >= 3 ? '#fbbf24' : '#f87171';
+
+  // WCAG checks
+  document.getElementById('aa-normal').innerHTML = passStatus(ratio >= 4.5);
+  document.getElementById('aa-large').innerHTML = passStatus(ratio >= 3);
+  document.getElementById('aaa-normal').innerHTML = passStatus(ratio >= 7);
+  document.getElementById('aaa-large').innerHTML = passStatus(ratio >= 4.5);
+
+  // Preview
+  const box = document.getElementById('previewBox');
+  box.style.backgroundColor = '#' + bgHex.replace(/^#/, '');
+  box.style.color = '#' + fgHex.replace(/^#/, '');
+  const btn = document.getElementById('previewBtn');
+  btn.style.backgroundColor = '#' + fgHex.replace(/^#/, '');
+  btn.style.color = '#' + bgHex.replace(/^#/, '');
+
+  // RGB display
+  document.getElementById('rgbDisplay').innerHTML =
+    `<span class="rgb-chip">FG rgb(${fg.r}, ${fg.g}, ${fg.b})</span>` +
+    `<span class="rgb-chip">BG rgb(${bg.r}, ${bg.g}, ${bg.b})</span>` +
+    `<span class="rgb-chip">FG lum: ${fgL.toFixed(4)}</span>` +
+    `<span class="rgb-chip">BG lum: ${bgL.toFixed(4)}</span>`;
+
+  // Sync pickers
+  try {
+    document.getElementById('fgPicker').value = '#' + hexToRgbToHex(fg);
+    document.getElementById('bgPicker').value = '#' + hexToRgbToHex(bg);
+  } catch(e) {}
+}
+
+function hexToRgbToHex(rgb) {
+  return ((1 << 24) | (rgb.r << 16) | (rgb.g << 8) | rgb.b).toString(16).slice(1);
+}
+
+function syncHexFromPicker(pickerId, hexId) {
+  const val = document.getElementById(pickerId).value;
+  document.getElementById(hexId).value = val;
+  update();
+}
+
+function syncPickerFromHex(hexId, pickerId) {
+  let val = document.getElementById(hexId).value.trim();
+  if (!val.startsWith('#')) val = '#' + val;
+  const rgb = hexToRgb(val);
+  if (rgb) {
+    document.getElementById(pickerId).value = '#' + hexToRgbToHex(rgb);
+    document.getElementById(hexId).value = val.startsWith('#') ? val : '#' + val;
+  }
+  update();
+}
+
+document.getElementById('fgPicker').addEventListener('input', () => syncHexFromPicker('fgPicker','fgHex'));
+document.getElementById('bgPicker').addEventListener('input', () => syncHexFromPicker('bgPicker','bgHex'));
+document.getElementById('fgHex').addEventListener('input', () => syncPickerFromHex('fgHex','fgPicker'));
+document.getElementById('bgHex').addEventListener('input', () => syncPickerFromHex('bgHex','bgPicker'));
+document.getElementById('swapBtn').addEventListener('click', () => {
+  const fg = document.getElementById('fgHex').value;
+  const bg = document.getElementById('bgHex').value;
+  document.getElementById('fgHex').value = bg;
+  document.getElementById('bgHex').value = fg;
+  update();
+});
+
+update();
+</script>
+</body>
+</html>

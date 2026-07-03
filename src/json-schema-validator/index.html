@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON Schema Validator – Draft-07 | DevNest.io</title>
+  <meta name="description" content="Free online JSON Schema validator. Validate JSON against JSON Schema Draft-07. Real-time error highlighting with path, message, and keyword. No server, no libraries.">
+  <meta name="keywords" content="json schema validator, json schema draft-07, json validation, json schema checker, schema validation online">
+  <link rel="canonical" href="https://devnestio.pages.dev/json-schema-validator/">
+  <meta property="og:title" content="JSON Schema Validator – Draft-07">
+  <meta property="og:description" content="Validate JSON against JSON Schema Draft-07 instantly in your browser. No server, no libraries.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://devnestio.pages.dev/json-schema-validator/">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="JSON Schema Validator">
+  <meta name="twitter:description" content="Free browser-only JSON Schema Draft-07 validator. Real-time error display with paths.">
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3348;
+      --accent: #4db8ff;
+      --accent2: #c792ea;
+      --text: #e8eaf6;
+      --text-muted: #8892a4;
+      --success: #4caf50;
+      --error: #f44747;
+      --warn: #ffcc00;
+      --radius: 10px;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    #privacy-banner {
+      background: #1e2233;
+      border-bottom: 1px solid var(--border);
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+    #privacy-banner button {
+      background: var(--accent);
+      color: #0f1117;
+      border: none;
+      border-radius: 6px;
+      padding: 4px 14px;
+      cursor: pointer;
+      font-size: 0.78rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    header h1 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    header .badge {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+    header a {
+      margin-left: auto;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+    header a:hover { color: var(--text); }
+
+    .toolbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      background: var(--accent);
+      color: #0f1117;
+      border: none;
+      border-radius: 6px;
+      padding: 7px 16px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn.secondary {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      font-weight: 500;
+    }
+    .btn.secondary:hover { border-color: var(--accent); }
+
+    #status-badge {
+      margin-left: auto;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      display: none;
+    }
+    #status-badge.valid {
+      background: color-mix(in srgb, var(--success) 15%, transparent);
+      border: 1px solid var(--success);
+      color: var(--success);
+      display: inline-block;
+    }
+    #status-badge.invalid {
+      background: color-mix(in srgb, var(--error) 15%, transparent);
+      border: 1px solid var(--error);
+      color: var(--error);
+      display: inline-block;
+    }
+
+    .main {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto;
+      gap: 0;
+      height: calc(100vh - 160px);
+    }
+    @media (max-width: 768px) {
+      .main { grid-template-columns: 1fr; height: auto; }
+    }
+
+    .pane {
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .pane:last-child { border-right: none; }
+
+    .pane-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .pane-header h2 {
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-muted);
+    }
+    .pane-header .pane-hint {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      margin-left: auto;
+    }
+
+    .editor-wrap {
+      position: relative;
+      flex: 1;
+      overflow: hidden;
+    }
+    textarea.editor {
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      border: none;
+      color: #a8d8ea;
+      font-family: 'Courier New', 'Consolas', monospace;
+      font-size: 0.85rem;
+      padding: 14px;
+      resize: none;
+      line-height: 1.6;
+      outline: none;
+      tab-size: 2;
+    }
+    textarea.editor.has-error { border-left: 3px solid var(--error); }
+    textarea.editor.is-valid { border-left: 3px solid var(--success); }
+
+    .parse-error {
+      padding: 8px 14px;
+      font-size: 0.78rem;
+      color: var(--error);
+      background: color-mix(in srgb, var(--error) 8%, transparent);
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+      display: none;
+    }
+    .parse-error.show { display: block; }
+
+    /* Results pane — spans both columns */
+    .results-pane {
+      grid-column: 1 / -1;
+      border-right: none;
+      border-bottom: none;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    @media (max-width: 768px) {
+      .results-pane { grid-column: 1; max-height: 250px; }
+    }
+
+    .results-body {
+      padding: 12px 16px;
+    }
+
+    .no-results {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      padding: 12px 0;
+    }
+
+    .error-list { list-style: none; }
+    .error-item {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 8px 10px;
+      border-radius: 6px;
+      margin-bottom: 6px;
+      border: 1px solid var(--border);
+      background: color-mix(in srgb, var(--error) 8%, transparent);
+    }
+    .error-item .icon {
+      color: var(--error);
+      font-size: 1rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .error-item .error-body { flex: 1; min-width: 0; }
+    .error-path {
+      font-family: 'Courier New', monospace;
+      font-size: 0.8rem;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .error-msg {
+      font-size: 0.83rem;
+      color: var(--text);
+    }
+    .error-keyword {
+      display: inline-block;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 0.72rem;
+      color: var(--accent2);
+      margin-top: 4px;
+      font-family: monospace;
+    }
+
+    .valid-msg {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 0;
+      color: var(--success);
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .examples-bar {
+      display: flex;
+      gap: 6px;
+      padding: 0 10px;
+      margin-left: auto;
+      flex-wrap: wrap;
+    }
+    .ex-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      padding: 3px 8px;
+      cursor: pointer;
+    }
+    .ex-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+    .ad-slot {
+      padding: 10px 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    footer {
+      text-align: center;
+      padding: 16px;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      border-top: 1px solid var(--border);
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<div id="privacy-banner">
+  <span>Validation runs entirely in your browser. No JSON or schema is sent to any server.</span>
+  <button onclick="document.getElementById('privacy-banner').remove()">OK</button>
+</div>
+
+<header>
+  <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="28" height="28" rx="6" fill="url(#hg)"/>
+    <text x="5" y="20" font-size="14" font-family="monospace" font-weight="bold" fill="#0f1117">{✓}</text>
+    <defs><linearGradient id="hg" x1="0" y1="0" x2="28" y2="28"><stop stop-color="#4db8ff"/><stop offset="1" stop-color="#c792ea"/></linearGradient></defs>
+  </svg>
+  <h1>JSON Schema Validator</h1>
+  <span class="badge">Draft-07</span>
+  <a href="https://devnestio.pages.dev" target="_blank" rel="noopener">← DevNest.io</a>
+</header>
+
+<div class="toolbar">
+  <button class="btn" id="btn-validate">Validate</button>
+  <button class="btn secondary" id="btn-format-json">Format JSON</button>
+  <button class="btn secondary" id="btn-format-schema">Format Schema</button>
+  <button class="btn secondary" id="btn-clear">Clear</button>
+  <span id="status-badge"></span>
+</div>
+
+<div class="main" id="main-grid">
+  <!-- JSON Input -->
+  <div class="pane">
+    <div class="pane-header">
+      <h2>JSON Data</h2>
+      <div class="examples-bar">
+        <button class="ex-btn" data-ex="user">User</button>
+        <button class="ex-btn" data-ex="product">Product</button>
+        <button class="ex-btn" data-ex="invalid">Invalid</button>
+      </div>
+    </div>
+    <div class="editor-wrap">
+      <textarea class="editor" id="json-input" spellcheck="false" placeholder='Paste your JSON here…&#10;&#10;{"name": "Alice", "age": 30}'></textarea>
+    </div>
+    <div class="parse-error" id="json-parse-error"></div>
+  </div>
+
+  <!-- Schema Input -->
+  <div class="pane">
+    <div class="pane-header">
+      <h2>JSON Schema</h2>
+      <span class="pane-hint">Draft-07</span>
+      <div class="examples-bar">
+        <button class="ex-btn" data-schema="user">User</button>
+        <button class="ex-btn" data-schema="product">Product</button>
+      </div>
+    </div>
+    <div class="editor-wrap">
+      <textarea class="editor" id="schema-input" spellcheck="false" placeholder='Paste your JSON Schema here…&#10;&#10;{&#10;  "$schema": "http://json-schema.org/draft-07/schema#",&#10;  "type": "object"&#10;}'></textarea>
+    </div>
+    <div class="parse-error" id="schema-parse-error"></div>
+  </div>
+
+  <!-- Results -->
+  <div class="pane results-pane">
+    <div class="pane-header">
+      <h2>Validation Results</h2>
+      <span class="pane-hint" id="error-count-label"></span>
+    </div>
+    <div class="results-body" id="results-body">
+      <p class="no-results">Paste JSON and a Schema above, then click <strong>Validate</strong>.</p>
+    </div>
+    <div class="ad-slot">
+      <div data-ea-publisher="devnestio" data-ea-type="image" id="ad-slot"></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>Part of <a href="https://devnestio.pages.dev" target="_blank" rel="noopener">DevNest.io</a> — Free developer tools. No login. No tracking.</p>
+</footer>
+
+<script>
+// ============================================================
+// JSON SCHEMA VALIDATOR — Draft-07 Pure Functions
+// ============================================================
+
+/**
+ * @typedef {{ path: string, message: string, keyword: string }} ValidationError
+ */
+
+/**
+ * Get the JSON type of a value (JSON Schema types)
+ * @param {*} val
+ * @returns {string}
+ */
+function getType(val) {
+  if (val === null) return 'null';
+  if (Array.isArray(val)) return 'array';
+  if (typeof val === 'boolean') return 'boolean';
+  if (typeof val === 'number') {
+    return Number.isInteger(val) ? 'integer' : 'number';
+  }
+  return typeof val; // 'string', 'object'
+}
+
+/**
+ * Check if a value matches a JSON Schema type keyword
+ * @param {*} val
+ * @param {string|string[]} type
+ * @returns {boolean}
+ */
+function typeMatches(val, type) {
+  const types = Array.isArray(type) ? type : [type];
+  const actual = getType(val);
+  return types.some(t => {
+    if (t === 'integer') return actual === 'integer' || (actual === 'number' && Number.isInteger(val));
+    if (t === 'number') return actual === 'integer' || actual === 'number';
+    return actual === t;
+  });
+}
+
+/**
+ * Validate email format (RFC 5322 simplified)
+ * @param {string} s
+ * @returns {boolean}
+ */
+function isValidEmail(s) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+}
+
+/**
+ * Validate URI format (simplified)
+ * @param {string} s
+ * @returns {boolean}
+ */
+function isValidUri(s) {
+  return /^[a-zA-Z][a-zA-Z0-9+\-.]*:\/\/[^\s]+$/.test(s);
+}
+
+/**
+ * Validate date format (YYYY-MM-DD)
+ * @param {string} s
+ * @returns {boolean}
+ */
+function isValidDate(s) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+  const [y, m, d] = s.split('-').map(Number);
+  if (m < 1 || m > 12 || d < 1 || d > 31) return false;
+  const dt = new Date(y, m - 1, d);
+  return dt.getFullYear() === y && dt.getMonth() === m - 1 && dt.getDate() === d;
+}
+
+/**
+ * Validate date-time format (ISO 8601)
+ * @param {string} s
+ * @returns {boolean}
+ */
+function isValidDateTime(s) {
+  if (!/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}/.test(s)) return false;
+  return !isNaN(Date.parse(s));
+}
+
+/**
+ * Validate IPv4 address
+ * @param {string} s
+ * @returns {boolean}
+ */
+function isValidIPv4(s) {
+  const parts = s.split('.');
+  if (parts.length !== 4) return false;
+  return parts.every(p => /^\d+$/.test(p) && parseInt(p, 10) >= 0 && parseInt(p, 10) <= 255);
+}
+
+/**
+ * Validate UUID (v1-v5)
+ * @param {string} s
+ * @returns {boolean}
+ */
+function isValidUUID(s) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(s);
+}
+
+/**
+ * Validate a string value against schema keywords
+ * @param {string} val
+ * @param {object} schema
+ * @param {string} path
+ * @returns {ValidationError[]}
+ */
+function validateString(val, schema, path) {
+  const errors = [];
+  if (typeof schema.minLength === 'number' && val.length < schema.minLength) {
+    errors.push({ path, message: `String is too short (${val.length} < ${schema.minLength})`, keyword: 'minLength' });
+  }
+  if (typeof schema.maxLength === 'number' && val.length > schema.maxLength) {
+    errors.push({ path, message: `String is too long (${val.length} > ${schema.maxLength})`, keyword: 'maxLength' });
+  }
+  if (schema.pattern) {
+    try {
+      if (!new RegExp(schema.pattern).test(val)) {
+        errors.push({ path, message: `String does not match pattern "${schema.pattern}"`, keyword: 'pattern' });
+      }
+    } catch(e) {
+      errors.push({ path, message: `Invalid pattern: ${schema.pattern}`, keyword: 'pattern' });
+    }
+  }
+  if (schema.format) {
+    const fmt = schema.format;
+    let ok = true;
+    if (fmt === 'email') ok = isValidEmail(val);
+    else if (fmt === 'uri') ok = isValidUri(val);
+    else if (fmt === 'date') ok = isValidDate(val);
+    else if (fmt === 'date-time') ok = isValidDateTime(val);
+    else if (fmt === 'ipv4') ok = isValidIPv4(val);
+    else if (fmt === 'uuid') ok = isValidUUID(val);
+    if (!ok) {
+      errors.push({ path, message: `String is not a valid "${fmt}"`, keyword: 'format' });
+    }
+  }
+  return errors;
+}
+
+/**
+ * Validate a number value against schema keywords
+ * @param {number} val
+ * @param {object} schema
+ * @param {string} path
+ * @returns {ValidationError[]}
+ */
+function validateNumber(val, schema, path) {
+  const errors = [];
+  if (typeof schema.minimum === 'number') {
+    if (schema.exclusiveMinimum === true) {
+      if (val <= schema.minimum) errors.push({ path, message: `Value ${val} must be > ${schema.minimum}`, keyword: 'exclusiveMinimum' });
+    } else {
+      if (val < schema.minimum) errors.push({ path, message: `Value ${val} must be >= ${schema.minimum}`, keyword: 'minimum' });
+    }
+  }
+  if (typeof schema.maximum === 'number') {
+    if (schema.exclusiveMaximum === true) {
+      if (val >= schema.maximum) errors.push({ path, message: `Value ${val} must be < ${schema.maximum}`, keyword: 'exclusiveMaximum' });
+    } else {
+      if (val > schema.maximum) errors.push({ path, message: `Value ${val} must be <= ${schema.maximum}`, keyword: 'maximum' });
+    }
+  }
+  // Draft-07 also supports exclusiveMinimum/Maximum as numbers
+  if (typeof schema.exclusiveMinimum === 'number') {
+    if (val <= schema.exclusiveMinimum) errors.push({ path, message: `Value ${val} must be > ${schema.exclusiveMinimum}`, keyword: 'exclusiveMinimum' });
+  }
+  if (typeof schema.exclusiveMaximum === 'number') {
+    if (val >= schema.exclusiveMaximum) errors.push({ path, message: `Value ${val} must be < ${schema.exclusiveMaximum}`, keyword: 'exclusiveMaximum' });
+  }
+  if (typeof schema.multipleOf === 'number' && schema.multipleOf > 0) {
+    const remainder = Math.abs(val % schema.multipleOf);
+    if (remainder > 1e-10 && Math.abs(remainder - schema.multipleOf) > 1e-10) {
+      errors.push({ path, message: `Value ${val} is not a multiple of ${schema.multipleOf}`, keyword: 'multipleOf' });
+    }
+  }
+  return errors;
+}
+
+/**
+ * Validate an array value against schema keywords
+ * @param {Array} val
+ * @param {object} schema
+ * @param {string} path
+ * @param {object} rootSchema
+ * @returns {ValidationError[]}
+ */
+function validateArray(val, schema, path, rootSchema) {
+  const errors = [];
+  if (typeof schema.minItems === 'number' && val.length < schema.minItems) {
+    errors.push({ path, message: `Array has too few items (${val.length} < ${schema.minItems})`, keyword: 'minItems' });
+  }
+  if (typeof schema.maxItems === 'number' && val.length > schema.maxItems) {
+    errors.push({ path, message: `Array has too many items (${val.length} > ${schema.maxItems})`, keyword: 'maxItems' });
+  }
+  if (schema.uniqueItems === true) {
+    const seen = [];
+    for (let i = 0; i < val.length; i++) {
+      const serialized = JSON.stringify(val[i]);
+      if (seen.includes(serialized)) {
+        errors.push({ path, message: `Array items must be unique (duplicate at index ${i})`, keyword: 'uniqueItems' });
+        break;
+      }
+      seen.push(serialized);
+    }
+  }
+  if (schema.items) {
+    if (Array.isArray(schema.items)) {
+      // Tuple validation
+      schema.items.forEach((itemSchema, i) => {
+        if (i < val.length) {
+          errors.push(...validate(val[i], itemSchema, `${path}[${i}]`, rootSchema));
+        }
+      });
+      // additionalItems
+      if (schema.additionalItems === false && val.length > schema.items.length) {
+        errors.push({ path, message: `Array has additional items beyond the tuple (${val.length} > ${schema.items.length})`, keyword: 'additionalItems' });
+      } else if (schema.additionalItems && typeof schema.additionalItems === 'object') {
+        for (let i = schema.items.length; i < val.length; i++) {
+          errors.push(...validate(val[i], schema.additionalItems, `${path}[${i}]`, rootSchema));
+        }
+      }
+    } else {
+      // All items must match
+      val.forEach((item, i) => {
+        errors.push(...validate(item, schema.items, `${path}[${i}]`, rootSchema));
+      });
+    }
+  }
+  if (schema.contains) {
+    const anyMatch = val.some(item => validate(item, schema.contains, '', rootSchema).length === 0);
+    if (!anyMatch) {
+      errors.push({ path, message: 'Array must contain at least one matching item', keyword: 'contains' });
+    }
+  }
+  return errors;
+}
+
+/**
+ * Validate an object value against schema keywords
+ * @param {object} val
+ * @param {object} schema
+ * @param {string} path
+ * @param {object} rootSchema
+ * @returns {ValidationError[]}
+ */
+function validateObject(val, schema, path, rootSchema) {
+  const errors = [];
+  const keys = Object.keys(val);
+
+  if (typeof schema.minProperties === 'number' && keys.length < schema.minProperties) {
+    errors.push({ path, message: `Object has too few properties (${keys.length} < ${schema.minProperties})`, keyword: 'minProperties' });
+  }
+  if (typeof schema.maxProperties === 'number' && keys.length > schema.maxProperties) {
+    errors.push({ path, message: `Object has too many properties (${keys.length} > ${schema.maxProperties})`, keyword: 'maxProperties' });
+  }
+
+  // required
+  if (Array.isArray(schema.required)) {
+    schema.required.forEach(key => {
+      if (!(key in val)) {
+        errors.push({ path: path ? `${path}.${key}` : key, message: `Missing required property "${key}"`, keyword: 'required' });
+      }
+    });
+  }
+
+  // properties
+  if (schema.properties && typeof schema.properties === 'object') {
+    Object.keys(schema.properties).forEach(key => {
+      if (key in val) {
+        const childPath = path ? `${path}.${key}` : key;
+        errors.push(...validate(val[key], schema.properties[key], childPath, rootSchema));
+      }
+    });
+  }
+
+  // patternProperties
+  if (schema.patternProperties && typeof schema.patternProperties === 'object') {
+    keys.forEach(key => {
+      Object.keys(schema.patternProperties).forEach(pattern => {
+        try {
+          if (new RegExp(pattern).test(key)) {
+            const childPath = path ? `${path}.${key}` : key;
+            errors.push(...validate(val[key], schema.patternProperties[pattern], childPath, rootSchema));
+          }
+        } catch(e) {}
+      });
+    });
+  }
+
+  // additionalProperties
+  if (schema.additionalProperties !== undefined) {
+    const definedKeys = new Set([
+      ...Object.keys(schema.properties || {}),
+    ]);
+    const patternKeys = new Set();
+    if (schema.patternProperties) {
+      keys.forEach(key => {
+        Object.keys(schema.patternProperties).forEach(pattern => {
+          try {
+            if (new RegExp(pattern).test(key)) patternKeys.add(key);
+          } catch(e) {}
+        });
+      });
+    }
+    const additionalKeys = keys.filter(k => !definedKeys.has(k) && !patternKeys.has(k));
+    if (schema.additionalProperties === false) {
+      additionalKeys.forEach(key => {
+        errors.push({ path: path ? `${path}.${key}` : key, message: `Additional property "${key}" is not allowed`, keyword: 'additionalProperties' });
+      });
+    } else if (schema.additionalProperties && typeof schema.additionalProperties === 'object') {
+      additionalKeys.forEach(key => {
+        const childPath = path ? `${path}.${key}` : key;
+        errors.push(...validate(val[key], schema.additionalProperties, childPath, rootSchema));
+      });
+    }
+  }
+
+  // dependencies
+  if (schema.dependencies && typeof schema.dependencies === 'object') {
+    Object.keys(schema.dependencies).forEach(depKey => {
+      if (!(depKey in val)) return;
+      const dep = schema.dependencies[depKey];
+      if (Array.isArray(dep)) {
+        dep.forEach(required => {
+          if (!(required in val)) {
+            errors.push({ path, message: `Property "${required}" is required when "${depKey}" is present`, keyword: 'dependencies' });
+          }
+        });
+      } else if (typeof dep === 'object') {
+        errors.push(...validate(val, dep, path, rootSchema));
+      }
+    });
+  }
+
+  // propertyNames
+  if (schema.propertyNames) {
+    keys.forEach(key => {
+      const keyErrors = validate(key, schema.propertyNames, path ? `${path}(key:${key})` : `(key:${key})`, rootSchema);
+      if (keyErrors.length > 0) {
+        errors.push({ path, message: `Property name "${key}" does not match propertyNames schema`, keyword: 'propertyNames' });
+      }
+    });
+  }
+
+  return errors;
+}
+
+/**
+ * Resolve a $ref within the root schema (supports #/$defs/... and #/definitions/...)
+ * @param {string} ref
+ * @param {object} rootSchema
+ * @returns {object|null}
+ */
+function resolveRef(ref, rootSchema) {
+  if (!ref.startsWith('#')) return null;
+  const fragment = ref.slice(1);
+  if (fragment === '' || fragment === '/') return rootSchema;
+  const parts = fragment.slice(1).split('/').map(p => p.replace(/~1/g, '/').replace(/~0/g, '~'));
+  let cur = rootSchema;
+  for (const part of parts) {
+    if (cur === null || typeof cur !== 'object') return null;
+    cur = cur[part];
+  }
+  return cur !== undefined ? cur : null;
+}
+
+/**
+ * Main validate function — returns array of validation errors
+ * @param {*} data
+ * @param {object} schema
+ * @param {string} [path='']
+ * @param {object} [rootSchema]
+ * @returns {ValidationError[]}
+ */
+function validate(data, schema, path, rootSchema) {
+  path = path || '';
+  rootSchema = rootSchema || schema;
+
+  if (schema === true) return [];
+  if (schema === false) return [{ path, message: 'Schema is false — no value is valid', keyword: 'false schema' }];
+  if (typeof schema !== 'object' || schema === null) return [];
+
+  const errors = [];
+
+  // $ref
+  if (schema.$ref) {
+    const resolved = resolveRef(schema.$ref, rootSchema);
+    if (resolved) {
+      errors.push(...validate(data, resolved, path, rootSchema));
+    } else {
+      errors.push({ path, message: `Cannot resolve $ref "${schema.$ref}"`, keyword: '$ref' });
+    }
+    return errors; // Draft-07: $ref ignores sibling keywords
+  }
+
+  // type check
+  if (schema.type !== undefined) {
+    if (!typeMatches(data, schema.type)) {
+      const expected = Array.isArray(schema.type) ? schema.type.join(' | ') : schema.type;
+      const actual = getType(data);
+      errors.push({ path, message: `Expected type "${expected}" but got "${actual}"`, keyword: 'type' });
+      return errors; // no point checking further if type is wrong
+    }
+  }
+
+  // enum
+  if (Array.isArray(schema.enum)) {
+    const match = schema.enum.some(e => JSON.stringify(e) === JSON.stringify(data));
+    if (!match) {
+      errors.push({ path, message: `Value must be one of: ${schema.enum.map(e => JSON.stringify(e)).join(', ')}`, keyword: 'enum' });
+    }
+  }
+
+  // const
+  if ('const' in schema) {
+    if (JSON.stringify(data) !== JSON.stringify(schema.const)) {
+      errors.push({ path, message: `Value must equal ${JSON.stringify(schema.const)}`, keyword: 'const' });
+    }
+  }
+
+  // String keywords
+  if (typeof data === 'string') {
+    errors.push(...validateString(data, schema, path));
+  }
+
+  // Number keywords
+  if (typeof data === 'number') {
+    errors.push(...validateNumber(data, schema, path));
+  }
+
+  // Array keywords
+  if (Array.isArray(data)) {
+    errors.push(...validateArray(data, schema, path, rootSchema));
+  }
+
+  // Object keywords
+  if (data !== null && typeof data === 'object' && !Array.isArray(data)) {
+    errors.push(...validateObject(data, schema, path, rootSchema));
+  }
+
+  // allOf
+  if (Array.isArray(schema.allOf)) {
+    schema.allOf.forEach((subSchema, i) => {
+      errors.push(...validate(data, subSchema, path, rootSchema));
+    });
+  }
+
+  // anyOf
+  if (Array.isArray(schema.anyOf)) {
+    const anyPass = schema.anyOf.some(subSchema => validate(data, subSchema, path, rootSchema).length === 0);
+    if (!anyPass) {
+      errors.push({ path, message: 'Value does not match any of the schemas in "anyOf"', keyword: 'anyOf' });
+    }
+  }
+
+  // oneOf
+  if (Array.isArray(schema.oneOf)) {
+    const passing = schema.oneOf.filter(subSchema => validate(data, subSchema, path, rootSchema).length === 0);
+    if (passing.length !== 1) {
+      errors.push({ path, message: `Value must match exactly one schema in "oneOf" (matched ${passing.length})`, keyword: 'oneOf' });
+    }
+  }
+
+  // not
+  if (schema.not !== undefined) {
+    const notErrors = validate(data, schema.not, path, rootSchema);
+    if (notErrors.length === 0) {
+      errors.push({ path, message: 'Value must NOT match the schema in "not"', keyword: 'not' });
+    }
+  }
+
+  // if/then/else
+  if (schema.if !== undefined) {
+    const ifErrors = validate(data, schema.if, path, rootSchema);
+    if (ifErrors.length === 0) {
+      if (schema.then !== undefined) {
+        errors.push(...validate(data, schema.then, path, rootSchema));
+      }
+    } else {
+      if (schema.else !== undefined) {
+        errors.push(...validate(data, schema.else, path, rootSchema));
+      }
+    }
+  }
+
+  return errors;
+}
+
+// Expose for testing
+if (typeof module !== 'undefined') {
+  module.exports = {
+    getType,
+    typeMatches,
+    isValidEmail,
+    isValidUri,
+    isValidDate,
+    isValidDateTime,
+    isValidIPv4,
+    isValidUUID,
+    validateString,
+    validateNumber,
+    validateArray,
+    validateObject,
+    resolveRef,
+    validate
+  };
+}
+
+// ============================================================
+// EXAMPLE DATA
+// ============================================================
+const EXAMPLES = {
+  user: {
+    json: JSON.stringify({
+      name: "Alice",
+      age: 30,
+      email: "alice@example.com",
+      role: "admin",
+      tags: ["dev", "admin"]
+    }, null, 2),
+    schema: JSON.stringify({
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "required": ["name", "age", "email"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "age": { "type": "integer", "minimum": 0, "maximum": 150 },
+        "email": { "type": "string", "format": "email" },
+        "role": { "type": "string", "enum": ["admin", "user", "guest"] },
+        "tags": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+      },
+      "additionalProperties": false
+    }, null, 2)
+  },
+  product: {
+    json: JSON.stringify({
+      id: "prod-001",
+      name: "Widget Pro",
+      price: 29.99,
+      inStock: true,
+      categories: ["tools", "hardware"],
+      dimensions: { width: 10, height: 5, depth: 3 }
+    }, null, 2),
+    schema: JSON.stringify({
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "required": ["id", "name", "price"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^prod-\\d+" },
+        "name": { "type": "string", "minLength": 1 },
+        "price": { "type": "number", "minimum": 0, "exclusiveMinimum": true },
+        "inStock": { "type": "boolean" },
+        "categories": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "dimensions": {
+          "type": "object",
+          "required": ["width", "height", "depth"],
+          "properties": {
+            "width": { "type": "number", "minimum": 0 },
+            "height": { "type": "number", "minimum": 0 },
+            "depth": { "type": "number", "minimum": 0 }
+          }
+        }
+      }
+    }, null, 2)
+  },
+  invalid: {
+    json: JSON.stringify({
+      name: "",
+      age: -5,
+      email: "not-an-email",
+      role: "superadmin",
+      tags: ["dev", "dev"],
+      extra: "not allowed"
+    }, null, 2)
+  }
+};
+
+// ============================================================
+// UI LOGIC
+// ============================================================
+function formatJSON(str) {
+  try {
+    return JSON.stringify(JSON.parse(str), null, 2);
+  } catch(e) {
+    return str;
+  }
+}
+
+function showParseError(elId, msg) {
+  const el = document.getElementById(elId);
+  if (msg) {
+    el.textContent = '⚠ ' + msg;
+    el.classList.add('show');
+  } else {
+    el.textContent = '';
+    el.classList.remove('show');
+  }
+}
+
+function setEditorState(editorId, state) {
+  const el = document.getElementById(editorId);
+  el.classList.remove('has-error', 'is-valid');
+  if (state === 'error') el.classList.add('has-error');
+  if (state === 'valid') el.classList.add('is-valid');
+}
+
+function renderResults(errors) {
+  const body = document.getElementById('results-body');
+  const badge = document.getElementById('status-badge');
+  const countLabel = document.getElementById('error-count-label');
+
+  if (errors === null) {
+    body.innerHTML = '<p class="no-results">Paste JSON and a Schema above, then click <strong>Validate</strong>.</p>';
+    badge.className = '';
+    badge.style.display = 'none';
+    countLabel.textContent = '';
+    return;
+  }
+
+  if (errors.length === 0) {
+    body.innerHTML = '<div class="valid-msg"><span>✓</span> Valid — JSON matches the schema.</div>';
+    badge.textContent = '✓ Valid';
+    badge.className = 'valid';
+    countLabel.textContent = '0 errors';
+  } else {
+    const items = errors.map(e => `
+      <li class="error-item">
+        <span class="icon">✕</span>
+        <div class="error-body">
+          <div class="error-path">${e.path || '(root)'}</div>
+          <div class="error-msg">${escapeHtml(e.message)}</div>
+          <span class="error-keyword">${escapeHtml(e.keyword)}</span>
+        </div>
+      </li>
+    `).join('');
+    body.innerHTML = `<ul class="error-list">${items}</ul>`;
+    badge.textContent = `✕ ${errors.length} error${errors.length !== 1 ? 's' : ''}`;
+    badge.className = 'invalid';
+    countLabel.textContent = `${errors.length} error${errors.length !== 1 ? 's' : ''}`;
+  }
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function runValidation() {
+  const jsonStr = document.getElementById('json-input').value.trim();
+  const schemaStr = document.getElementById('schema-input').value.trim();
+
+  if (!jsonStr || !schemaStr) {
+    renderResults(null);
+    return;
+  }
+
+  let data, schema;
+  let jsonOk = true, schemaOk = true;
+
+  try {
+    data = JSON.parse(jsonStr);
+    showParseError('json-parse-error', '');
+    setEditorState('json-input', '');
+  } catch(e) {
+    showParseError('json-parse-error', `JSON parse error: ${e.message}`);
+    setEditorState('json-input', 'error');
+    jsonOk = false;
+  }
+
+  try {
+    schema = JSON.parse(schemaStr);
+    showParseError('schema-parse-error', '');
+    setEditorState('schema-input', '');
+  } catch(e) {
+    showParseError('schema-parse-error', `Schema parse error: ${e.message}`);
+    setEditorState('schema-input', 'error');
+    schemaOk = false;
+  }
+
+  if (!jsonOk || !schemaOk) {
+    renderResults(null);
+    return;
+  }
+
+  try {
+    const errors = validate(data, schema, '', schema);
+    renderResults(errors);
+    setEditorState('json-input', errors.length === 0 ? 'valid' : 'has-error');
+  } catch(e) {
+    renderResults([{ path: '', message: `Validator error: ${e.message}`, keyword: 'internal' }]);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('btn-validate').addEventListener('click', runValidation);
+
+  document.getElementById('btn-format-json').addEventListener('click', () => {
+    const el = document.getElementById('json-input');
+    el.value = formatJSON(el.value);
+  });
+
+  document.getElementById('btn-format-schema').addEventListener('click', () => {
+    const el = document.getElementById('schema-input');
+    el.value = formatJSON(el.value);
+  });
+
+  document.getElementById('btn-clear').addEventListener('click', () => {
+    document.getElementById('json-input').value = '';
+    document.getElementById('schema-input').value = '';
+    setEditorState('json-input', '');
+    setEditorState('schema-input', '');
+    showParseError('json-parse-error', '');
+    showParseError('schema-parse-error', '');
+    renderResults(null);
+  });
+
+  // Example buttons
+  document.querySelectorAll('[data-ex]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const ex = EXAMPLES[btn.dataset.ex];
+      if (ex) {
+        document.getElementById('json-input').value = ex.json;
+        if (ex.schema) {
+          document.getElementById('schema-input').value = ex.schema;
+        }
+        runValidation();
+      }
+    });
+  });
+
+  document.querySelectorAll('[data-schema]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const ex = EXAMPLES[btn.dataset.schema];
+      if (ex && ex.schema) {
+        document.getElementById('schema-input').value = ex.schema;
+        runValidation();
+      }
+    });
+  });
+
+  // Ctrl+Enter to validate
+  [document.getElementById('json-input'), document.getElementById('schema-input')].forEach(el => {
+    el.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        runValidation();
+      }
+    });
+  });
+});
+</script>
+</body>
+</html>

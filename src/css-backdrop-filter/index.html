@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSS Backdrop Filter Generator – devnestio</title>
+  <meta name="description" content="Visually generate CSS backdrop-filter effects with sliders for blur, brightness, contrast, grayscale, hue-rotate, invert, opacity, saturate, and sepia. Live glassmorphism preview with copy-ready CSS output." />
+  <link rel="canonical" href="https://devnestio.pages.dev/css-backdrop-filter/" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    header { background: #1a1d2e; border-bottom: 1px solid #2d3748; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+    header a { color: #7c85f3; text-decoration: none; font-size: 14px; }
+    header h1 { font-size: 18px; font-weight: 700; color: #fff; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; display: grid; grid-template-columns: 320px 1fr; gap: 24px; }
+    @media (max-width: 760px) { .container { grid-template-columns: 1fr; } }
+    .panel { background: #1a1d2e; border: 1px solid #2d3748; border-radius: 10px; padding: 20px; }
+    .panel-title { font-size: 12px; font-weight: 700; color: #a0aec0; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 16px; }
+    .slider-row { margin-bottom: 14px; }
+    .slider-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+    .slider-label { font-size: 13px; color: #e2e8f0; font-family: 'Courier New', monospace; }
+    .slider-val { font-size: 13px; color: #7c85f3; font-weight: 700; min-width: 60px; text-align: right; }
+    input[type=range] { width: 100%; accent-color: #7c85f3; height: 4px; }
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .toggle { width: 34px; height: 18px; background: #2d3748; border-radius: 20px; border: none; cursor: pointer; position: relative; }
+    .toggle.on { background: #7c85f3; }
+    .toggle::after { content:''; position: absolute; width: 12px; height: 12px; background: #fff; border-radius: 50%; top: 3px; left: 3px; transition: left .15s; }
+    .toggle.on::after { left: 19px; }
+    .toggle-label { font-size: 13px; color: #e2e8f0; }
+    .presets { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+    .preset { background: #0f1117; border: 1px solid #2d3748; border-radius: 6px; padding: 5px 12px; font-size: 12px; color: #a0aec0; cursor: pointer; }
+    .preset:hover { border-color: #7c85f3; color: #7c85f3; }
+    .preview-area { position: relative; border-radius: 12px; overflow: hidden; min-height: 340px; display: flex; align-items: center; justify-content: center; background: #0f1117; margin-bottom: 16px; }
+    .bg-scene { position: absolute; inset: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 30%, #f093fb 60%, #f5576c 100%); }
+    .bg-shapes { position: absolute; inset: 0; overflow: hidden; }
+    .shape { position: absolute; border-radius: 50%; }
+    .shape-1 { width: 160px; height: 160px; background: rgba(255,200,0,.5); top: 10%; left: 15%; }
+    .shape-2 { width: 120px; height: 120px; background: rgba(0,200,255,.5); bottom: 15%; right: 20%; }
+    .shape-3 { width: 80px; height: 80px; background: rgba(255,100,100,.6); top: 50%; left: 55%; }
+    .glass-card { position: relative; z-index: 2; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); border-radius: 16px; padding: 32px 40px; text-align: center; min-width: 240px; }
+    .glass-card h2 { font-size: 22px; font-weight: 700; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.4); margin-bottom: 8px; }
+    .glass-card p { font-size: 14px; color: rgba(255,255,255,.85); text-shadow: 0 1px 2px rgba(0,0,0,.3); }
+    .output-section { }
+    .code-label { font-size: 11px; color: #a0aec0; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
+    .code-block { background: #0a0d1a; border: 1px solid #1e2435; border-radius: 8px; padding: 14px; font-family: 'Courier New', monospace; font-size: 13px; color: #c3dafe; white-space: pre; overflow-x: auto; line-height: 1.6; margin-bottom: 10px; position: relative; }
+    .copy-btn { position: absolute; top: 8px; right: 8px; background: #2d3748; border: none; border-radius: 4px; padding: 4px 10px; font-size: 11px; color: #a0aec0; cursor: pointer; }
+    .copy-btn:hover { background: #3d4a5c; }
+    .copy-btn.copied { background: #276749; color: #68d391; }
+    .compat-note { background: rgba(124,133,243,.08); border: 1px solid rgba(124,133,243,.2); border-radius: 6px; padding: 10px 14px; font-size: 12px; color: #a0aec0; margin-bottom: 12px; line-height: 1.6; }
+    .compat-note a { color: #7c85f3; text-decoration: none; }
+    .btn-row { display: flex; gap: 8px; }
+    .btn { background: #7c85f3; border: none; border-radius: 6px; padding: 7px 16px; font-size: 13px; color: #fff; cursor: pointer; font-weight: 600; }
+    .btn:hover { background: #6b74e0; }
+    .btn.copied { background: #276749; }
+    .btn-sec { background: #2d3748; }
+    .btn-sec:hover { background: #3d4a5c; }
+    .active-tag { font-size: 11px; background: rgba(126,231,135,.12); color: #7ee787; padding: 2px 6px; border-radius: 4px; }
+    .inactive-tag { font-size: 11px; color: #4a5568; }
+  </style>
+</head>
+<body>
+<header>
+  <a href="https://devnestio.pages.dev/">← devnestio</a>
+  <h1>CSS Backdrop Filter Generator</h1>
+</header>
+<div class="container">
+  <div>
+    <div class="panel" style="margin-bottom:16px">
+      <div class="panel-title">Quick Presets</div>
+      <div class="presets">
+        <button class="preset" data-p="frosted">Frosted Glass</button>
+        <button class="preset" data-p="dark">Dark Overlay</button>
+        <button class="preset" data-p="bright">Bright Glow</button>
+        <button class="preset" data-p="vintage">Vintage</button>
+        <button class="preset" data-p="noir">Noir</button>
+        <button class="preset" data-p="reset">Reset</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Filter Functions</div>
+      <div id="sliders"></div>
+    </div>
+  </div>
+  <div>
+    <div class="panel" style="margin-bottom:16px">
+      <div class="panel-title">Live Preview</div>
+      <div class="preview-area">
+        <div class="bg-scene"></div>
+        <div class="bg-shapes">
+          <div class="shape shape-1"></div>
+          <div class="shape shape-2"></div>
+          <div class="shape shape-3"></div>
+        </div>
+        <div class="glass-card" id="card">
+          <h2>Glassmorphism</h2>
+          <p>Adjust filters on the left<br>to preview the effect.</p>
+        </div>
+      </div>
+      <div class="compat-note">
+        <strong>Browser support:</strong> Chrome 76+, Edge 79+, Firefox 103+, Safari 9+ (with <code>-webkit-</code> prefix).
+        The generated CSS includes the <code>-webkit-</code> prefix automatically.
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Generated CSS</div>
+      <div style="position:relative">
+        <div class="code-block" id="cssOutput"></div>
+        <button class="copy-btn" id="copyBtn" onclick="copyCSS()">Copy</button>
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="copyAllBtn" onclick="copyAll()">Copy Full CSS</button>
+        <button class="btn btn-sec" onclick="resetAll()">Reset All</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const FILTERS = [
+  { id: 'blur',       label: 'blur',       unit: 'px',  min: 0, max: 40,  step: 0.5, def: 0,   active: false, desc: 'Blur radius' },
+  { id: 'brightness', label: 'brightness', unit: '%',   min: 0, max: 200, step: 5,   def: 100, active: false, desc: 'Brightness %' },
+  { id: 'contrast',   label: 'contrast',   unit: '%',   min: 0, max: 200, step: 5,   def: 100, active: false, desc: 'Contrast %' },
+  { id: 'grayscale',  label: 'grayscale',  unit: '%',   min: 0, max: 100, step: 5,   def: 0,   active: false, desc: 'Grayscale %' },
+  { id: 'hue-rotate', label: 'hue-rotate', unit: 'deg', min: 0, max: 360, step: 5,   def: 0,   active: false, desc: 'Hue rotation' },
+  { id: 'invert',     label: 'invert',     unit: '%',   min: 0, max: 100, step: 5,   def: 0,   active: false, desc: 'Invert %' },
+  { id: 'opacity',    label: 'opacity',    unit: '%',   min: 0, max: 100, step: 5,   def: 100, active: false, desc: 'Opacity %' },
+  { id: 'saturate',   label: 'saturate',   unit: '%',   min: 0, max: 300, step: 5,   def: 100, active: false, desc: 'Saturation %' },
+  { id: 'sepia',      label: 'sepia',      unit: '%',   min: 0, max: 100, step: 5,   def: 0,   active: false, desc: 'Sepia %' },
+];
+
+const PRESETS = {
+  frosted: { blur: [12, true], brightness: [110, true], saturate: [160, true] },
+  dark:    { blur: [8, true], brightness: [40, true], contrast: [120, true] },
+  bright:  { blur: [4, true], brightness: [180, true], saturate: [200, true] },
+  vintage: { sepia: [60, true], contrast: [110, true], brightness: [90, true], saturate: [80, true] },
+  noir:    { grayscale: [100, true], contrast: [130, true], brightness: [80, true] },
+  reset:   null,
+};
+
+function getVal(id) { return parseFloat(document.getElementById('rng-' + id).value); }
+function isActive(id) { return document.getElementById('tog-' + id).classList.contains('on'); }
+
+function buildFilterStr() {
+  const parts = [];
+  FILTERS.forEach(f => {
+    if (!isActive(f.id)) return;
+    const v = getVal(f.id);
+    const unit = f.unit === '%' ? '%' : f.unit;
+    if (f.unit === '%') parts.push(`${f.label}(${v}%)`);
+    else parts.push(`${f.label}(${v}${f.unit})`);
+  });
+  return parts.length ? parts.join(' ') : 'none';
+}
+
+function update() {
+  FILTERS.forEach(f => {
+    const v = getVal(f.id);
+    document.getElementById('val-' + f.id).textContent = v + f.unit;
+  });
+  const fs = buildFilterStr();
+  const card = document.getElementById('card');
+  card.style.backdropFilter = fs;
+  card.style.webkitBackdropFilter = fs;
+
+  const activeFilters = FILTERS.filter(f => isActive(f.id));
+  let css;
+  if (activeFilters.length === 0) {
+    css = `.element {\n  /* No active filters — enable some on the left */\n  backdrop-filter: none;\n  -webkit-backdrop-filter: none;\n}`;
+  } else {
+    const filterVal = buildFilterStr();
+    css = `.element {\n  backdrop-filter: ${filterVal};\n  -webkit-backdrop-filter: ${filterVal}; /* Safari */\n}`;
+  }
+  document.getElementById('cssOutput').textContent = css;
+}
+
+function toggleFilter(id) {
+  const tog = document.getElementById('tog-' + id);
+  tog.classList.toggle('on');
+  const row = document.getElementById('row-' + id);
+  const rng = document.getElementById('rng-' + id);
+  rng.disabled = !tog.classList.contains('on');
+  update();
+}
+
+function resetAll() {
+  FILTERS.forEach(f => {
+    document.getElementById('tog-' + f.id).classList.remove('on');
+    document.getElementById('rng-' + f.id).value = f.def;
+    document.getElementById('rng-' + f.id).disabled = true;
+    document.getElementById('val-' + f.id).textContent = f.def + f.unit;
+  });
+  update();
+}
+
+function applyPreset(key) {
+  resetAll();
+  if (!PRESETS[key]) return;
+  Object.entries(PRESETS[key]).forEach(([id, [val, active]]) => {
+    document.getElementById('rng-' + id).value = val;
+    if (active) {
+      document.getElementById('tog-' + id).classList.add('on');
+      document.getElementById('rng-' + id).disabled = false;
+    }
+  });
+  update();
+}
+
+function copyCSS() {
+  const text = document.getElementById('cssOutput').textContent;
+  const btn = document.getElementById('copyBtn');
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+  });
+}
+
+function copyAll() {
+  const fs = buildFilterStr();
+  const full = `.element {\n  /* Background context needed for backdrop-filter to have effect */\n  background: rgba(255, 255, 255, 0.1);\n  border: 1px solid rgba(255, 255, 255, 0.2);\n  border-radius: 16px;\n  backdrop-filter: ${fs};\n  -webkit-backdrop-filter: ${fs}; /* Safari */\n}`;
+  const btn = document.getElementById('copyAllBtn');
+  navigator.clipboard.writeText(full).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy Full CSS'; btn.classList.remove('copied'); }, 1500);
+  });
+}
+
+// Build slider UI
+const cont = document.getElementById('sliders');
+FILTERS.forEach(f => {
+  const div = document.createElement('div');
+  div.className = 'slider-row';
+  div.id = 'row-' + f.id;
+  div.innerHTML = `
+    <div class="slider-header">
+      <label class="slider-label" for="rng-${f.id}">${f.label}()</label>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="slider-val" id="val-${f.id}">${f.def}${f.unit}</span>
+        <button class="toggle" id="tog-${f.id}" onclick="toggleFilter('${f.id}')"></button>
+      </div>
+    </div>
+    <input type="range" id="rng-${f.id}" min="${f.min}" max="${f.max}" step="${f.step}" value="${f.def}" disabled oninput="update()">`;
+  cont.appendChild(div);
+});
+
+document.querySelectorAll('.preset').forEach(btn => {
+  btn.addEventListener('click', () => applyPreset(btn.dataset.p));
+});
+
+resetAll();
+</script>
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Text Statistics & Readability Analyzer | DevNestio</title>
+  <meta name="description" content="Analyze text statistics: word count, character count, sentence count, paragraph count, reading time, unique words, and top keywords. Browser-only." />
+  <meta property="og:title" content="Text Statistics & Readability Analyzer | DevNestio" />
+  <meta property="og:description" content="Instant text statistics: words, characters, sentences, paragraphs, reading time, unique words, top keywords, and Flesch reading ease score." />
+  <meta property="og:url" content="https://devnestio.pages.dev/text-stats/" />
+  <meta name="twitter:card" content="summary" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    #privacy-banner { background: #1e293b; border-bottom: 1px solid #334155; padding: 8px 16px; font-size: 12px; color: #94a3b8; text-align: center; }
+    header { background: #1e293b; border-bottom: 1px solid #334155; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+    header a { color: #64748b; font-size: 13px; text-decoration: none; margin-left: auto; }
+    header a:hover { color: #94a3b8; }
+    .badge { background: #dc2626; color: #fff; font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+    main { max-width: 1000px; margin: 0 auto; padding: 24px 16px; }
+    .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 700px) { .layout { grid-template-columns: 1fr; } }
+    .panel { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 16px; }
+    .panel-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .panel-hdr h2 { font-size: 13px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em; }
+    textarea { width: 100%; padding: 10px 12px; background: #0f1117; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 13px; font-family: inherit; outline: none; resize: vertical; min-height: 400px; line-height: 1.7; }
+    textarea:focus { border-color: #dc2626; }
+    .btn { padding: 6px 14px; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; }
+    .btn-secondary { background: #334155; color: #e2e8f0; }
+    .btn-secondary:hover { background: #475569; }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+    .stat-card { background: #0f1117; border: 1px solid #334155; border-radius: 8px; padding: 12px 14px; }
+    .stat-value { font-size: 26px; font-weight: 800; font-family: monospace; color: #dc2626; line-height: 1; }
+    .stat-label { font-size: 11px; color: #64748b; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .readability-bar { margin: 12px 0 6px; }
+    .bar-label { display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8; margin-bottom: 4px; }
+    .bar-track { background: #0f1117; border-radius: 99px; height: 8px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 99px; transition: width 0.3s; }
+    .bar-ease { background: linear-gradient(90deg, #f87171 0%, #fbbf24 50%, #4ade80 100%); }
+    .readability-level { font-size: 12px; font-weight: 600; text-align: center; margin-top: 6px; }
+    .keyword-list { display: flex; flex-wrap: wrap; gap: 6px; }
+    .keyword-chip { background: #0f1117; border: 1px solid #334155; border-radius: 99px; padding: 3px 10px; font-size: 12px; display: flex; align-items: center; gap: 5px; }
+    .keyword-count { font-size: 10px; background: #dc2626; color: #fff; border-radius: 99px; padding: 0 5px; font-weight: 700; }
+    .char-breakdown { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; padding: 10px 12px; background: #0f1117; border-radius: 7px; }
+    .cb-item { font-size: 12px; color: #94a3b8; }
+    .cb-item strong { color: #e2e8f0; }
+    .section-title { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; margin-top: 14px; }
+    #ad-slot { margin: 20px auto; text-align: center; }
+  </style>
+</head>
+<body>
+<div id="privacy-banner">🔒 All processing happens in your browser. No data is sent to any server.</div>
+<header>
+  <span class="badge">FREE</span>
+  <h1>Text Statistics & Readability</h1>
+  <a href="https://devnestio.pages.dev">← All Tools</a>
+</header>
+<main>
+  <div class="layout">
+    <div class="panel">
+      <div class="panel-hdr">
+        <h2>Input Text</h2>
+        <button class="btn btn-secondary" onclick="clearText()">Clear</button>
+      </div>
+      <textarea id="input-text" spellcheck="true" placeholder="Paste or type text here to analyze…"></textarea>
+    </div>
+
+    <div class="panel" id="results-panel">
+      <div class="panel-hdr">
+        <h2>Statistics</h2>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-value" id="st-words">0</div><div class="stat-label">Words</div></div>
+        <div class="stat-card"><div class="stat-value" id="st-chars">0</div><div class="stat-label">Characters</div></div>
+        <div class="stat-card"><div class="stat-value" id="st-sentences">0</div><div class="stat-label">Sentences</div></div>
+        <div class="stat-card"><div class="stat-value" id="st-paragraphs">0</div><div class="stat-label">Paragraphs</div></div>
+        <div class="stat-card"><div class="stat-value" id="st-unique">0</div><div class="stat-label">Unique Words</div></div>
+        <div class="stat-card"><div class="stat-value" id="st-read-time">0m</div><div class="stat-label">Reading Time</div></div>
+        <div class="stat-card"><div class="stat-value" id="st-avg-word">0</div><div class="stat-label">Avg Word Length</div></div>
+        <div class="stat-card"><div class="stat-value" id="st-avg-sent">0</div><div class="stat-label">Avg Sentence (words)</div></div>
+      </div>
+
+      <div class="section-title">Readability (Flesch Reading Ease)</div>
+      <div class="readability-bar">
+        <div class="bar-label"><span>Difficult</span><span>Easy</span></div>
+        <div class="bar-track"><div class="bar-fill bar-ease" id="ease-bar" style="width:0%"></div></div>
+      </div>
+      <div class="readability-level" id="ease-label">—</div>
+
+      <div class="char-breakdown">
+        <div class="cb-item">Spaces: <strong id="cb-spaces">0</strong></div>
+        <div class="cb-item">Letters: <strong id="cb-letters">0</strong></div>
+        <div class="cb-item">Digits: <strong id="cb-digits">0</strong></div>
+        <div class="cb-item">Punctuation: <strong id="cb-punct">0</strong></div>
+        <div class="cb-item">Lines: <strong id="cb-lines">0</strong></div>
+      </div>
+
+      <div class="section-title" style="margin-top:14px">Top Keywords</div>
+      <div class="keyword-list" id="keyword-list"><span style="color:#475569;font-size:12px">Start typing to see keywords…</span></div>
+    </div>
+  </div>
+
+  <div id="ad-slot" data-ea-publisher="devnestio" data-ea-type="image"></div>
+</main>
+<script>
+// Syllable count approximation
+function countSyllables(word) {
+  word = word.toLowerCase().replace(/[^a-z]/g, '');
+  if (!word) return 0;
+  if (word.length <= 3) return 1;
+  word = word.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
+  word = word.replace(/^y/, '');
+  const m = word.match(/[aeiouy]{1,2}/g);
+  return m ? m.length : 1;
+}
+
+// Flesch Reading Ease = 206.835 - 1.015*(words/sentences) - 84.6*(syllables/words)
+function fleschEase(words, sentences, syllables) {
+  if (!words || !sentences) return null;
+  const score = 206.835 - 1.015 * (words / sentences) - 84.6 * (syllables / words);
+  return Math.max(0, Math.min(100, score));
+}
+
+function fleschLabel(score) {
+  if (score === null) return '—';
+  if (score >= 90) return `${score.toFixed(0)} — Very Easy`;
+  if (score >= 80) return `${score.toFixed(0)} — Easy`;
+  if (score >= 70) return `${score.toFixed(0)} — Fairly Easy`;
+  if (score >= 60) return `${score.toFixed(0)} — Standard`;
+  if (score >= 50) return `${score.toFixed(0)} — Fairly Difficult`;
+  if (score >= 30) return `${score.toFixed(0)} — Difficult`;
+  return `${score.toFixed(0)} — Very Difficult`;
+}
+
+const STOP_WORDS = new Set(['the','a','an','and','or','but','in','on','at','to','for','of','with','by','from','is','are','was','were','be','been','being','have','has','had','do','does','did','will','would','could','should','may','might','shall','this','that','these','those','it','its','we','you','he','she','they','i','my','your','his','her','our','their','me','him','us','them','not','no','nor','so','as','if','then','than','also','into','up','out','down','over','under','about','after','before','between','through','during','without','within','along','following','across','behind','beyond','plus','except','but','who','which','what','how','when','where','why']);
+
+function analyze() {
+  const text = document.getElementById('input-text').value;
+
+  // Counts
+  const chars = text.length;
+  const lines = text.split('\n').length;
+  const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim()).length || (text.trim() ? 1 : 0);
+  const spaces = (text.match(/ /g) || []).length;
+  const letters = (text.match(/[a-zA-Z]/g) || []).length;
+  const digits = (text.match(/\d/g) || []).length;
+  const punct = (text.match(/[.,!?;:'"()\[\]{}\-–—]/g) || []).length;
+  const wordList = text.trim() ? text.match(/\b[a-zA-Z'-]+\b/g) || [] : [];
+  const words = wordList.length;
+  const sentences = text.trim() ? (text.match(/[.!?]+(?:\s|$)/g) || [text]).length : 0;
+
+  const uniqueSet = new Set(wordList.map(w => w.toLowerCase()));
+  const unique = uniqueSet.size;
+
+  const avgWordLen = words > 0 ? (wordList.reduce((s, w) => s + w.replace(/['-]/g, '').length, 0) / words).toFixed(1) : '0';
+  const avgSentLen = sentences > 0 ? (words / sentences).toFixed(1) : '0';
+
+  // Reading time (avg 238 wpm)
+  const mins = words / 238;
+  const readTime = mins < 1 ? `${Math.round(mins * 60)}s` : `${Math.ceil(mins)}m`;
+
+  // Syllables for Flesch
+  let totalSyllables = 0;
+  for (const w of wordList) totalSyllables += countSyllables(w);
+  const ease = fleschEase(words, sentences, totalSyllables);
+
+  // Top keywords (excluding stop words)
+  const freq = {};
+  for (const w of wordList) {
+    const lw = w.toLowerCase();
+    if (!STOP_WORDS.has(lw) && lw.length > 2) freq[lw] = (freq[lw] || 0) + 1;
+  }
+  const topWords = Object.entries(freq).sort((a,b) => b[1]-a[1]).slice(0, 20);
+
+  // Render
+  document.getElementById('st-words').textContent = words.toLocaleString();
+  document.getElementById('st-chars').textContent = chars.toLocaleString();
+  document.getElementById('st-sentences').textContent = sentences.toLocaleString();
+  document.getElementById('st-paragraphs').textContent = paragraphs.toLocaleString();
+  document.getElementById('st-unique').textContent = unique.toLocaleString();
+  document.getElementById('st-read-time').textContent = readTime;
+  document.getElementById('st-avg-word').textContent = avgWordLen;
+  document.getElementById('st-avg-sent').textContent = avgSentLen;
+
+  document.getElementById('cb-spaces').textContent = spaces.toLocaleString();
+  document.getElementById('cb-letters').textContent = letters.toLocaleString();
+  document.getElementById('cb-digits').textContent = digits.toLocaleString();
+  document.getElementById('cb-punct').textContent = punct.toLocaleString();
+  document.getElementById('cb-lines').textContent = lines.toLocaleString();
+
+  const pct = ease !== null ? ease.toFixed(0) : 0;
+  document.getElementById('ease-bar').style.width = pct + '%';
+  document.getElementById('ease-label').textContent = fleschLabel(ease);
+
+  const kwEl = document.getElementById('keyword-list');
+  if (topWords.length === 0) {
+    kwEl.innerHTML = '<span style="color:#475569;font-size:12px">No keywords found yet…</span>';
+  } else {
+    kwEl.innerHTML = topWords.map(([w, c]) =>
+      `<span class="keyword-chip">${escHtml(w)}<span class="keyword-count">${c}</span></span>`
+    ).join('');
+  }
+}
+
+function clearText() {
+  document.getElementById('input-text').value = '';
+  analyze();
+}
+
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// Debounce
+let debounce;
+document.getElementById('input-text').addEventListener('input', () => {
+  clearTimeout(debounce);
+  debounce = setTimeout(analyze, 200);
+});
+
+analyze();
+</script>
+</body>
+</html>

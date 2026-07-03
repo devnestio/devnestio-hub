@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS Animations & Transitions Reference — devnestio</title>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#0f1117;color:#e2e8f0;min-height:100vh}
+header{padding:24px 32px;border-bottom:1px solid #1e2535}
+h1{font-size:1.5rem;font-weight:700;color:#f8fafc}
+h1 span{color:#a78bfa}
+.desc{color:#94a3b8;margin-top:4px;font-size:.9rem}
+.controls{display:flex;gap:12px;flex-wrap:wrap;padding:16px 32px;border-bottom:1px solid #1e2535;align-items:center}
+.search-wrap{position:relative;flex:1;min-width:200px}
+.search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#64748b}
+#search{width:100%;background:#1e2535;border:1px solid #334155;color:#e2e8f0;padding:8px 12px 8px 34px;border-radius:6px;font-size:.9rem;outline:none}
+#search:focus{border-color:#a78bfa}
+.cat-filters{display:flex;gap:8px;flex-wrap:wrap}
+.cat-btn{padding:5px 12px;border-radius:99px;border:1px solid #334155;background:#1e2535;color:#94a3b8;font-size:.8rem;cursor:pointer}
+.cat-btn.active,.cat-btn:hover{background:#7c3aed;border-color:#7c3aed;color:#fff}
+.content{max-width:900px;margin:0 auto;padding:24px 32px}
+.section{margin-bottom:28px}
+.section-title{font-size:.95rem;font-weight:700;color:#a78bfa;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #1e2535}
+.prop-card{background:#141924;border:1px solid #1e2535;border-radius:8px;margin-bottom:10px;overflow:hidden}
+.prop-card:hover{border-color:#334155}
+.prop-header{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid #1e2535}
+.prop-name{font-family:monospace;font-size:.9rem;color:#c4b5fd;font-weight:700;flex:1}
+.prop-type{font-size:.72rem;padding:2px 7px;border-radius:99px;background:#3b1f5e;border:1px solid #7c3aed;color:#c4b5fd}
+.prop-body{padding:12px 16px}
+.prop-desc{font-size:.83rem;color:#94a3b8;line-height:1.5;margin-bottom:8px}
+.prop-values{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.val-chip{font-family:monospace;font-size:.75rem;background:#1e2535;border:1px solid #334155;border-radius:3px;padding:2px 6px;color:#7dd3fc;cursor:pointer}
+.val-chip:hover{border-color:#7dd3fc}
+pre{background:#0f1117;border:1px solid #1e2535;border-radius:4px;padding:10px;font-size:.8rem;overflow:auto;line-height:1.6;position:relative}
+code{font-family:'Courier New',monospace;color:#c4b5fd}
+.copy-btn{position:absolute;top:8px;right:8px;background:#1e2535;border:1px solid #334155;color:#64748b;padding:3px 8px;border-radius:4px;font-size:.73rem;cursor:pointer}
+.copy-btn:hover{color:#e2e8f0;background:#334155}
+.no-results{text-align:center;color:#64748b;padding:48px}
+.demo-box{width:48px;height:48px;background:#7c3aed;border-radius:6px;display:inline-block;vertical-align:middle;margin-right:8px}
+</style>
+</head>
+<body>
+<header>
+  <h1>CSS <span>Animations & Transitions</span> Reference</h1>
+  <p class="desc">All animation and transition properties — keyframes, timing functions, easing, transforms, and patterns</p>
+</header>
+<div class="controls">
+  <div class="search-wrap">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="search" placeholder="Search properties…">
+  </div>
+  <div class="cat-filters" id="cats"></div>
+</div>
+<div class="content" id="content"></div>
+<script>
+const PROPS = [
+  // Transitions
+  {cat:'Transition',name:'transition',type:'shorthand',
+   desc:'Shorthand for all transition properties. Comma-separate multiple transitions.',
+   values:['property duration timing-function delay','all 0.3s ease','opacity 0.2s ease, transform 0.3s ease-out'],
+   code:`/* Single property */
+.btn {
+  background: blue;
+  transition: background 0.3s ease;
+}
+.btn:hover { background: darkblue; }
+
+/* Multiple properties */
+.card {
+  transition: opacity 0.2s ease, transform 0.3s ease-out;
+}
+
+/* All properties (avoid — can cause performance issues) */
+.el { transition: all 0.3s ease; }`},
+  {cat:'Transition',name:'transition-property',type:'property',
+   desc:'The CSS property to animate. Use specific property names for best performance (avoid "all").',
+   values:['all','none','opacity','transform','background-color','width'],
+   code:`/* Prefer specific properties for performance */
+.el {
+  transition-property: opacity, transform;
+  transition-duration: 0.3s;
+}`},
+  {cat:'Transition',name:'transition-duration',type:'property',
+   desc:'How long the transition takes. Use seconds (s) or milliseconds (ms).',
+   values:['0s','0.3s','300ms','0.5s','1s'],
+   code:`.fast { transition-duration: 150ms; }
+.normal { transition-duration: 0.3s; }
+.slow { transition-duration: 0.8s; }`},
+  {cat:'Transition',name:'transition-timing-function',type:'property',
+   desc:'The easing function controlling acceleration over the transition. Cubic bezier or keyword.',
+   values:['ease','linear','ease-in','ease-out','ease-in-out','cubic-bezier(...)','steps(...)'],
+   code:`/* Built-in keywords */
+.ease      { transition-timing-function: ease; }        /* slow→fast→slow */
+.linear    { transition-timing-function: linear; }      /* constant speed */
+.ease-in   { transition-timing-function: ease-in; }     /* starts slow */
+.ease-out  { transition-timing-function: ease-out; }    /* ends slow */
+
+/* Custom cubic bezier */
+.custom { transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+/* Step timing */
+.steps { transition-timing-function: steps(4, end); }`},
+  {cat:'Transition',name:'transition-delay',type:'property',
+   desc:'How long to wait before starting the transition. Negative values start mid-animation.',
+   values:['0s','0.1s','200ms','-0.5s'],
+   code:`/* Stagger list items entering */
+li:nth-child(1) { transition-delay: 0ms; }
+li:nth-child(2) { transition-delay: 50ms; }
+li:nth-child(3) { transition-delay: 100ms; }
+
+/* Start mid-way (negative delay) */
+.el { transition-delay: -0.5s; }`},
+  // Animation
+  {cat:'Animation',name:'animation',type:'shorthand',
+   desc:'Shorthand for all animation properties.',
+   values:['name duration timing delay count direction fill-mode play-state'],
+   code:`/* Basic */
+.spin { animation: rotate 1s linear infinite; }
+
+/* Full shorthand */
+.bounce {
+  animation: bounce 0.5s ease-in-out 0s 3 alternate both;
+  /*         name   dur  timing    del cnt dir       fill */
+}
+
+/* Multiple animations */
+.complex {
+  animation: fadeIn 0.3s ease, slideUp 0.5s ease-out;
+}`},
+  {cat:'Animation',name:'@keyframes',type:'rule',
+   desc:'Define the states of an animation. Use percentages or from/to keywords.',
+   values:['from / to','0% 100%','0% 50% 100%'],
+   code:`/* Simple fade in */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Bounce */
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-20px); }
+}
+
+/* Shake */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25%       { transform: translateX(-8px); }
+  75%       { transform: translateX(8px); }
+}`},
+  {cat:'Animation',name:'animation-iteration-count',type:'property',
+   desc:'How many times to play the animation.',
+   values:['1','infinite','2.5'],
+   code:`.once    { animation-iteration-count: 1; }
+.loop    { animation-iteration-count: infinite; }
+.partial { animation-iteration-count: 2.5; }`},
+  {cat:'Animation',name:'animation-direction',type:'property',
+   desc:'Whether to play forward, backward, or alternate.',
+   values:['normal','reverse','alternate','alternate-reverse'],
+   code:`.normal    { animation-direction: normal; }           /* → → → */
+.reverse   { animation-direction: reverse; }          /* ← ← ← */
+.alternate { animation-direction: alternate; }         /* → ← → */
+.alt-rev   { animation-direction: alternate-reverse; } /* ← → ← */`},
+  {cat:'Animation',name:'animation-fill-mode',type:'property',
+   desc:'Defines what values are applied before/after the animation plays.',
+   values:['none','forwards','backwards','both'],
+   code:`/* forwards: stay at final keyframe state */
+.fade-out {
+  animation: fadeOut 0.3s ease forwards;
+}
+
+/* backwards: apply from keyframe before delay period */
+.delayed {
+  animation: slideIn 0.3s ease 0.5s backwards;
+}
+
+/* both: apply both forwards and backwards */
+.full { animation: pulse 0.5s ease both; }`},
+  {cat:'Animation',name:'animation-play-state',type:'property',
+   desc:'Pauses or resumes an animation. Useful for hover-to-pause effects.',
+   values:['running','paused'],
+   code:`.spinner { animation: rotate 1s linear infinite; }
+.spinner:hover { animation-play-state: paused; }
+
+/* Toggle with JS */
+el.style.animationPlayState = 'paused';
+el.style.animationPlayState = 'running';`},
+  // Transform
+  {cat:'Transform',name:'transform',type:'property',
+   desc:'Apply 2D or 3D transformations. Multiple functions are applied right-to-left.',
+   values:['translate()','scale()','rotate()','skew()','matrix()'],
+   code:`/* 2D transforms */
+.translate { transform: translate(50px, 20px); }
+.scale     { transform: scale(1.5); }
+.rotate    { transform: rotate(45deg); }
+.skew      { transform: skew(10deg, 5deg); }
+
+/* Chaining (right-to-left order!) */
+.combined  { transform: translateX(50px) rotate(45deg) scale(0.8); }
+
+/* 3D transforms */
+.flip      { transform: rotateY(180deg); }
+.tilt      { transform: perspective(500px) rotateX(15deg); }`},
+  {cat:'Transform',name:'transform-origin',type:'property',
+   desc:'The point around which transforms are applied. Default is center (50% 50%).',
+   values:['center','top left','50% 50%','0 0','bottom right'],
+   code:`/* Rotate from top-left corner */
+.fold { transform-origin: top left; transform: rotate(90deg); }
+
+/* Scale from center (default) */
+.zoom { transform-origin: center; transform: scale(2); }
+
+/* Rotate clock hand from bottom */
+.hand { transform-origin: bottom center; transform: rotate(45deg); }`},
+  {cat:'Transform',name:'will-change',type:'property',
+   desc:'Hints the browser to prepare GPU compositing for animated properties. Use sparingly.',
+   values:['transform','opacity','auto'],
+   code:`/* Tell browser to GPU-composite ahead of time */
+.animated {
+  will-change: transform, opacity;
+}
+
+/* Remove when not needed to free memory */
+el.addEventListener('animationend', () => {
+  el.style.willChange = 'auto';
+});`},
+  // Patterns
+  {cat:'Patterns',name:'Fade in on load',type:'pattern',
+   desc:'Smoothly reveal an element when it loads using opacity and keyframes.',
+   values:[],
+   code:`@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.hero {
+  animation: fadeIn 0.5s ease-out forwards;
+}`},
+  {cat:'Patterns',name:'Hover lift card',type:'pattern',
+   desc:'Elevate a card on hover with transform and box-shadow transition.',
+   values:[],
+   code:`.card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+}`},
+  {cat:'Patterns',name:'Skeleton loading pulse',type:'pattern',
+   desc:'Animated gradient shimmer for skeleton loading states.',
+   values:[],
+   code:`@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #1e2535 25%, #2d3748 50%, #1e2535 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}`},
+  {cat:'Patterns',name:'Spinner',type:'pattern',
+   desc:'CSS-only loading spinner using border and rotation.',
+   values:[],
+   code:`@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #334155;
+  border-top-color: #60a5fa;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}`},
+];
+
+const CATS=['All',...new Set(PROPS.map(p=>p.cat))];
+let activeCat='All', query='';
+
+function render(){
+  const visible=PROPS.filter(p=>{
+    const mc=activeCat==='All'||p.cat===activeCat;
+    const mq=!query||p.name.toLowerCase().includes(query)||p.desc.toLowerCase().includes(query)||p.cat.toLowerCase().includes(query)||p.values.join(' ').toLowerCase().includes(query);
+    return mc&&mq;
+  });
+  const el=document.getElementById('content');
+  if(!visible.length){el.innerHTML='<div class="no-results">No results</div>';return;}
+  const byCat={};
+  visible.forEach(p=>{(byCat[p.cat]=byCat[p.cat]||[]).push(p);});
+  el.innerHTML=Object.entries(byCat).map(([cat,items])=>`
+    <div class="section">
+      <div class="section-title">${cat}</div>
+      ${items.map(p=>`
+        <div class="prop-card">
+          <div class="prop-header">
+            <span class="prop-name">${p.name}</span>
+            <span class="prop-type">${p.type}</span>
+          </div>
+          <div class="prop-body">
+            <div class="prop-desc">${p.desc}</div>
+            ${p.values.length?`<div class="prop-values">${p.values.map(v=>`<span class="val-chip" onclick="cp(${JSON.stringify(v)},this)">${escHtml(v)}</span>`).join('')}</div>`:''}
+            <pre><code>${escHtml(p.code)}</code><button class="copy-btn" onclick="cp(${JSON.stringify(p.code)},this)">Copy</button></pre>
+          </div>
+        </div>`).join('')}
+    </div>`).join('');
+}
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function cp(text,btn){
+  navigator.clipboard.writeText(text);
+  const orig=btn.textContent;btn.textContent='Copied!';setTimeout(()=>btn.textContent=orig,1400);
+}
+document.getElementById('cats').innerHTML=CATS.map(c=>`
+  <button class="cat-btn${c==='All'?' active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
+function setCat(c){
+  activeCat=c;
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.toggle('active',b.textContent===c));
+  render();
+}
+document.getElementById('search').addEventListener('input',e=>{query=e.target.value.toLowerCase();render();});
+render();
+</script>
+</body>
+</html>

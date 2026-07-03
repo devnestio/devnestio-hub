@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diff Tool — devnestio</title>
+  <meta name="description" content="Side-by-side and unified text diff tool. Paste two texts to see line-level differences highlighted in real time — added, removed, and changed lines. No upload, fully browser-based.">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --surface: #161b22; --surface2: #21262d;
+      --border: #30363d; --text: #c9d1d9; --muted: #8b949e;
+      --accent: #58a6ff; --green: #3fb950; --red: #f85149;
+      --add-bg: rgba(63,185,80,.12); --add-hl: rgba(63,185,80,.4);
+      --del-bg: rgba(248,81,73,.12); --del-hl: rgba(248,81,73,.4);
+      --chg-bg: rgba(88,166,255,.1);
+    }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 24px; }
+    header nav a { color: var(--accent); text-decoration: none; font-size: 0.9em; }
+    header h1 { font-size: 1.6rem; margin: 8px 0 4px; }
+    header p { color: var(--muted); font-size: 0.95em; }
+    main { flex: 1; padding: 20px 24px; display: flex; flex-direction: column; }
+    footer { background: var(--surface); border-top: 1px solid var(--border); padding: 16px 24px; text-align: center; color: var(--muted); font-size: 0.875rem; }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    .btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 7px 14px; border-radius: 6px; cursor: pointer; font-size: 0.88em; transition: background .15s; }
+    .btn:hover { background: var(--border); }
+    .btn-primary { background: var(--accent); color: #0d1117; border-color: var(--accent); font-weight: 600; }
+    .btn-primary:hover { background: #79b8ff; }
+    .btn-active { background: var(--surface2); border-color: var(--accent); color: var(--accent); }
+
+    /* Input area */
+    .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    @media (max-width: 700px) { .input-row { grid-template-columns: 1fr; } }
+    .input-pane { display: flex; flex-direction: column; }
+    .input-label { font-size: 0.82em; color: var(--muted); font-weight: 600; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+    .input-label .clear-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.85em; padding: 2px 6px; border-radius: 4px; }
+    .input-label .clear-btn:hover { color: var(--red); }
+    textarea { width: 100%; min-height: 160px; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.82em; padding: 10px 12px; border-radius: 8px; resize: vertical; line-height: 1.55; }
+    textarea:focus { outline: none; border-color: var(--accent); }
+
+    /* Toolbar */
+    .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+    .stat-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.8em; font-weight: 600; }
+    .stat-add { background: var(--add-bg); color: var(--green); border: 1px solid rgba(63,185,80,.3); }
+    .stat-del { background: var(--del-bg); color: var(--red); border: 1px solid rgba(248,81,73,.3); }
+    .stat-unch { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+
+    /* Diff output */
+    .diff-container { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; flex: 1; }
+    .diff-header { padding: 10px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 0.88em; }
+    .diff-body { overflow-x: auto; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.82em; line-height: 1.55; }
+
+    /* Side-by-side */
+    .side-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    .side-table td { padding: 2px 0; vertical-align: top; }
+    .line-num { width: 42px; text-align: right; padding: 1px 8px; color: var(--muted); user-select: none; border-right: 1px solid var(--border); flex-shrink: 0; font-size: 0.85em; }
+    .line-content { padding: 1px 10px; white-space: pre; overflow-x: hidden; text-overflow: ellipsis; min-width: 0; }
+    .divider-col { width: 1px; background: var(--border); }
+
+    .line-add { background: var(--add-bg); }
+    .line-del { background: var(--del-bg); }
+    .line-equal { }
+    .line-empty { background: var(--surface2); opacity: .5; }
+    .line-sep { background: var(--surface2); color: var(--muted); font-style: italic; font-size: 0.85em; }
+
+    /* Inline char highlights */
+    .hl-add { background: var(--add-hl); border-radius: 2px; }
+    .hl-del { background: var(--del-hl); border-radius: 2px; }
+
+    /* Unified */
+    .uni-line { display: flex; gap: 0; }
+    .uni-sign { width: 20px; text-align: center; flex-shrink: 0; font-weight: 700; }
+    .uni-num { width: 40px; text-align: right; padding-right: 8px; color: var(--muted); flex-shrink: 0; }
+    .uni-content { flex: 1; white-space: pre-wrap; word-break: break-all; padding: 2px 8px; }
+    .uni-add { background: var(--add-bg); color: var(--green); }
+    .uni-del { background: var(--del-bg); color: var(--red); }
+    .uni-ctx { }
+    .uni-hunk { background: var(--chg-bg); color: var(--accent); font-style: italic; font-size: 0.85em; padding: 2px 10px; }
+
+    .empty-state { padding: 40px; text-align: center; color: var(--muted); }
+
+    /* View toggle */
+    .view-toggle { display: flex; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+    .view-toggle button { background: transparent; border: none; color: var(--muted); padding: 6px 14px; cursor: pointer; font-size: 0.85em; transition: all .15s; }
+    .view-toggle button.active { background: var(--accent); color: #0d1117; font-weight: 600; }
+  </style>
+</head>
+<body>
+<header>
+  <nav><a href="/">← devnestio</a></nav>
+  <h1>Diff Tool</h1>
+  <p>Side-by-side and unified text diff — paste two texts and see changes highlighted instantly.</p>
+</header>
+<main>
+
+  <!-- Inputs -->
+  <div class="input-row">
+    <div class="input-pane">
+      <div class="input-label">
+        <span>📄 Original</span>
+        <button class="clear-btn" onclick="clearPane('a')">✕ clear</button>
+      </div>
+      <textarea id="text-a" placeholder="Paste original text here…" oninput="scheduleDiff()"></textarea>
+    </div>
+    <div class="input-pane">
+      <div class="input-label">
+        <span>📝 Modified</span>
+        <button class="clear-btn" onclick="clearPane('b')">✕ clear</button>
+      </div>
+      <textarea id="text-b" placeholder="Paste modified text here…" oninput="scheduleDiff()"></textarea>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="view-toggle">
+      <button id="btn-side" class="active" onclick="setView('side')">Side-by-side</button>
+      <button id="btn-uni" onclick="setView('unified')">Unified</button>
+    </div>
+    <label style="font-size:0.85em;color:var(--muted);display:flex;align-items:center;gap:6px;">
+      <input type="checkbox" id="ignore-ws" onchange="scheduleDiff()"> Ignore whitespace
+    </label>
+    <label style="font-size:0.85em;color:var(--muted);display:flex;align-items:center;gap:6px;">
+      <input type="checkbox" id="ignore-case" onchange="scheduleDiff()"> Ignore case
+    </label>
+    <span id="stat-add" class="stat-badge stat-add" style="display:none"></span>
+    <span id="stat-del" class="stat-badge stat-del" style="display:none"></span>
+    <span id="stat-unch" class="stat-badge stat-unch" style="display:none"></span>
+    <button class="btn" style="margin-left:auto;" onclick="swapTexts()">⇄ Swap</button>
+    <button class="btn" onclick="copyDiff()">Copy Diff</button>
+    <button class="btn" onclick="loadExample()">Example</button>
+  </div>
+
+  <!-- Output -->
+  <div class="diff-container">
+    <div class="diff-body" id="diff-body">
+      <div class="empty-state">Paste text into both panels above to see the diff.</div>
+    </div>
+  </div>
+</main>
+<footer>
+  <p>Made with ☕ · <a href="https://devnestio.pages.dev">devnestio</a></p>
+  <p style="margin-top:8px;font-size:0.85em;">If this saved you time, <a href="https://buymeacoffee.com/devnestio" target="_blank" rel="noopener">buy me a coffee ☕</a></p>
+</footer>
+<script>
+let currentView = 'side';
+let diffTimer = null;
+let lastDiff = [];
+
+function setView(v) {
+  currentView = v;
+  document.getElementById('btn-side').classList.toggle('active', v === 'side');
+  document.getElementById('btn-uni').classList.toggle('active', v === 'unified');
+  renderDiff(lastDiff);
+}
+
+function scheduleDiff() {
+  clearTimeout(diffTimer);
+  diffTimer = setTimeout(runDiff, 120);
+}
+
+function clearPane(p) {
+  document.getElementById('text-' + p).value = '';
+  scheduleDiff();
+}
+
+function swapTexts() {
+  const a = document.getElementById('text-a');
+  const b = document.getElementById('text-b');
+  [a.value, b.value] = [b.value, a.value];
+  scheduleDiff();
+}
+
+function getLines(id) {
+  let t = document.getElementById(id).value;
+  if (document.getElementById('ignore-ws').checked) t = t.split('\n').map(l => l.replace(/\s+/g,' ').trim()).join('\n');
+  if (document.getElementById('ignore-case').checked) t = t.toLowerCase();
+  return t.split('\n');
+}
+
+// Myers diff algorithm
+function diff(a, b) {
+  const n = a.length, m = b.length;
+  const max = n + m;
+  if (max === 0) return [];
+  const v = new Array(2 * max + 1).fill(0);
+  const trace = [];
+
+  for (let d = 0; d <= max; d++) {
+    trace.push([...v]);
+    for (let k = -d; k <= d; k += 2) {
+      const ki = k + max;
+      let x;
+      if (k === -d || (k !== d && v[ki-1] < v[ki+1])) {
+        x = v[ki+1];
+      } else {
+        x = v[ki-1] + 1;
+      }
+      let y = x - k;
+      while (x < n && y < m && a[x] === b[y]) { x++; y++; }
+      v[ki] = x;
+      if (x >= n && y >= m) return backtrack(trace, a, b, max);
+    }
+  }
+  return backtrack(trace, a, b, max);
+}
+
+function backtrack(trace, a, b, max) {
+  const edits = [];
+  let x = a.length, y = b.length;
+  for (let d = trace.length - 1; d >= 0; d--) {
+    const v = trace[d];
+    const k = x - y;
+    const ki = k + max;
+    let prevK;
+    if (k === -d || (k !== d && v[ki-1] < v[ki+1])) {
+      prevK = k + 1;
+    } else {
+      prevK = k - 1;
+    }
+    const prevX = v[prevK + max];
+    const prevY = prevX - prevK;
+    while (x > prevX && y > prevY) { edits.push(['=', a[x-1], b[y-1]]); x--; y--; }
+    if (d > 0) {
+      if (x === prevX) { edits.push(['+', null, b[y-1]]); y--; }
+      else { edits.push(['-', a[x-1], null]); x--; }
+    }
+  }
+  return edits.reverse();
+}
+
+function runDiff() {
+  const aLines = getLines('text-a');
+  const bLines = getLines('text-b');
+  const a = document.getElementById('text-a').value;
+  const b = document.getElementById('text-b').value;
+
+  if (!a && !b) {
+    document.getElementById('diff-body').innerHTML = '<div class="empty-state">Paste text into both panels above to see the diff.</div>';
+    hideStats(); lastDiff = []; return;
+  }
+
+  const edits = diff(aLines, bLines);
+  lastDiff = edits;
+  renderDiff(edits);
+}
+
+function renderDiff(edits) {
+  if (!edits.length) {
+    document.getElementById('diff-body').innerHTML = '<div class="empty-state">Paste text into both panels above to see the diff.</div>';
+    hideStats(); return;
+  }
+
+  let added = 0, removed = 0, unchanged = 0;
+  edits.forEach(([op]) => { if (op==='+') added++; else if (op==='-') removed++; else unchanged++; });
+  showStats(added, removed, unchanged);
+
+  if (currentView === 'side') renderSide(edits);
+  else renderUnified(edits);
+}
+
+function renderSide(edits) {
+  let leftN = 0, rightN = 0;
+  let html = '<table class="side-table"><tbody>';
+
+  for (const [op, left, right] of edits) {
+    if (op === '=') {
+      leftN++; rightN++;
+      html += `<tr>
+        <td class="line-num line-equal">${leftN}</td>
+        <td class="line-content line-equal">${escHtml(left)}</td>
+        <td class="divider-col"></td>
+        <td class="line-num line-equal">${rightN}</td>
+        <td class="line-content line-equal">${escHtml(right)}</td>
+      </tr>`;
+    } else if (op === '-') {
+      leftN++;
+      html += `<tr>
+        <td class="line-num line-del">${leftN}</td>
+        <td class="line-content line-del">${escHtml(left)}</td>
+        <td class="divider-col"></td>
+        <td class="line-num line-empty"></td>
+        <td class="line-content line-empty"></td>
+      </tr>`;
+    } else {
+      rightN++;
+      html += `<tr>
+        <td class="line-num line-empty"></td>
+        <td class="line-content line-empty"></td>
+        <td class="divider-col"></td>
+        <td class="line-num line-add">${rightN}</td>
+        <td class="line-content line-add">${escHtml(right)}</td>
+      </tr>`;
+    }
+  }
+  html += '</tbody></table>';
+  document.getElementById('diff-body').innerHTML = html;
+}
+
+function renderUnified(edits) {
+  let leftN = 0, rightN = 0;
+  let html = '<div style="padding:4px 0;">';
+
+  for (const [op, left, right] of edits) {
+    if (op === '=') {
+      leftN++; rightN++;
+      html += `<div class="uni-line uni-ctx"><span class="uni-sign" style="color:var(--muted)"> </span><span class="uni-num">${leftN}</span><span class="uni-content">${escHtml(left)}</span></div>`;
+    } else if (op === '-') {
+      leftN++;
+      html += `<div class="uni-line uni-del"><span class="uni-sign" style="color:var(--red)">-</span><span class="uni-num">${leftN}</span><span class="uni-content">${escHtml(left)}</span></div>`;
+    } else {
+      rightN++;
+      html += `<div class="uni-line uni-add"><span class="uni-sign" style="color:var(--green)">+</span><span class="uni-num">${rightN}</span><span class="uni-content">${escHtml(right)}</span></div>`;
+    }
+  }
+  html += '</div>';
+  document.getElementById('diff-body').innerHTML = html;
+}
+
+function showStats(add, del, unch) {
+  const sa = document.getElementById('stat-add');
+  const sd = document.getElementById('stat-del');
+  const su = document.getElementById('stat-unch');
+  sa.textContent = `+${add} added`; sa.style.display = 'inline';
+  sd.textContent = `-${del} removed`; sd.style.display = 'inline';
+  su.textContent = `${unch} unchanged`; su.style.display = 'inline';
+}
+function hideStats() {
+  ['stat-add','stat-del','stat-unch'].forEach(id => document.getElementById(id).style.display = 'none');
+}
+
+function copyDiff() {
+  if (!lastDiff.length) { alert('Nothing to copy.'); return; }
+  const lines = lastDiff.map(([op, l, r]) => {
+    if (op === '=') return '  ' + l;
+    if (op === '-') return '- ' + l;
+    return '+ ' + r;
+  });
+  navigator.clipboard.writeText(lines.join('\n')).then(() => alert('Diff copied!'));
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function loadExample() {
+  document.getElementById('text-a').value = `function greet(name) {
+  console.log("Hello, " + name);
+  return "Hello, " + name;
+}
+
+const result = greet("World");
+console.log(result);
+
+// Old utility
+function add(a, b) {
+  return a + b;
+}`;
+  document.getElementById('text-b').value = `function greet(name, greeting = "Hello") {
+  const msg = \`\${greeting}, \${name}!\`;
+  console.log(msg);
+  return msg;
+}
+
+const result = greet("World", "Hi");
+console.log(result);
+
+// Improved utility
+function add(...nums) {
+  return nums.reduce((sum, n) => sum + n, 0);
+}
+
+function multiply(a, b) {
+  return a * b;
+}`;
+  scheduleDiff();
+}
+</script>
+</body>
+</html>

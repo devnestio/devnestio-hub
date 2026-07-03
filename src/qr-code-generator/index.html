@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Code Generator — devnestio</title>
+  <meta name="description" content="Free online QR Code Generator. Create QR codes from text or URLs instantly. Download as PNG. No sign-up required.">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3352;
+      --accent: #6c63ff;
+      --accent2: #a78bfa;
+      --text: #e2e8f0;
+      --text2: #94a3b8;
+      --success: #10b981;
+      --radius: 10px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    header a {
+      color: var(--accent2);
+      text-decoration: none;
+      font-size: 13px;
+      opacity: .8;
+    }
+
+    header a:hover { opacity: 1; }
+
+    .logo { font-size: 18px; font-weight: 700; color: var(--accent2); }
+    .sep { color: var(--border); }
+    .tool-name { font-size: 15px; font-weight: 600; }
+
+    main {
+      flex: 1;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 32px 20px;
+      width: 100%;
+    }
+
+    h1 { font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+    .subtitle { color: var(--text2); font-size: 14px; margin-bottom: 28px; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 640px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+    }
+
+    .card h2 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      color: var(--text2);
+      margin-bottom: 6px;
+      margin-top: 14px;
+    }
+
+    label:first-of-type { margin-top: 0; }
+
+    textarea, input[type="text"], select {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 14px;
+      padding: 9px 12px;
+      outline: none;
+      transition: border-color .15s;
+      font-family: inherit;
+    }
+
+    textarea { resize: vertical; min-height: 100px; }
+
+    textarea:focus, input:focus, select:focus {
+      border-color: var(--accent);
+    }
+
+    .row { display: flex; gap: 12px; }
+    .row > * { flex: 1; }
+
+    .color-row {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      margin-top: 14px;
+    }
+
+    .color-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+
+    .color-group label { margin: 0; }
+
+    input[type="color"] {
+      width: 100%;
+      height: 36px;
+      padding: 2px 4px;
+      border-radius: 6px;
+      cursor: pointer;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+    }
+
+    .preview-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    #qr-canvas {
+      border-radius: 8px;
+      image-rendering: pixelated;
+      max-width: 100%;
+    }
+
+    .char-count {
+      font-size: 12px;
+      color: var(--text2);
+      text-align: right;
+      margin-top: 4px;
+    }
+
+    .char-count.warn { color: #f59e0b; }
+    .char-count.error { color: #ef4444; }
+
+    .download-btns {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    button {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 9px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .15s;
+      font-family: inherit;
+    }
+
+    button:hover { opacity: .88; }
+    button:active { opacity: .75; }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--accent);
+      color: var(--accent2);
+    }
+
+    .status {
+      font-size: 12px;
+      color: var(--text2);
+      text-align: center;
+      min-height: 18px;
+    }
+
+    .status.ok { color: var(--success); }
+    .status.err { color: #ef4444; }
+
+    .ad-placeholder {
+      background: var(--surface2);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text2);
+      font-size: 12px;
+      margin-top: 24px;
+    }
+
+    footer {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      text-align: center;
+      padding: 16px;
+      font-size: 12px;
+      color: var(--text2);
+    }
+
+    footer a { color: var(--accent2); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="https://devnestio.pages.dev" class="logo">devnestio</a>
+  <span class="sep">/</span>
+  <span class="tool-name">QR Code Generator</span>
+</header>
+
+<main>
+  <h1>QR Code Generator</h1>
+  <p class="subtitle">Create QR codes from text or URLs instantly. Zero dependencies, 100% client-side.</p>
+
+  <div class="layout">
+    <!-- Controls -->
+    <div class="card">
+      <h2>Settings</h2>
+
+      <label for="qr-input">Text / URL</label>
+      <textarea id="qr-input" placeholder="https://example.com or any text…" maxlength="2953"></textarea>
+      <div class="char-count" id="char-count">0 / 2953</div>
+
+      <div class="row">
+        <div>
+          <label for="qr-size">Size (px)</label>
+          <select id="qr-size">
+            <option value="128">128 × 128</option>
+            <option value="256" selected>256 × 256</option>
+            <option value="512">512 × 512</option>
+          </select>
+        </div>
+        <div>
+          <label for="qr-ecl">Error Correction</label>
+          <select id="qr-ecl">
+            <option value="L">L — Low (7%)</option>
+            <option value="M" selected>M — Medium (15%)</option>
+            <option value="Q">Q — Quartile (25%)</option>
+            <option value="H">H — High (30%)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="color-row">
+        <div class="color-group">
+          <label>Foreground</label>
+          <input type="color" id="qr-fg" value="#000000">
+        </div>
+        <div class="color-group">
+          <label>Background</label>
+          <input type="color" id="qr-bg" value="#ffffff">
+        </div>
+      </div>
+    </div>
+
+    <!-- Preview -->
+    <div class="card preview-card">
+      <h2 style="align-self:flex-start">Preview</h2>
+      <canvas id="qr-canvas" width="256" height="256"></canvas>
+      <div class="status" id="status">Enter text to generate a QR code</div>
+      <div class="download-btns">
+        <button id="btn-png">Download PNG</button>
+        <button id="btn-svg" class="btn-outline">Download SVG</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EthicalAds placeholder -->
+  <div class="ad-placeholder" data-ea-publisher="devnestio" data-ea-type="image">
+    Advertisement
+  </div>
+</main>
+
+<footer>
+  <p>Part of <a href="https://devnestio.pages.dev">devnestio</a> — free developer tools &nbsp;|&nbsp;
+  <a href="https://devnestio.pages.dev">Back to hub</a></p>
+</footer>
+
+<script>
+/* ============================================================
+   QR Code Generator — Pure Vanilla JS (zero external libs)
+   Full QR Code Model 2 implementation (versions 1-40)
+   ============================================================ */
+
+'use strict';
+
+// ── Galois Field GF(256) arithmetic ─────────────────────────
+const GF = (() => {
+  const EXP = new Uint8Array(512);
+  const LOG  = new Uint8Array(256);
+  let x = 1;
+  for (let i = 0; i < 255; i++) {
+    EXP[i] = x;
+    LOG[x] = i;
+    x <<= 1;
+    if (x & 0x100) x ^= 0x11d;
+  }
+  for (let i = 255; i < 512; i++) EXP[i] = EXP[i - 255];
+
+  return {
+    mul(a, b) { return (a === 0 || b === 0) ? 0 : EXP[LOG[a] + LOG[b]]; },
+    div(a, b) { return (a === 0) ? 0 : EXP[(LOG[a] + 255 - LOG[b]) % 255]; },
+    pow(a, b) { return EXP[(LOG[a] * b) % 255]; },
+    inv(a)    { return EXP[255 - LOG[a]]; },
+    LOG, EXP
+  };
+})();
+
+// ── Reed-Solomon ─────────────────────────────────────────────
+function rsGenerator(degree) {
+  let poly = [1];
+  for (let i = 0; i < degree; i++) {
+    const g = [1, GF.pow(2, i)];
+    const result = new Array(poly.length + g.length - 1).fill(0);
+    for (let j = 0; j < poly.length; j++)
+      for (let k = 0; k < g.length; k++)
+        result[j + k] ^= GF.mul(poly[j], g[k]);
+    poly = result;
+  }
+  return poly;
+}
+
+function rsEncode(data, ecLen) {
+  const gen = rsGenerator(ecLen);
+  const msg = data.slice();
+  for (let i = 0; i < ecLen; i++) msg.push(0);
+  for (let i = 0; i < data.length; i++) {
+    const coef = msg[i];
+    if (coef !== 0)
+      for (let j = 0; j < gen.length; j++)
+        msg[i + j] ^= GF.mul(gen[j], coef);
+  }
+  return msg.slice(data.length);
+}
+
+// ── QR Code tables ───────────────────────────────────────────
+const ECL = { L: 0, M: 1, Q: 2, H: 3 };
+
+// EC codewords per block & number of blocks (version 1-40, 4 ECL levels)
+// Format: [ec_codewords_per_block, blocks_in_group1, data_codewords_group1, blocks_in_group2, data_codewords_group2]
+const EC_TABLE = [
+  // v1
+  [[7,1,19,0,0],[10,1,16,0,0],[13,1,13,0,0],[17,1,9,0,0]],
+  // v2
+  [[10,1,34,0,0],[16,1,28,0,0],[22,1,22,0,0],[28,1,16,0,0]],
+  // v3
+  [[15,1,55,0,0],[26,1,44,0,0],[18,2,17,0,0],[22,2,13,0,0]],
+  // v4
+  [[20,1,80,0,0],[18,2,32,0,0],[26,2,24,0,0],[16,4,9,0,0]],
+  // v5
+  [[26,1,108,0,0],[24,2,43,0,0],[18,2,15,2,16],[22,2,11,2,12]],
+  // v6
+  [[18,2,68,0,0],[16,4,27,0,0],[24,4,19,0,0],[28,4,15,0,0]],
+  // v7
+  [[20,2,78,0,0],[18,4,31,0,0],[18,2,14,4,15],[26,4,13,1,14]],
+  // v8
+  [[24,2,97,0,0],[22,2,38,2,39],[22,4,18,2,19],[26,4,14,2,15]],
+  // v9
+  [[30,2,116,0,0],[22,3,36,2,37],[20,4,16,4,17],[24,4,12,4,13]],
+  // v10
+  [[18,2,68,2,69],[26,4,43,1,44],[24,6,19,2,20],[28,6,15,2,16]],
+  // v11
+  [[20,4,81,0,0],[30,1,50,4,51],[28,4,22,4,23],[24,3,12,8,13]],
+  // v12
+  [[24,2,92,2,93],[22,6,36,2,37],[26,4,20,6,21],[28,7,14,4,15]],
+  // v13
+  [[26,4,107,0,0],[22,8,37,1,38],[24,8,20,4,21],[22,12,11,4,12]],
+  // v14
+  [[30,3,115,1,116],[24,4,40,5,41],[20,11,16,5,17],[24,11,12,5,13]],
+  // v15
+  [[22,5,87,1,88],[24,5,41,5,42],[30,5,24,7,25],[24,11,12,7,13]],
+  // v16
+  [[24,5,98,1,99],[28,7,45,3,46],[24,15,19,2,20],[30,3,15,13,16]],
+  // v17
+  [[28,1,107,5,108],[28,10,46,1,47],[28,1,22,15,23],[28,2,14,17,15]],
+  // v18
+  [[30,5,120,1,121],[26,9,43,4,44],[28,17,22,1,23],[28,2,14,19,15]],
+  // v19
+  [[28,3,113,4,114],[26,3,44,11,45],[26,17,21,4,22],[26,9,13,16,14]],
+  // v20
+  [[28,3,107,5,108],[26,3,41,13,42],[30,15,24,5,25],[28,15,15,10,16]],
+  // v21
+  [[28,4,116,4,117],[26,17,42,0,0],[28,17,22,6,23],[30,19,16,6,17]],
+  // v22
+  [[28,2,111,7,112],[28,17,46,0,0],[30,7,24,16,25],[24,34,13,0,0]],
+  // v23
+  [[30,4,121,5,122],[28,4,47,14,48],[30,11,24,14,25],[30,16,15,14,16]],
+  // v24
+  [[30,6,117,4,118],[28,6,45,14,46],[30,11,24,16,25],[30,30,16,2,17]],
+  // v25
+  [[26,8,106,4,107],[28,8,47,13,48],[30,7,24,22,25],[30,22,15,13,16]],
+  // v26
+  [[28,10,114,2,115],[28,19,46,4,47],[28,28,22,6,23],[30,33,16,4,17]],
+  // v27
+  [[30,8,122,4,123],[28,22,45,3,46],[30,8,23,26,24],[30,12,15,28,16]],
+  // v28
+  [[30,3,117,10,118],[28,3,45,23,46],[30,4,24,31,25],[30,11,15,31,16]],
+  // v29
+  [[30,7,116,7,117],[28,21,45,7,46],[30,1,23,37,24],[30,19,15,26,16]],
+  // v30
+  [[30,5,115,10,116],[28,19,45,10,46],[30,15,24,25,25],[30,23,15,25,16]],
+  // v31
+  [[30,13,115,3,116],[28,2,45,29,46],[30,42,24,1,25],[30,23,15,28,16]],
+  // v32
+  [[30,17,115,0,0],[28,10,45,23,46],[30,10,24,35,25],[30,19,15,35,16]],
+  // v33
+  [[30,17,115,1,116],[28,14,45,21,46],[30,29,24,19,25],[30,11,15,46,16]],
+  // v34
+  [[30,13,115,6,116],[28,14,45,23,46],[30,44,24,7,25],[30,59,16,1,17]],
+  // v35
+  [[30,12,121,7,122],[28,12,45,26,46],[30,39,24,14,25],[30,22,15,41,16]],
+  // v36
+  [[30,6,121,14,122],[28,6,45,34,46],[30,46,24,10,25],[30,2,15,64,16]],
+  // v37
+  [[30,17,122,4,123],[28,29,45,14,46],[30,49,24,10,25],[30,24,15,46,16]],
+  // v38
+  [[30,4,122,18,123],[28,13,45,32,46],[30,48,24,14,25],[30,42,15,32,16]],
+  // v39
+  [[30,20,117,4,118],[28,40,45,7,46],[30,43,24,22,25],[30,10,15,67,16]],
+  // v40
+  [[30,19,118,6,119],[28,18,45,31,46],[30,34,24,34,25],[30,20,15,61,16]]
+];
+
+// Alignment pattern positions per version
+const ALIGN_POSITIONS = [
+  [],
+  [6,18],[6,22],[6,26],[6,30],[6,34],
+  [6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],
+  [6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],
+  [6,30,54,78],[6,30,56,82],[6,30,58,86],[6,34,62,90],
+  [6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],[6,28,54,80,106],
+  [6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],
+  [6,26,50,74,98,122],[6,30,54,78,102,126],[6,26,52,78,104,130],
+  [6,30,56,82,108,134],[6,34,60,86,112,138],[6,30,58,86,114,142],
+  [6,34,62,90,118,146],[6,30,54,78,102,126,150],[6,24,50,76,102,128,154],
+  [6,28,54,80,106,132,158],[6,32,58,84,110,136,162],[6,26,54,82,110,138,166],
+  [6,30,58,86,114,142,170]
+];
+
+// Format info strings: index = ecl*8 + mask (precomputed, BCH encoded)
+const FORMAT_STRINGS = [
+  // ECL=L (0)
+  [0x77c4,0x72f3,0x7daa,0x789d,0x662f,0x6318,0x6c41,0x6976],
+  // ECL=M (1)
+  [0x5412,0x5125,0x5e7c,0x5b4b,0x45f9,0x40ce,0x4f97,0x4aa0],
+  // ECL=Q (2)
+  [0x355f,0x3068,0x3f31,0x3a06,0x24b4,0x2183,0x2eda,0x2bed],
+  // ECL=H (3)
+  [0x1689,0x13be,0x1ce7,0x19d0,0x0762,0x0255,0x0d0c,0x083b]
+];
+
+// Version info (version 7+): BCH(18,6) encoded
+function versionBits(ver) {
+  let d = ver << 12;
+  for (let i = 17; i >= 12; i--) {
+    if (d & (1 << i)) d ^= (0x1f25 << (i - 12));
+  }
+  return (ver << 12) | d;
+}
+
+// ── Data encoding ────────────────────────────────────────────
+const BYTE_MODE = 0b0100;
+const NUMERIC_MODE = 0b0001;
+const ALPHANUM_MODE = 0b0010;
+const ALPHANUMS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:';
+
+function detectMode(text) {
+  if (/^\d+$/.test(text)) return NUMERIC_MODE;
+  if (text.split('').every(c => ALPHANUMS.includes(c))) return ALPHANUM_MODE;
+  return BYTE_MODE;
+}
+
+function utf8Bytes(str) {
+  const bytes = [];
+  for (let i = 0; i < str.length; i++) {
+    const cp = str.codePointAt(i);
+    if (cp < 0x80) {
+      bytes.push(cp);
+    } else if (cp < 0x800) {
+      bytes.push(0xc0 | (cp >> 6), 0x80 | (cp & 0x3f));
+    } else if (cp < 0x10000) {
+      bytes.push(0xe0 | (cp >> 12), 0x80 | ((cp >> 6) & 0x3f), 0x80 | (cp & 0x3f));
+    } else {
+      bytes.push(0xf0|(cp>>18), 0x80|((cp>>12)&0x3f), 0x80|((cp>>6)&0x3f), 0x80|(cp&0x3f));
+      i++;
+    }
+  }
+  return bytes;
+}
+
+function charCountBits(mode, ver) {
+  if (mode === NUMERIC_MODE)  return ver < 10 ? 10 : ver < 27 ? 12 : 14;
+  if (mode === ALPHANUM_MODE) return ver < 10 ?  9 : ver < 27 ? 11 : 13;
+  return ver < 10 ? 8 : 16; // byte mode
+}
+
+// Total data codewords capacity per version & ECL
+function dataCapacity(ver, eclIdx) {
+  const [ecLen, b1, d1, b2, d2] = EC_TABLE[ver - 1][eclIdx];
+  return b1 * d1 + b2 * d2;
+}
+
+function findVersion(bitLen, eclIdx) {
+  for (let v = 1; v <= 40; v++) {
+    if (dataCapacity(v, eclIdx) * 8 >= bitLen) return v;
+  }
+  return -1;
+}
+
+function encodeData(text, eclIdx) {
+  const mode = detectMode(text);
+  const bytes = utf8Bytes(text);
+
+  // Find minimum version
+  let ver = -1;
+  for (let v = 1; v <= 40; v++) {
+    let bits = 4 + charCountBits(mode, v);
+    if (mode === BYTE_MODE) bits += bytes.length * 8;
+    else if (mode === NUMERIC_MODE) {
+      const groups = Math.floor(bytes.length / 3);
+      const rem = bytes.length % 3;
+      bits += groups * 10 + (rem === 2 ? 7 : rem === 1 ? 4 : 0);
+    } else { // alphanum
+      bits += Math.floor(bytes.length / 2) * 11 + (bytes.length % 2) * 6;
+    }
+    if (dataCapacity(v, eclIdx) * 8 >= bits) { ver = v; break; }
+  }
+  if (ver === -1) return null;
+
+  const cap = dataCapacity(ver, eclIdx);
+  const stream = new BitStream();
+
+  // Mode indicator
+  stream.append(mode, 4);
+  // Character count
+  const text_arr = mode === BYTE_MODE ? bytes : [...text];
+  stream.append(text_arr.length, charCountBits(mode, ver));
+
+  if (mode === BYTE_MODE) {
+    for (const b of bytes) stream.append(b, 8);
+  } else if (mode === NUMERIC_MODE) {
+    const t = text;
+    for (let i = 0; i < t.length; i += 3) {
+      const chunk = t.slice(i, i + 3);
+      if (chunk.length === 3) stream.append(parseInt(chunk), 10);
+      else if (chunk.length === 2) stream.append(parseInt(chunk), 7);
+      else stream.append(parseInt(chunk), 4);
+    }
+  } else { // alphanum
+    for (let i = 0; i < text.length; i += 2) {
+      if (i + 1 < text.length) {
+        stream.append(ALPHANUMS.indexOf(text[i]) * 45 + ALPHANUMS.indexOf(text[i+1]), 11);
+      } else {
+        stream.append(ALPHANUMS.indexOf(text[i]), 6);
+      }
+    }
+  }
+
+  // Terminator
+  const remaining = cap * 8 - stream.length;
+  stream.append(0, Math.min(4, remaining));
+  // Byte align
+  while (stream.length % 8 !== 0) stream.append(0, 1);
+  // Pad bytes
+  const padBytes = [0xec, 0x11];
+  let pi = 0;
+  while (stream.length < cap * 8) {
+    stream.append(padBytes[pi++ % 2], 8);
+  }
+
+  return { ver, data: stream.bytes() };
+}
+
+class BitStream {
+  constructor() { this._bits = []; }
+  append(val, len) {
+    for (let i = len - 1; i >= 0; i--) this._bits.push((val >> i) & 1);
+  }
+  get length() { return this._bits.length; }
+  bytes() {
+    const out = [];
+    for (let i = 0; i < this._bits.length; i += 8) {
+      let b = 0;
+      for (let j = 0; j < 8; j++) b = (b << 1) | (this._bits[i+j] || 0);
+      out.push(b);
+    }
+    return out;
+  }
+}
+
+// ── Interleave & RS ─────────────────────────────────────────
+function buildCodewords(data, ver, eclIdx) {
+  const [ecLen, b1, d1, b2, d2] = EC_TABLE[ver - 1][eclIdx];
+  const blocks = [];
+  let idx = 0;
+  for (let i = 0; i < b1; i++) blocks.push(data.slice(idx, idx += d1));
+  for (let i = 0; i < b2; i++) blocks.push(data.slice(idx, idx += d2));
+
+  const ecBlocks = blocks.map(b => rsEncode(b, ecLen));
+
+  const result = [];
+  const maxData = Math.max(d1, d2);
+  for (let i = 0; i < maxData; i++)
+    for (const blk of blocks)
+      if (i < blk.length) result.push(blk[i]);
+  for (let i = 0; i < ecLen; i++)
+    for (const ec of ecBlocks) result.push(ec[i]);
+
+  return result;
+}
+
+// ── Matrix construction ──────────────────────────────────────
+const DARK = 1, LIGHT = 0, RESERVED = 2;
+
+function makeMatrix(ver) {
+  const size = ver * 4 + 17;
+  const m = Array.from({length: size}, () => new Uint8Array(size).fill(255));
+  return m;
+}
+
+function placeFinderPattern(m, r, c) {
+  for (let dy = -1; dy <= 7; dy++) {
+    for (let dx = -1; dx <= 7; dx++) {
+      const row = r + dy, col = c + dx;
+      if (row < 0 || col < 0 || row >= m.length || col >= m.length) continue;
+      const inSquare = dy >= 0 && dy <= 6 && dx >= 0 && dx <= 6;
+      const onBorder = dy === 0 || dy === 6 || dx === 0 || dx === 6;
+      const inInner  = dy >= 2 && dy <= 4 && dx >= 2 && dx <= 4;
+      m[row][col] = (inSquare && (onBorder || inInner)) ? DARK : LIGHT;
+    }
+  }
+}
+
+function placeAlignPattern(m, r, c) {
+  for (let dy = -2; dy <= 2; dy++) {
+    for (let dx = -2; dx <= 2; dx++) {
+      const onEdge = Math.abs(dy) === 2 || Math.abs(dx) === 2;
+      const center = dy === 0 && dx === 0;
+      m[r+dy][c+dx] = (onEdge || center) ? DARK : LIGHT;
+    }
+  }
+}
+
+function reserveFormatArea(m) {
+  const size = m.length;
+  // Around top-left finder
+  for (let i = 0; i < 9; i++) {
+    if (m[8][i] === 255) m[8][i] = RESERVED;
+    if (m[i][8] === 255) m[i][8] = RESERVED;
+  }
+  // Around top-right finder
+  for (let i = size - 8; i < size; i++) {
+    if (m[8][i] === 255) m[8][i] = RESERVED;
+    if (m[i][8] === 255) m[i][8] = RESERVED; // noop for this range
+  }
+  // Wait, fix: around top-right
+  for (let i = 0; i < 8; i++) {
+    if (m[8][size - 1 - i] === 255) m[8][size - 1 - i] = RESERVED;
+  }
+  // Around bottom-left finder
+  for (let i = size - 7; i < size; i++) {
+    if (m[i][8] === 255) m[i][8] = RESERVED;
+  }
+  // Dark module
+  m[size - 8][8] = DARK;
+}
+
+function placeFormatInfo(m, eclIdx, maskIdx) {
+  const fmt = FORMAT_STRINGS[eclIdx][maskIdx];
+  const size = m.length;
+  // Top-left horizontal
+  for (let i = 0; i < 6; i++) m[8][i] = (fmt >> (14-i)) & 1;
+  m[8][7] = (fmt >> 8) & 1;
+  m[8][8] = (fmt >> 7) & 1;
+  // Top-left vertical
+  m[7][8] = (fmt >> 6) & 1;
+  for (let i = 5; i >= 0; i--) m[5-i+2][8] = (fmt >> i) & 1; // rows 2..7 go bits 0..5?
+  // Actually spec: bits 0-5 go to rows 0-5 column 8 (reversed)
+  for (let i = 0; i < 6; i++) m[i][8] = (fmt >> i) & 1;
+  m[7][8] = (fmt >> 6) & 1;
+  m[8][8] = (fmt >> 7) & 1;
+  m[8][7] = (fmt >> 8) & 1;
+
+  // Top-right
+  for (let i = 0; i < 8; i++) m[8][size-1-i] = (fmt >> i) & 1;
+  // Bottom-left
+  for (let i = 0; i < 7; i++) m[size-7+i][8] = (fmt >> (14-i)) & 1;
+  m[size-8][8] = DARK; // always dark
+}
+
+function placeVersionInfo(m, ver) {
+  if (ver < 7) return;
+  const bits = versionBits(ver);
+  const size = m.length;
+  for (let i = 0; i < 18; i++) {
+    const bit = (bits >> i) & 1;
+    m[Math.floor(i/3)][size - 11 + (i%3)] = bit;
+    m[size - 11 + (i%3)][Math.floor(i/3)] = bit;
+  }
+}
+
+function placeTiming(m) {
+  const size = m.length;
+  for (let i = 8; i < size - 8; i++) {
+    if (m[6][i] === 255) m[6][i] = (i % 2 === 0) ? DARK : LIGHT;
+    if (m[i][6] === 255) m[i][6] = (i % 2 === 0) ? DARK : LIGHT;
+  }
+}
+
+function dataModulePositions(size) {
+  const positions = [];
+  let up = true;
+  let col = size - 1;
+  while (col > 0) {
+    if (col === 6) col--;
+    for (let rowIdx = 0; rowIdx < size; rowIdx++) {
+      const row = up ? size - 1 - rowIdx : rowIdx;
+      for (let dc = 0; dc < 2; dc++) {
+        positions.push([row, col - dc]);
+      }
+    }
+    up = !up;
+    col -= 2;
+  }
+  return positions;
+}
+
+const MASK_FNS = [
+  (r,c) => (r+c)%2===0,
+  (r,c) => r%2===0,
+  (r,c) => c%3===0,
+  (r,c) => (r+c)%3===0,
+  (r,c) => (Math.floor(r/2)+Math.floor(c/3))%2===0,
+  (r,c) => (r*c)%2+(r*c)%3===0,
+  (r,c) => ((r*c)%2+(r*c)%3)%2===0,
+  (r,c) => ((r+c)%2+(r*c)%3)%2===0
+];
+
+function applyMask(m, maskIdx) {
+  const fn = MASK_FNS[maskIdx];
+  const size = m.length;
+  for (let r = 0; r < size; r++)
+    for (let c = 0; c < size; c++)
+      if (m[r][c] <= 1 && fn(r,c)) m[r][c] ^= 1;
+}
+
+function penalty(m) {
+  const size = m.length;
+  let p = 0;
+  // Rule 1: 5+ same in row/col
+  for (let r = 0; r < size; r++) {
+    let run = 1;
+    for (let c = 1; c < size; c++) {
+      if (m[r][c] === m[r][c-1]) { run++; if (run===5) p+=3; else if(run>5) p++; }
+      else run = 1;
+    }
+  }
+  for (let c = 0; c < size; c++) {
+    let run = 1;
+    for (let r = 1; r < size; r++) {
+      if (m[r][c] === m[r-1][c]) { run++; if (run===5) p+=3; else if(run>5) p++; }
+      else run = 1;
+    }
+  }
+  // Rule 2: 2x2 blocks
+  for (let r = 0; r < size-1; r++)
+    for (let c = 0; c < size-1; c++)
+      if (m[r][c]===m[r][c+1] && m[r][c]===m[r+1][c] && m[r][c]===m[r+1][c+1]) p+=3;
+  // Rule 3: patterns
+  const pat1 = [1,0,1,1,1,0,1,0,0,0,0];
+  const pat2 = [0,0,0,0,1,0,1,1,1,0,1];
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c <= size-11; c++) {
+      let m1=true,m2=true;
+      for (let k=0;k<11;k++) { if(m[r][c+k]!==pat1[k]) m1=false; if(m[r][c+k]!==pat2[k]) m2=false; }
+      if (m1||m2) p+=40;
+    }
+  }
+  for (let c = 0; c < size; c++) {
+    for (let r = 0; r <= size-11; r++) {
+      let m1=true,m2=true;
+      for (let k=0;k<11;k++) { if(m[r+k][c]!==pat1[k]) m1=false; if(m[r+k][c]!==pat2[k]) m2=false; }
+      if (m1||m2) p+=40;
+    }
+  }
+  // Rule 4: ratio
+  let dark = 0;
+  for (let r = 0; r < size; r++) for (let c = 0; c < size; c++) if (m[r][c]===1) dark++;
+  const ratio = dark/(size*size)*100;
+  const prev5 = Math.floor(ratio/5)*5;
+  const next5 = prev5+5;
+  p += Math.min(Math.abs(prev5-50),Math.abs(next5-50))/5*10;
+  return p;
+}
+
+// ── Main QR generator ────────────────────────────────────────
+function generateQR(text, ecl = 'M') {
+  if (!text) return null;
+  const eclIdx = ECL[ecl] ?? 1;
+  const enc = encodeData(text, eclIdx);
+  if (!enc) return null;
+
+  const { ver, data } = enc;
+  const codewords = buildCodewords(data, ver, eclIdx);
+  const size = ver * 4 + 17;
+
+  function buildBase() {
+    const m = makeMatrix(ver);
+    placeFinderPattern(m, 0, 0);
+    placeFinderPattern(m, 0, size - 7);
+    placeFinderPattern(m, size - 7, 0);
+    reserveFormatArea(m);
+    placeVersionInfo(m, ver);
+    const ap = ALIGN_POSITIONS[ver - 1];
+    for (const r of ap) for (const c of ap) {
+      if ((r===6&&c===6)||(r===6&&c===ap[ap.length-1])||(c===6&&r===ap[ap.length-1])) continue;
+      placeAlignPattern(m, r, c);
+    }
+    placeTiming(m);
+    return m;
+  }
+
+  // Place data bits
+  const positions = dataModulePositions(size);
+  let bitIdx = 0;
+  const dataBits = [];
+  for (const cw of codewords) for (let i=7;i>=0;i--) dataBits.push((cw>>i)&1);
+
+  let bestMask = 0, bestPenalty = Infinity, bestMatrix = null;
+
+  for (let maskIdx = 0; maskIdx < 8; maskIdx++) {
+    const m = buildBase();
+    // Place data
+    let bi = 0;
+    for (const [r, c] of positions) {
+      if (m[r][c] === 255 && bi < dataBits.length) {
+        m[r][c] = dataBits[bi++];
+      } else if (m[r][c] === 255) {
+        m[r][c] = 0;
+      }
+    }
+    // Replace RESERVED with 0 for masking purposes
+    for (let r = 0; r < size; r++)
+      for (let c = 0; c < size; c++)
+        if (m[r][c] === 255) m[r][c] = 0;
+
+    applyMask(m, maskIdx);
+    placeFormatInfo(m, eclIdx, maskIdx);
+
+    const p = penalty(m);
+    if (p < bestPenalty) {
+      bestPenalty = p;
+      bestMask = maskIdx;
+      bestMatrix = m.map(row => row.slice());
+    }
+  }
+
+  return { matrix: bestMatrix, size, version: ver };
+}
+
+// ── Rendering ────────────────────────────────────────────────
+function renderToCanvas(canvas, matrix, size, fgColor, bgColor, canvasSize) {
+  canvas.width = canvasSize;
+  canvas.height = canvasSize;
+  const ctx = canvas.getContext('2d');
+  const moduleSize = canvasSize / size;
+  ctx.fillStyle = bgColor;
+  ctx.fillRect(0, 0, canvasSize, canvasSize);
+  ctx.fillStyle = fgColor;
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
+      if (matrix[r][c] === 1) {
+        ctx.fillRect(
+          Math.round(c * moduleSize),
+          Math.round(r * moduleSize),
+          Math.ceil(moduleSize),
+          Math.ceil(moduleSize)
+        );
+      }
+    }
+  }
+}
+
+function renderToSVG(matrix, size, fgColor, bgColor, svgSize) {
+  const mod = svgSize / size;
+  const rects = [];
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
+      if (matrix[r][c] === 1) {
+        rects.push(`<rect x="${(c*mod).toFixed(2)}" y="${(r*mod).toFixed(2)}" width="${mod.toFixed(2)}" height="${mod.toFixed(2)}"/>`);
+      }
+    }
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${svgSize} ${svgSize}" width="${svgSize}" height="${svgSize}">
+<rect width="${svgSize}" height="${svgSize}" fill="${bgColor}"/>
+<g fill="${fgColor}">${rects.join('')}</g>
+</svg>`;
+}
+
+// ── UI logic ─────────────────────────────────────────────────
+const qrInput    = document.getElementById('qr-input');
+const qrSize     = document.getElementById('qr-size');
+const qrEcl      = document.getElementById('qr-ecl');
+const qrFg       = document.getElementById('qr-fg');
+const qrBg       = document.getElementById('qr-bg');
+const canvas     = document.getElementById('qr-canvas');
+const statusEl   = document.getElementById('status');
+const charCount  = document.getElementById('char-count');
+const btnPng     = document.getElementById('btn-png');
+const btnSvg     = document.getElementById('btn-svg');
+
+let currentQR = null;
+let debounceTimer = null;
+
+function update() {
+  const text = qrInput.value.trim();
+  const len  = qrInput.value.length;
+  charCount.textContent = `${len} / 2953`;
+  charCount.className = 'char-count' + (len > 2800 ? ' warn' : '') + (len > 2953 ? ' error' : '');
+
+  if (!text) {
+    statusEl.textContent = 'Enter text to generate a QR code';
+    statusEl.className = 'status';
+    currentQR = null;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    return;
+  }
+
+  const eclVal  = qrEcl.value;
+  const sizeVal = parseInt(qrSize.value);
+  const fg = qrFg.value;
+  const bg = qrBg.value;
+
+  const result = generateQR(text, eclVal);
+  if (!result) {
+    statusEl.textContent = 'Text is too long for QR encoding';
+    statusEl.className = 'status err';
+    currentQR = null;
+    return;
+  }
+
+  currentQR = { ...result, fg, bg };
+  canvas.width  = sizeVal;
+  canvas.height = sizeVal;
+  renderToCanvas(canvas, result.matrix, result.size, fg, bg, sizeVal);
+  statusEl.textContent = `Version ${result.version} · ${result.size}×${result.size} modules · ECL ${eclVal}`;
+  statusEl.className = 'status ok';
+}
+
+function scheduleUpdate() {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(update, 80);
+}
+
+qrInput.addEventListener('input', scheduleUpdate);
+qrSize.addEventListener('change', update);
+qrEcl.addEventListener('change', update);
+qrFg.addEventListener('input', scheduleUpdate);
+qrBg.addEventListener('input', scheduleUpdate);
+
+btnPng.addEventListener('click', () => {
+  if (!currentQR) return;
+  const link = document.createElement('a');
+  link.download = 'qr-code.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+});
+
+btnSvg.addEventListener('click', () => {
+  if (!currentQR) return;
+  const sizeVal = parseInt(qrSize.value);
+  const svg = renderToSVG(currentQR.matrix, currentQR.size, currentQR.fg, currentQR.bg, sizeVal);
+  const blob = new Blob([svg], {type: 'image/svg+xml'});
+  const link = document.createElement('a');
+  link.download = 'qr-code.svg';
+  link.href = URL.createObjectURL(blob);
+  link.click();
+  URL.revokeObjectURL(link.href);
+});
+
+// Initial placeholder
+update();
+</script>
+</body>
+</html>

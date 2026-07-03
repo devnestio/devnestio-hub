@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JSONPath Tester — Query JSON with Path Expressions | DevNestio</title>
+  <meta name="description" content="Test JSONPath expressions against JSON data live in your browser. Supports dot notation, bracket notation, wildcards, recursive descent, array slices, and filter expressions." />
+  <meta property="og:title" content="JSONPath Tester | DevNestio" />
+  <meta property="og:description" content="Evaluate JSONPath queries against JSON in real time. Highlights matches and shows results with paths. Browser-only, no data sent." />
+  <meta property="og:url" content="https://devnestio.pages.dev/jsonpath-tester/" />
+  <meta name="twitter:card" content="summary" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    #privacy-banner { background: #1e293b; border-bottom: 1px solid #334155; padding: 8px 16px; font-size: 12px; color: #94a3b8; text-align: center; }
+    header { background: #1e293b; border-bottom: 1px solid #334155; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+    header a { color: #64748b; font-size: 13px; text-decoration: none; margin-left: auto; }
+    header a:hover { color: #94a3b8; }
+    .badge { background: #f59e0b; color: #000; font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+    main { max-width: 960px; margin: 0 auto; padding: 24px 16px; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 18px; margin-bottom: 16px; }
+    .card-title { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 12px; }
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 680px) { .split { grid-template-columns: 1fr; } }
+    label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 5px; font-weight: 600; }
+    textarea { width: 100%; padding: 10px 12px; background: #0f1117; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 13px; font-family: 'Menlo', 'Courier New', monospace; outline: none; resize: vertical; line-height: 1.5; }
+    textarea:focus { border-color: #f59e0b; }
+    textarea.error { border-color: #ef4444; }
+    input[type=text] { width: 100%; padding: 9px 12px; background: #0f1117; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 14px; font-family: 'Menlo', 'Courier New', monospace; outline: none; }
+    input[type=text]:focus { border-color: #f59e0b; }
+    input[type=text].error { border-color: #ef4444; }
+    .path-bar { display: flex; gap: 8px; align-items: center; }
+    .path-bar input { flex: 1; }
+    .result-box { background: #0f1117; border: 1px solid #334155; border-radius: 6px; padding: 12px; font-family: monospace; font-size: 13px; min-height: 200px; max-height: 400px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; line-height: 1.5; }
+    .match-count { font-size: 12px; color: #64748b; margin-bottom: 8px; }
+    .match-item { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #1e293b; }
+    .match-path { font-size: 11px; color: #64748b; margin-bottom: 3px; }
+    .match-val { color: #f1f5f9; }
+    .string-val { color: #86efac; }
+    .num-val { color: #93c5fd; }
+    .bool-val { color: #f59e0b; }
+    .null-val { color: #94a3b8; }
+    .err-msg { color: #f87171; font-size: 13px; padding: 8px; }
+    .example-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip { padding: 3px 10px; border-radius: 99px; font-size: 11px; font-family: monospace; cursor: pointer; border: 1px solid #334155; background: #0f1117; color: #94a3b8; }
+    .chip:hover { border-color: #f59e0b; color: #f59e0b; }
+    #ad-slot { margin: 20px auto; text-align: center; }
+  </style>
+</head>
+<body>
+<div id="privacy-banner">🔒 All processing happens in your browser. No data is sent to any server.</div>
+<header>
+  <span class="badge">FREE</span>
+  <h1>JSONPath Tester</h1>
+  <a href="https://devnestio.pages.dev">← All Tools</a>
+</header>
+<main>
+
+  <!-- Path input -->
+  <div class="card">
+    <div class="card-title">JSONPath Expression</div>
+    <div class="path-bar">
+      <input type="text" id="path-input" placeholder="e.g. $.store.book[*].author" value="$.store.book[*].author" oninput="evaluate()" />
+    </div>
+    <div style="margin-top:10px">
+      <div class="card-title" style="margin-bottom:6px">Examples</div>
+      <div class="example-chips" id="example-chips"></div>
+    </div>
+  </div>
+
+  <div class="split">
+    <!-- JSON Input -->
+    <div class="card">
+      <div class="card-title">JSON Input</div>
+      <textarea id="json-input" rows="18" oninput="evaluate()" spellcheck="false"></textarea>
+    </div>
+
+    <!-- Results -->
+    <div class="card">
+      <div class="card-title">Results</div>
+      <div class="match-count" id="match-count"></div>
+      <div class="result-box" id="result-box"></div>
+    </div>
+  </div>
+
+  <div id="ad-slot" data-ea-publisher="devnestio" data-ea-type="image"></div>
+</main>
+<script>
+const SAMPLE = {
+  "store": {
+    "book": [
+      { "category": "reference", "author": "Nigel Rees", "title": "Sayings of the Century", "price": 8.95 },
+      { "category": "fiction", "author": "Evelyn Waugh", "title": "Sword of Honour", "price": 12.99 },
+      { "category": "fiction", "author": "Herman Melville", "title": "Moby Dick", "isbn": "0-553-21311-3", "price": 8.99 },
+      { "category": "fiction", "author": "J. R. R. Tolkien", "title": "The Lord of the Rings", "isbn": "0-395-19395-8", "price": 22.99 }
+    ],
+    "bicycle": { "color": "red", "price": 19.95 }
+  },
+  "expensive": 10
+};
+
+const EXAMPLES = [
+  { label: '$.store.book[*].author', desc: 'All authors' },
+  { label: '$..author', desc: 'All authors (recursive)' },
+  { label: '$.store.*', desc: 'All store items' },
+  { label: '$..price', desc: 'All prices' },
+  { label: '$.store.book[0]', desc: 'First book' },
+  { label: '$.store.book[-1]', desc: 'Last book' },
+  { label: '$.store.book[0,1]', desc: 'First two books' },
+  { label: '$.store.book[0:2]', desc: 'Slice [0,2)' },
+  { label: '$.store.book[?(@.isbn)]', desc: 'Books with ISBN' },
+  { label: '$.store.book[?(@.price < 10)]', desc: 'Books under $10' },
+  { label: '$.store.book[?(@.category == "fiction")]', desc: 'Fiction books' },
+  { label: '$..book[2]', desc: 'Third book (recursive)' },
+];
+
+function buildChips() {
+  const container = document.getElementById('example-chips');
+  EXAMPLES.forEach(ex => {
+    const c = document.createElement('span');
+    c.className = 'chip';
+    c.textContent = ex.label;
+    c.title = ex.desc;
+    c.onclick = () => { document.getElementById('path-input').value = ex.label; evaluate(); };
+    container.appendChild(c);
+  });
+}
+
+// JSONPath engine
+function jsonpath(obj, path) {
+  if (!path || path[0] !== '$') throw new Error('Path must start with $');
+  const results = [];
+  function query(node, tokens, currentPath) {
+    if (tokens.length === 0) {
+      results.push({ path: currentPath, value: node });
+      return;
+    }
+    const tok = tokens[0];
+    const rest = tokens.slice(1);
+
+    if (tok === '..') {
+      query(node, rest, currentPath);
+      if (node && typeof node === 'object') {
+        if (Array.isArray(node)) {
+          node.forEach((v, i) => query(v, ['..', ...rest], currentPath + '[' + i + ']'));
+        } else {
+          Object.keys(node).forEach(k => query(node[k], ['..', ...rest], currentPath + '.' + k));
+        }
+      }
+      return;
+    }
+
+    if (tok === '*') {
+      if (node && typeof node === 'object') {
+        if (Array.isArray(node)) {
+          node.forEach((v, i) => query(v, rest, currentPath + '[' + i + ']'));
+        } else {
+          Object.keys(node).forEach(k => query(node[k], rest, currentPath + '.' + k));
+        }
+      }
+      return;
+    }
+
+    // key access
+    if (typeof tok === 'string' && !/^\[/.test(tok)) {
+      if (node && typeof node === 'object' && !Array.isArray(node) && tok in node) {
+        query(node[tok], rest, currentPath + '.' + tok);
+      }
+      return;
+    }
+
+    // bracket expression [...]
+    const bracketMatch = tok.match(/^\[(.+)\]$/);
+    if (bracketMatch) {
+      const inner = bracketMatch[1].trim();
+
+      // filter: [?(@.key op val)]
+      const filterMatch = inner.match(/^\?\(@\.(\w+)\s*(==|!=|<=|>=|<|>)\s*(.+)\)$/) ||
+                          inner.match(/^\?\(@\.(\w+)\)$/);
+      if (filterMatch) {
+        if (!Array.isArray(node)) return;
+        const [, key, op, rawVal] = filterMatch;
+        node.forEach((item, i) => {
+          if (!item || typeof item !== 'object') return;
+          if (op === undefined) {
+            if (key in item) query(item, rest, currentPath + '[' + i + ']');
+          } else {
+            const lhs = item[key];
+            let rhs = rawVal.trim();
+            if ((rhs.startsWith('"') && rhs.endsWith('"')) || (rhs.startsWith("'") && rhs.endsWith("'"))) {
+              rhs = rhs.slice(1, -1);
+            } else if (rhs === 'true') rhs = true;
+            else if (rhs === 'false') rhs = false;
+            else if (!isNaN(rhs)) rhs = Number(rhs);
+            let match = false;
+            if (op === '==') match = lhs == rhs;
+            else if (op === '!=') match = lhs != rhs;
+            else if (op === '<')  match = lhs < rhs;
+            else if (op === '>')  match = lhs > rhs;
+            else if (op === '<=') match = lhs <= rhs;
+            else if (op === '>=') match = lhs >= rhs;
+            if (match) query(item, rest, currentPath + '[' + i + ']');
+          }
+        });
+        return;
+      }
+
+      // wildcard [*]
+      if (inner === '*') {
+        if (node && typeof node === 'object') {
+          if (Array.isArray(node)) {
+            node.forEach((v, i) => query(v, rest, currentPath + '[' + i + ']'));
+          } else {
+            Object.keys(node).forEach(k => query(node[k], rest, currentPath + '["' + k + '"]'));
+          }
+        }
+        return;
+      }
+
+      // slice [start:end] or [start:end:step]
+      if (inner.includes(':')) {
+        if (!Array.isArray(node)) return;
+        const parts = inner.split(':').map(p => p.trim() === '' ? undefined : parseInt(p));
+        const len = node.length;
+        let [start, end, step] = parts;
+        step = step || 1;
+        if (start === undefined) start = step > 0 ? 0 : len - 1;
+        if (end === undefined) end = step > 0 ? len : -len - 1;
+        if (start < 0) start = Math.max(0, len + start);
+        if (end < 0) end = Math.max(-1, len + end);
+        for (let i = start; step > 0 ? i < end : i > end; i += step) {
+          if (i >= 0 && i < len) query(node[i], rest, currentPath + '[' + i + ']');
+        }
+        return;
+      }
+
+      // union [0,1,2] or ["key1","key2"]
+      if (inner.includes(',')) {
+        const parts = inner.split(',').map(p => p.trim().replace(/^['"]|['"]$/g, ''));
+        parts.forEach(p => {
+          const idx = parseInt(p);
+          if (!isNaN(idx)) {
+            const realIdx = idx < 0 ? (node.length + idx) : idx;
+            if (Array.isArray(node) && realIdx >= 0 && realIdx < node.length) {
+              query(node[realIdx], rest, currentPath + '[' + realIdx + ']');
+            }
+          } else if (node && typeof node === 'object' && p in node) {
+            query(node[p], rest, currentPath + '["' + p + '"]');
+          }
+        });
+        return;
+      }
+
+      // single index or key in brackets
+      const stripped = inner.replace(/^['"]|['"]$/g, '');
+      const idx = parseInt(stripped);
+      if (!isNaN(idx) && Array.isArray(node)) {
+        const realIdx = idx < 0 ? node.length + idx : idx;
+        if (realIdx >= 0 && realIdx < node.length) query(node[realIdx], rest, currentPath + '[' + realIdx + ']');
+      } else if (node && typeof node === 'object' && stripped in node) {
+        query(node[stripped], rest, currentPath + '["' + stripped + '"]');
+      }
+      return;
+    }
+  }
+
+  // tokenize path (skip leading $)
+  const tokens = tokenize(path.slice(1));
+  query(obj, tokens, '$');
+  return results;
+}
+
+function tokenize(path) {
+  const tokens = [];
+  let i = 0;
+  while (i < path.length) {
+    if (path[i] === '.') {
+      if (path[i+1] === '.') { tokens.push('..'); i += 2; }
+      else { i++; }
+      // read key
+      if (i < path.length && path[i] !== '[' && path[i] !== '.') {
+        let key = '';
+        while (i < path.length && path[i] !== '.' && path[i] !== '[') key += path[i++];
+        if (key === '*') tokens.push('*');
+        else if (key) tokens.push(key);
+      }
+    } else if (path[i] === '[') {
+      let depth = 0, bracket = '';
+      while (i < path.length) {
+        bracket += path[i];
+        if (path[i] === '[') depth++;
+        if (path[i] === ']') { depth--; if (depth === 0) { i++; break; } }
+        i++;
+      }
+      tokens.push(bracket);
+    } else {
+      let key = '';
+      while (i < path.length && path[i] !== '.' && path[i] !== '[') key += path[i++];
+      if (key === '*') tokens.push('*');
+      else if (key) tokens.push(key);
+    }
+  }
+  return tokens;
+}
+
+function colorVal(v) {
+  if (v === null) return '<span class="null-val">null</span>';
+  if (typeof v === 'string') return '<span class="string-val">"' + v.replace(/</g,'&lt;') + '"</span>';
+  if (typeof v === 'number') return '<span class="num-val">' + v + '</span>';
+  if (typeof v === 'boolean') return '<span class="bool-val">' + v + '</span>';
+  return '<span>' + JSON.stringify(v, null, 2).replace(/</g,'&lt;') + '</span>';
+}
+
+function evaluate() {
+  const pathVal = document.getElementById('path-input').value.trim();
+  const jsonVal = document.getElementById('json-input').value.trim();
+  const pathInput = document.getElementById('path-input');
+  const jsonInput = document.getElementById('json-input');
+  const resultBox = document.getElementById('result-box');
+  const matchCount = document.getElementById('match-count');
+
+  jsonInput.classList.remove('error');
+  pathInput.classList.remove('error');
+
+  let parsed;
+  try { parsed = JSON.parse(jsonVal); } catch(e) {
+    jsonInput.classList.add('error');
+    resultBox.innerHTML = '<div class="err-msg">Invalid JSON: ' + e.message + '</div>';
+    matchCount.textContent = '';
+    return;
+  }
+
+  try {
+    const results = jsonpath(parsed, pathVal);
+    matchCount.textContent = `${results.length} match${results.length !== 1 ? 'es' : ''} found`;
+    if (results.length === 0) {
+      resultBox.innerHTML = '<div class="err-msg" style="color:#64748b">No matches found</div>';
+      return;
+    }
+    resultBox.innerHTML = results.map(r =>
+      `<div class="match-item"><div class="match-path">${r.path}</div><div class="match-val">${colorVal(r.value)}</div></div>`
+    ).join('');
+  } catch(e) {
+    pathInput.classList.add('error');
+    resultBox.innerHTML = '<div class="err-msg">Error: ' + e.message + '</div>';
+    matchCount.textContent = '';
+  }
+}
+
+document.getElementById('json-input').value = JSON.stringify(SAMPLE, null, 2);
+buildChips();
+evaluate();
+</script>
+</body>
+</html>

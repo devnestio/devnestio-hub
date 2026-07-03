@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Keyboard Event Tester — devnestio</title>
+  <meta name="description" content="Inspect keyboard events in real time. See key, code, keyCode, which, charCode, modifiers, and event type for every keydown, keypress, and keyup. Zero dependencies." />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    header { background: #1a1d2e; border-bottom: 1px solid #2d3748; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+    header a { color: #7c85f3; text-decoration: none; font-size: 14px; }
+    header h1 { font-size: 18px; font-weight: 700; color: #fff; }
+    .container { max-width: 900px; margin: 0 auto; padding: 24px 16px; display: flex; flex-direction: column; gap: 20px; }
+    .capture-zone { background: #1a1d2e; border: 2px dashed #4a5568; border-radius: 12px; padding: 32px; text-align: center; cursor: pointer; outline: none; transition: border-color .2s; }
+    .capture-zone:focus, .capture-zone.active { border-color: #7c85f3; }
+    .capture-zone .prompt { font-size: 18px; color: #718096; }
+    .capture-zone .active-text { color: #7c85f3; font-size: 18px; font-weight: 700; display: none; }
+    .capture-zone.active .prompt { display: none; }
+    .capture-zone.active .active-text { display: block; }
+    .key-display { background: #1a1d2e; border-radius: 12px; padding: 20px; }
+    .key-display h2 { font-size: 13px; font-weight: 600; color: #a0aec0; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 16px; }
+    .key-viz { font-size: 48px; font-weight: 800; text-align: center; padding: 20px; background: #0f1117; border-radius: 8px; margin-bottom: 16px; min-height: 100px; display: flex; align-items: center; justify-content: center; color: #7c85f3; font-family: 'Courier New', monospace; word-break: break-all; }
+    .props-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+    .prop-card { background: #0f1117; border: 1px solid #2d3748; border-radius: 8px; padding: 12px; }
+    .prop-name { font-size: 11px; color: #7c85f3; font-weight: 700; margin-bottom: 4px; }
+    .prop-val { font-family: 'Courier New', monospace; font-size: 14px; color: #e2e8f0; word-break: break-all; }
+    .prop-val.empty { color: #4a5568; }
+    .modifiers { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    .mod-badge { padding: 5px 12px; border-radius: 6px; font-size: 13px; font-weight: 700; }
+    .mod-on { background: #7c85f3; color: #fff; }
+    .mod-off { background: #0f1117; border: 1px solid #2d3748; color: #4a5568; }
+    .event-log { background: #1a1d2e; border-radius: 12px; padding: 20px; }
+    .event-log-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .event-log h2 { font-size: 13px; font-weight: 600; color: #a0aec0; text-transform: uppercase; letter-spacing: .06em; }
+    .log-list { max-height: 260px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+    .log-item { display: flex; gap: 10px; align-items: baseline; font-size: 12px; padding: 6px 10px; border-radius: 6px; background: #0f1117; border: 1px solid #1a1d2e; }
+    .log-item.keydown { border-left: 3px solid #7c85f3; }
+    .log-item.keyup { border-left: 3px solid #4a5568; }
+    .log-item.keypress { border-left: 3px solid #68d391; }
+    .log-type { font-weight: 700; width: 70px; flex-shrink: 0; }
+    .log-type.keydown { color: #7c85f3; }
+    .log-type.keyup { color: #718096; }
+    .log-type.keypress { color: #68d391; }
+    .log-key { font-family: 'Courier New', monospace; color: #7ee787; }
+    .log-code { font-family: 'Courier New', monospace; color: #fbd38d; }
+    .log-mods { color: #a0aec0; }
+    .btn-sm { background: #2d3748; border: none; border-radius: 6px; padding: 5px 12px; font-size: 12px; color: #e2e8f0; cursor: pointer; }
+    .btn-sm:hover { background: #3d4a5c; }
+    .event-filter { display: flex; gap: 6px; }
+    .ef-btn { background: #0f1117; border: 1px solid #2d3748; border-radius: 4px; padding: 3px 8px; font-size: 11px; cursor: pointer; color: #718096; }
+    .ef-btn.active { background: #7c85f3; border-color: #7c85f3; color: #fff; }
+  </style>
+</head>
+<body>
+<header>
+  <a href="/">← devnestio</a>
+  <h1>Keyboard Event Tester</h1>
+</header>
+<div class="container">
+  <div class="capture-zone" id="capture-zone" tabindex="0">
+    <div class="prompt">Click here, then press any key</div>
+    <div class="active-text">Listening for keyboard events…</div>
+  </div>
+
+  <div class="key-display">
+    <h2>Last Event</h2>
+    <div class="key-viz" id="key-viz">—</div>
+    <div class="props-grid" id="props-grid"></div>
+    <div class="modifiers" id="modifiers">
+      <span class="mod-badge mod-off">Shift</span>
+      <span class="mod-badge mod-off">Ctrl</span>
+      <span class="mod-badge mod-off">Alt</span>
+      <span class="mod-badge mod-off">Meta</span>
+      <span class="mod-badge mod-off">CapsLock</span>
+      <span class="mod-badge mod-off">Repeat</span>
+    </div>
+  </div>
+
+  <div class="event-log">
+    <div class="event-log-header">
+      <h2>Event Log</h2>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="event-filter">
+          <div class="ef-btn active" onclick="toggleEventFilter('keydown',this)">keydown</div>
+          <div class="ef-btn active" onclick="toggleEventFilter('keypress',this)">keypress</div>
+          <div class="ef-btn active" onclick="toggleEventFilter('keyup',this)">keyup</div>
+        </div>
+        <button class="btn-sm" onclick="clearLog()">Clear</button>
+      </div>
+    </div>
+    <div class="log-list" id="log-list"></div>
+  </div>
+</div>
+
+<script>
+const zone = document.getElementById('capture-zone');
+const logList = document.getElementById('log-list');
+const propsGrid = document.getElementById('props-grid');
+
+let eventFilters = new Set(['keydown', 'keypress', 'keyup']);
+let logItems = [];
+
+const PROPS = [
+  { key: 'key', label: 'key' },
+  { key: 'code', label: 'code' },
+  { key: 'keyCode', label: 'keyCode' },
+  { key: 'which', label: 'which' },
+  { key: 'charCode', label: 'charCode' },
+  { key: 'location', label: 'location', fmt: v => ['Standard','Left','Right','Numpad'][v] || v },
+  { key: 'type', label: 'type' },
+];
+
+function toggleEventFilter(type, el) {
+  if (eventFilters.has(type)) {
+    eventFilters.delete(type);
+    el.classList.remove('active');
+  } else {
+    eventFilters.add(type);
+    el.classList.add('active');
+  }
+  renderLog();
+}
+
+function clearLog() {
+  logItems = [];
+  renderLog();
+}
+
+zone.addEventListener('focus', () => zone.classList.add('active'));
+zone.addEventListener('blur', () => zone.classList.remove('active'));
+
+['keydown', 'keypress', 'keyup'].forEach(type => {
+  zone.addEventListener(type, e => {
+    if (type === 'keydown') updateDisplay(e);
+    logItems.unshift({ type, e: {
+      key: e.key, code: e.code, keyCode: e.keyCode, which: e.which,
+      charCode: e.charCode, shiftKey: e.shiftKey, ctrlKey: e.ctrlKey,
+      altKey: e.altKey, metaKey: e.metaKey, repeat: e.repeat, location: e.location
+    }});
+    if (logItems.length > 100) logItems.pop();
+    renderLog();
+    // Prevent some browser shortcuts only when in zone
+    if (['F5','F11','F12'].includes(e.key)) return;
+    e.preventDefault();
+  });
+});
+
+function updateDisplay(e) {
+  const keyDisplay = e.key === ' ' ? 'Space' : e.key === 'Enter' ? '⏎' : e.key;
+  document.getElementById('key-viz').textContent = keyDisplay;
+
+  propsGrid.innerHTML = '';
+  PROPS.forEach(({ key, label, fmt }) => {
+    const val = e[key];
+    const displayVal = fmt ? fmt(val) : String(val);
+    const card = document.createElement('div');
+    card.className = 'prop-card';
+    card.innerHTML = `<div class="prop-name">${label}</div><div class="prop-val${!displayVal || displayVal === 'undefined' ? ' empty' : ''}">${displayVal || '(empty)'}</div>`;
+    propsGrid.appendChild(card);
+  });
+
+  const mods = document.getElementById('modifiers');
+  const badges = mods.querySelectorAll('.mod-badge');
+  const states = [e.shiftKey, e.ctrlKey, e.altKey, e.metaKey, e.getModifierState?.('CapsLock') || false, e.repeat];
+  badges.forEach((b, i) => {
+    b.className = 'mod-badge ' + (states[i] ? 'mod-on' : 'mod-off');
+  });
+}
+
+function renderLog() {
+  logList.innerHTML = '';
+  const filtered = logItems.filter(item => eventFilters.has(item.type));
+  filtered.forEach(({ type, e }) => {
+    const mods = [
+      e.shiftKey && 'Shift',
+      e.ctrlKey && 'Ctrl',
+      e.altKey && 'Alt',
+      e.metaKey && 'Meta',
+    ].filter(Boolean).join('+');
+    const item = document.createElement('div');
+    item.className = `log-item ${type}`;
+    item.innerHTML = `
+      <span class="log-type ${type}">${type}</span>
+      <span class="log-key">${e.key === ' ' ? 'Space' : e.key}</span>
+      <span class="log-code">${e.code}</span>
+      <span style="color:#718096">kc:${e.keyCode}</span>
+      ${mods ? `<span class="log-mods">[${mods}]</span>` : ''}
+      ${e.repeat ? '<span style="color:#f6ad55">repeat</span>' : ''}`;
+    logList.appendChild(item);
+  });
+}
+
+// Also listen globally as fallback
+document.addEventListener('keydown', e => {
+  if (document.activeElement !== zone) return;
+});
+</script>
+</body>
+</html>

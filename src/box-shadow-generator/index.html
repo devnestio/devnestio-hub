@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Box Shadow Generator – Visual Builder | DevNest.io</title>
+  <meta name="description" content="Free online CSS box-shadow generator. Build single and multi-layer shadows with real-time preview, inset support, and instant CSS code copy. No dependencies.">
+  <meta name="keywords" content="css box shadow generator, box-shadow, css shadow, web design tools, css tools">
+  <link rel="canonical" href="https://box-shadow-generator.pages.dev/">
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3348;
+      --accent: #6c63ff;
+      --accent2: #ff6584;
+      --text: #e8eaf6;
+      --text-muted: #8892a4;
+      --success: #4caf50;
+      --radius: 10px;
+      --gap: 16px;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    header h1 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #6c63ff, #ff6584);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    header p { font-size: 0.82rem; color: var(--text-muted); }
+    .header-text { flex: 1; }
+
+    .hub-link {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 6px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .hub-link:hover { color: var(--accent); border-color: var(--accent); }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px var(--gap);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--gap);
+    }
+
+    @media (max-width: 768px) {
+      .container { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .panel-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    /* --- Preview --- */
+    .preview-area {
+      width: 100%;
+      min-height: 260px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--surface2);
+      border-radius: 8px;
+      position: relative;
+    }
+
+    .preview-bg-toggle {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      gap: 6px;
+    }
+
+    .bg-opt {
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .bg-opt.active { border-color: var(--accent); }
+
+    #preview-card {
+      width: 140px;
+      height: 140px;
+      background: #ffffff;
+      border-radius: 12px;
+      transition: box-shadow 0.15s;
+    }
+
+    /* --- Form elements --- */
+    label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .field { margin-bottom: 14px; }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .range-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .range-row input[type="range"] { flex: 1; }
+    .range-val {
+      font-size: 0.8rem;
+      color: var(--text);
+      min-width: 42px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* --- Color picker --- */
+    .color-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .color-swatch-wrap {
+      position: relative;
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 2px solid var(--border);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .color-swatch-wrap input[type="color"] {
+      position: absolute;
+      inset: -4px;
+      width: calc(100% + 8px);
+      height: calc(100% + 8px);
+      border: none;
+      cursor: pointer;
+      opacity: 0;
+    }
+    .swatch-bg {
+      position: absolute;
+      inset: 0;
+      border-radius: 4px;
+      pointer-events: none;
+    }
+    .color-hex-label {
+      font-size: 0.82rem;
+      font-family: monospace;
+      color: var(--text);
+    }
+
+    /* --- Toggle --- */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .toggle-label { font-size: 0.82rem; color: var(--text-muted); font-weight: 600; }
+
+    .toggle {
+      width: 40px;
+      height: 22px;
+      background: var(--border);
+      border-radius: 11px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s;
+      border: none;
+      outline: none;
+      flex-shrink: 0;
+    }
+    .toggle::after {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      background: #fff;
+      border-radius: 50%;
+      top: 3px;
+      left: 3px;
+      transition: transform 0.2s;
+    }
+    .toggle.on { background: var(--accent); }
+    .toggle.on::after { transform: translateX(18px); }
+
+    /* --- Layer list --- */
+    .layers-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .btn-small {
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+    .btn-small:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-small.danger:hover { border-color: var(--accent2); color: var(--accent2); }
+
+    .layer-list { display: flex; flex-direction: column; gap: 6px; }
+
+    .layer-item {
+      background: var(--surface2);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: border-color 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .layer-item.active { border-color: var(--accent); }
+
+    .layer-preview {
+      width: 28px;
+      height: 28px;
+      border-radius: 4px;
+      background: #fff;
+      flex-shrink: 0;
+    }
+
+    .layer-label {
+      flex: 1;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-family: monospace;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* --- CSS Output --- */
+    .css-output-wrap { position: relative; }
+
+    #css-output {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: #a8d8ea;
+      border-radius: 8px;
+      padding: 14px;
+      font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+      font-size: 0.8rem;
+      min-height: 80px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      padding: 5px 12px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .copy-btn:hover { background: #574fd6; }
+    .copy-btn.copied { background: var(--success); }
+
+    /* --- Presets --- */
+    .presets-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .preset-btn {
+      padding: 10px 6px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .preset-btn:hover { border-color: var(--accent); }
+
+    .preset-preview {
+      width: 48px;
+      height: 48px;
+      background: #ffffff;
+      border-radius: 8px;
+    }
+
+    .preset-name {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* --- Ad placeholder --- */
+    .ad-placeholder {
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      height: 90px;
+      margin: 0 0 var(--gap);
+    }
+
+    footer {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      padding: 24px;
+      border-top: 1px solid var(--border);
+      margin-top: 8px;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    /* --- Card shape toggle --- */
+    .shape-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .shape-btn {
+      flex: 1;
+      padding: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text-muted);
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .shape-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-text">
+    <h1>CSS Box Shadow Generator</h1>
+    <p>Build single &amp; multi-layer shadows with live preview</p>
+  </div>
+  <a href="https://devnestio.pages.dev" class="hub-link" target="_blank" rel="noopener">← All Tools</a>
+</header>
+
+<!-- EthicalAds placeholder -->
+<div style="max-width:1100px;margin:16px auto 0;padding:0 16px;">
+  <div data-ea-publisher="devnestio" data-ea-type="image" class="ad-placeholder">
+    <span>[Advertisement]</span>
+  </div>
+</div>
+
+<div class="container">
+  <!-- LEFT: Controls -->
+  <div>
+    <!-- Shadow properties -->
+    <div class="panel">
+      <div class="panel-title">Shadow Properties</div>
+
+      <div class="field">
+        <label>Horizontal Offset (X)</label>
+        <div class="range-row">
+          <input type="range" id="offset-x" min="-100" max="100" value="4" oninput="onSlider('offsetX', this.value, 'px', 'offset-x-val')">
+          <span class="range-val" id="offset-x-val">4px</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Vertical Offset (Y)</label>
+        <div class="range-row">
+          <input type="range" id="offset-y" min="-100" max="100" value="4" oninput="onSlider('offsetY', this.value, 'px', 'offset-y-val')">
+          <span class="range-val" id="offset-y-val">4px</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Blur Radius</label>
+        <div class="range-row">
+          <input type="range" id="blur" min="0" max="100" value="12" oninput="onSlider('blur', this.value, 'px', 'blur-val')">
+          <span class="range-val" id="blur-val">12px</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Spread Radius</label>
+        <div class="range-row">
+          <input type="range" id="spread" min="-50" max="50" value="0" oninput="onSlider('spread', this.value, 'px', 'spread-val')">
+          <span class="range-val" id="spread-val">0px</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Shadow Color</label>
+        <div class="color-row">
+          <div class="color-swatch-wrap">
+            <div class="swatch-bg" id="shadow-swatch"></div>
+            <input type="color" id="shadow-color" value="#000000" oninput="onColorChange(this.value)">
+          </div>
+          <span class="color-hex-label" id="shadow-hex-label">#000000</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Opacity</label>
+        <div class="range-row">
+          <input type="range" id="opacity" min="0" max="100" value="25" oninput="onSlider('opacity', this.value, '%', 'opacity-val')">
+          <span class="range-val" id="opacity-val">25%</span>
+        </div>
+      </div>
+
+      <div class="toggle-row">
+        <button class="toggle" id="inset-toggle" onclick="toggleInset()" title="Toggle inset"></button>
+        <span class="toggle-label">Inset</span>
+      </div>
+    </div>
+
+    <!-- Preview card shape -->
+    <div class="panel" style="margin-top:var(--gap)">
+      <div class="panel-title">Preview Card</div>
+      <div class="shape-row">
+        <button class="shape-btn active" onclick="setShape(0,'0px')">Square</button>
+        <button class="shape-btn" onclick="setShape(1,'8px')">Rounded</button>
+        <button class="shape-btn" onclick="setShape(2,'50%')">Circle</button>
+      </div>
+      <div class="field">
+        <label>Card Background</label>
+        <div class="color-row">
+          <div class="color-swatch-wrap">
+            <div class="swatch-bg" id="card-swatch" style="background:#ffffff"></div>
+            <input type="color" id="card-color" value="#ffffff" oninput="onCardColorChange(this.value)">
+          </div>
+          <span class="color-hex-label" id="card-hex-label">#ffffff</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Presets -->
+    <div class="panel" style="margin-top:var(--gap)">
+      <div class="panel-title">Presets</div>
+      <div class="presets-grid" id="presets-grid"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Preview + Layers + Output -->
+  <div>
+    <!-- Preview -->
+    <div class="panel" style="margin-bottom:var(--gap)">
+      <div class="panel-title">Preview</div>
+      <div class="preview-area" id="preview-area">
+        <div class="preview-bg-toggle" id="preview-bg-toggle"></div>
+        <div id="preview-card"></div>
+      </div>
+    </div>
+
+    <!-- Layers -->
+    <div class="panel" style="margin-bottom:var(--gap)">
+      <div class="layers-header">
+        <div class="panel-title" style="margin:0">Shadow Layers</div>
+        <div style="display:flex;gap:6px">
+          <button class="btn-small" onclick="addLayer()">+ Add Layer</button>
+          <button class="btn-small danger" onclick="removeActiveLayer()">Remove</button>
+        </div>
+      </div>
+      <div class="layer-list" id="layer-list"></div>
+    </div>
+
+    <!-- CSS Output -->
+    <div class="panel">
+      <div class="panel-title">CSS Code</div>
+      <div class="css-output-wrap">
+        <textarea id="css-output" readonly rows="4"></textarea>
+        <button class="copy-btn" id="copy-btn" onclick="copyCSS()">Copy</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>Part of <a href="https://devnestio.pages.dev" target="_blank" rel="noopener">DevNest.io</a> — free browser-only developer tools. No data sent to server.</p>
+</footer>
+
+<script>
+// ============================================================
+// PURE FUNCTIONS (testable)
+// ============================================================
+
+function hexToRgba(hex, opacity) {
+  const clean = hex.replace('#', '');
+  const full = clean.length === 3
+    ? clean.split('').map(c => c + c).join('')
+    : clean;
+  const r = parseInt(full.slice(0, 2), 16);
+  const g = parseInt(full.slice(2, 4), 16);
+  const b = parseInt(full.slice(4, 6), 16);
+  const a = parseFloat((opacity / 100).toFixed(2));
+  if (a >= 1) return `#${full.toLowerCase()}`;
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+function buildShadowString(layer) {
+  const inset = layer.inset ? 'inset ' : '';
+  const color = hexToRgba(layer.color, layer.opacity);
+  return `${inset}${layer.offsetX}px ${layer.offsetY}px ${layer.blur}px ${layer.spread}px ${color}`;
+}
+
+function buildBoxShadowCSS(layers) {
+  if (layers.length === 0) return 'none';
+  return layers.map(buildShadowString).join(',\n             ');
+}
+
+function buildFullCSS(layers) {
+  const val = buildBoxShadowCSS(layers);
+  return `box-shadow: ${val};`;
+}
+
+function clamp(val, min, max) {
+  return Math.min(max, Math.max(min, val));
+}
+
+function validateHex(hex) {
+  return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(hex);
+}
+
+function opacityToAlpha(opacity) {
+  return parseFloat((clamp(opacity, 0, 100) / 100).toFixed(2));
+}
+
+function alphaToOpacity(alpha) {
+  return Math.round(clamp(alpha, 0, 1) * 100);
+}
+
+function defaultLayer(overrides) {
+  return Object.assign({
+    offsetX: 4,
+    offsetY: 4,
+    blur: 12,
+    spread: 0,
+    color: '#000000',
+    opacity: 25,
+    inset: false
+  }, overrides || {});
+}
+
+function layerLabel(layer) {
+  return buildShadowString(layer);
+}
+
+// ============================================================
+// PRESETS
+// ============================================================
+const PRESETS = [
+  {
+    name: 'Soft',
+    layers: [defaultLayer({ offsetX: 0, offsetY: 4, blur: 24, spread: 0, color: '#000000', opacity: 12 })]
+  },
+  {
+    name: 'Sharp',
+    layers: [defaultLayer({ offsetX: 4, offsetY: 4, blur: 0, spread: 0, color: '#000000', opacity: 30 })]
+  },
+  {
+    name: 'Elevated',
+    layers: [
+      defaultLayer({ offsetX: 0, offsetY: 2, blur: 4, spread: -1, color: '#000000', opacity: 20 }),
+      defaultLayer({ offsetX: 0, offsetY: 8, blur: 24, spread: -4, color: '#000000', opacity: 15 })
+    ]
+  },
+  {
+    name: 'Glow',
+    layers: [defaultLayer({ offsetX: 0, offsetY: 0, blur: 20, spread: 4, color: '#6c63ff', opacity: 60 })]
+  },
+  {
+    name: 'Inset',
+    layers: [defaultLayer({ offsetX: 0, offsetY: 2, blur: 8, spread: 0, color: '#000000', opacity: 20, inset: true })]
+  },
+  {
+    name: 'Neumorphic',
+    layers: [
+      defaultLayer({ offsetX: 6, offsetY: 6, blur: 12, spread: 0, color: '#000000', opacity: 15 }),
+      defaultLayer({ offsetX: -6, offsetY: -6, blur: 12, spread: 0, color: '#ffffff', opacity: 70 })
+    ]
+  },
+  {
+    name: 'Danger',
+    layers: [defaultLayer({ offsetX: 0, offsetY: 4, blur: 16, spread: 0, color: '#ef4444', opacity: 50 })]
+  },
+  {
+    name: 'Deep',
+    layers: [
+      defaultLayer({ offsetX: 0, offsetY: 1, blur: 2, spread: 0, color: '#000000', opacity: 30 }),
+      defaultLayer({ offsetX: 0, offsetY: 4, blur: 8, spread: 0, color: '#000000', opacity: 20 }),
+      defaultLayer({ offsetX: 0, offsetY: 12, blur: 32, spread: 0, color: '#000000', opacity: 12 })
+    ]
+  },
+  {
+    name: 'Flat',
+    layers: [defaultLayer({ offsetX: 3, offsetY: 3, blur: 0, spread: 0, color: '#6c63ff', opacity: 100 })]
+  },
+  {
+    name: 'Ambient',
+    layers: [
+      defaultLayer({ offsetX: 0, offsetY: 0, blur: 0, spread: 1, color: '#000000', opacity: 10 }),
+      defaultLayer({ offsetX: 0, offsetY: 8, blur: 32, spread: -8, color: '#000000', opacity: 20 })
+    ]
+  },
+  {
+    name: 'Neon',
+    layers: [
+      defaultLayer({ offsetX: 0, offsetY: 0, blur: 8, spread: 2, color: '#00ffcc', opacity: 80 }),
+      defaultLayer({ offsetX: 0, offsetY: 0, blur: 24, spread: 4, color: '#00c8ff', opacity: 50 })
+    ]
+  },
+  {
+    name: 'None',
+    layers: [defaultLayer({ offsetX: 0, offsetY: 0, blur: 0, spread: 0, color: '#000000', opacity: 0 })]
+  }
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let layers = [defaultLayer()];
+let activeLayerIdx = 0;
+let cardColor = '#ffffff';
+let previewBg = '#22263a';
+
+const PREVIEW_BGS = ['#22263a', '#f0f0f0', '#1a1d27'];
+
+// ============================================================
+// UI UPDATE
+// ============================================================
+function syncSlidersToCurrent() {
+  const l = layers[activeLayerIdx];
+  document.getElementById('offset-x').value = l.offsetX;
+  document.getElementById('offset-x-val').textContent = l.offsetX + 'px';
+  document.getElementById('offset-y').value = l.offsetY;
+  document.getElementById('offset-y-val').textContent = l.offsetY + 'px';
+  document.getElementById('blur').value = l.blur;
+  document.getElementById('blur-val').textContent = l.blur + 'px';
+  document.getElementById('spread').value = l.spread;
+  document.getElementById('spread-val').textContent = l.spread + 'px';
+  document.getElementById('shadow-color').value = l.color;
+  document.getElementById('shadow-swatch').style.background = l.color;
+  document.getElementById('shadow-hex-label').textContent = l.color;
+  document.getElementById('opacity').value = l.opacity;
+  document.getElementById('opacity-val').textContent = l.opacity + '%';
+  const insetBtn = document.getElementById('inset-toggle');
+  if (l.inset) insetBtn.classList.add('on'); else insetBtn.classList.remove('on');
+}
+
+function renderLayers() {
+  const list = document.getElementById('layer-list');
+  list.innerHTML = '';
+  layers.forEach((l, i) => {
+    const div = document.createElement('div');
+    div.className = 'layer-item' + (i === activeLayerIdx ? ' active' : '');
+    div.onclick = () => { activeLayerIdx = i; renderLayers(); syncSlidersToCurrent(); };
+    const prev = document.createElement('div');
+    prev.className = 'layer-preview';
+    prev.style.boxShadow = buildShadowString(l);
+    const lbl = document.createElement('span');
+    lbl.className = 'layer-label';
+    lbl.textContent = (l.inset ? 'inset ' : '') + `${l.offsetX}px ${l.offsetY}px ${l.blur}px ${l.spread}px`;
+    const rmBtn = document.createElement('button');
+    rmBtn.className = 'btn-small danger';
+    rmBtn.textContent = '✕';
+    rmBtn.onclick = (e) => { e.stopPropagation(); removeLayer(i); };
+    div.appendChild(prev);
+    div.appendChild(lbl);
+    if (layers.length > 1) div.appendChild(rmBtn);
+    list.appendChild(div);
+  });
+}
+
+function updatePreview() {
+  const cssVal = buildBoxShadowCSS(layers);
+  document.getElementById('preview-card').style.boxShadow = cssVal;
+  document.getElementById('css-output').value = buildFullCSS(layers);
+  renderLayers();
+}
+
+function renderPresets() {
+  const grid = document.getElementById('presets-grid');
+  grid.innerHTML = '';
+  PRESETS.forEach((p, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'preset-btn';
+    const prev = document.createElement('div');
+    prev.className = 'preset-preview';
+    prev.style.boxShadow = buildBoxShadowCSS(p.layers);
+    const name = document.createElement('span');
+    name.className = 'preset-name';
+    name.textContent = p.name;
+    btn.appendChild(prev);
+    btn.appendChild(name);
+    btn.onclick = () => applyPreset(i);
+    grid.appendChild(btn);
+  });
+}
+
+function renderBgToggle() {
+  const wrap = document.getElementById('preview-bg-toggle');
+  wrap.innerHTML = '';
+  const COLORS = ['#22263a', '#f0f0f0', '#1a1d27'];
+  COLORS.forEach((c, i) => {
+    const d = document.createElement('div');
+    d.className = 'bg-opt' + (c === previewBg ? ' active' : '');
+    d.style.background = c;
+    d.onclick = () => { previewBg = c; document.getElementById('preview-area').style.background = c; renderBgToggle(); };
+    wrap.appendChild(d);
+  });
+}
+
+// ============================================================
+// EVENT HANDLERS
+// ============================================================
+function onSlider(prop, val, suffix, labelId) {
+  layers[activeLayerIdx][prop] = parseFloat(val);
+  document.getElementById(labelId).textContent = val + suffix;
+  updatePreview();
+}
+
+function onColorChange(hex) {
+  layers[activeLayerIdx].color = hex;
+  document.getElementById('shadow-swatch').style.background = hex;
+  document.getElementById('shadow-hex-label').textContent = hex;
+  updatePreview();
+}
+
+function onCardColorChange(hex) {
+  cardColor = hex;
+  document.getElementById('card-swatch').style.background = hex;
+  document.getElementById('card-hex-label').textContent = hex;
+  document.getElementById('preview-card').style.background = hex;
+}
+
+function toggleInset() {
+  layers[activeLayerIdx].inset = !layers[activeLayerIdx].inset;
+  const btn = document.getElementById('inset-toggle');
+  if (layers[activeLayerIdx].inset) btn.classList.add('on'); else btn.classList.remove('on');
+  updatePreview();
+}
+
+function addLayer() {
+  layers.push(defaultLayer());
+  activeLayerIdx = layers.length - 1;
+  syncSlidersToCurrent();
+  updatePreview();
+}
+
+function removeLayer(i) {
+  if (layers.length <= 1) return;
+  layers.splice(i, 1);
+  activeLayerIdx = clamp(activeLayerIdx, 0, layers.length - 1);
+  syncSlidersToCurrent();
+  updatePreview();
+}
+
+function removeActiveLayer() {
+  removeLayer(activeLayerIdx);
+}
+
+function applyPreset(i) {
+  layers = PRESETS[i].layers.map(l => Object.assign({}, l));
+  activeLayerIdx = 0;
+  syncSlidersToCurrent();
+  updatePreview();
+}
+
+function setShape(idx, radius) {
+  document.querySelectorAll('.shape-btn').forEach((b, i) => {
+    b.classList.toggle('active', i === idx);
+  });
+  document.getElementById('preview-card').style.borderRadius = radius;
+}
+
+function copyCSS() {
+  navigator.clipboard.writeText(document.getElementById('css-output').value).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1800);
+  });
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  renderPresets();
+  renderBgToggle();
+  renderLayers();
+  syncSlidersToCurrent();
+  updatePreview();
+  document.getElementById('preview-card').style.background = cardColor;
+}
+
+init();
+</script>
+</body>
+</html>

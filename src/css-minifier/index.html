@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSS Minifier & Beautifier – Compress & Format CSS | DevNestio</title>
+  <meta name="description" content="Minify CSS by removing comments, whitespace, and redundant semicolons. Also beautifies minified CSS. Shows compression ratio. Browser-only, no server." />
+  <meta property="og:title" content="CSS Minifier & Beautifier – Compress & Format CSS | DevNestio" />
+  <meta property="og:description" content="Minify or beautify CSS instantly in your browser. Removes comments, whitespace. Shows byte savings and compression ratio." />
+  <meta property="og:url" content="https://devnestio.pages.dev/css-minifier/" />
+  <meta name="twitter:card" content="summary" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    #privacy-banner { background: #1e293b; border-bottom: 1px solid #334155; padding: 8px 16px; font-size: 12px; color: #94a3b8; text-align: center; }
+    header { background: #1e293b; border-bottom: 1px solid #334155; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+    header a { color: #64748b; font-size: 13px; text-decoration: none; margin-left: auto; }
+    header a:hover { color: #94a3b8; }
+    .badge { background: #db2777; color: #fff; font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+    main { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+    .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+    .btn { padding: 8px 16px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: background 0.15s; }
+    .btn-primary { background: #db2777; color: #fff; }
+    .btn-primary:hover { background: #be185d; }
+    .btn-secondary { background: #334155; color: #e2e8f0; }
+    .btn-secondary:hover { background: #475569; }
+    .btn-success { background: #16a34a; color: #fff; }
+    .btn-success:hover { background: #15803d; }
+    .opt { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #94a3b8; margin-left: auto; }
+    .opt input[type="checkbox"] { accent-color: #db2777; width: 14px; height: 14px; cursor: pointer; }
+    .editor-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 700px) { .editor-row { grid-template-columns: 1fr; } }
+    .panel { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 16px; }
+    .panel-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .panel-hdr h2 { font-size: 13px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em; }
+    .panel-hdr .info { font-size: 12px; color: #64748b; }
+    textarea { width: 100%; padding: 10px 12px; background: #0f1117; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 13px; font-family: 'JetBrains Mono', monospace; outline: none; resize: vertical; min-height: 340px; }
+    textarea:focus { border-color: #db2777; }
+    .stats-bar { display: flex; gap: 20px; flex-wrap: wrap; background: #0f1117; border: 1px solid #334155; border-radius: 8px; padding: 12px 16px; margin-top: 14px; }
+    .stat { text-align: center; }
+    .stat-value { font-size: 22px; font-weight: 800; color: #f1f5f9; }
+    .stat-label { font-size: 11px; color: #64748b; margin-top: 2px; }
+    .stat-value.green { color: #4ade80; }
+    .stat-value.pink { color: #f472b6; }
+    .diff-indicator { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 3px; }
+    .diff-indicator.saved { background: #14532d; color: #86efac; }
+    .diff-indicator.bigger { background: #450a0a; color: #fca5a5; }
+    .presets { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .preset { padding: 4px 10px; border-radius: 5px; font-size: 11px; cursor: pointer; background: #500724; color: #fbcfe8; border: 1px solid #9d174d; }
+    .preset:hover { background: #9d174d; color: #fff; }
+    #ad-slot { margin: 20px auto; text-align: center; }
+  </style>
+</head>
+<body>
+
+<div id="privacy-banner">🔒 All processing happens in your browser. No data is sent to any server.</div>
+
+<header>
+  <span class="badge">FREE</span>
+  <h1>CSS Minifier &amp; Beautifier</h1>
+  <a href="https://devnestio.pages.dev">← All Tools</a>
+</header>
+
+<main>
+  <div class="presets">
+    <span class="preset" onclick="loadExample('simple')">Simple styles</span>
+    <span class="preset" onclick="loadExample('media')">Media queries</span>
+    <span class="preset" onclick="loadExample('variables')">CSS variables</span>
+    <span class="preset" onclick="loadExample('animation')">Keyframes</span>
+    <span class="preset" onclick="loadExample('minified')">Minified → Beautify</span>
+  </div>
+
+  <div class="toolbar">
+    <button class="btn btn-primary" onclick="minify()">⬇ Minify</button>
+    <button class="btn btn-success" onclick="beautify()">↑ Beautify</button>
+    <button class="btn btn-secondary" onclick="clearAll()">Clear</button>
+    <div class="opt">
+      <input type="checkbox" id="opt-comments" />
+      <label for="opt-comments">Keep comments</label>
+    </div>
+    <div class="opt">
+      <input type="checkbox" id="opt-last-semi" />
+      <label for="opt-last-semi">Keep last semicolon</label>
+    </div>
+  </div>
+
+  <div class="editor-row">
+    <div class="panel">
+      <div class="panel-hdr">
+        <h2>Input CSS</h2>
+        <span class="info" id="input-size">0 bytes</span>
+      </div>
+      <textarea id="css-input" spellcheck="false" placeholder="Paste your CSS here…
+
+/* Example */
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #ffffff;
+}"></textarea>
+    </div>
+
+    <div class="panel">
+      <div class="panel-hdr">
+        <h2>Output CSS</h2>
+        <span class="info" id="output-size">0 bytes</span>
+      </div>
+      <textarea id="css-output" spellcheck="false" readonly placeholder="Output will appear here…"></textarea>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn btn-secondary" onclick="copyOutput()">Copy</button>
+        <button class="btn btn-secondary" onclick="swapIO()">⇄ Swap</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-bar" id="stats-bar" style="display:none">
+    <div class="stat">
+      <div class="stat-value" id="stat-before">—</div>
+      <div class="stat-label">Before (bytes)</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value green" id="stat-after">—</div>
+      <div class="stat-label">After (bytes)</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value pink" id="stat-saved">—</div>
+      <div class="stat-label">Bytes saved</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value pink" id="stat-ratio">—</div>
+      <div class="stat-label">Compression</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="stat-rules">—</div>
+      <div class="stat-label">Rules found</div>
+    </div>
+  </div>
+
+  <div id="ad-slot" data-ea-publisher="devnestio" data-ea-type="image"></div>
+</main>
+
+<script>
+const EXAMPLES = {
+  simple: `/* Main layout styles */
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #ffffff;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* Navigation */
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background-color: #1a1a2e;
+  color: #ffffff;
+}
+
+.nav a {
+  color: #e94560;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.nav a:hover {
+  text-decoration: underline;
+}
+
+/* Button styles */
+.btn {
+  display: inline-block;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-primary {
+  background-color: #e94560;
+  color: #ffffff;
+}
+
+.btn-secondary {
+  background-color: #16213e;
+  color: #ffffff;
+  border: 1px solid #e94560;
+}`,
+
+  media: `/* Responsive grid layout */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+/* Tablet */
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .container {
+    padding: 0 12px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #0f1117;
+    color: #e2e8f0;
+  }
+}`,
+
+  variables: `/* CSS Custom Properties */
+:root {
+  --color-primary: #7c3aed;
+  --color-secondary: #4ade80;
+  --color-background: #0f1117;
+  --color-text: #e2e8f0;
+  --font-size-base: 16px;
+  --spacing-unit: 8px;
+  --border-radius: 8px;
+  --transition-speed: 0.2s;
+}
+
+.card {
+  background: var(--color-background);
+  color: var(--color-text);
+  border-radius: var(--border-radius);
+  padding: calc(var(--spacing-unit) * 2);
+  transition: transform var(--transition-speed) ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}`,
+
+  animation: `/* Keyframe animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+.pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}`,
+
+  minified: `body{margin:0;padding:0;background-color:#fff;font-family:Arial,sans-serif;font-size:16px;line-height:1.5}.nav{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;background-color:#1a1a2e;color:#fff}.btn{display:inline-block;padding:8px 16px;border:none;border-radius:4px;cursor:pointer}.btn-primary{background-color:#e94560;color:#fff}.btn-secondary{background-color:#16213e;color:#fff;border:1px solid #e94560}`
+};
+
+function loadExample(key) {
+  document.getElementById('css-input').value = EXAMPLES[key];
+  updateInputSize();
+  if (key === 'minified') beautify(); else minify();
+}
+
+function minifyCss(css, keepComments, keepLastSemi) {
+  let result = css;
+
+  if (!keepComments) {
+    // Remove /* ... */ comments (non-greedy)
+    result = result.replace(/\/\*[\s\S]*?\*\//g, '');
+  }
+
+  // Remove // single-line comments (not in CSS spec but some preprocessors use them)
+  if (!keepComments) {
+    result = result.replace(/(?<!:)\/\/.*/g, '');
+  }
+
+  // Remove whitespace around selectors and declarations
+  result = result
+    .replace(/\s*{\s*/g, '{')
+    .replace(/\s*}\s*/g, '}')
+    .replace(/\s*:\s*/g, ':')
+    .replace(/\s*;\s*/g, ';')
+    .replace(/\s*,\s*/g, ',')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  // Remove trailing semicolons before }
+  if (!keepLastSemi) {
+    result = result.replace(/;}/g, '}');
+  }
+
+  // Remove leading/trailing spaces inside {}
+  result = result.replace(/{\s+/g, '{').replace(/\s+}/g, '}');
+
+  // Collapse multiple spaces
+  result = result.replace(/  +/g, ' ');
+
+  return result;
+}
+
+function beautifyCss(css) {
+  let result = css;
+  let indent = 0;
+  const indentStr = '  ';
+  let out = '';
+  let i = 0;
+  const len = result.length;
+
+  // Simple tokenizer approach
+  while (i < len) {
+    const ch = result[i];
+
+    if (ch === '{') {
+      out += ' {\n';
+      indent++;
+      out += indentStr.repeat(indent);
+      i++;
+    } else if (ch === '}') {
+      indent = Math.max(0, indent - 1);
+      out = out.trimEnd();
+      out += '\n' + indentStr.repeat(indent) + '}\n';
+      if (i + 1 < len && result[i + 1] !== '}') out += '\n';
+      i++;
+    } else if (ch === ';') {
+      out += ';\n' + indentStr.repeat(indent);
+      i++;
+    } else if (ch === ' ' && out.endsWith('\n' + indentStr.repeat(indent))) {
+      i++; // skip leading space after newline
+    } else {
+      out += ch;
+      i++;
+    }
+  }
+
+  return out.trim();
+}
+
+function countRules(css) {
+  const matches = css.match(/{/g);
+  return matches ? matches.length : 0;
+}
+
+function minify() {
+  const input = document.getElementById('css-input').value;
+  if (!input.trim()) return;
+  const keepComments = document.getElementById('opt-comments').checked;
+  const keepLastSemi = document.getElementById('opt-last-semi').checked;
+  const output = minifyCss(input, keepComments, keepLastSemi);
+  document.getElementById('css-output').value = output;
+  updateStats(input, output);
+}
+
+function beautify() {
+  const input = document.getElementById('css-input').value;
+  if (!input.trim()) return;
+  const output = beautifyCss(input);
+  document.getElementById('css-output').value = output;
+  updateStats(input, output);
+}
+
+function updateStats(input, output) {
+  const before = new TextEncoder().encode(input).length;
+  const after = new TextEncoder().encode(output).length;
+  const saved = before - after;
+  const ratio = before > 0 ? ((saved / before) * 100).toFixed(1) : 0;
+  const rules = countRules(input);
+
+  document.getElementById('stat-before').textContent = before.toLocaleString();
+  document.getElementById('stat-after').textContent = after.toLocaleString();
+  document.getElementById('stat-saved').textContent = (saved >= 0 ? '-' : '+') + Math.abs(saved).toLocaleString();
+  document.getElementById('stat-ratio').textContent = (saved >= 0 ? ratio + '%' : '+' + Math.abs(ratio) + '%');
+  document.getElementById('stat-rules').textContent = rules;
+  document.getElementById('stats-bar').style.display = 'flex';
+
+  document.getElementById('output-size').textContent = after.toLocaleString() + ' bytes';
+}
+
+function updateInputSize() {
+  const bytes = new TextEncoder().encode(document.getElementById('css-input').value).length;
+  document.getElementById('input-size').textContent = bytes.toLocaleString() + ' bytes';
+}
+
+function copyOutput() {
+  navigator.clipboard.writeText(document.getElementById('css-output').value);
+}
+
+function swapIO() {
+  const inp = document.getElementById('css-input');
+  const out = document.getElementById('css-output');
+  const tmp = inp.value;
+  inp.value = out.value;
+  out.value = tmp;
+  updateInputSize();
+}
+
+function clearAll() {
+  document.getElementById('css-input').value = '';
+  document.getElementById('css-output').value = '';
+  document.getElementById('stats-bar').style.display = 'none';
+  document.getElementById('input-size').textContent = '0 bytes';
+  document.getElementById('output-size').textContent = '0 bytes';
+}
+
+document.getElementById('css-input').addEventListener('input', updateInputSize);
+</script>
+</body>
+</html>

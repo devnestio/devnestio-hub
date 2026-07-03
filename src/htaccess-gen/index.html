@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>.htaccess Generator – Redirects, Auth, HTTPS, CORS | DevNestio</title>
+  <meta name="description" content="Generate .htaccess rules visually: 301/302 redirects, basic auth, HTTPS force, CORS headers, custom error pages, directory listing. Browser-only." />
+  <meta property="og:title" content=".htaccess Generator – Redirects, Auth, HTTPS, CORS | DevNestio" />
+  <meta property="og:description" content="Build Apache .htaccess files visually. Redirects, basic auth, HTTPS enforcement, CORS headers, error pages." />
+  <meta property="og:url" content="https://devnestio.pages.dev/htaccess-gen/" />
+  <meta name="twitter:card" content="summary" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    #privacy-banner { background: #1e293b; border-bottom: 1px solid #334155; padding: 8px 16px; font-size: 12px; color: #94a3b8; text-align: center; }
+    header { background: #1e293b; border-bottom: 1px solid #334155; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+    header a { color: #64748b; font-size: 13px; text-decoration: none; margin-left: auto; }
+    header a:hover { color: #94a3b8; }
+    .badge { background: #b45309; color: #fff; font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+    main { max-width: 960px; margin: 0 auto; padding: 24px 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 720px) { main { grid-template-columns: 1fr; } }
+    .full { grid-column: 1 / -1; }
+    .panel { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 16px; }
+    .panel h2 { font-size: 13px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .toggle { width: 36px; height: 20px; background: #334155; border-radius: 99px; cursor: pointer; position: relative; flex-shrink: 0; }
+    .toggle.on { background: #b45309; }
+    .toggle::after { content: ''; width: 14px; height: 14px; background: #fff; border-radius: 50%; position: absolute; top: 3px; left: 3px; transition: left 0.15s; }
+    .toggle.on::after { left: 19px; }
+    label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 4px; margin-top: 10px; }
+    label:first-of-type { margin-top: 0; }
+    input[type="text"], select { width: 100%; padding: 7px 10px; background: #0f1117; border: 1px solid #334155; border-radius: 5px; color: #e2e8f0; font-size: 12px; font-family: monospace; outline: none; }
+    input:focus, select:focus { border-color: #b45309; }
+    .btn { padding: 8px 16px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; }
+    .btn-primary { background: #b45309; color: #fff; }
+    .btn-primary:hover { background: #92400e; }
+    .btn-secondary { background: #334155; color: #e2e8f0; }
+    .btn-secondary:hover { background: #475569; }
+    .btn-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .redirect-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+    .redirect-item { display: flex; gap: 6px; align-items: center; }
+    .redirect-item input { flex: 1; }
+    .redirect-item select { width: 80px; flex-shrink: 0; }
+    .redirect-item .del { background: none; border: none; cursor: pointer; color: #475569; font-size: 16px; padding: 0 3px; }
+    .redirect-item .del:hover { color: #f87171; }
+    .output-box { background: #0f1117; border: 1px solid #334155; border-radius: 8px; padding: 14px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.8; white-space: pre; overflow: auto; min-height: 260px; }
+    .c-comment { color: #475569; }
+    .c-directive { color: #60a5fa; }
+    .c-value { color: #4ade80; }
+    .c-on { color: #a78bfa; }
+    .hint { font-size: 11px; color: #64748b; margin-top: 4px; }
+    #ad-slot { grid-column: 1 / -1; text-align: center; margin: 8px 0; }
+  </style>
+</head>
+<body>
+
+<div id="privacy-banner">🔒 All processing happens in your browser. No data is sent to any server.</div>
+
+<header>
+  <span class="badge">FREE</span>
+  <h1>.htaccess Generator</h1>
+  <a href="https://devnestio.pages.dev">← All Tools</a>
+</header>
+
+<main>
+
+  <!-- Redirects -->
+  <div class="panel">
+    <h2><span class="toggle on" id="toggle-redirects" onclick="toggleSection('redirects')"></span>Redirects</h2>
+    <div id="section-redirects">
+      <div class="redirect-list" id="redirect-list"></div>
+      <button class="btn btn-secondary" style="margin-top:8px;font-size:12px" onclick="addRedirect()">+ Add Redirect</button>
+    </div>
+  </div>
+
+  <!-- HTTPS -->
+  <div class="panel">
+    <h2><span class="toggle on" id="toggle-https" onclick="toggleSection('https')"></span>Force HTTPS</h2>
+    <div id="section-https">
+      <label>www preference</label>
+      <select id="www-pref">
+        <option value="none">No www preference</option>
+        <option value="add">Force www (add www.)</option>
+        <option value="remove">Remove www</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Basic Auth -->
+  <div class="panel">
+    <h2><span class="toggle" id="toggle-auth" onclick="toggleSection('auth')"></span>Basic Auth</h2>
+    <div id="section-auth" style="display:none">
+      <label>Auth realm name</label>
+      <input type="text" id="auth-realm" value="Protected Area" placeholder="Protected Area" />
+      <label>Path to .htpasswd</label>
+      <input type="text" id="auth-passwdfile" value="/etc/apache2/.htpasswd" placeholder="/etc/apache2/.htpasswd" />
+      <p class="hint">Generate .htpasswd with: <code>htpasswd -c .htpasswd username</code></p>
+    </div>
+  </div>
+
+  <!-- CORS -->
+  <div class="panel">
+    <h2><span class="toggle" id="toggle-cors" onclick="toggleSection('cors')"></span>CORS Headers</h2>
+    <div id="section-cors" style="display:none">
+      <label>Allow-Origin</label>
+      <input type="text" id="cors-origin" value="*" placeholder="* or https://example.com" />
+      <label>Allow-Methods</label>
+      <input type="text" id="cors-methods" value="GET, POST, OPTIONS" placeholder="GET, POST, OPTIONS" />
+      <label>Allow-Headers</label>
+      <input type="text" id="cors-headers" value="Content-Type, Authorization" placeholder="Content-Type, Authorization" />
+    </div>
+  </div>
+
+  <!-- Error pages -->
+  <div class="panel">
+    <h2><span class="toggle" id="toggle-errors" onclick="toggleSection('errors')"></span>Custom Error Pages</h2>
+    <div id="section-errors" style="display:none">
+      <label>404 Not Found</label>
+      <input type="text" id="err-404" value="/404.html" placeholder="/404.html" />
+      <label>403 Forbidden</label>
+      <input type="text" id="err-403" value="/403.html" placeholder="/403.html" />
+      <label>500 Server Error</label>
+      <input type="text" id="err-500" value="/500.html" placeholder="/500.html" />
+    </div>
+  </div>
+
+  <!-- Directory listing -->
+  <div class="panel">
+    <h2><span class="toggle on" id="toggle-dirlisting" onclick="toggleSection('dirlisting')"></span>Directory Options</h2>
+    <div id="section-dirlisting">
+      <label>Directory listing</label>
+      <select id="dir-listing">
+        <option value="off">Disable (Options -Indexes)</option>
+        <option value="on">Enable (Options +Indexes)</option>
+      </select>
+      <label>Follow symlinks</label>
+      <select id="dir-symlinks">
+        <option value="off">No</option>
+        <option value="on">Yes (Options +FollowSymLinks)</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Output -->
+  <div class="panel full">
+    <h2 style="margin-bottom:12px">Generated .htaccess</h2>
+    <div class="output-box" id="htaccess-output"></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="generate()">Generate</button>
+      <button class="btn btn-secondary" onclick="copyOutput()">Copy</button>
+      <button class="btn btn-secondary" onclick="downloadOutput()">Download .htaccess</button>
+    </div>
+  </div>
+
+  <div id="ad-slot" data-ea-publisher="devnestio" data-ea-type="image"></div>
+</main>
+
+<script>
+const sections = { redirects: true, https: true, auth: false, cors: false, errors: false, dirlisting: true };
+let redirects = [
+  { from: '/old-page', to: '/new-page', code: '301' }
+];
+
+function toggleSection(name) {
+  sections[name] = !sections[name];
+  const el = document.getElementById('section-' + name);
+  const toggle = document.getElementById('toggle-' + name);
+  el.style.display = sections[name] ? '' : 'none';
+  toggle.className = 'toggle' + (sections[name] ? ' on' : '');
+}
+
+function addRedirect() {
+  redirects.push({ from: '/old', to: '/new', code: '301' });
+  renderRedirects();
+}
+
+function removeRedirect(i) {
+  redirects.splice(i, 1);
+  renderRedirects();
+}
+
+function renderRedirects() {
+  const list = document.getElementById('redirect-list');
+  list.innerHTML = redirects.map((r, i) => `
+    <div class="redirect-item">
+      <input type="text" value="${escAttr(r.from)}" placeholder="From: /old" onchange="redirects[${i}].from=this.value" />
+      <input type="text" value="${escAttr(r.to)}" placeholder="To: /new" onchange="redirects[${i}].to=this.value" />
+      <select onchange="redirects[${i}].code=this.value">
+        <option value="301"${r.code==='301'?' selected':''}>301</option>
+        <option value="302"${r.code==='302'?' selected':''}>302</option>
+      </select>
+      <button class="del" onclick="removeRedirect(${i})">×</button>
+    </div>`).join('');
+}
+
+function generate() {
+  const lines = [];
+  const c = (s) => `<span class="c-comment">${escHtml(s)}</span>`;
+  const d = (s) => `<span class="c-directive">${escHtml(s)}</span>`;
+  const v = (s) => `<span class="c-value">${escHtml(s)}</span>`;
+  const on = (s) => `<span class="c-on">${escHtml(s)}</span>`;
+
+  lines.push(c('# Generated by DevNestio .htaccess Generator'));
+  lines.push(c('# https://devnestio.pages.dev/htaccess-gen/'));
+  lines.push('');
+
+  // Directory options
+  if (sections.dirlisting) {
+    lines.push(c('# Directory options'));
+    const listing = document.getElementById('dir-listing').value;
+    const symlinks = document.getElementById('dir-symlinks').value;
+    const opts = [];
+    opts.push(listing === 'on' ? '+Indexes' : '-Indexes');
+    if (symlinks === 'on') opts.push('+FollowSymLinks');
+    lines.push(d('Options') + ' ' + on(opts.join(' ')));
+    lines.push('');
+  }
+
+  // HTTPS
+  if (sections.https) {
+    lines.push(c('# Force HTTPS'));
+    lines.push(d('RewriteEngine') + ' ' + on('On'));
+    lines.push(d('RewriteCond') + ' ' + v('%{HTTPS}') + ' off');
+    lines.push(d('RewriteRule') + ' ' + v('^(.*)$') + ' ' + v('https://%{HTTP_HOST}%{REQUEST_URI}') + ' ' + on('[L,R=301]'));
+
+    const www = document.getElementById('www-pref').value;
+    if (www === 'add') {
+      lines.push('');
+      lines.push(c('# Force www'));
+      lines.push(d('RewriteCond') + ' ' + v('%{HTTP_HOST}') + ' ' + v('^(?!www\\.)(.+)$') + ' ' + on('[NC]'));
+      lines.push(d('RewriteRule') + ' ' + v('^(.*)$') + ' ' + v('https://www.%1/$1') + ' ' + on('[R=301,L]'));
+    } else if (www === 'remove') {
+      lines.push('');
+      lines.push(c('# Remove www'));
+      lines.push(d('RewriteCond') + ' ' + v('%{HTTP_HOST}') + ' ' + v('^www\\.(.+)$') + ' ' + on('[NC]'));
+      lines.push(d('RewriteRule') + ' ' + v('^(.*)$') + ' ' + v('https://%1/$1') + ' ' + on('[R=301,L]'));
+    }
+    lines.push('');
+  }
+
+  // Redirects
+  if (sections.redirects && redirects.length > 0) {
+    lines.push(c('# Redirects'));
+    if (!sections.https) { lines.push(d('RewriteEngine') + ' ' + on('On')); }
+    for (const r of redirects) {
+      if (!r.from || !r.to) continue;
+      lines.push(d('Redirect') + ' ' + on(r.code) + ' ' + v(r.from) + ' ' + v(r.to));
+    }
+    lines.push('');
+  }
+
+  // Basic Auth
+  if (sections.auth) {
+    const realm = document.getElementById('auth-realm').value;
+    const passwd = document.getElementById('auth-passwdfile').value;
+    lines.push(c('# Basic authentication'));
+    lines.push(d('AuthType') + ' ' + on('Basic'));
+    lines.push(d('AuthName') + ' ' + v('"' + realm + '"'));
+    lines.push(d('AuthUserFile') + ' ' + v(passwd));
+    lines.push(d('Require') + ' ' + on('valid-user'));
+    lines.push('');
+  }
+
+  // CORS
+  if (sections.cors) {
+    const origin = document.getElementById('cors-origin').value;
+    const methods = document.getElementById('cors-methods').value;
+    const headers = document.getElementById('cors-headers').value;
+    lines.push(c('# CORS headers'));
+    lines.push(d('Header') + ' ' + on('set') + ' ' + v('Access-Control-Allow-Origin') + ' ' + v('"' + origin + '"'));
+    lines.push(d('Header') + ' ' + on('set') + ' ' + v('Access-Control-Allow-Methods') + ' ' + v('"' + methods + '"'));
+    lines.push(d('Header') + ' ' + on('set') + ' ' + v('Access-Control-Allow-Headers') + ' ' + v('"' + headers + '"'));
+    lines.push('');
+  }
+
+  // Error pages
+  if (sections.errors) {
+    lines.push(c('# Custom error pages'));
+    const e404 = document.getElementById('err-404').value;
+    const e403 = document.getElementById('err-403').value;
+    const e500 = document.getElementById('err-500').value;
+    if (e404) lines.push(d('ErrorDocument') + ' ' + on('404') + ' ' + v(e404));
+    if (e403) lines.push(d('ErrorDocument') + ' ' + on('403') + ' ' + v(e403));
+    if (e500) lines.push(d('ErrorDocument') + ' ' + on('500') + ' ' + v(e500));
+    lines.push('');
+  }
+
+  const output = document.getElementById('htaccess-output');
+  const rendered = lines.join('\n').trimEnd();
+  output.innerHTML = rendered;
+  output.dataset.raw = rendered.replace(/<[^>]+>/g, '');
+}
+
+function copyOutput() {
+  navigator.clipboard.writeText(document.getElementById('htaccess-output').dataset.raw || '');
+}
+
+function downloadOutput() {
+  const raw = document.getElementById('htaccess-output').dataset.raw || '';
+  if (!raw) return;
+  const blob = new Blob([raw], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '.htaccess';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function escAttr(s) {
+  return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+renderRedirects();
+generate();
+</script>
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSS Border Radius Generator — devnestio</title>
+  <meta name="description" content="Build CSS border-radius declarations visually. Set each corner independently or use linked mode. Supports px, %, em, rem. Live preview and copy-ready CSS." />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    header { background: #1a1d2e; border-bottom: 1px solid #2d3748; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+    header a { color: #7c85f3; text-decoration: none; font-size: 14px; }
+    header h1 { font-size: 18px; font-weight: 700; color: #fff; }
+    .container { max-width: 860px; margin: 0 auto; padding: 24px 16px; display: grid; grid-template-columns: 320px 1fr; gap: 24px; }
+    @media (max-width: 700px) { .container { grid-template-columns: 1fr; } }
+    .panel { background: #1a1d2e; border: 1px solid #2d3748; border-radius: 10px; padding: 20px; }
+    .panel h2 { font-size: 14px; font-weight: 600; color: #a0aec0; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 16px; }
+    .link-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+    .link-row label { font-size: 13px; color: #a0aec0; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+    .link-row input[type=checkbox] { accent-color: #7c85f3; width: 16px; height: 16px; }
+    .unit-tabs { display: flex; gap: 6px; margin-bottom: 16px; }
+    .unit-tab { background: #0f1117; border: 1px solid #2d3748; border-radius: 6px; padding: 5px 14px; font-size: 13px; cursor: pointer; color: #718096; }
+    .unit-tab.active { background: #7c85f3; color: #fff; border-color: #7c85f3; }
+    .corners-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+    .corner-card { background: #0f1117; border: 1px solid #2d3748; border-radius: 8px; padding: 12px; }
+    .corner-label { font-size: 11px; color: #7c85f3; font-weight: 700; margin-bottom: 8px; }
+    .corner-inputs { display: flex; gap: 6px; flex-direction: column; }
+    .input-row { display: flex; align-items: center; gap: 6px; }
+    .input-row span { font-size: 11px; color: #718096; width: 16px; }
+    .corner-inputs input[type=range] { flex: 1; accent-color: #7c85f3; }
+    .corner-inputs input[type=number] { width: 54px; background: #1a1d2e; border: 1px solid #2d3748; border-radius: 4px; padding: 4px 6px; color: #e2e8f0; font-size: 12px; }
+    .presets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .preset-btn { background: #0f1117; border: 1px solid #2d3748; border-radius: 6px; padding: 6px 12px; font-size: 12px; color: #a0aec0; cursor: pointer; }
+    .preset-btn:hover { border-color: #7c85f3; color: #7c85f3; }
+    .preview-box { width: 180px; height: 120px; background: linear-gradient(135deg, #7c85f3, #a855f7); margin: 0 auto; transition: border-radius .15s; }
+    .preview-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 20px; background: #0f1117; border-radius: 8px; }
+    .preview-label { font-size: 12px; color: #718096; }
+    .output-box { background: #0f1117; border: 1px solid #2d3748; border-radius: 8px; padding: 14px; font-family: 'Courier New', monospace; font-size: 13px; color: #7ee787; white-space: pre-wrap; word-break: break-all; min-height: 60px; }
+    .copy-row { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+    .btn { background: #7c85f3; color: #fff; border: none; border-radius: 6px; padding: 7px 14px; font-size: 13px; cursor: pointer; font-weight: 600; }
+    .btn-sm { padding: 4px 10px; font-size: 12px; border-radius: 4px; }
+    .btn-secondary { background: #2d3748; }
+    .btn-secondary:hover { background: #3d4a5c; }
+    .copied { background: #276749 !important; }
+  </style>
+</head>
+<body>
+<header>
+  <a href="/">← devnestio</a>
+  <h1>CSS Border Radius Generator</h1>
+</header>
+<div class="container">
+  <div style="display:flex;flex-direction:column;gap:16px;">
+    <div class="panel">
+      <h2>Controls</h2>
+
+      <div class="link-row">
+        <label>
+          <input type="checkbox" id="linked" checked onchange="render()">
+          Link all corners
+        </label>
+      </div>
+
+      <div class="unit-tabs">
+        <div class="unit-tab active" onclick="setUnit('px',this)">px</div>
+        <div class="unit-tab" onclick="setUnit('%',this)">%</div>
+        <div class="unit-tab" onclick="setUnit('em',this)">em</div>
+        <div class="unit-tab" onclick="setUnit('rem',this)">rem</div>
+      </div>
+
+      <div class="corners-grid" id="corners-grid"></div>
+
+      <div class="panel" style="margin-top:0;padding:14px;">
+        <div style="font-size:12px;color:#a0aec0;margin-bottom:10px;">Presets</div>
+        <div class="presets">
+          <div class="preset-btn" onclick="applyPreset([0,0,0,0])">None</div>
+          <div class="preset-btn" onclick="applyPreset([4,4,4,4])">Small</div>
+          <div class="preset-btn" onclick="applyPreset([8,8,8,8])">Medium</div>
+          <div class="preset-btn" onclick="applyPreset([16,16,16,16])">Large</div>
+          <div class="preset-btn" onclick="applyPreset([999,999,999,999])">Pill</div>
+          <div class="preset-btn" onclick="applyPreset([50,50,50,50],'%')">Circle</div>
+          <div class="preset-btn" onclick="applyPreset([16,16,0,0])">Top only</div>
+          <div class="preset-btn" onclick="applyPreset([0,0,16,16])">Bottom only</div>
+          <div class="preset-btn" onclick="applyPreset([16,0,0,16])">Left only</div>
+          <div class="preset-btn" onclick="applyPreset([0,16,16,0])">Right only</div>
+          <div class="preset-btn" onclick="applyPreset([24,4,24,4])">Blob 1</div>
+          <div class="preset-btn" onclick="applyPreset([4,24,4,24])">Blob 2</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:16px;">
+    <div class="panel">
+      <h2>Preview</h2>
+      <div class="preview-wrap">
+        <div class="preview-box" id="preview-box"></div>
+        <span class="preview-label" id="preview-label">border-radius: 8px</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Generated CSS</h2>
+      <div class="output-box" id="output-box"></div>
+      <div class="copy-row">
+        <button class="btn btn-secondary btn-sm" onclick="copyCSS()">Copy CSS</button>
+        <button class="btn btn-secondary btn-sm" onclick="applyPreset([8,8,8,8])">Reset</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let corners = [8, 8, 8, 8]; // TL, TR, BR, BL
+let unit = 'px';
+const labels = ['Top-Left', 'Top-Right', 'Bottom-Right', 'Bottom-Left'];
+const maxVal = () => unit === '%' ? 50 : unit === 'px' ? 100 : 10;
+
+function buildCSS() {
+  const [tl, tr, br, bl] = corners.map(v => v + unit);
+  if (tl === tr && tr === br && br === bl) return `border-radius: ${tl};`;
+  if (tl === br && tr === bl) return `border-radius: ${tl} ${tr};`;
+  if (tr === bl) return `border-radius: ${tl} ${tr} ${br};`;
+  return `border-radius: ${tl} ${tr} ${br} ${bl};`;
+}
+
+function buildBorderRadius() {
+  const [tl, tr, br, bl] = corners.map(v => v + unit);
+  if (tl === tr && tr === br && br === bl) return tl;
+  if (tl === br && tr === bl) return `${tl} ${tr}`;
+  if (tr === bl) return `${tl} ${tr} ${br}`;
+  return `${tl} ${tr} ${br} ${bl}`;
+}
+
+function render() {
+  const css = buildCSS();
+  const val = buildBorderRadius();
+  document.getElementById('output-box').textContent = css;
+  document.getElementById('preview-box').style.borderRadius = val;
+  document.getElementById('preview-label').textContent = css;
+  renderCorners();
+}
+
+function renderCorners() {
+  const linked = document.getElementById('linked').checked;
+  const max = maxVal();
+  const grid = document.getElementById('corners-grid');
+  grid.innerHTML = '';
+  corners.forEach((v, i) => {
+    const card = document.createElement('div');
+    card.className = 'corner-card';
+    const clampedV = Math.min(v, max);
+    card.innerHTML = `
+      <div class="corner-label">${labels[i]}</div>
+      <div class="corner-inputs">
+        <div class="input-row">
+          <input type="range" min="0" max="${max}" step="${unit==='px'?1:0.5}" value="${clampedV}"
+            oninput="setCorner(${i},+this.value,true)">
+          <input type="number" min="0" max="${max}" step="${unit==='px'?1:0.5}" value="${clampedV}"
+            oninput="setCorner(${i},+this.value,true)">
+          <span style="font-size:11px;color:#718096">${unit}</span>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function setCorner(i, val, fromUI) {
+  const linked = document.getElementById('linked').checked;
+  if (linked) {
+    corners = [val, val, val, val];
+  } else {
+    corners[i] = val;
+  }
+  render();
+}
+
+function setUnit(u, el) {
+  unit = u;
+  document.querySelectorAll('.unit-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  // Clamp values
+  const max = maxVal();
+  corners = corners.map(v => Math.min(v, max));
+  render();
+}
+
+function applyPreset(vals, u) {
+  if (u) {
+    unit = u;
+    document.querySelectorAll('.unit-tab').forEach(t => t.classList.remove('active'));
+    const tabs = document.querySelectorAll('.unit-tab');
+    tabs.forEach(t => { if (t.textContent === u) t.classList.add('active'); });
+  }
+  corners = [...vals];
+  document.getElementById('linked').checked = corners.every(v => v === corners[0]);
+  render();
+}
+
+function copyCSS() {
+  navigator.clipboard.writeText(document.getElementById('output-box').textContent).then(() => {
+    const btn = document.querySelector('.copy-row .btn-secondary');
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy CSS'; btn.classList.remove('copied'); }, 1500);
+  });
+}
+
+render();
+</script>
+</body>
+</html>

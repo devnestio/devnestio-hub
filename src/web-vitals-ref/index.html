@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Core Web Vitals Reference — devnestio</title>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#0f1117;color:#e2e8f0;min-height:100vh}
+header{padding:24px 32px;border-bottom:1px solid #1e2535}
+h1{font-size:1.5rem;font-weight:700;color:#f8fafc}
+h1 span{color:#60a5fa}
+.desc{color:#94a3b8;margin-top:4px;font-size:.9rem}
+.main{max-width:900px;margin:0 auto;padding:32px}
+.vitals-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:32px}
+.vital-card{border-radius:10px;overflow:hidden;border:1px solid #1e2535}
+.vital-header{padding:16px 20px;border-bottom:1px solid}
+.vital-abbr{font-size:1.8rem;font-weight:800;letter-spacing:-.02em;margin-bottom:2px}
+.vital-name{font-size:.82rem;font-weight:600;opacity:.85}
+.vital-body{background:#141924;padding:16px 20px}
+.vital-desc{font-size:.83rem;color:#94a3b8;line-height:1.5;margin-bottom:12px}
+.thresholds{display:flex;gap:0;border-radius:6px;overflow:hidden;margin-bottom:12px}
+.threshold{flex:1;padding:6px 8px;text-align:center}
+.th-good{background:#14532d}
+.th-needs{background:#422006}
+.th-poor{background:#450a0a}
+.th-label{font-size:.7rem;color:#9ca3af;margin-bottom:2px}
+.th-value{font-size:.85rem;font-weight:700}
+.th-good .th-value{color:#4ade80}
+.th-needs .th-value{color:#fb923c}
+.th-poor .th-value{color:#f87171}
+.vital-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.meta-item{background:#1e2535;border-radius:4px;padding:6px 8px}
+.meta-label{font-size:.7rem;color:#64748b;margin-bottom:2px}
+.meta-val{font-size:.78rem;color:#e2e8f0;font-weight:500}
+.core-badge{display:inline-block;font-size:.68rem;padding:2px 6px;border-radius:99px;background:#1e3a5f;border:1px solid #1d4ed8;color:#93c5fd;margin-left:6px}
+.section-title{font-size:1rem;font-weight:700;color:#60a5fa;margin-bottom:14px}
+.tips-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:28px}
+.tip-card{background:#141924;border:1px solid #1e2535;border-radius:8px;padding:16px}
+.tip-card:hover{border-color:#334155}
+.tip-metric{font-size:.73rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
+.tip-title{font-size:.9rem;font-weight:600;color:#f8fafc;margin-bottom:6px}
+.tip-desc{font-size:.82rem;color:#94a3b8;line-height:1.5}
+.tool-table{background:#141924;border:1px solid #1e2535;border-radius:10px;overflow:hidden;margin-bottom:28px}
+.tool-table table{width:100%;border-collapse:collapse}
+.tool-table th{background:#1e2535;padding:10px 14px;font-size:.78rem;font-weight:600;text-transform:uppercase;color:#64748b;text-align:left;border-bottom:1px solid #1e2535}
+.tool-table td{padding:10px 14px;border-bottom:1px solid #0f1117;font-size:.83rem;vertical-align:top}
+.tool-table tr:last-child td{border:none}
+.tool-table tr:hover td{background:#1a2030}
+.tool-name{color:#60a5fa;font-weight:600}
+.metric-dots{display:flex;gap:4px;flex-wrap:wrap}
+.mdot{font-size:.7rem;padding:1px 5px;border-radius:3px;background:#1e2535;border:1px solid #334155;color:#94a3b8}
+</style>
+</head>
+<body>
+<header>
+  <h1>Core Web Vitals <span>Reference</span></h1>
+  <p class="desc">LCP, INP, CLS, FCP, TTFB — thresholds, measurement tools, and optimization tips</p>
+</header>
+<div class="main">
+  <div class="section-title">Core Web Vitals</div>
+  <div class="vitals-grid" id="vitals"></div>
+  <div class="section-title">Optimization Tips</div>
+  <div class="tips-grid" id="tips"></div>
+  <div class="section-title">Measurement Tools</div>
+  <div class="tool-table">
+    <table id="tools-table">
+      <thead><tr><th>Tool</th><th>Measures</th><th>Lab/Field</th><th>Notes</th></tr></thead>
+      <tbody id="tools"></tbody>
+    </table>
+  </div>
+</div>
+<script>
+const VITALS = [
+  {abbr:'LCP',name:'Largest Contentful Paint',core:true,
+   color:{bg:'#1e3a5f',border:'#1d4ed8',text:'#93c5fd'},
+   desc:'Time until the largest visible content element (image, video, or block-level text) is rendered.',
+   good:'≤ 2.5s',needs:'≤ 4.0s',poor:'> 4.0s',
+   axis:'Loading',api:'PerformanceObserver (largest-contentful-paint)',
+   elements:'img, video, background-image, text blocks'},
+  {abbr:'INP',name:'Interaction to Next Paint',core:true,
+   color:{bg:'#3b0764',border:'#7c3aed',text:'#c4b5fd'},
+   desc:'Responsiveness metric measuring the latency from a user interaction to the next visual update. Replaced FID as a Core Web Vital.',
+   good:'≤ 200ms',needs:'≤ 500ms',poor:'> 500ms',
+   axis:'Interactivity',api:'PerformanceObserver (event, first-input)',
+   elements:'click, keydown, pointerdown events'},
+  {abbr:'CLS',name:'Cumulative Layout Shift',core:true,
+   color:{bg:'#422006',border:'#c2410c',text:'#fed7aa'},
+   desc:'Measures unexpected layout shifts — content moving around as the page loads. A score of 0 means no shifting.',
+   good:'≤ 0.1',needs:'≤ 0.25',poor:'> 0.25',
+   axis:'Visual Stability',api:'PerformanceObserver (layout-shift)',
+   elements:'images without dimensions, ads, embeds, dynamic content'},
+  {abbr:'FCP',name:'First Contentful Paint',core:false,
+   color:{bg:'#14532d',border:'#16a34a',text:'#86efac'},
+   desc:'Time when the first content (text, image, canvas) is painted. Marks when the user starts to see something on screen.',
+   good:'≤ 1.8s',needs:'≤ 3.0s',poor:'> 3.0s',
+   axis:'Loading',api:'PerformanceObserver (paint)',
+   elements:'Any content — text, images, SVG, canvas'},
+  {abbr:'TTFB',name:'Time to First Byte',core:false,
+   color:{bg:'#1a2b1a',border:'#15803d',text:'#4ade80'},
+   desc:'Time from resource request to receiving the first byte of the response. Reflects server and network latency.',
+   good:'≤ 800ms',needs:'≤ 1800ms',poor:'> 1800ms',
+   axis:'Server',api:'navigation.responseStart - navigation.requestStart',
+   elements:'Server response time, CDN, redirects'},
+];
+const TIPS = [
+  {metric:'LCP',title:'Preload the LCP image',desc:'Add <link rel="preload" as="image"> for the LCP image. Avoids discovery delay in the waterfall.'},
+  {metric:'LCP',title:'Use a CDN and HTTP/2',desc:'Serve assets from a CDN close to the user. HTTP/2 multiplexing reduces connection overhead.'},
+  {metric:'LCP',title:'Optimize image format',desc:'Use AVIF or WebP with <picture> fallback. 20-50% smaller than JPEG/PNG at the same quality.'},
+  {metric:'LCP',title:'Remove render-blocking resources',desc:'Defer non-critical CSS/JS. Inline critical CSS for above-the-fold content.'},
+  {metric:'INP',title:'Avoid long tasks on the main thread',desc:'Break up long JS with setTimeout or scheduler.yield(). Tasks > 50ms block input responses.'},
+  {metric:'INP',title:'Use web workers for heavy computation',desc:'Move CPU-heavy work off the main thread with Web Workers.'},
+  {metric:'INP',title:'Debounce frequent events',desc:'Debounce scroll, resize, and input events. Use passive: true for scroll/touch listeners.'},
+  {metric:'CLS',title:'Always set image dimensions',desc:'Add width and height attributes to <img> elements. Prevents layout shifts while images load.'},
+  {metric:'CLS',title:'Reserve space for ads and embeds',desc:'Set min-height on ad slots and iframes before content loads.'},
+  {metric:'CLS',title:'Prefer transform over position changes',desc:'Animations using transform/opacity don\'t cause layout shifts. Avoid top/left animations.'},
+  {metric:'FCP',title:'Eliminate render-blocking CSS',desc:'Use media queries on non-critical stylesheets. Inline critical CSS in <head>.'},
+  {metric:'TTFB',title:'Use server-side caching',desc:'Cache responses with proper Cache-Control headers. Use a CDN for static assets.'},
+  {metric:'TTFB',title:'Optimize server response time',desc:'Profile slow database queries, use connection pooling, and enable HTTP compression (gzip/Brotli).'},
+];
+const TOOLS = [
+  {name:'PageSpeed Insights',metrics:['LCP','INP','CLS','FCP','TTFB'],type:'Lab + Field',note:'Google tool. Shows field data (CrUX) and lab data (Lighthouse). URL: pagespeed.web.dev'},
+  {name:'Chrome DevTools',metrics:['LCP','INP','CLS','FCP','TTFB'],type:'Lab',note:'Performance panel, Lighthouse tab. Real-time analysis during development.'},
+  {name:'web-vitals JS library',metrics:['LCP','INP','CLS','FCP','TTFB'],type:'Field',note:'Tiny library from Google. Reports user-measured vitals from your own traffic.'},
+  {name:'WebPageTest',metrics:['LCP','CLS','FCP','TTFB'],type:'Lab',note:'Detailed waterfall charts, filmstrip view. Supports throttling and multiple locations.'},
+  {name:'Chrome CrUX Dashboard',metrics:['LCP','INP','CLS','FCP'],type:'Field',note:'Aggregated real-user data by origin and URL. 28-day rolling window.'},
+  {name:'Search Console (Core Web Vitals report)',metrics:['LCP','INP','CLS'],type:'Field',note:'Shows CWV status per URL group. Highlights pages needing attention.'},
+  {name:'Lighthouse CLI',metrics:['LCP','CLS','FCP','TTFB'],type:'Lab',note:'Run in CI: npx lighthouse <url> --output=json. Integrates with GitHub Actions.'},
+];
+
+const METRIC_COLORS = {LCP:'#60a5fa',INP:'#c4b5fd',CLS:'#fb923c',FCP:'#4ade80',TTFB:'#86efac'};
+
+document.getElementById('vitals').innerHTML=VITALS.map(v=>`
+  <div class="vital-card">
+    <div class="vital-header" style="background:${v.color.bg};border-color:${v.color.border}">
+      <div class="vital-abbr" style="color:${v.color.text}">${v.abbr}${v.core?`<span class="core-badge">Core</span>`:''}</div>
+      <div class="vital-name" style="color:${v.color.text}">${v.name}</div>
+    </div>
+    <div class="vital-body">
+      <div class="vital-desc">${v.desc}</div>
+      <div class="thresholds">
+        <div class="threshold th-good"><div class="th-label">Good</div><div class="th-value">${v.good}</div></div>
+        <div class="threshold th-needs"><div class="th-label">Needs Work</div><div class="th-value">${v.needs}</div></div>
+        <div class="threshold th-poor"><div class="th-label">Poor</div><div class="th-value">${v.poor}</div></div>
+      </div>
+      <div class="vital-meta">
+        <div class="meta-item"><div class="meta-label">Axis</div><div class="meta-val">${v.axis}</div></div>
+        <div class="meta-item"><div class="meta-label">API</div><div class="meta-val">${v.api.split(' ')[0]}…</div></div>
+      </div>
+    </div>
+  </div>`).join('');
+
+document.getElementById('tips').innerHTML=TIPS.map(t=>`
+  <div class="tip-card">
+    <div class="tip-metric" style="color:${METRIC_COLORS[t.metric]||'#94a3b8'}">${t.metric}</div>
+    <div class="tip-title">${t.title}</div>
+    <div class="tip-desc">${t.desc}</div>
+  </div>`).join('');
+
+document.getElementById('tools').innerHTML=TOOLS.map(t=>`
+  <tr>
+    <td><span class="tool-name">${t.name}</span></td>
+    <td><div class="metric-dots">${t.metrics.map(m=>`<span class="mdot" style="color:${METRIC_COLORS[m]||'#94a3b8'};border-color:${METRIC_COLORS[m]||'#334155'}">${m}</span>`).join('')}</div></td>
+    <td style="color:${t.type==='Field'?'#4ade80':t.type.includes('+')? '#60a5fa':'#94a3b8'};font-size:.78rem">${t.type}</td>
+    <td style="color:#94a3b8;font-size:.78rem">${t.note}</td>
+  </tr>`).join('');
+</script>
+</body>
+</html>

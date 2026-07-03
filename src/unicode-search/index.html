@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unicode Character Search — Lookup Codepoints & Names | DevNestio</title>
+  <meta name="description" content="Search Unicode characters by name, codepoint (U+XXXX), or paste a character. Get codepoint, UTF-8 bytes, HTML entity, CSS escape, and category info instantly." />
+  <meta property="og:title" content="Unicode Character Search | DevNestio" />
+  <meta property="og:description" content="Look up any Unicode character: enter a U+ codepoint, paste a character, or search by name. Shows UTF-8, UTF-16, HTML entity, JS escape, and block info." />
+  <meta property="og:url" content="https://devnestio.pages.dev/unicode-search/" />
+  <meta name="twitter:card" content="summary" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    #privacy-banner { background: #1e293b; border-bottom: 1px solid #334155; padding: 8px 16px; font-size: 12px; color: #94a3b8; text-align: center; }
+    header { background: #1e293b; border-bottom: 1px solid #334155; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+    header a { color: #64748b; font-size: 13px; text-decoration: none; margin-left: auto; }
+    header a:hover { color: #94a3b8; }
+    .badge { background: #f59e0b; color: #000; font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+    main { max-width: 860px; margin: 0 auto; padding: 24px 16px; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 18px; margin-bottom: 16px; }
+    .card-title { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 12px; }
+    .search-box { display: flex; gap: 8px; }
+    .search-box input { flex: 1; padding: 10px 14px; background: #0f1117; border: 1px solid #334155; border-radius: 8px; color: #e2e8f0; font-size: 16px; font-family: inherit; outline: none; }
+    .search-box input:focus { border-color: #f59e0b; }
+    .search-box button { padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; background: #f59e0b; color: #000; }
+    .search-box button:hover { background: #d97706; }
+    .hint { font-size: 12px; color: #64748b; margin-top: 6px; }
+    .char-display { font-size: 80px; line-height: 1; text-align: center; padding: 20px; background: #0f1117; border-radius: 8px; margin-bottom: 16px; min-height: 120px; display: flex; align-items: center; justify-content: center; }
+    .info-grid { display: grid; grid-template-columns: 140px 1fr auto; gap: 8px 12px; align-items: center; }
+    .info-label { font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase; }
+    .info-val { font-family: 'Menlo', 'Courier New', monospace; font-size: 13px; color: #f1f5f9; word-break: break-all; }
+    .copy-btn { padding: 2px 9px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid #334155; background: transparent; color: #64748b; white-space: nowrap; }
+    .copy-btn:hover { border-color: #f59e0b; color: #f59e0b; }
+    .results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 8px; }
+    .char-card { background: #0f1117; border: 1px solid #334155; border-radius: 8px; padding: 8px 4px; text-align: center; cursor: pointer; }
+    .char-card:hover { border-color: #f59e0b; }
+    .char-card .glyph { font-size: 24px; line-height: 1.4; display: block; }
+    .char-card .cp { font-size: 9px; color: #64748b; font-family: monospace; }
+    .err-msg { color: #f87171; font-size: 13px; }
+    .examples { display: flex; flex-wrap: wrap; gap: 8px; }
+    .ex-chip { padding: 4px 10px; border-radius: 6px; font-size: 13px; cursor: pointer; border: 1px solid #334155; background: #0f1117; }
+    .ex-chip:hover { border-color: #f59e0b; }
+    #ad-slot { margin: 20px auto; text-align: center; }
+  </style>
+</head>
+<body>
+<div id="privacy-banner">🔒 All processing happens in your browser. No data is sent to any server.</div>
+<header>
+  <span class="badge">FREE</span>
+  <h1>Unicode Character Search</h1>
+  <a href="https://devnestio.pages.dev">← All Tools</a>
+</header>
+<main>
+
+  <!-- Search -->
+  <div class="card">
+    <div class="card-title">Search</div>
+    <div class="search-box">
+      <input id="search-inp" type="text" placeholder="U+1F600  or  😀  or  SNOWMAN  or  0x2603" oninput="onInput()" />
+    </div>
+    <div class="hint">Enter a U+ codepoint, paste a character, a hex codepoint (0x...), or search by name</div>
+  </div>
+
+  <!-- Quick examples -->
+  <div class="card">
+    <div class="card-title">Quick Examples</div>
+    <div class="examples" id="examples"></div>
+  </div>
+
+  <!-- Single char detail -->
+  <div class="card" id="detail-card" style="display:none">
+    <div class="char-display" id="char-display"></div>
+    <div class="info-grid" id="info-grid"></div>
+  </div>
+
+  <!-- Name search results -->
+  <div class="card" id="results-card" style="display:none">
+    <div class="card-title" id="results-title"></div>
+    <div class="results-grid" id="results-grid"></div>
+  </div>
+
+  <div id="ad-slot" data-ea-publisher="devnestio" data-ea-type="image"></div>
+</main>
+<script>
+// Curated Unicode data: [codepoint, short-name]
+// Covers: Basic Latin, Latin-1 Supplement, symbols, arrows, math, currency, emoji, Greek, Cyrillic, misc
+const NAMED = (() => {
+  const d = [];
+  // Basic Latin printable (32-126)
+  const basicNames = {32:'SPACE',33:'EXCLAMATION MARK',34:'QUOTATION MARK',35:'NUMBER SIGN',36:'DOLLAR SIGN',
+    37:'PERCENT SIGN',38:'AMPERSAND',39:'APOSTROPHE',40:'LEFT PARENTHESIS',41:'RIGHT PARENTHESIS',
+    42:'ASTERISK',43:'PLUS SIGN',44:'COMMA',45:'HYPHEN-MINUS',46:'FULL STOP',47:'SOLIDUS',
+    48:'DIGIT ZERO',49:'DIGIT ONE',50:'DIGIT TWO',51:'DIGIT THREE',52:'DIGIT FOUR',
+    53:'DIGIT FIVE',54:'DIGIT SIX',55:'DIGIT SEVEN',56:'DIGIT EIGHT',57:'DIGIT NINE',
+    58:'COLON',59:'SEMICOLON',60:'LESS-THAN SIGN',61:'EQUALS SIGN',62:'GREATER-THAN SIGN',
+    63:'QUESTION MARK',64:'COMMERCIAL AT',65:'LATIN CAPITAL LETTER A',66:'LATIN CAPITAL LETTER B',
+    67:'LATIN CAPITAL LETTER C',68:'LATIN CAPITAL LETTER D',69:'LATIN CAPITAL LETTER E',
+    70:'LATIN CAPITAL LETTER F',71:'LATIN CAPITAL LETTER G',72:'LATIN CAPITAL LETTER H',
+    73:'LATIN CAPITAL LETTER I',74:'LATIN CAPITAL LETTER J',75:'LATIN CAPITAL LETTER K',
+    76:'LATIN CAPITAL LETTER L',77:'LATIN CAPITAL LETTER M',78:'LATIN CAPITAL LETTER N',
+    79:'LATIN CAPITAL LETTER O',80:'LATIN CAPITAL LETTER P',81:'LATIN CAPITAL LETTER Q',
+    82:'LATIN CAPITAL LETTER R',83:'LATIN CAPITAL LETTER S',84:'LATIN CAPITAL LETTER T',
+    85:'LATIN CAPITAL LETTER U',86:'LATIN CAPITAL LETTER V',87:'LATIN CAPITAL LETTER W',
+    88:'LATIN CAPITAL LETTER X',89:'LATIN CAPITAL LETTER Y',90:'LATIN CAPITAL LETTER Z',
+    91:'LEFT SQUARE BRACKET',92:'REVERSE SOLIDUS',93:'RIGHT SQUARE BRACKET',94:'CIRCUMFLEX ACCENT',
+    95:'LOW LINE',96:'GRAVE ACCENT',97:'LATIN SMALL LETTER A',98:'LATIN SMALL LETTER B',
+    99:'LATIN SMALL LETTER C',100:'LATIN SMALL LETTER D',101:'LATIN SMALL LETTER E',
+    102:'LATIN SMALL LETTER F',103:'LATIN SMALL LETTER G',104:'LATIN SMALL LETTER H',
+    105:'LATIN SMALL LETTER I',106:'LATIN SMALL LETTER J',107:'LATIN SMALL LETTER K',
+    108:'LATIN SMALL LETTER L',109:'LATIN SMALL LETTER M',110:'LATIN SMALL LETTER N',
+    111:'LATIN SMALL LETTER O',112:'LATIN SMALL LETTER P',113:'LATIN SMALL LETTER Q',
+    114:'LATIN SMALL LETTER R',115:'LATIN SMALL LETTER S',116:'LATIN SMALL LETTER T',
+    117:'LATIN SMALL LETTER U',118:'LATIN SMALL LETTER V',119:'LATIN SMALL LETTER W',
+    120:'LATIN SMALL LETTER X',121:'LATIN SMALL LETTER Y',122:'LATIN SMALL LETTER Z',
+    123:'LEFT CURLY BRACKET',124:'VERTICAL LINE',125:'RIGHT CURLY BRACKET',126:'TILDE'
+  };
+  Object.entries(basicNames).forEach(([cp, name]) => d.push([parseInt(cp), name]));
+
+  // Latin-1 supplement
+  const l1 = [[160,'NO-BREAK SPACE'],[161,'INVERTED EXCLAMATION MARK'],[162,'CENT SIGN'],
+    [163,'POUND SIGN'],[164,'CURRENCY SIGN'],[165,'YEN SIGN'],[166,'BROKEN BAR'],
+    [167,'SECTION SIGN'],[168,'DIAERESIS'],[169,'COPYRIGHT SIGN'],[170,'FEMININE ORDINAL INDICATOR'],
+    [171,'LEFT-POINTING DOUBLE ANGLE QUOTATION MARK'],[172,'NOT SIGN'],[173,'SOFT HYPHEN'],
+    [174,'REGISTERED SIGN'],[175,'MACRON'],[176,'DEGREE SIGN'],[177,'PLUS-MINUS SIGN'],
+    [178,'SUPERSCRIPT TWO'],[179,'SUPERSCRIPT THREE'],[180,'ACUTE ACCENT'],[181,'MICRO SIGN'],
+    [182,'PILCROW SIGN'],[183,'MIDDLE DOT'],[184,'CEDILLA'],[185,'SUPERSCRIPT ONE'],
+    [186,'MASCULINE ORDINAL INDICATOR'],[187,'RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK'],
+    [188,'VULGAR FRACTION ONE QUARTER'],[189,'VULGAR FRACTION ONE HALF'],[190,'VULGAR FRACTION THREE QUARTERS'],
+    [191,'INVERTED QUESTION MARK'],[192,'LATIN CAPITAL LETTER A WITH GRAVE'],
+    [196,'LATIN CAPITAL LETTER A WITH DIAERESIS'],[197,'LATIN CAPITAL LETTER A WITH RING ABOVE'],
+    [198,'LATIN CAPITAL LETTER AE'],[199,'LATIN CAPITAL LETTER C WITH CEDILLA'],
+    [209,'LATIN CAPITAL LETTER N WITH TILDE'],[214,'LATIN CAPITAL LETTER O WITH DIAERESIS'],
+    [216,'LATIN CAPITAL LETTER O WITH STROKE'],[220,'LATIN CAPITAL LETTER U WITH DIAERESIS'],
+    [223,'LATIN SMALL LETTER SHARP S'],[224,'LATIN SMALL LETTER A WITH GRAVE'],
+    [228,'LATIN SMALL LETTER A WITH DIAERESIS'],[229,'LATIN SMALL LETTER A WITH RING ABOVE'],
+    [230,'LATIN SMALL LETTER AE'],[231,'LATIN SMALL LETTER C WITH CEDILLA'],
+    [241,'LATIN SMALL LETTER N WITH TILDE'],[246,'LATIN SMALL LETTER O WITH DIAERESIS'],
+    [248,'LATIN SMALL LETTER O WITH STROKE'],[252,'LATIN SMALL LETTER U WITH DIAERESIS'],
+    [255,'LATIN SMALL LETTER Y WITH DIAERESIS']];
+  l1.forEach(e => d.push(e));
+
+  // Currency
+  [[0x20AC,'EURO SIGN'],[0x20A3,'FRENCH FRANC SIGN'],[0x20A4,'LIRA SIGN'],
+   [0x20A7,'PESETA SIGN'],[0x20B9,'INDIAN RUPEE SIGN'],[0x20BF,'BITCOIN SIGN']].forEach(e=>d.push(e));
+
+  // Punctuation & quotes
+  [[0x2013,'EN DASH'],[0x2014,'EM DASH'],[0x2018,'LEFT SINGLE QUOTATION MARK'],
+   [0x2019,'RIGHT SINGLE QUOTATION MARK'],[0x201C,'LEFT DOUBLE QUOTATION MARK'],
+   [0x201D,'RIGHT DOUBLE QUOTATION MARK'],[0x2026,'HORIZONTAL ELLIPSIS'],
+   [0x2022,'BULLET'],[0x2023,'TRIANGULAR BULLET'],[0x203C,'DOUBLE EXCLAMATION MARK'],
+   [0x2030,'PER MILLE SIGN'],[0x2031,'PER TEN THOUSAND SIGN']].forEach(e=>d.push(e));
+
+  // Math
+  [[0x00D7,'MULTIPLICATION SIGN'],[0x00F7,'DIVISION SIGN'],[0x2200,'FOR ALL'],
+   [0x2202,'PARTIAL DIFFERENTIAL'],[0x2203,'THERE EXISTS'],[0x2205,'EMPTY SET'],
+   [0x2207,'NABLA'],[0x2208,'ELEMENT OF'],[0x2209,'NOT AN ELEMENT OF'],
+   [0x220F,'N-ARY PRODUCT'],[0x2211,'N-ARY SUMMATION'],[0x221A,'SQUARE ROOT'],
+   [0x221E,'INFINITY'],[0x2227,'LOGICAL AND'],[0x2228,'LOGICAL OR'],
+   [0x2229,'INTERSECTION'],[0x222A,'UNION'],[0x222B,'INTEGRAL'],
+   [0x2248,'ALMOST EQUAL TO'],[0x2260,'NOT EQUAL TO'],[0x2261,'IDENTICAL TO'],
+   [0x2264,'LESS-THAN OR EQUAL TO'],[0x2265,'GREATER-THAN OR EQUAL TO'],
+   [0x2282,'SUBSET OF'],[0x2283,'SUPERSET OF'],[0x2295,'CIRCLED PLUS'],
+   [0x2297,'CIRCLED TIMES'],[0x22C5,'DOT OPERATOR'],[0x03C0,'GREEK SMALL LETTER PI'],
+   [0x03C6,'GREEK SMALL LETTER PHI'],[0x03B1,'GREEK SMALL LETTER ALPHA'],
+   [0x03B2,'GREEK SMALL LETTER BETA'],[0x03B3,'GREEK SMALL LETTER GAMMA'],
+   [0x03B4,'GREEK SMALL LETTER DELTA'],[0x03B5,'GREEK SMALL LETTER EPSILON'],
+   [0x03BB,'GREEK SMALL LETTER LAMDA'],[0x03BC,'GREEK SMALL LETTER MU'],
+   [0x03C3,'GREEK SMALL LETTER SIGMA'],[0x03C9,'GREEK SMALL LETTER OMEGA'],
+   [0x0391,'GREEK CAPITAL LETTER ALPHA'],[0x03A9,'GREEK CAPITAL LETTER OMEGA']].forEach(e=>d.push(e));
+
+  // Arrows
+  [[0x2190,'LEFTWARDS ARROW'],[0x2191,'UPWARDS ARROW'],[0x2192,'RIGHTWARDS ARROW'],
+   [0x2193,'DOWNWARDS ARROW'],[0x2194,'LEFT RIGHT ARROW'],[0x21D0,'LEFTWARDS DOUBLE ARROW'],
+   [0x21D2,'RIGHTWARDS DOUBLE ARROW'],[0x21D4,'LEFT RIGHT DOUBLE ARROW'],
+   [0x21E6,'LEFTWARDS WHITE ARROW'],[0x21E8,'RIGHTWARDS WHITE ARROW']].forEach(e=>d.push(e));
+
+  // Misc symbols
+  [[0x2600,'BLACK SUN WITH RAYS'],[0x2601,'CLOUD'],[0x2602,'UMBRELLA'],
+   [0x2603,'SNOWMAN'],[0x2604,'COMET'],[0x2605,'BLACK STAR'],[0x2606,'WHITE STAR'],
+   [0x2610,'BALLOT BOX'],[0x2611,'BALLOT BOX WITH CHECK'],[0x2612,'BALLOT BOX WITH X'],
+   [0x2615,'HOT BEVERAGE'],[0x261B,'BLACK RIGHT POINTING INDEX'],
+   [0x2630,'TRIGRAM FOR HEAVEN'],[0x2660,'BLACK SPADE SUIT'],[0x2663,'BLACK CLUB SUIT'],
+   [0x2665,'BLACK HEART SUIT'],[0x2666,'BLACK DIAMOND SUIT'],
+   [0x2713,'CHECK MARK'],[0x2714,'HEAVY CHECK MARK'],[0x2717,'BALLOT X'],
+   [0x2718,'HEAVY BALLOT X'],[0x2764,'HEAVY BLACK HEART'],[0x2665,'BLACK HEART SUIT']].forEach(e=>d.push(e));
+
+  // Emoji (common)
+  [[0x1F600,'GRINNING FACE'],[0x1F601,'GRINNING FACE WITH SMILING EYES'],
+   [0x1F602,'FACE WITH TEARS OF JOY'],[0x1F603,'SMILING FACE WITH OPEN MOUTH'],
+   [0x1F604,'SMILING FACE WITH OPEN MOUTH AND SMILING EYES'],
+   [0x1F605,'SMILING FACE WITH OPEN MOUTH AND COLD SWEAT'],
+   [0x1F606,'SMILING FACE WITH OPEN MOUTH AND TIGHTLY-CLOSED EYES'],
+   [0x1F607,'SMILING FACE WITH HALO'],[0x1F608,'SMILING FACE WITH HORNS'],
+   [0x1F609,'WINKING FACE'],[0x1F60A,'SMILING FACE WITH SMILING EYES'],
+   [0x1F60D,'SMILING FACE WITH HEART-SHAPED EYES'],
+   [0x1F614,'PENSIVE FACE'],[0x1F615,'CONFUSED FACE'],
+   [0x1F621,'POUTING FACE'],[0x1F622,'CRYING FACE'],[0x1F625,'DISAPPOINTED BUT RELIEVED FACE'],
+   [0x1F62D,'LOUDLY CRYING FACE'],[0x1F631,'FACE SCREAMING IN FEAR'],
+   [0x1F633,'FLUSHED FACE'],[0x1F637,'FACE WITH MEDICAL MASK'],
+   [0x1F680,'ROCKET'],[0x1F681,'HELICOPTER'],[0x1F682,'STEAM LOCOMOTIVE'],
+   [0x1F483,'DANCER'],[0x1F484,'LIPSTICK'],[0x1F4A9,'PILE OF POO'],
+   [0x1F4AF,'HUNDRED POINTS SYMBOL'],[0x1F525,'FIRE'],
+   [0x1F44D,'THUMBS UP SIGN'],[0x1F44E,'THUMBS DOWN SIGN'],
+   [0x1F4A1,'ELECTRIC LIGHT BULB'],[0x1F4BB,'PERSONAL COMPUTER'],
+   [0x1F4F1,'MOBILE PHONE'],[0x1F511,'KEY'],[0x1F512,'LOCK'],
+   [0x1F513,'OPEN LOCK'],[0x1F514,'BELL'],[0x2728,'SPARKLES'],
+   [0x1F308,'RAINBOW'],[0x1F310,'GLOBE WITH MERIDIANS'],
+   [0x1F333,'EVERGREEN TREE'],[0x1F334,'PALM TREE'],
+   [0x1F40D,'SNAKE'],[0x1F410,'GOAT'],[0x1F411,'SHEEP'],
+   [0x1F412,'MONKEY'],[0x1F413,'ROOSTER'],[0x1F419,'OCTOPUS'],
+   [0x1F41D,'HONEYBEE'],[0x1F422,'TURTLE'],[0x1F42C,'DOLPHIN'],
+   [0x2615,'HOT BEVERAGE'],[0x1F355,'SLICE OF PIZZA'],[0x1F370,'SHORTCAKE']].forEach(e=>d.push(e));
+
+  // Box drawing (useful for terminal UIs)
+  [[0x250C,'BOX DRAWINGS LIGHT DOWN AND RIGHT'],[0x2510,'BOX DRAWINGS LIGHT DOWN AND LEFT'],
+   [0x2514,'BOX DRAWINGS LIGHT UP AND RIGHT'],[0x2518,'BOX DRAWINGS LIGHT UP AND LEFT'],
+   [0x251C,'BOX DRAWINGS LIGHT VERTICAL AND RIGHT'],[0x2524,'BOX DRAWINGS LIGHT VERTICAL AND LEFT'],
+   [0x252C,'BOX DRAWINGS LIGHT DOWN AND HORIZONTAL'],[0x2534,'BOX DRAWINGS LIGHT UP AND HORIZONTAL'],
+   [0x253C,'BOX DRAWINGS LIGHT VERTICAL AND HORIZONTAL'],
+   [0x2500,'BOX DRAWINGS LIGHT HORIZONTAL'],[0x2502,'BOX DRAWINGS LIGHT VERTICAL'],
+   [0x2550,'BOX DRAWINGS DOUBLE HORIZONTAL'],[0x2551,'BOX DRAWINGS DOUBLE VERTICAL']].forEach(e=>d.push(e));
+
+  return d;
+})();
+
+const BLOCKS = [
+  [0x0000,0x007F,'Basic Latin'],[0x0080,0x00FF,'Latin-1 Supplement'],
+  [0x0100,0x017F,'Latin Extended-A'],[0x0180,0x024F,'Latin Extended-B'],
+  [0x0370,0x03FF,'Greek and Coptic'],[0x0400,0x04FF,'Cyrillic'],
+  [0x2000,0x206F,'General Punctuation'],[0x2070,0x209F,'Superscripts and Subscripts'],
+  [0x20A0,0x20CF,'Currency Symbols'],[0x2100,0x214F,'Letterlike Symbols'],
+  [0x2190,0x21FF,'Arrows'],[0x2200,0x22FF,'Mathematical Operators'],
+  [0x2300,0x23FF,'Miscellaneous Technical'],[0x2500,0x257F,'Box Drawing'],
+  [0x2580,0x259F,'Block Elements'],[0x25A0,0x25FF,'Geometric Shapes'],
+  [0x2600,0x26FF,'Miscellaneous Symbols'],[0x2700,0x27BF,'Dingbats'],
+  [0x1F300,0x1F5FF,'Miscellaneous Symbols and Pictographs'],
+  [0x1F600,0x1F64F,'Emoticons'],[0x1F680,0x1F6FF,'Transport and Map Symbols'],
+];
+
+function getBlock(cp) {
+  for (const [lo, hi, name] of BLOCKS) {
+    if (cp >= lo && cp <= hi) return name;
+  }
+  return 'Unknown Block';
+}
+
+function getName(cp) {
+  const entry = NAMED.find(([c]) => c === cp);
+  return entry ? entry[1] : null;
+}
+
+function toUtf8Bytes(cp) {
+  if (cp < 0x80) return [cp];
+  if (cp < 0x800) return [0xC0|(cp>>6), 0x80|(cp&0x3F)];
+  if (cp < 0x10000) return [0xE0|(cp>>12), 0x80|((cp>>6)&0x3F), 0x80|(cp&0x3F)];
+  return [0xF0|(cp>>18), 0x80|((cp>>12)&0x3F), 0x80|((cp>>6)&0x3F), 0x80|(cp&0x3F)];
+}
+
+function toUtf16(cp) {
+  if (cp < 0x10000) return [cp];
+  const c = cp - 0x10000;
+  return [0xD800 + (c >> 10), 0xDC00 + (c & 0x3FF)];
+}
+
+function cpToHtmlEntity(cp) {
+  const named = { 34:'&quot;', 38:'&amp;', 60:'&lt;', 62:'&gt;', 160:'&nbsp;' };
+  if (named[cp]) return named[cp];
+  return `&#x${cp.toString(16).toUpperCase()};`;
+}
+
+function parseInput(raw) {
+  const s = raw.trim();
+  if (!s) return null;
+
+  // U+XXXX or u+XXXX
+  const uMatch = s.match(/^[Uu]\+([0-9a-fA-F]{1,6})$/);
+  if (uMatch) return parseInt(uMatch[1], 16);
+
+  // 0xXXXX
+  const hexMatch = s.match(/^0[xX]([0-9a-fA-F]{1,6})$/);
+  if (hexMatch) return parseInt(hexMatch[1], 16);
+
+  // Decimal number
+  if (/^\d+$/.test(s)) return parseInt(s, 10);
+
+  // Single character (possibly emoji = 2 code units)
+  if ([...s].length === 1) return s.codePointAt(0);
+
+  return null; // name search
+}
+
+function renderDetail(cp) {
+  const char = String.fromCodePoint(cp);
+  const name = getName(cp) || `U+${cp.toString(16).toUpperCase().padStart(4,'0')}`;
+  const utf8 = toUtf8Bytes(cp).map(b => b.toString(16).toUpperCase().padStart(2,'0')).join(' ');
+  const utf16 = toUtf16(cp).map(u => u.toString(16).toUpperCase().padStart(4,'0')).join(' ');
+  const entity = cpToHtmlEntity(cp);
+  const jsEsc = cp < 0x10000 ? `\\u${cp.toString(16).toUpperCase().padStart(4,'0')}` : `\\u{${cp.toString(16).toUpperCase()}}`;
+  const cssEsc = `\\${cp.toString(16).toUpperCase()}`;
+  const block = getBlock(cp);
+
+  document.getElementById('char-display').textContent = char;
+  const grid = document.getElementById('info-grid');
+  const rows = [
+    ['Character', char, char],
+    ['Codepoint', `U+${cp.toString(16).toUpperCase().padStart(4,'0')}`, `U+${cp.toString(16).toUpperCase().padStart(4,'0')}`],
+    ['Decimal', cp.toString(), cp.toString()],
+    ['Name', name, name],
+    ['Block', block, block],
+    ['UTF-8', utf8, utf8],
+    ['UTF-16', utf16, utf16],
+    ['HTML Entity', entity, entity],
+    ['JS Escape', jsEsc, jsEsc],
+    ['CSS Escape', cssEsc, cssEsc],
+  ];
+  grid.innerHTML = rows.map(([label, display, copy]) =>
+    `<span class="info-label">${label}</span><span class="info-val">${display.replace(/</g,'&lt;')}</span><button class="copy-btn" onclick="navigator.clipboard.writeText(${JSON.stringify(copy)})">Copy</button>`
+  ).join('');
+
+  document.getElementById('detail-card').style.display = '';
+  document.getElementById('results-card').style.display = 'none';
+}
+
+function renderNameSearch(query) {
+  const q = query.toUpperCase().trim();
+  if (!q) return;
+  const matches = NAMED.filter(([cp, name]) => name.includes(q)).slice(0, 120);
+  document.getElementById('results-title').textContent = `${matches.length} result${matches.length !== 1 ? 's' : ''} for "${query}"`;
+  document.getElementById('results-grid').innerHTML = matches.map(([cp, name]) => {
+    const char = String.fromCodePoint(cp);
+    return `<div class="char-card" onclick="showCp(${cp})" title="${name}">
+      <span class="glyph">${char}</span>
+      <span class="cp">U+${cp.toString(16).toUpperCase().padStart(4,'0')}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('results-card').style.display = '';
+  document.getElementById('detail-card').style.display = 'none';
+}
+
+function showCp(cp) {
+  document.getElementById('search-inp').value = `U+${cp.toString(16).toUpperCase().padStart(4,'0')}`;
+  renderDetail(cp);
+}
+
+function onInput() {
+  const raw = document.getElementById('search-inp').value;
+  const cp = parseInput(raw);
+  if (cp !== null && Number.isInteger(cp) && cp >= 0 && cp <= 0x10FFFF) {
+    renderDetail(cp);
+  } else if (raw.trim().length > 1) {
+    renderNameSearch(raw.trim());
+  } else {
+    document.getElementById('detail-card').style.display = 'none';
+    document.getElementById('results-card').style.display = 'none';
+  }
+}
+
+const QUICK = [
+  [0x1F600,'😀 Grinning Face'],[0x2603,'☃ Snowman'],[0x2665,'♥ Heart'],
+  [0x00A9,'© Copyright'],[0x03C0,'π Pi'],[0x221E,'∞ Infinity'],
+  [0x2713,'✓ Checkmark'],[0x20AC,'€ Euro'],[0x2192,'→ Arrow'],
+  [0x00C5,'Å A-Ring'],[0x1F525,'🔥 Fire'],[0x1F4BB,'💻 Laptop'],
+];
+
+document.getElementById('examples').innerHTML = QUICK.map(([cp, label]) =>
+  `<span class="ex-chip" onclick="showCp(${cp})">${label}</span>`
+).join('');
+</script>
+</body>
+</html>

@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Gradient Generator – Linear, Radial & Conic | DevNest.io</title>
+  <meta name="description" content="Free online CSS gradient generator. Create beautiful linear, radial, and conic gradients with real-time preview and instant CSS code copy. No dependencies.">
+  <meta name="keywords" content="css gradient generator, linear gradient, radial gradient, conic gradient, css tools, web design">
+  <link rel="canonical" href="https://css-gradient-generator.pages.dev/">
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3348;
+      --accent: #6c63ff;
+      --accent2: #ff6584;
+      --text: #e8eaf6;
+      --text-muted: #8892a4;
+      --success: #4caf50;
+      --radius: 10px;
+      --gap: 16px;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    header h1 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #6c63ff, #ff6584);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    header p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .header-text { flex: 1; }
+
+    .hub-link {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 6px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .hub-link:hover { color: var(--accent); border-color: var(--accent); }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px var(--gap);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--gap);
+    }
+
+    @media (max-width: 768px) {
+      .container { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .panel-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    /* --- Preview --- */
+    .preview-panel { aspect-ratio: 1/0.6; min-height: 240px; }
+    #preview-box {
+      width: 100%;
+      height: 100%;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #6c63ff, #ff6584);
+      position: relative;
+    }
+
+    /* --- Type Tabs --- */
+    .tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text-muted);
+      border-radius: 7px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .tab-btn:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
+
+    /* --- Form elements --- */
+    label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .field { margin-bottom: 14px; }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .range-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .range-row input[type="range"] { flex: 1; }
+    .range-val {
+      font-size: 0.8rem;
+      color: var(--text);
+      min-width: 42px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    select {
+      width: 100%;
+      padding: 8px 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    select:focus { outline: none; border-color: var(--accent); }
+
+    /* --- Color Stops --- */
+    .stops-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .btn-small {
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+    .btn-small:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-small.danger:hover { border-color: var(--accent2); color: var(--accent2); }
+
+    .stop-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .stop-item {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+
+    .stop-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .color-swatch-wrap {
+      position: relative;
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 2px solid var(--border);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .color-swatch-wrap input[type="color"] {
+      position: absolute;
+      inset: -4px;
+      width: calc(100% + 8px);
+      height: calc(100% + 8px);
+      border: none;
+      cursor: pointer;
+      opacity: 0;
+    }
+    .swatch-bg {
+      position: absolute;
+      inset: 0;
+      border-radius: 4px;
+      pointer-events: none;
+    }
+
+    .stop-hex {
+      font-size: 0.8rem;
+      color: var(--text);
+      font-family: monospace;
+      flex: 1;
+    }
+
+    .stop-alpha-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .stop-alpha-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      width: 50px;
+      flex-shrink: 0;
+    }
+
+    /* --- CSS Output --- */
+    .css-output-wrap {
+      position: relative;
+    }
+
+    #css-output {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: #a8d8ea;
+      border-radius: 8px;
+      padding: 14px;
+      font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+      font-size: 0.8rem;
+      min-height: 100px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      padding: 5px 12px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .copy-btn:hover { background: #574fd6; }
+    .copy-btn.copied { background: var(--success); }
+
+    /* --- Presets --- */
+    .presets-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .preset-btn {
+      height: 48px;
+      border-radius: 8px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: border-color 0.2s, transform 0.15s;
+      position: relative;
+      overflow: hidden;
+    }
+    .preset-btn:hover { border-color: #fff; transform: scale(1.04); }
+    .preset-btn span {
+      position: absolute;
+      bottom: 3px;
+      left: 0; right: 0;
+      text-align: center;
+      font-size: 0.62rem;
+      color: rgba(255,255,255,0.85);
+      text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+      font-weight: 600;
+    }
+
+    /* --- Type sections --- */
+    .type-section { display: none; }
+    .type-section.active { display: block; }
+
+    /* --- Ad placeholder --- */
+    .ad-placeholder {
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      height: 90px;
+      margin: 0 0 var(--gap);
+    }
+
+    footer {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      padding: 24px;
+      border-top: 1px solid var(--border);
+      margin-top: 8px;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-text">
+    <h1>CSS Gradient Generator</h1>
+    <p>Build linear, radial &amp; conic gradients with live preview</p>
+  </div>
+  <a href="https://devnestio.pages.dev" class="hub-link" target="_blank" rel="noopener">← All Tools</a>
+</header>
+
+<!-- EthicalAds placeholder -->
+<div style="max-width:1100px;margin:16px auto 0;padding:0 16px;">
+  <div data-ea-publisher="devnestio" data-ea-type="image" class="ad-placeholder">
+    <span>[Advertisement]</span>
+  </div>
+</div>
+
+<div class="container">
+  <!-- LEFT: Controls -->
+  <div>
+    <!-- Type tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" data-type="linear" onclick="setType('linear')">Linear</button>
+      <button class="tab-btn" data-type="radial" onclick="setType('radial')">Radial</button>
+      <button class="tab-btn" data-type="conic" onclick="setType('conic')">Conic</button>
+    </div>
+
+    <!-- Linear options -->
+    <div id="section-linear" class="type-section panel active">
+      <div class="panel-title">Linear Options</div>
+      <div class="field">
+        <label>Angle: <span id="angle-label">135</span>°</label>
+        <div class="range-row">
+          <input type="range" id="angle" min="0" max="360" value="135" oninput="onAngle(this)">
+          <span class="range-val" id="angle-val">135°</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Radial options -->
+    <div id="section-radial" class="type-section panel">
+      <div class="panel-title">Radial Options</div>
+      <div class="field">
+        <label>Shape</label>
+        <select id="radial-shape" onchange="updateGradient()">
+          <option value="ellipse">Ellipse</option>
+          <option value="circle">Circle</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Size</label>
+        <select id="radial-size" onchange="updateGradient()">
+          <option value="farthest-corner">Farthest Corner</option>
+          <option value="closest-corner">Closest Corner</option>
+          <option value="farthest-side">Farthest Side</option>
+          <option value="closest-side">Closest Side</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Position</label>
+        <select id="radial-position" onchange="updateGradient()">
+          <option value="center">Center</option>
+          <option value="top">Top</option>
+          <option value="bottom">Bottom</option>
+          <option value="left">Left</option>
+          <option value="right">Right</option>
+          <option value="top left">Top Left</option>
+          <option value="top right">Top Right</option>
+          <option value="bottom left">Bottom Left</option>
+          <option value="bottom right">Bottom Right</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Conic options -->
+    <div id="section-conic" class="type-section panel">
+      <div class="panel-title">Conic Options</div>
+      <div class="field">
+        <label>From Angle: <span id="conic-angle-label">0</span>°</label>
+        <div class="range-row">
+          <input type="range" id="conic-angle" min="0" max="360" value="0" oninput="onConicAngle(this)">
+          <span class="range-val" id="conic-angle-val">0°</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Position</label>
+        <select id="conic-position" onchange="updateGradient()">
+          <option value="center">Center</option>
+          <option value="top">Top</option>
+          <option value="bottom">Bottom</option>
+          <option value="left">Left</option>
+          <option value="right">Right</option>
+          <option value="top left">Top Left</option>
+          <option value="top right">Top Right</option>
+          <option value="bottom left">Bottom Left</option>
+          <option value="bottom right">Bottom Right</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Color stops -->
+    <div class="panel" style="margin-top:var(--gap)">
+      <div class="stops-header">
+        <div class="panel-title" style="margin:0">Color Stops</div>
+        <button class="btn-small" onclick="addStop()">+ Add Stop</button>
+      </div>
+      <div class="stop-list" id="stop-list"></div>
+    </div>
+
+    <!-- Presets -->
+    <div class="panel" style="margin-top:var(--gap)">
+      <div class="panel-title">Presets</div>
+      <div class="presets-grid" id="presets-grid"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Preview + Output -->
+  <div>
+    <div class="panel preview-panel" style="margin-bottom:var(--gap)">
+      <div class="panel-title">Preview</div>
+      <div id="preview-box"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">CSS Code</div>
+      <div class="css-output-wrap">
+        <textarea id="css-output" readonly rows="5"></textarea>
+        <button class="copy-btn" id="copy-btn" onclick="copyCSS()">Copy</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>Part of <a href="https://devnestio.pages.dev" target="_blank" rel="noopener">DevNest.io</a> — free browser-only developer tools. No data sent to server.</p>
+</footer>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+let state = {
+  type: 'linear',
+  angle: 135,
+  radialShape: 'ellipse',
+  radialSize: 'farthest-corner',
+  radialPosition: 'center',
+  conicAngle: 0,
+  conicPosition: 'center',
+  stops: [
+    { hex: '#6c63ff', alpha: 1, position: 0 },
+    { hex: '#ff6584', alpha: 1, position: 100 }
+  ]
+};
+
+// ============================================================
+// PURE CSS GENERATION FUNCTIONS (exported for testing)
+// ============================================================
+
+function hexToRgba(hex, alpha) {
+  const clean = hex.replace('#', '');
+  const full = clean.length === 3
+    ? clean.split('').map(c => c + c).join('')
+    : clean;
+  const r = parseInt(full.slice(0, 2), 16);
+  const g = parseInt(full.slice(2, 4), 16);
+  const b = parseInt(full.slice(4, 6), 16);
+  if (alpha >= 1) return `#${full.toLowerCase()}`;
+  return `rgba(${r},${g},${b},${alpha.toFixed(2)})`;
+}
+
+function buildColorStop(stop) {
+  const color = hexToRgba(stop.hex, stop.alpha);
+  return `${color} ${stop.position}%`;
+}
+
+function buildLinearCSS(angle, stops) {
+  const stopsStr = stops.map(buildColorStop).join(', ');
+  return `linear-gradient(${angle}deg, ${stopsStr})`;
+}
+
+function buildRadialCSS(shape, size, position, stops) {
+  const stopsStr = stops.map(buildColorStop).join(', ');
+  return `radial-gradient(${shape} ${size} at ${position}, ${stopsStr})`;
+}
+
+function buildConicCSS(fromAngle, position, stops) {
+  const stopsStr = stops.map(buildColorStop).join(', ');
+  return `conic-gradient(from ${fromAngle}deg at ${position}, ${stopsStr})`;
+}
+
+function buildFullCSS(s) {
+  let gradient;
+  if (s.type === 'linear') {
+    gradient = buildLinearCSS(s.angle, s.stops);
+  } else if (s.type === 'radial') {
+    gradient = buildRadialCSS(s.radialShape, s.radialSize, s.radialPosition, s.stops);
+  } else {
+    gradient = buildConicCSS(s.conicAngle, s.conicPosition, s.stops);
+  }
+  return `background: ${gradient};\nbackground: -webkit-${gradient};`;
+}
+
+function sortStops(stops) {
+  return [...stops].sort((a, b) => a.position - b.position);
+}
+
+function validateHex(hex) {
+  return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(hex);
+}
+
+function clamp(val, min, max) {
+  return Math.min(max, Math.max(min, val));
+}
+
+function alphaToPercent(alpha) {
+  return Math.round(alpha * 100);
+}
+
+function percentToAlpha(pct) {
+  return clamp(pct / 100, 0, 1);
+}
+
+function roundAlpha(alpha, decimals) {
+  return parseFloat(alpha.toFixed(decimals));
+}
+
+// ============================================================
+// PRESETS
+// ============================================================
+const PRESETS = [
+  { name: 'Sunset', type: 'linear', angle: 135, stops: [{ hex: '#f97316', alpha: 1, position: 0 }, { hex: '#ec4899', alpha: 1, position: 50 }, { hex: '#8b5cf6', alpha: 1, position: 100 }] },
+  { name: 'Ocean', type: 'linear', angle: 180, stops: [{ hex: '#06b6d4', alpha: 1, position: 0 }, { hex: '#3b82f6', alpha: 1, position: 100 }] },
+  { name: 'Forest', type: 'linear', angle: 145, stops: [{ hex: '#10b981', alpha: 1, position: 0 }, { hex: '#065f46', alpha: 1, position: 100 }] },
+  { name: 'Purple Rain', type: 'linear', angle: 160, stops: [{ hex: '#a855f7', alpha: 1, position: 0 }, { hex: '#3b82f6', alpha: 1, position: 100 }] },
+  { name: 'Fire', type: 'radial', radialShape: 'ellipse', radialSize: 'farthest-corner', radialPosition: 'center', stops: [{ hex: '#fbbf24', alpha: 1, position: 0 }, { hex: '#ef4444', alpha: 1, position: 60 }, { hex: '#7f1d1d', alpha: 1, position: 100 }] },
+  { name: 'Arctic', type: 'linear', angle: 200, stops: [{ hex: '#e0f2fe', alpha: 1, position: 0 }, { hex: '#7dd3fc', alpha: 1, position: 50 }, { hex: '#0369a1', alpha: 1, position: 100 }] },
+  { name: 'Peach', type: 'linear', angle: 120, stops: [{ hex: '#fde68a', alpha: 1, position: 0 }, { hex: '#fb7185', alpha: 1, position: 100 }] },
+  { name: 'Mint', type: 'linear', angle: 90, stops: [{ hex: '#a7f3d0', alpha: 1, position: 0 }, { hex: '#059669', alpha: 1, position: 100 }] },
+  { name: 'Dusk', type: 'linear', angle: 170, stops: [{ hex: '#1e1b4b', alpha: 1, position: 0 }, { hex: '#7c3aed', alpha: 1, position: 50 }, { hex: '#db2777', alpha: 1, position: 100 }] },
+  { name: 'Candy', type: 'conic', conicAngle: 0, conicPosition: 'center', stops: [{ hex: '#f472b6', alpha: 1, position: 0 }, { hex: '#facc15', alpha: 1, position: 33 }, { hex: '#34d399', alpha: 1, position: 66 }, { hex: '#f472b6', alpha: 1, position: 100 }] },
+  { name: 'Chrome', type: 'linear', angle: 135, stops: [{ hex: '#e2e8f0', alpha: 1, position: 0 }, { hex: '#94a3b8', alpha: 1, position: 50 }, { hex: '#e2e8f0', alpha: 1, position: 100 }] },
+  { name: 'Aurora', type: 'linear', angle: 135, stops: [{ hex: '#00ffcc', alpha: 1, position: 0 }, { hex: '#00c8ff', alpha: 1, position: 40 }, { hex: '#9b5de5', alpha: 1, position: 100 }] }
+];
+
+// ============================================================
+// UI RENDERING
+// ============================================================
+function renderStops() {
+  const list = document.getElementById('stop-list');
+  list.innerHTML = '';
+  state.stops.forEach((stop, i) => {
+    const div = document.createElement('div');
+    div.className = 'stop-item';
+    div.innerHTML = `
+      <div class="stop-top">
+        <div class="color-swatch-wrap" title="Pick color">
+          <div class="swatch-bg" id="swatch-bg-${i}" style="background:${stop.hex}"></div>
+          <input type="color" value="${stop.hex}" oninput="onStopColor(${i},this.value)">
+        </div>
+        <span class="stop-hex" id="stop-hex-${i}">${stop.hex}</span>
+        ${state.stops.length > 2 ? `<button class="btn-small danger" onclick="removeStop(${i})">✕</button>` : ''}
+      </div>
+      <div class="stop-alpha-row">
+        <span class="stop-alpha-label">Alpha</span>
+        <input type="range" min="0" max="100" value="${alphaToPercent(stop.alpha)}"
+          style="flex:1;accent-color:var(--accent)"
+          oninput="onStopAlpha(${i},this.value)">
+        <span class="range-val">${alphaToPercent(stop.alpha)}%</span>
+      </div>
+      <div class="stop-alpha-row" style="margin-top:6px">
+        <span class="stop-alpha-label">Position</span>
+        <input type="range" min="0" max="100" value="${stop.position}"
+          style="flex:1;accent-color:var(--accent2)"
+          oninput="onStopPosition(${i},this.value)">
+        <span class="range-val">${stop.position}%</span>
+      </div>`;
+    list.appendChild(div);
+  });
+}
+
+function renderPresets() {
+  const grid = document.getElementById('presets-grid');
+  grid.innerHTML = '';
+  PRESETS.forEach((p, i) => {
+    let bg;
+    if (p.type === 'linear') {
+      bg = buildLinearCSS(p.angle, p.stops);
+    } else if (p.type === 'radial') {
+      bg = buildRadialCSS(p.radialShape, p.radialSize, p.radialPosition, p.stops);
+    } else {
+      bg = buildConicCSS(p.conicAngle, p.conicPosition, p.stops);
+    }
+    const btn = document.createElement('button');
+    btn.className = 'preset-btn';
+    btn.style.background = bg;
+    btn.innerHTML = `<span>${p.name}</span>`;
+    btn.onclick = () => applyPreset(i);
+    grid.appendChild(btn);
+  });
+}
+
+function updateGradient() {
+  // sync state from DOM
+  state.angle = parseInt(document.getElementById('angle').value);
+  state.radialShape = document.getElementById('radial-shape').value;
+  state.radialSize = document.getElementById('radial-size').value;
+  state.radialPosition = document.getElementById('radial-position').value;
+  state.conicAngle = parseInt(document.getElementById('conic-angle').value);
+  state.conicPosition = document.getElementById('conic-position').value;
+
+  const css = buildFullCSS(state);
+  const gradientValue = state.type === 'linear'
+    ? buildLinearCSS(state.angle, state.stops)
+    : state.type === 'radial'
+      ? buildRadialCSS(state.radialShape, state.radialSize, state.radialPosition, state.stops)
+      : buildConicCSS(state.conicAngle, state.conicPosition, state.stops);
+
+  document.getElementById('preview-box').style.background = gradientValue;
+  document.getElementById('css-output').value = css;
+}
+
+// ============================================================
+// EVENT HANDLERS
+// ============================================================
+function setType(type) {
+  state.type = type;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`[data-type="${type}"]`).classList.add('active');
+  document.querySelectorAll('.type-section').forEach(s => s.classList.remove('active'));
+  document.getElementById(`section-${type}`).classList.add('active');
+  updateGradient();
+}
+
+function onAngle(el) {
+  state.angle = parseInt(el.value);
+  document.getElementById('angle-label').textContent = state.angle;
+  document.getElementById('angle-val').textContent = state.angle + '°';
+  updateGradient();
+}
+
+function onConicAngle(el) {
+  state.conicAngle = parseInt(el.value);
+  document.getElementById('conic-angle-label').textContent = state.conicAngle;
+  document.getElementById('conic-angle-val').textContent = state.conicAngle + '°';
+  updateGradient();
+}
+
+function onStopColor(i, hex) {
+  state.stops[i].hex = hex;
+  const bg = document.getElementById(`swatch-bg-${i}`);
+  const hexEl = document.getElementById(`stop-hex-${i}`);
+  if (bg) bg.style.background = hex;
+  if (hexEl) hexEl.textContent = hex;
+  updateGradient();
+}
+
+function onStopAlpha(i, val) {
+  state.stops[i].alpha = percentToAlpha(parseInt(val));
+  renderStops();
+  updateGradient();
+}
+
+function onStopPosition(i, val) {
+  state.stops[i].position = parseInt(val);
+  renderStops();
+  updateGradient();
+}
+
+function addStop() {
+  const positions = state.stops.map(s => s.position);
+  let newPos = 50;
+  if (positions.length >= 2) {
+    let maxGap = 0, gapPos = 50;
+    const sorted = [...positions].sort((a, b) => a - b);
+    for (let i = 0; i < sorted.length - 1; i++) {
+      const gap = sorted[i + 1] - sorted[i];
+      if (gap > maxGap) { maxGap = gap; gapPos = Math.round((sorted[i] + sorted[i + 1]) / 2); }
+    }
+    newPos = gapPos;
+  }
+  state.stops.push({ hex: '#ffffff', alpha: 1, position: newPos });
+  renderStops();
+  updateGradient();
+}
+
+function removeStop(i) {
+  if (state.stops.length <= 2) return;
+  state.stops.splice(i, 1);
+  renderStops();
+  updateGradient();
+}
+
+function applyPreset(i) {
+  const p = PRESETS[i];
+  state.type = p.type;
+  state.stops = JSON.parse(JSON.stringify(p.stops));
+  if (p.type === 'linear') state.angle = p.angle;
+  if (p.type === 'radial') {
+    state.radialShape = p.radialShape;
+    state.radialSize = p.radialSize;
+    state.radialPosition = p.radialPosition;
+  }
+  if (p.type === 'conic') {
+    state.conicAngle = p.conicAngle;
+    state.conicPosition = p.conicPosition;
+  }
+
+  // update DOM
+  setType(p.type);
+  if (p.type === 'linear') {
+    document.getElementById('angle').value = p.angle;
+    document.getElementById('angle-label').textContent = p.angle;
+    document.getElementById('angle-val').textContent = p.angle + '°';
+  }
+  if (p.type === 'radial') {
+    document.getElementById('radial-shape').value = p.radialShape;
+    document.getElementById('radial-size').value = p.radialSize;
+    document.getElementById('radial-position').value = p.radialPosition;
+  }
+  if (p.type === 'conic') {
+    document.getElementById('conic-angle').value = p.conicAngle;
+    document.getElementById('conic-angle-label').textContent = p.conicAngle;
+    document.getElementById('conic-angle-val').textContent = p.conicAngle + '°';
+    document.getElementById('conic-position').value = p.conicPosition;
+  }
+  renderStops();
+  updateGradient();
+}
+
+function copyCSS() {
+  const out = document.getElementById('css-output').value;
+  navigator.clipboard.writeText(out).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1800);
+  });
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  renderStops();
+  renderPresets();
+  updateGradient();
+}
+
+init();
+</script>
+</body>
+</html>

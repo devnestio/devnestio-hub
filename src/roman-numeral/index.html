@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roman Numeral Converter — Arabic ↔ Roman Numerals | DevNestio</title>
+  <meta name="description" content="Convert between Arabic numbers and Roman numerals instantly. Supports 1–3,999,999 with extended notation. Shows step-by-step breakdown. Browser-only." />
+  <meta property="og:title" content="Roman Numeral Converter | DevNestio" />
+  <meta property="og:description" content="Convert numbers to Roman numerals and back. Extended range up to 3,999,999 with vinculum notation. Instant, browser-only." />
+  <meta property="og:url" content="https://devnestio.pages.dev/roman-numeral/" />
+  <meta name="twitter:card" content="summary" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    #privacy-banner { background: #1e293b; border-bottom: 1px solid #334155; padding: 8px 16px; font-size: 12px; color: #94a3b8; text-align: center; }
+    header { background: #1e293b; border-bottom: 1px solid #334155; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+    header a { color: #64748b; font-size: 13px; text-decoration: none; margin-left: auto; }
+    header a:hover { color: #94a3b8; }
+    .badge { background: #f59e0b; color: #000; font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+    main { max-width: 760px; margin: 0 auto; padding: 24px 16px; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 18px; margin-bottom: 16px; }
+    .card-title { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 14px; }
+    .mode-tabs { display: flex; gap: 4px; margin-bottom: 18px; }
+    .mode-tab { padding: 7px 20px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid #334155; background: #0f1117; color: #64748b; }
+    .mode-tab.active { background: #f59e0b; border-color: #f59e0b; color: #000; }
+    label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 5px; font-weight: 600; }
+    input[type=text], input[type=number] { width: 100%; padding: 12px 16px; background: #0f1117; border: 1px solid #334155; border-radius: 8px; color: #e2e8f0; font-size: 20px; font-family: 'Menlo','Courier New',monospace; outline: none; }
+    input:focus { border-color: #f59e0b; }
+    input.err { border-color: #ef4444; }
+    .result-box { background: #0f1117; border: 2px solid #f59e0b; border-radius: 8px; padding: 16px 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 60px; }
+    .result-val { font-size: 28px; font-weight: 700; color: #f59e0b; font-family: 'Menlo','Courier New',monospace; word-break: break-all; }
+    .copy-btn { padding: 4px 14px; border-radius: 5px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid #334155; background: transparent; color: #64748b; white-space: nowrap; flex-shrink: 0; }
+    .copy-btn:hover { border-color: #f59e0b; color: #f59e0b; }
+    .err-msg { color: #f87171; font-size: 14px; }
+    .steps-table { width: 100%; border-collapse: collapse; font-size: 13px; font-family: monospace; }
+    .steps-table td { padding: 5px 10px; border-bottom: 1px solid #334155; }
+    .steps-table td:first-child { color: #f59e0b; width: 25%; }
+    .steps-table td:nth-child(2) { color: #94a3b8; width: 25%; text-align: right; padding-right: 20px; }
+    .steps-table td:nth-child(3) { color: #e2e8f0; }
+    .examples { display: flex; flex-wrap: wrap; gap: 6px; }
+    .ex-chip { padding: 4px 10px; border-radius: 6px; font-size: 12px; font-family: monospace; cursor: pointer; border: 1px solid #334155; background: #0f1117; color: #94a3b8; }
+    .ex-chip:hover { border-color: #f59e0b; color: #f59e0b; }
+    #ad-slot { margin: 20px auto; text-align: center; }
+  </style>
+</head>
+<body>
+<div id="privacy-banner">🔒 All processing happens in your browser. No data is sent to any server.</div>
+<header>
+  <span class="badge">FREE</span>
+  <h1>Roman Numeral Converter</h1>
+  <a href="https://devnestio.pages.dev">← All Tools</a>
+</header>
+<main>
+
+  <div class="mode-tabs">
+    <button class="mode-tab active" data-mode="to-roman" onclick="setMode('to-roman')">Arabic → Roman</button>
+    <button class="mode-tab" data-mode="to-arabic" onclick="setMode('to-arabic')">Roman → Arabic</button>
+  </div>
+
+  <div class="card" id="panel-to-roman">
+    <div class="card-title">Enter a Number (1 – 3,999,999)</div>
+    <input type="number" id="arabic-input" value="2024" min="1" max="3999999" oninput="convertToRoman()" />
+  </div>
+
+  <div class="card" id="panel-to-arabic" style="display:none">
+    <div class="card-title">Enter Roman Numerals</div>
+    <input type="text" id="roman-input" value="" placeholder="e.g. MMXXIV" oninput="convertToArabic()" style="text-transform:uppercase" />
+  </div>
+
+  <div class="card">
+    <div class="card-title">Result</div>
+    <div class="result-box">
+      <span class="result-val" id="result-val">—</span>
+      <button class="copy-btn" onclick="copyResult()">Copy</button>
+    </div>
+  </div>
+
+  <div class="card" id="steps-card" style="display:none">
+    <div class="card-title">Breakdown</div>
+    <table class="steps-table" id="steps-table"></table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Examples</div>
+    <div class="examples" id="examples"></div>
+  </div>
+
+  <div id="ad-slot" data-ea-publisher="devnestio" data-ea-type="image"></div>
+</main>
+<script>
+// Standard + extended numerals (vinculum notation via parentheses convention)
+const ROMAN_MAP = [
+  [1000000,'M̄'],[900000,'C̄M̄'],[500000,'D̄'],[400000,'C̄D̄'],
+  [100000,'C̄'],[90000,'X̄C̄'],[50000,'L̄'],[40000,'X̄L̄'],
+  [10000,'X̄'],[9000,'MX̄'],[5000,'V̄'],[4000,'MV̄'],
+  [1000,'M'],[900,'CM'],[500,'D'],[400,'CD'],
+  [100,'C'],[90,'XC'],[50,'L'],[40,'XL'],
+  [10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']
+];
+
+// For parsing: standard only (1–3999)
+const PARSE_MAP = [
+  [1000,'M'],[900,'CM'],[500,'D'],[400,'CD'],
+  [100,'C'],[90,'XC'],[50,'L'],[40,'XL'],
+  [10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']
+];
+
+function toRoman(n) {
+  if (!Number.isInteger(n) || n < 1 || n > 3999999) return null;
+  let result = '', rem = n;
+  const steps = [];
+  for (const [val, sym] of ROMAN_MAP) {
+    while (rem >= val) {
+      result += sym;
+      steps.push({ sym, val, rem: rem - val });
+      rem -= val;
+    }
+  }
+  return { roman: result, steps };
+}
+
+function fromRoman(str) {
+  const s = str.toUpperCase().trim();
+  if (!s) return null;
+  // Validate: only standard Roman numeral characters
+  if (!/^[IVXLCDM]+$/.test(s)) return null;
+
+  let total = 0, i = 0;
+  for (const [val, sym] of PARSE_MAP) {
+    while (s.startsWith(sym, i)) {
+      total += val;
+      i += sym.length;
+    }
+  }
+  // Verify round-trip (catches invalid sequences)
+  const check = toRoman(total);
+  if (!check || check.roman !== s) return null;
+  return total;
+}
+
+function renderSteps(steps, startN) {
+  let rem = startN;
+  let html = '';
+  for (const step of steps) {
+    html += `<tr><td>${step.sym}</td><td>${step.val.toLocaleString()}</td><td>rem: ${step.rem.toLocaleString()}</td></tr>`;
+    rem = step.rem;
+  }
+  document.getElementById('steps-table').innerHTML = html;
+  document.getElementById('steps-card').style.display = '';
+}
+
+let mode = 'to-roman';
+
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === m));
+  document.getElementById('panel-to-roman').style.display = m === 'to-roman' ? '' : 'none';
+  document.getElementById('panel-to-arabic').style.display = m === 'to-arabic' ? '' : 'none';
+  document.getElementById('steps-card').style.display = 'none';
+  document.getElementById('result-val').textContent = '—';
+  if (m === 'to-roman') convertToRoman();
+  else convertToArabic();
+}
+
+function convertToRoman() {
+  const inp = document.getElementById('arabic-input');
+  const n = parseInt(inp.value);
+  const el = document.getElementById('result-val');
+  inp.classList.remove('err');
+  if (!n || n < 1 || n > 3999999) {
+    inp.classList.add('err');
+    el.innerHTML = '<span class="err-msg">Enter a number from 1 to 3,999,999</span>';
+    document.getElementById('steps-card').style.display = 'none';
+    return;
+  }
+  const res = toRoman(n);
+  el.textContent = res.roman;
+  renderSteps(res.steps, n);
+}
+
+function convertToArabic() {
+  const inp = document.getElementById('roman-input');
+  const el = document.getElementById('result-val');
+  inp.classList.remove('err');
+  const s = inp.value.trim().toUpperCase();
+  if (!s) { el.textContent = '—'; document.getElementById('steps-card').style.display = 'none'; return; }
+  const n = fromRoman(s);
+  if (n === null) {
+    inp.classList.add('err');
+    el.innerHTML = '<span class="err-msg">Invalid Roman numeral</span>';
+    document.getElementById('steps-card').style.display = 'none';
+    return;
+  }
+  el.textContent = n.toLocaleString();
+  const res = toRoman(n);
+  if (res) renderSteps(res.steps, n);
+}
+
+function copyResult() {
+  const t = document.getElementById('result-val').textContent;
+  if (t && t !== '—') navigator.clipboard.writeText(t);
+}
+
+// Examples
+const EXAMPLES = [
+  [1,'I'],[4,'IV'],[9,'IX'],[14,'XIV'],[40,'XL'],[49,'XLIX'],
+  [99,'XCIX'],[400,'CD'],[900,'CM'],[1000,'M'],[1999,'MCMXCIX'],
+  [2024,'MMXXIV'],[3999,'MMMCMXCIX']
+];
+document.getElementById('examples').innerHTML = EXAMPLES.map(([n,r]) =>
+  `<span class="ex-chip" onclick="document.getElementById('arabic-input').value=${n};setMode('to-roman');convertToRoman()">${n} = ${r}</span>`
+).join('');
+
+// Init
+convertToRoman();
+</script>
+</body>
+</html>

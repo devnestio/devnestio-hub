@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSS Filter Generator — Visual filter() Builder with Live Preview | DevNestio</title>
+  <meta name="description" content="Build CSS filter() declarations visually. Adjust brightness, contrast, blur, saturation, hue-rotate, sepia, grayscale, invert, and opacity with sliders. Live image preview and copy-ready CSS." />
+  <meta property="og:title" content="CSS Filter Generator | DevNestio" />
+  <meta property="og:description" content="Design CSS filter effects visually with live preview. Brightness, contrast, blur, hue-rotate and more. Copy-ready CSS output, no upload required." />
+  <meta property="og:url" content="https://devnestio.pages.dev/css-filter-gen/" />
+  <meta name="twitter:card" content="summary" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    #privacy-banner { background: #1e293b; border-bottom: 1px solid #334155; padding: 8px 16px; font-size: 12px; color: #94a3b8; text-align: center; }
+    header { background: #1e293b; border-bottom: 1px solid #334155; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+    header a { color: #64748b; font-size: 13px; text-decoration: none; margin-left: auto; }
+    header a:hover { color: #94a3b8; }
+    .badge { background: #f59e0b; color: #000; font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+    main { max-width: 900px; margin: 0 auto; padding: 24px 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 640px) { main { grid-template-columns: 1fr; } }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 18px; }
+    .card-title { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 14px; }
+    .full-width { grid-column: 1 / -1; }
+    .filter-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .filter-row label { font-size: 12px; color: #94a3b8; font-weight: 600; width: 110px; flex-shrink: 0; }
+    .filter-row input[type=range] { flex: 1; accent-color: #f59e0b; }
+    .filter-row .val { font-size: 12px; font-family: monospace; color: #f59e0b; width: 60px; text-align: right; flex-shrink: 0; }
+    .filter-row .reset-btn { font-size: 11px; color: #475569; cursor: pointer; background: none; border: none; padding: 2px 4px; }
+    .filter-row .reset-btn:hover { color: #f59e0b; }
+    .preview-area { background: #0f1117; border: 1px solid #334155; border-radius: 8px; min-height: 240px; display: flex; align-items: center; justify-content: center; padding: 16px; overflow: hidden; position: relative; }
+    .preview-img { max-width: 100%; max-height: 210px; border-radius: 6px; object-fit: contain; }
+    .upload-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #475569; font-size: 13px; cursor: pointer; gap: 8px; }
+    .upload-overlay svg { opacity: 0.4; }
+    .code-block { background: #0f1117; border: 1px solid #334155; border-radius: 6px; padding: 12px 14px; font-family: 'Menlo','Courier New',monospace; font-size: 13px; white-space: pre-wrap; word-break: break-all; color: #e2e8f0; line-height: 1.6; position: relative; }
+    .copy-btn { position: absolute; top: 8px; right: 8px; padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid #334155; background: #1e293b; color: #64748b; }
+    .copy-btn:hover { border-color: #f59e0b; color: #f59e0b; }
+    .reset-all-btn { padding: 6px 16px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid #334155; background: transparent; color: #64748b; }
+    .reset-all-btn:hover { border-color: #f59e0b; color: #f59e0b; }
+    .presets { display: flex; flex-wrap: wrap; gap: 6px; }
+    .preset-chip { padding: 4px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; border: 1px solid #334155; background: #0f1117; color: #94a3b8; }
+    .preset-chip:hover { border-color: #f59e0b; color: #f59e0b; }
+    #ad-slot { grid-column: 1 / -1; text-align: center; }
+  </style>
+</head>
+<body>
+<div id="privacy-banner">🔒 All processing is local. Images are never uploaded.</div>
+<header>
+  <span class="badge">FREE</span>
+  <h1>CSS Filter Generator</h1>
+  <a href="https://devnestio.pages.dev">← All Tools</a>
+</header>
+<main>
+
+  <!-- Controls -->
+  <div class="card">
+    <div class="card-title" style="display:flex;justify-content:space-between">
+      <span>Filters</span>
+      <button class="reset-all-btn" onclick="resetAll()">Reset all</button>
+    </div>
+    <div id="sliders"></div>
+  </div>
+
+  <!-- Preview -->
+  <div class="card">
+    <div class="card-title">Preview</div>
+    <div class="preview-area" id="preview-area" onclick="document.getElementById('img-upload').click()">
+      <input type="file" id="img-upload" accept="image/*" style="display:none" onchange="loadImage(this)" />
+      <img id="preview-img" class="preview-img" src="" alt="" style="display:none" />
+      <div class="upload-overlay" id="upload-overlay">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        Click to load an image (optional)
+      </div>
+    </div>
+  </div>
+
+  <!-- CSS output -->
+  <div class="card full-width">
+    <div class="card-title">Generated CSS</div>
+    <div class="code-block" id="code-block">
+      <button class="copy-btn" onclick="copyCSS()">Copy</button>
+      <span id="code-output"></span>
+    </div>
+  </div>
+
+  <!-- Presets -->
+  <div class="card full-width">
+    <div class="card-title">Presets</div>
+    <div class="presets" id="presets"></div>
+  </div>
+
+  <div id="ad-slot" data-ea-publisher="devnestio" data-ea-type="image"></div>
+</main>
+<script>
+const FILTERS = [
+  { id:'brightness',   label:'Brightness',   min:0, max:300, step:1,   def:100, unit:'%',  fmt: v => `brightness(${v}%)` },
+  { id:'contrast',     label:'Contrast',     min:0, max:300, step:1,   def:100, unit:'%',  fmt: v => `contrast(${v}%)` },
+  { id:'saturate',     label:'Saturation',   min:0, max:300, step:1,   def:100, unit:'%',  fmt: v => `saturate(${v}%)` },
+  { id:'grayscale',    label:'Grayscale',    min:0, max:100, step:1,   def:0,   unit:'%',  fmt: v => `grayscale(${v}%)` },
+  { id:'sepia',        label:'Sepia',        min:0, max:100, step:1,   def:0,   unit:'%',  fmt: v => `sepia(${v}%)` },
+  { id:'invert',       label:'Invert',       min:0, max:100, step:1,   def:0,   unit:'%',  fmt: v => `invert(${v}%)` },
+  { id:'hue-rotate',   label:'Hue Rotate',   min:0, max:360, step:1,   def:0,   unit:'deg',fmt: v => `hue-rotate(${v}deg)` },
+  { id:'blur',         label:'Blur',         min:0, max:20,  step:0.1, def:0,   unit:'px', fmt: v => `blur(${v}px)` },
+  { id:'opacity',      label:'Opacity',      min:0, max:100, step:1,   def:100, unit:'%',  fmt: v => `opacity(${v}%)` },
+  { id:'drop-shadow',  label:'Drop Shadow',  min:0, max:20,  step:1,   def:0,   unit:'px', fmt: v => v > 0 ? `drop-shadow(${v}px ${v}px ${v*2}px rgba(0,0,0,0.5))` : null },
+];
+
+const PRESETS = [
+  { name:'None',       vals:{ brightness:100, contrast:100, saturate:100, grayscale:0, sepia:0, invert:0, 'hue-rotate':0, blur:0, opacity:100, 'drop-shadow':0 } },
+  { name:'Grayscale',  vals:{ brightness:100, contrast:100, saturate:0,   grayscale:100, sepia:0, invert:0, 'hue-rotate':0, blur:0, opacity:100, 'drop-shadow':0 } },
+  { name:'Sepia',      vals:{ brightness:100, contrast:80,  saturate:100, grayscale:0, sepia:80, invert:0, 'hue-rotate':0, blur:0, opacity:100, 'drop-shadow':0 } },
+  { name:'Vivid',      vals:{ brightness:110, contrast:130, saturate:200, grayscale:0, sepia:0, invert:0, 'hue-rotate':0, blur:0, opacity:100, 'drop-shadow':0 } },
+  { name:'Cold',       vals:{ brightness:100, contrast:100, saturate:80,  grayscale:0, sepia:0, invert:0, 'hue-rotate':200, blur:0, opacity:100, 'drop-shadow':0 } },
+  { name:'Warm',       vals:{ brightness:110, contrast:100, saturate:110, grayscale:0, sepia:20, invert:0, 'hue-rotate':15, blur:0, opacity:100, 'drop-shadow':0 } },
+  { name:'Invert',     vals:{ brightness:100, contrast:100, saturate:100, grayscale:0, sepia:0, invert:100, 'hue-rotate':0, blur:0, opacity:100, 'drop-shadow':0 } },
+  { name:'Blur',       vals:{ brightness:100, contrast:100, saturate:100, grayscale:0, sepia:0, invert:0, 'hue-rotate':0, blur:5, opacity:100, 'drop-shadow':0 } },
+  { name:'Matte',      vals:{ brightness:105, contrast:90,  saturate:90,  grayscale:10, sepia:10, invert:0, 'hue-rotate':0, blur:0, opacity:100, 'drop-shadow':0 } },
+  { name:'Neon',       vals:{ brightness:120, contrast:150, saturate:300, grayscale:0, sepia:0, invert:0, 'hue-rotate':270, blur:0, opacity:100, 'drop-shadow':4 } },
+];
+
+// Build slider UI
+const slidersEl = document.getElementById('sliders');
+FILTERS.forEach(f => {
+  const row = document.createElement('div');
+  row.className = 'filter-row';
+  row.innerHTML = `
+    <label>${f.label}</label>
+    <input type="range" id="s-${f.id}" min="${f.min}" max="${f.max}" step="${f.step}" value="${f.def}" oninput="updateVal('${f.id}')" />
+    <span class="val" id="v-${f.id}">${f.def}${f.unit}</span>
+    <button class="reset-btn" onclick="resetOne('${f.id}')" title="Reset">↺</button>
+  `;
+  slidersEl.appendChild(row);
+});
+
+function getVal(id) {
+  return parseFloat(document.getElementById(`s-${id}`).value);
+}
+
+function updateVal(id) {
+  const f = FILTERS.find(x => x.id === id);
+  const v = getVal(id);
+  document.getElementById(`v-${id}`).textContent = v + f.unit;
+  update();
+}
+
+function resetOne(id) {
+  const f = FILTERS.find(x => x.id === id);
+  document.getElementById(`s-${id}`).value = f.def;
+  updateVal(id);
+}
+
+function resetAll() {
+  FILTERS.forEach(f => resetOne(f.id));
+}
+
+function applyPreset(vals) {
+  Object.entries(vals).forEach(([id, v]) => {
+    document.getElementById(`s-${id}`).value = v;
+    const f = FILTERS.find(x => x.id === id);
+    document.getElementById(`v-${id}`).textContent = v + f.unit;
+  });
+  update();
+}
+
+function buildFilterString() {
+  const parts = [];
+  FILTERS.forEach(f => {
+    const v = getVal(f.id);
+    const part = f.fmt(v);
+    if (part) parts.push(part);
+  });
+  return parts.join(' ') || 'none';
+}
+
+function update() {
+  const fs = buildFilterString();
+  const img = document.getElementById('preview-img');
+  if (img.style.display !== 'none') img.style.filter = fs;
+
+  const isNone = FILTERS.every(f => getVal(f.id) === f.def);
+  const css = isNone ? `.element {\n  /* no filters active */\n}` : `.element {\n  filter: ${fs};\n}`;
+  document.getElementById('code-output').textContent = css;
+}
+
+function copyCSS() {
+  navigator.clipboard.writeText(document.getElementById('code-output').textContent);
+}
+
+function loadImage(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  const img = document.getElementById('preview-img');
+  img.src = url;
+  img.style.display = '';
+  document.getElementById('upload-overlay').style.display = 'none';
+  update();
+}
+
+// Presets
+document.getElementById('presets').innerHTML = PRESETS.map(p =>
+  `<button class="preset-chip" onclick='applyPreset(${JSON.stringify(p.vals)})'>${p.name}</button>`
+).join('');
+
+// Init
+update();
+</script>
+</body>
+</html>

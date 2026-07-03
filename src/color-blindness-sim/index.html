@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Color Blindness Simulator — devnestio</title>
+  <meta name="description" content="Simulate how colors appear to people with color blindness. Enter any color and see it through Deuteranopia, Protanopia, Tritanopia, and Achromatopsia filters. Compare palettes for accessibility." />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    header { background: #1a1d2e; border-bottom: 1px solid #2d3748; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+    header a { color: #7c85f3; text-decoration: none; font-size: 14px; }
+    header h1 { font-size: 18px; font-weight: 700; color: #fff; }
+    .container { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
+    .input-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
+    .input-row input[type=color] { width: 52px; height: 44px; border: 1px solid #2d3748; border-radius: 8px; background: none; cursor: pointer; padding: 2px; }
+    .input-row input[type=text] { flex: 1; min-width: 140px; background: #1a1d2e; border: 1px solid #2d3748; border-radius: 8px; padding: 10px 14px; color: #e2e8f0; font-family: 'Courier New', monospace; font-size: 15px; }
+    .input-row input:focus { outline: none; border-color: #7c85f3; }
+    .palette-input { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; }
+    .palette-input label { font-size: 12px; color: #718096; }
+    .swatch-add { display: flex; gap: 6px; align-items: center; }
+    .btn-sm { background: #2d3748; border: none; border-radius: 6px; padding: 6px 12px; font-size: 12px; color: #e2e8f0; cursor: pointer; }
+    .btn-sm:hover { background: #3d4a5c; }
+    .palette-swatches { display: flex; gap: 6px; flex-wrap: wrap; }
+    .swatch-item { position: relative; width: 36px; height: 36px; border-radius: 6px; border: 1px solid #2d3748; cursor: pointer; }
+    .swatch-item:hover::after { content: '✕'; position: absolute; top: -6px; right: -6px; background: #e53e3e; color: #fff; border-radius: 50%; width: 14px; height: 14px; font-size: 10px; display: flex; align-items: center; justify-content: center; line-height: 14px; text-align: center; }
+    .presets-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .preset-btn { background: #1a1d2e; border: 1px solid #2d3748; border-radius: 6px; padding: 5px 12px; font-size: 12px; color: #a0aec0; cursor: pointer; }
+    .preset-btn:hover { border-color: #7c85f3; color: #7c85f3; }
+    .sim-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+    .sim-card { background: #1a1d2e; border: 1px solid #2d3748; border-radius: 10px; overflow: hidden; }
+    .sim-card-header { padding: 10px 14px; background: #2d3748; }
+    .sim-name { font-size: 13px; font-weight: 700; color: #e2e8f0; }
+    .sim-desc { font-size: 11px; color: #718096; margin-top: 2px; }
+    .sim-colors { display: flex; padding: 14px; gap: 8px; flex-wrap: wrap; }
+    .sim-color-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .sim-swatch { width: 48px; height: 48px; border-radius: 8px; border: 1px solid rgba(255,255,255,.1); }
+    .sim-hex { font-size: 10px; font-family: 'Courier New', monospace; color: #718096; }
+    .single-compare { display: flex; gap: 8px; padding: 14px; }
+    .compare-swatch { flex: 1; height: 80px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-family: 'Courier New', monospace; }
+  </style>
+</head>
+<body>
+<header>
+  <a href="/">← devnestio</a>
+  <h1>Color Blindness Simulator</h1>
+</header>
+<div class="container">
+  <div class="input-row">
+    <input type="color" id="color-pick" value="#7c85f3" oninput="setSingleColor(this.value)" />
+    <input type="text" id="color-hex" value="#7c85f3" placeholder="#rrggbb" oninput="onHexInput(this.value)" />
+    <button class="btn-sm" onclick="addToPalette()">+ Add to palette</button>
+  </div>
+
+  <div style="margin-bottom:12px;font-size:12px;color:#718096;">Palette (click swatch to remove):</div>
+  <div class="palette-swatches" id="palette-swatches"></div>
+
+  <div class="presets-row" style="margin-top:12px">
+    <span style="font-size:12px;color:#718096;">Load palette:</span>
+    <div class="preset-btn" onclick="loadPreset('rainbow')">Rainbow</div>
+    <div class="preset-btn" onclick="loadPreset('traffic')">Traffic lights</div>
+    <div class="preset-btn" onclick="loadPreset('ui')">UI colors</div>
+    <div class="preset-btn" onclick="loadPreset('brand')">Brand palette</div>
+  </div>
+
+  <div style="margin:24px 0 12px;font-size:14px;font-weight:600;color:#a0aec0;">Simulations</div>
+  <div class="sim-grid" id="sim-grid"></div>
+</div>
+
+<script>
+const PRESETS = {
+  rainbow: ['#e53e3e','#f6ad55','#ecc94b','#68d391','#63b3ed','#9f7aea'],
+  traffic: ['#22c55e','#eab308','#ef4444'],
+  ui: ['#7c85f3','#68d391','#fc8181','#fbd38d','#e2e8f0','#4a5568'],
+  brand: ['#1a1a2e','#16213e','#0f3460','#e94560','#fff'],
+};
+
+const TYPES = [
+  { id: 'normal', name: 'Normal Vision', desc: 'How most people see' },
+  { id: 'deuteranopia', name: 'Deuteranopia', desc: 'Green-blind (~6% of males)' },
+  { id: 'protanopia', name: 'Protanopia', desc: 'Red-blind (~2% of males)' },
+  { id: 'tritanopia', name: 'Tritanopia', desc: 'Blue-blind (~0.01%)' },
+  { id: 'achromatopsia', name: 'Achromatopsia', desc: 'Total color blindness' },
+  { id: 'deuteranomaly', name: 'Deuteranomaly', desc: 'Green-weak (~5% of males)' },
+];
+
+let palette = ['#7c85f3'];
+
+function hexToRgb(hex) {
+  const h = hex.replace('#','');
+  return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
+}
+
+function rgbToHex(r,g,b) {
+  return '#' + [r,g,b].map(v => Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('');
+}
+
+function linearize(c) {
+  const v = c / 255;
+  return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+}
+
+function delinearize(v) {
+  const c = v <= 0.0031308 ? 12.92 * v : 1.055 * Math.pow(v, 1/2.4) - 0.055;
+  return Math.round(Math.max(0, Math.min(1, c)) * 255);
+}
+
+function simulate(hex, type) {
+  if (type === 'normal') return hex;
+  const [r,g,b] = hexToRgb(hex).map(linearize);
+
+  // LMS matrix (sRGB → LMS Brettel)
+  let L = 0.31399022*r + 0.63951294*g + 0.04649755*b;
+  let M = 0.15537241*r + 0.75789446*g + 0.08670142*b;
+  let S = 0.01775239*r + 0.10944209*g + 0.87256922*b;
+
+  let Ls = L, Ms = M, Ss = S;
+
+  if (type === 'deuteranopia') {
+    Ls = L; Ms = 0.494207*L + 1.24827*S; Ss = S;
+  } else if (type === 'protanopia') {
+    Ls = 2.02344*M - 2.52581*S; Ms = M; Ss = S;
+  } else if (type === 'tritanopia') {
+    Ls = L; Ms = M; Ss = -0.395913*L + 0.801109*M;
+  } else if (type === 'achromatopsia') {
+    const gray = 0.212656*r + 0.715158*g + 0.072186*b;
+    return rgbToHex(delinearize(gray), delinearize(gray), delinearize(gray));
+  } else if (type === 'deuteranomaly') {
+    Ls = L; Ms = 0.7*M + 0.3*(0.494207*L + 1.24827*S); Ss = S;
+  }
+
+  // LMS → sRGB
+  const ro =  5.47221206*Ls - 4.6419601*Ms + 0.16963708*Ss;
+  const go = -1.1252419*Ls  + 2.29317094*Ms - 0.1678952*Ss;
+  const bo =  0.02980165*Ls - 0.19318073*Ms + 1.16364789*Ss;
+
+  return rgbToHex(delinearize(ro), delinearize(go), delinearize(bo));
+}
+
+function renderSims() {
+  const grid = document.getElementById('sim-grid');
+  grid.innerHTML = '';
+  TYPES.forEach(type => {
+    const card = document.createElement('div');
+    card.className = 'sim-card';
+    const header = document.createElement('div');
+    header.className = 'sim-card-header';
+    header.innerHTML = `<div class="sim-name">${type.name}</div><div class="sim-desc">${type.desc}</div>`;
+    card.appendChild(header);
+    const colorsEl = document.createElement('div');
+    colorsEl.className = 'sim-colors';
+    palette.forEach(color => {
+      const sim = simulate(color, type.id);
+      const item = document.createElement('div');
+      item.className = 'sim-color-item';
+      item.innerHTML = `<div class="sim-swatch" style="background:${sim}"></div><div class="sim-hex">${sim}</div>`;
+      colorsEl.appendChild(item);
+    });
+    card.appendChild(colorsEl);
+    grid.appendChild(card);
+  });
+}
+
+function renderPalette() {
+  const el = document.getElementById('palette-swatches');
+  el.innerHTML = '';
+  palette.forEach((color, i) => {
+    const swatch = document.createElement('div');
+    swatch.className = 'swatch-item';
+    swatch.style.background = color;
+    swatch.title = color;
+    swatch.onclick = () => { palette.splice(i, 1); renderPalette(); renderSims(); };
+    el.appendChild(swatch);
+  });
+}
+
+function setSingleColor(hex) {
+  document.getElementById('color-hex').value = hex;
+  document.getElementById('color-pick').value = hex;
+  if (palette.length === 1) { palette[0] = hex; renderPalette(); renderSims(); }
+}
+
+function onHexInput(val) {
+  const clean = val.trim();
+  if (/^#[0-9a-fA-F]{6}$/.test(clean)) {
+    document.getElementById('color-pick').value = clean;
+    setSingleColor(clean);
+  }
+}
+
+function addToPalette() {
+  const hex = document.getElementById('color-hex').value.trim();
+  if (/^#[0-9a-fA-F]{6}$/.test(hex) && !palette.includes(hex)) {
+    palette.push(hex);
+    renderPalette();
+    renderSims();
+  }
+}
+
+function loadPreset(name) {
+  palette = [...PRESETS[name]];
+  document.getElementById('color-hex').value = palette[0];
+  document.getElementById('color-pick').value = palette[0];
+  renderPalette();
+  renderSims();
+}
+
+renderPalette();
+renderSims();
+</script>
+</body>
+</html>

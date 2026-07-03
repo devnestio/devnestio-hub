@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HAR Analyzer — devnestio</title>
+  <meta name="description" content="Upload or paste a HAR (HTTP Archive) file to analyze web performance. View request timings, waterfall chart, slowest requests, largest assets, and per-domain breakdown. Browser-only.">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --surface: #161b22; --surface2: #21262d;
+      --border: #30363d; --text: #c9d1d9; --muted: #8b949e;
+      --accent: #58a6ff; --green: #3fb950; --red: #f85149;
+      --yellow: #d29922; --purple: #bc8cff;
+    }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 24px; }
+    header nav a { color: var(--accent); text-decoration: none; font-size: 0.9em; }
+    header h1 { font-size: 1.6rem; margin: 8px 0 4px; }
+    header p { color: var(--muted); font-size: 0.95em; }
+    main { flex: 1; padding: 24px; max-width: 1200px; width: 100%; margin: 0 auto; }
+    footer { background: var(--surface); border-top: 1px solid var(--border); padding: 16px 24px; text-align: center; color: var(--muted); font-size: 0.875rem; }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    .upload-zone {
+      border: 2px dashed var(--border); border-radius: 10px; padding: 40px;
+      text-align: center; cursor: pointer; transition: border-color .2s, background .2s;
+      background: var(--surface); margin-bottom: 20px;
+    }
+    .upload-zone:hover, .upload-zone.drag { border-color: var(--accent); background: #1a2130; }
+    .upload-zone p { color: var(--muted); margin-top: 8px; font-size: 0.9em; }
+    .upload-icon { font-size: 2.5rem; }
+
+    .paste-area { width: 100%; min-height: 120px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.82em; padding: 12px; resize: vertical; }
+    .paste-area:focus { outline: none; border-color: var(--accent); }
+
+    .btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9em; transition: background .15s, border-color .15s; }
+    .btn:hover { background: var(--border); border-color: var(--muted); }
+    .btn-primary { background: var(--accent); color: #0d1117; border-color: var(--accent); font-weight: 600; }
+    .btn-primary:hover { background: #79b8ff; border-color: #79b8ff; }
+    .btn-danger { background: transparent; border-color: var(--red); color: var(--red); }
+    .btn-danger:hover { background: rgba(248,81,73,.1); }
+
+    .toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; }
+
+    /* Stats */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+    .stat-label { font-size: 0.78em; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .stat-value { font-size: 1.6rem; font-weight: 700; color: var(--accent); margin-top: 4px; }
+    .stat-sub { font-size: 0.78em; color: var(--muted); margin-top: 2px; }
+
+    /* Sections */
+    .section { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; overflow: hidden; }
+    .section-header { padding: 12px 16px; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 0.95em; display: flex; justify-content: space-between; align-items: center; }
+    .section-body { padding: 16px; overflow-x: auto; }
+
+    /* Table */
+    table { width: 100%; border-collapse: collapse; font-size: 0.83em; }
+    th { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); color: var(--muted); font-weight: 600; font-size: 0.85em; white-space: nowrap; }
+    td { padding: 7px 10px; border-bottom: 1px solid #1a1f26; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--surface2); }
+
+    .method { font-weight: 700; font-family: monospace; font-size: 0.85em; }
+    .method-get { color: var(--green); }
+    .method-post { color: var(--accent); }
+    .method-put { color: var(--yellow); }
+    .method-delete { color: var(--red); }
+    .method-patch { color: var(--purple); }
+
+    .status-2 { color: var(--green); font-weight: 600; }
+    .status-3 { color: var(--accent); font-weight: 600; }
+    .status-4 { color: var(--yellow); font-weight: 600; }
+    .status-5 { color: var(--red); font-weight: 600; }
+
+    .url-cell { max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: monospace; font-size: 0.82em; }
+    .type-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.75em; font-weight: 600; }
+    .type-xhr { background: rgba(88,166,255,.15); color: var(--accent); }
+    .type-document { background: rgba(63,185,80,.15); color: var(--green); }
+    .type-script { background: rgba(188,140,255,.15); color: var(--purple); }
+    .type-stylesheet { background: rgba(210,153,34,.15); color: var(--yellow); }
+    .type-image { background: rgba(248,81,73,.15); color: var(--red); }
+    .type-font { background: rgba(139,148,158,.15); color: var(--muted); }
+    .type-other { background: var(--surface2); color: var(--muted); }
+
+    /* Bar */
+    .timing-bar-wrap { width: 100px; display: inline-block; }
+    .timing-bar { height: 8px; border-radius: 4px; background: var(--accent); opacity: 0.8; }
+
+    /* Filter bar */
+    .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--border); }
+    .filter-btn { padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--muted); font-size: 0.8em; cursor: pointer; transition: all .15s; }
+    .filter-btn:hover, .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #0d1117; }
+    .search-input { background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 4px 10px; font-size: 0.85em; width: 220px; }
+    .search-input:focus { outline: none; border-color: var(--accent); }
+
+    /* Waterfall */
+    .waterfall-table td:last-child { padding: 0; }
+    .wf-bar-cell { position: relative; height: 26px; padding: 0 !important; }
+    .wf-bar { position: absolute; top: 5px; height: 16px; border-radius: 3px; }
+    .wf-bar-blocked { background: #f85149; }
+    .wf-bar-dns { background: #79b8ff; }
+    .wf-bar-connect { background: var(--yellow); }
+    .wf-bar-ssl { background: var(--purple); }
+    .wf-bar-send { background: var(--green); }
+    .wf-bar-wait { background: var(--accent); opacity: 0.6; }
+    .wf-bar-receive { background: var(--green); }
+
+    .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 0.78em; color: var(--muted); padding: 8px 0 0; }
+    .legend-item { display: flex; align-items: center; gap: 5px; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+    .hidden { display: none !important; }
+    #drop-overlay { display: none; }
+  </style>
+</head>
+<body>
+<header>
+  <nav><a href="/">← devnestio</a></nav>
+  <h1>HAR Analyzer</h1>
+  <p>Analyze HTTP Archive files — timings, performance, waterfall, slowest requests.</p>
+</header>
+<main>
+
+  <div id="upload-section">
+    <div class="upload-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+      <div class="upload-icon">📦</div>
+      <strong>Drop HAR file here</strong> or click to browse
+      <p>Exported from Chrome DevTools → Network → "Export HAR" or Firefox / Safari</p>
+    </div>
+    <input type="file" id="file-input" accept=".har,application/json" style="display:none">
+
+    <p style="text-align:center;color:var(--muted);margin:12px 0;font-size:0.9em;">— or paste HAR JSON —</p>
+    <textarea class="paste-area" id="paste-input" placeholder='Paste HAR JSON here ({ "log": { "entries": [...] } })'></textarea>
+    <div class="toolbar" style="margin-top:12px;">
+      <button class="btn btn-primary" onclick="analyzeFromPaste()">Analyze</button>
+      <button class="btn" onclick="loadSample()">Load Sample</button>
+    </div>
+  </div>
+
+  <div id="results-section" class="hidden">
+    <div class="toolbar">
+      <button class="btn btn-danger" onclick="reset()">← New File</button>
+      <button class="btn" onclick="copyCSV()">Export CSV</button>
+      <span id="file-name-label" style="color:var(--muted);font-size:0.9em;margin-left:auto;"></span>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid" id="stats-grid"></div>
+
+    <!-- Slowest Requests -->
+    <div class="section">
+      <div class="section-header">🐢 Slowest Requests <span id="slow-count" style="color:var(--muted);font-weight:400;font-size:0.85em;"></span></div>
+      <div class="section-body">
+        <table id="slow-table">
+          <thead><tr><th>#</th><th>URL</th><th>Type</th><th>Status</th><th>Total (ms)</th><th>Size</th></tr></thead>
+          <tbody id="slow-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- All Requests -->
+    <div class="section">
+      <div class="section-header">📋 All Requests</div>
+      <div class="filter-bar">
+        <input class="search-input" id="search-input" placeholder="Filter by URL…" oninput="applyFilters()">
+        <div id="type-filters"></div>
+        <label style="color:var(--muted);font-size:0.82em;margin-left:auto;">
+          Sort: <select id="sort-select" onchange="applyFilters()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:3px 6px;border-radius:4px;font-size:1em;">
+            <option value="index">Default</option>
+            <option value="time-desc">Slowest first</option>
+            <option value="size-desc">Largest first</option>
+            <option value="status">Status code</option>
+          </select>
+        </label>
+      </div>
+      <div class="section-body" style="padding:0;">
+        <table>
+          <thead><tr><th>#</th><th>Method</th><th>URL</th><th>Type</th><th>Status</th><th>Size</th><th>Time (ms)</th><th>Timing</th></tr></thead>
+          <tbody id="all-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Domain breakdown -->
+    <div class="section">
+      <div class="section-header">🌐 By Domain</div>
+      <div class="section-body">
+        <table>
+          <thead><tr><th>Domain</th><th>Requests</th><th>Total Size</th><th>Total Time (ms)</th></tr></thead>
+          <tbody id="domain-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+<footer>
+  <p>Made with ☕ · <a href="https://devnestio.pages.dev">devnestio</a></p>
+  <p style="margin-top:8px;font-size:0.85em;">If this saved you time, <a href="https://buymeacoffee.com/devnestio" target="_blank" rel="noopener">buy me a coffee ☕</a></p>
+</footer>
+<script>
+let allEntries = [];
+let maxTime = 1;
+
+// Drag & drop
+const dz = document.getElementById('drop-zone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
+dz.addEventListener('drop', e => {
+  e.preventDefault(); dz.classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file) readFile(file);
+});
+document.getElementById('file-input').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (file) readFile(file);
+});
+
+function readFile(file) {
+  document.getElementById('file-name-label').textContent = file.name;
+  const reader = new FileReader();
+  reader.onload = ev => analyzeHAR(ev.target.result);
+  reader.readAsText(file);
+}
+
+function analyzeFromPaste() {
+  const text = document.getElementById('paste-input').value.trim();
+  if (!text) { alert('Paste HAR JSON first.'); return; }
+  analyzeHAR(text);
+}
+
+function analyzeHAR(text) {
+  let har;
+  try { har = JSON.parse(text); } catch(e) { alert('Invalid JSON: ' + e.message); return; }
+  const entries = har?.log?.entries;
+  if (!Array.isArray(entries) || entries.length === 0) { alert('No entries found. Make sure this is a valid HAR file.'); return; }
+  allEntries = entries.map((e, i) => {
+    const req = e.request || {};
+    const res = e.response || {};
+    const timings = e.timings || {};
+    const totalTime = e.time || 0;
+    const size = (res.content?.size > 0 ? res.content.size : 0) || res.bodySize || 0;
+    const type = getType(res.content?.mimeType || '', req.url || '');
+    let domain = '';
+    try { domain = new URL(req.url).hostname; } catch(x) {}
+    return { index: i, url: req.url || '', method: req.method || 'GET', status: res.status || 0, type, size, time: totalTime, timings, domain };
+  });
+  maxTime = Math.max(...allEntries.map(e => e.time), 1);
+  renderResults();
+}
+
+function getType(mime, url) {
+  if (mime.includes('json') || mime.includes('xml') || /\/(xhr|fetch)/.test(mime) || url.includes('/api/')) return 'xhr';
+  if (mime.includes('html')) return 'document';
+  if (mime.includes('javascript') || url.endsWith('.js')) return 'script';
+  if (mime.includes('css') || url.endsWith('.css')) return 'stylesheet';
+  if (mime.includes('image') || /\.(png|jpg|gif|svg|webp|ico)(\?|$)/.test(url)) return 'image';
+  if (mime.includes('font') || /\.(woff|woff2|ttf|eot)(\?|$)/.test(url)) return 'font';
+  return 'other';
+}
+
+function fmtSize(bytes) {
+  if (!bytes) return '—';
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1048576).toFixed(2) + ' MB';
+}
+
+function fmtTime(ms) {
+  if (ms < 1) return '<1';
+  return Math.round(ms).toLocaleString();
+}
+
+function typeBadge(type) {
+  return `<span class="type-badge type-${type}">${type}</span>`;
+}
+
+function methodSpan(m) {
+  return `<span class="method method-${m.toLowerCase()}">${m}</span>`;
+}
+
+function statusSpan(s) {
+  const cls = s >= 500 ? 'status-5' : s >= 400 ? 'status-4' : s >= 300 ? 'status-3' : 'status-2';
+  return `<span class="${cls}">${s}</span>`;
+}
+
+function renderResults() {
+  document.getElementById('upload-section').classList.add('hidden');
+  document.getElementById('results-section').classList.remove('hidden');
+  renderStats();
+  renderSlowest();
+  renderTypeFilters();
+  applyFilters();
+  renderDomains();
+}
+
+function renderStats() {
+  const total = allEntries.length;
+  const totalSize = allEntries.reduce((s, e) => s + e.size, 0);
+  const totalTime = allEntries.reduce((s, e) => s + e.time, 0);
+  const errors = allEntries.filter(e => e.status >= 400).length;
+  const avgTime = total ? totalTime / total : 0;
+  const firstUrl = allEntries[0]?.url || '';
+  let domain = '';
+  try { domain = new URL(firstUrl).hostname; } catch(x) {}
+
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Total Requests</div><div class="stat-value">${total}</div><div class="stat-sub">${errors} errors</div></div>
+    <div class="stat-card"><div class="stat-label">Total Size</div><div class="stat-value">${fmtSize(totalSize)}</div><div class="stat-sub">across all resources</div></div>
+    <div class="stat-card"><div class="stat-label">Avg Response</div><div class="stat-value">${fmtTime(avgTime)}<small style="font-size:1rem">ms</small></div><div class="stat-sub">per request</div></div>
+    <div class="stat-card"><div class="stat-label">Slowest</div><div class="stat-value">${fmtTime(Math.max(...allEntries.map(e=>e.time)))}<small style="font-size:1rem">ms</small></div><div class="stat-sub">single request</div></div>
+    <div class="stat-card"><div class="stat-label">Errors (4xx/5xx)</div><div class="stat-value" style="color:${errors?'var(--red)':'var(--green)'}">${errors}</div><div class="stat-sub">failed requests</div></div>
+    <div class="stat-card"><div class="stat-label">Domain</div><div class="stat-value" style="font-size:0.95rem;padding-top:4px;">${domain}</div><div class="stat-sub">primary host</div></div>
+  `;
+}
+
+function renderSlowest() {
+  const top = [...allEntries].sort((a,b)=>b.time-a.time).slice(0,10);
+  document.getElementById('slow-count').textContent = `(top ${top.length})`;
+  document.getElementById('slow-tbody').innerHTML = top.map((e,i) => `
+    <tr>
+      <td>${i+1}</td>
+      <td class="url-cell" title="${e.url}">${e.url}</td>
+      <td>${typeBadge(e.type)}</td>
+      <td>${statusSpan(e.status)}</td>
+      <td><strong>${fmtTime(e.time)}</strong></td>
+      <td>${fmtSize(e.size)}</td>
+    </tr>`).join('');
+}
+
+let activeType = 'all';
+function renderTypeFilters() {
+  const types = ['all', ...new Set(allEntries.map(e => e.type))];
+  const counts = {};
+  allEntries.forEach(e => { counts[e.type] = (counts[e.type]||0)+1; });
+  document.getElementById('type-filters').innerHTML = types.map(t =>
+    `<button class="filter-btn ${t==='all'?'active':''}" data-type="${t}" onclick="setTypeFilter('${t}')">${t} ${t==='all'?`(${allEntries.length})`:`(${counts[t]||0})`}</button>`
+  ).join('');
+}
+
+function setTypeFilter(type) {
+  activeType = type;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.type === type));
+  applyFilters();
+}
+
+function applyFilters() {
+  const search = document.getElementById('search-input').value.toLowerCase();
+  const sort = document.getElementById('sort-select').value;
+  let filtered = allEntries.filter(e => {
+    if (activeType !== 'all' && e.type !== activeType) return false;
+    if (search && !e.url.toLowerCase().includes(search)) return false;
+    return true;
+  });
+  if (sort === 'time-desc') filtered.sort((a,b) => b.time - a.time);
+  else if (sort === 'size-desc') filtered.sort((a,b) => b.size - a.size);
+  else if (sort === 'status') filtered.sort((a,b) => a.status - b.status);
+
+  const localMax = Math.max(...filtered.map(e=>e.time), 1);
+  document.getElementById('all-tbody').innerHTML = filtered.map((e,i) => {
+    const pct = Math.round((e.time / localMax) * 100);
+    return `<tr>
+      <td style="color:var(--muted)">${e.index+1}</td>
+      <td>${methodSpan(e.method)}</td>
+      <td class="url-cell" title="${e.url}">${e.url}</td>
+      <td>${typeBadge(e.type)}</td>
+      <td>${statusSpan(e.status)}</td>
+      <td>${fmtSize(e.size)}</td>
+      <td>${fmtTime(e.time)}</td>
+      <td><div class="timing-bar-wrap"><div class="timing-bar" style="width:${pct}%"></div></div></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">No requests match filter.</td></tr>';
+}
+
+function renderDomains() {
+  const map = {};
+  allEntries.forEach(e => {
+    if (!map[e.domain]) map[e.domain] = { count: 0, size: 0, time: 0 };
+    map[e.domain].count++;
+    map[e.domain].size += e.size;
+    map[e.domain].time += e.time;
+  });
+  const rows = Object.entries(map).sort((a,b)=>b[1].count-a[1].count);
+  document.getElementById('domain-tbody').innerHTML = rows.map(([domain, d]) => `
+    <tr>
+      <td style="font-family:monospace">${domain||'(unknown)'}</td>
+      <td>${d.count}</td>
+      <td>${fmtSize(d.size)}</td>
+      <td>${fmtTime(d.time)}</td>
+    </tr>`).join('');
+}
+
+function copyCSV() {
+  const header = 'Index,Method,URL,Type,Status,Size(bytes),Time(ms)';
+  const rows = allEntries.map(e => `${e.index+1},${e.method},"${e.url}",${e.type},${e.status},${e.size},${Math.round(e.time)}`);
+  navigator.clipboard.writeText([header, ...rows].join('\n')).then(() => alert('CSV copied to clipboard!'));
+}
+
+function reset() {
+  allEntries = [];
+  document.getElementById('upload-section').classList.remove('hidden');
+  document.getElementById('results-section').classList.add('hidden');
+  document.getElementById('paste-input').value = '';
+  document.getElementById('file-input').value = '';
+}
+
+function loadSample() {
+  const now = new Date().toISOString();
+  const sample = { log: { version: '1.2', creator: { name: 'DevNestio', version: '1.0' }, entries: [
+    { time: 245, request: { method: 'GET', url: 'https://example.com/', headers: [] }, response: { status: 200, content: { size: 12800, mimeType: 'text/html' }, bodySize: 12800 }, timings: { send: 1, wait: 230, receive: 14 } },
+    { time: 89, request: { method: 'GET', url: 'https://example.com/main.css', headers: [] }, response: { status: 200, content: { size: 45200, mimeType: 'text/css' }, bodySize: 45200 }, timings: { send: 1, wait: 80, receive: 8 } },
+    { time: 340, request: { method: 'GET', url: 'https://example.com/bundle.js', headers: [] }, response: { status: 200, content: { size: 512000, mimeType: 'application/javascript' }, bodySize: 512000 }, timings: { send: 1, wait: 320, receive: 19 } },
+    { time: 56, request: { method: 'GET', url: 'https://cdn.example.com/logo.png', headers: [] }, response: { status: 200, content: { size: 8400, mimeType: 'image/png' }, bodySize: 8400 }, timings: { send: 1, wait: 50, receive: 5 } },
+    { time: 1240, request: { method: 'POST', url: 'https://api.example.com/v1/users', headers: [] }, response: { status: 201, content: { size: 320, mimeType: 'application/json' }, bodySize: 320 }, timings: { send: 5, wait: 1220, receive: 15 } },
+    { time: 38, request: { method: 'GET', url: 'https://api.example.com/v1/config', headers: [] }, response: { status: 200, content: { size: 1200, mimeType: 'application/json' }, bodySize: 1200 }, timings: { send: 1, wait: 30, receive: 7 } },
+    { time: 820, request: { method: 'GET', url: 'https://fonts.gstatic.com/s/roboto/v30/font.woff2', headers: [] }, response: { status: 200, content: { size: 15200, mimeType: 'font/woff2' }, bodySize: 15200 }, timings: { send: 1, wait: 800, receive: 19 } },
+    { time: 12, request: { method: 'GET', url: 'https://example.com/favicon.ico', headers: [] }, response: { status: 404, content: { size: 0, mimeType: 'text/plain' }, bodySize: 0 }, timings: { send: 1, wait: 10, receive: 1 } },
+    { time: 95, request: { method: 'DELETE', url: 'https://api.example.com/v1/sessions/abc123', headers: [] }, response: { status: 204, content: { size: 0, mimeType: '' }, bodySize: 0 }, timings: { send: 2, wait: 85, receive: 8 } },
+    { time: 510, request: { method: 'GET', url: 'https://cdn.example.com/hero-bg.webp', headers: [] }, response: { status: 200, content: { size: 142000, mimeType: 'image/webp' }, bodySize: 142000 }, timings: { send: 1, wait: 480, receive: 29 } }
+  ]}};
+  analyzeHAR(JSON.stringify(sample));
+}
+</script>
+</body>
+</html>

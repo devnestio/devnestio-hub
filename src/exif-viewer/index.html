@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Image EXIF Viewer — Read EXIF Metadata from Photos | DevNestio</title>
+  <meta name="description" content="View EXIF metadata from JPEG/TIFF images locally in your browser. See camera settings, GPS coordinates, date taken, and more. No upload, 100% private." />
+  <meta property="og:title" content="Image EXIF Viewer | DevNestio" />
+  <meta property="og:description" content="Read EXIF metadata from photos in your browser. Camera make/model, exposure, GPS, timestamps — all parsed locally without any server." />
+  <meta property="og:url" content="https://devnestio.pages.dev/exif-viewer/" />
+  <meta name="twitter:card" content="summary" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    #privacy-banner { background: #1e293b; border-bottom: 1px solid #334155; padding: 8px 16px; font-size: 12px; color: #94a3b8; text-align: center; }
+    header { background: #1e293b; border-bottom: 1px solid #334155; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+    header a { color: #64748b; font-size: 13px; text-decoration: none; margin-left: auto; }
+    header a:hover { color: #94a3b8; }
+    .badge { background: #f59e0b; color: #000; font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+    main { max-width: 860px; margin: 0 auto; padding: 24px 16px; }
+    .drop-zone { border: 2px dashed #334155; border-radius: 12px; padding: 48px 24px; text-align: center; cursor: pointer; transition: border-color .15s; margin-bottom: 16px; }
+    .drop-zone:hover, .drop-zone.drag-over { border-color: #f59e0b; }
+    .drop-zone input { display: none; }
+    .drop-icon { font-size: 40px; margin-bottom: 12px; }
+    .drop-text { font-size: 14px; color: #64748b; }
+    .drop-text strong { color: #f59e0b; cursor: pointer; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 18px; margin-bottom: 16px; }
+    .card-title { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; }
+    .thumb { max-width: 200px; max-height: 200px; border-radius: 8px; object-fit: contain; border: 1px solid #334155; }
+    .thumb-row { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+    .file-info { font-size: 13px; color: #94a3b8; line-height: 1.8; }
+    .file-info strong { color: #e2e8f0; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    tr:nth-child(even) td { background: #0f1117; }
+    td { padding: 7px 10px; border-bottom: 1px solid #1e293b; vertical-align: top; word-break: break-all; }
+    td:first-child { width: 38%; color: #94a3b8; white-space: nowrap; font-weight: 600; }
+    td:last-child { color: #e2e8f0; }
+    .tag-group { font-size: 11px; font-weight: 700; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.08em; padding: 8px 10px 4px; background: #0f172a; border-bottom: 1px solid #334155; }
+    .copy-btn { padding: 3px 10px; border-radius: 5px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid #334155; background: transparent; color: #64748b; }
+    .copy-btn:hover { border-color: #f59e0b; color: #f59e0b; }
+    .gps-link { color: #38bdf8; text-decoration: none; font-size: 12px; margin-left: 8px; }
+    .gps-link:hover { text-decoration: underline; }
+    .empty-msg { color: #64748b; font-size: 14px; text-align: center; padding: 24px; }
+    #ad-slot { margin: 20px auto; text-align: center; }
+    .no-exif { color: #94a3b8; font-size: 14px; padding: 16px 0; }
+    .filter-input { padding: 6px 12px; background: #0f1117; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 13px; outline: none; width: 200px; }
+    .filter-input:focus { border-color: #f59e0b; }
+  </style>
+</head>
+<body>
+<div id="privacy-banner">🔒 Files stay in your browser. Nothing is uploaded to any server.</div>
+<header>
+  <span class="badge">FREE</span>
+  <h1>Image EXIF Viewer</h1>
+  <a href="https://devnestio.pages.dev">← All Tools</a>
+</header>
+<main>
+
+  <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()"
+    ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+    <input type="file" id="file-input" accept="image/jpeg,image/tiff,.jpg,.jpeg,.tif,.tiff" onchange="handleFile(this.files[0])" />
+    <div class="drop-icon">📷</div>
+    <div class="drop-text">Drop a JPEG or TIFF image here, or <strong>browse</strong></div>
+    <div class="drop-text" style="margin-top:6px;font-size:12px">Supports JPEG, TIFF · All processing is local</div>
+  </div>
+
+  <div id="output" style="display:none">
+    <div class="card" id="file-card">
+      <div class="card-title">File Info</div>
+      <div class="thumb-row">
+        <img id="thumb" class="thumb" src="" alt="preview" />
+        <div class="file-info" id="file-info"></div>
+      </div>
+    </div>
+
+    <div class="card" id="exif-card">
+      <div class="card-title">
+        <span>EXIF Data</span>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input class="filter-input" id="filter-input" type="text" placeholder="Filter tags…" oninput="filterTags()" />
+          <button class="copy-btn" onclick="copyAll()">Copy All</button>
+        </div>
+      </div>
+      <div id="exif-table-wrap"></div>
+    </div>
+  </div>
+
+  <div id="empty-msg" class="card">
+    <p class="empty-msg">No image loaded. Drop a JPEG file above to view its EXIF metadata.</p>
+  </div>
+
+  <div id="ad-slot" data-ea-publisher="devnestio" data-ea-type="image"></div>
+</main>
+<script>
+// Minimal EXIF parser for JPEG/TIFF — browser-native DataView, no libs
+
+const TAG_NAMES = {
+  0x010F:'Make', 0x0110:'Model', 0x0112:'Orientation', 0x011A:'XResolution', 0x011B:'YResolution',
+  0x0128:'ResolutionUnit', 0x0131:'Software', 0x0132:'DateTime', 0x013B:'Artist',
+  0x013E:'WhitePoint', 0x013F:'PrimaryChromaticities', 0x0211:'YCbCrCoefficients',
+  0x0213:'YCbCrPositioning', 0x0214:'ReferenceBlackWhite', 0x8298:'Copyright',
+  0x8769:'ExifIFD', 0x8825:'GPSIFD', 0xA005:'InteropIFD',
+  // Exif sub-IFD
+  0x829A:'ExposureTime', 0x829D:'FNumber', 0x8822:'ExposureProgram', 0x8824:'SpectralSensitivity',
+  0x8827:'ISOSpeedRatings', 0x9000:'ExifVersion', 0x9003:'DateTimeOriginal',
+  0x9004:'DateTimeDigitized', 0x9101:'ComponentsConfiguration', 0x9102:'CompressedBitsPerPixel',
+  0x9201:'ShutterSpeedValue', 0x9202:'ApertureValue', 0x9203:'BrightnessValue',
+  0x9204:'ExposureBiasValue', 0x9205:'MaxApertureValue', 0x9206:'SubjectDistance',
+  0x9207:'MeteringMode', 0x9208:'LightSource', 0x9209:'Flash', 0x920A:'FocalLength',
+  0x9214:'SubjectArea', 0x927C:'MakerNote', 0x9286:'UserComment', 0x9290:'SubSecTime',
+  0x9291:'SubSecTimeOriginal', 0x9292:'SubSecTimeDigitized', 0xA000:'FlashPixVersion',
+  0xA001:'ColorSpace', 0xA002:'PixelXDimension', 0xA003:'PixelYDimension',
+  0xA004:'RelatedSoundFile', 0xA20B:'FlashEnergy', 0xA20C:'SpatialFrequencyResponse',
+  0xA20E:'FocalPlaneXResolution', 0xA20F:'FocalPlaneYResolution', 0xA210:'FocalPlaneResolutionUnit',
+  0xA214:'SubjectLocation', 0xA215:'ExposureIndex', 0xA217:'SensingMethod',
+  0xA300:'FileSource', 0xA301:'SceneType', 0xA302:'CFAPattern', 0xA401:'CustomRendered',
+  0xA402:'ExposureMode', 0xA403:'WhiteBalance', 0xA404:'DigitalZoomRatio',
+  0xA405:'FocalLengthIn35mmFilm', 0xA406:'SceneCaptureType', 0xA407:'GainControl',
+  0xA408:'Contrast', 0xA409:'Saturation', 0xA40A:'Sharpness', 0xA40B:'DeviceSettingDescription',
+  0xA40C:'SubjectDistanceRange', 0xA420:'ImageUniqueID', 0xA430:'CameraOwnerName',
+  0xA431:'BodySerialNumber', 0xA432:'LensSpecification', 0xA433:'LensMake',
+  0xA434:'LensModel', 0xA435:'LensSerialNumber',
+  // GPS sub-IFD
+  0x0000:'GPSVersionID', 0x0001:'GPSLatitudeRef', 0x0002:'GPSLatitude',
+  0x0003:'GPSLongitudeRef', 0x0004:'GPSLongitude', 0x0005:'GPSAltitudeRef',
+  0x0006:'GPSAltitude', 0x0007:'GPSTimeStamp', 0x0008:'GPSSatellites',
+  0x0009:'GPSStatus', 0x000A:'GPSMeasureMode', 0x000B:'GPSDOP',
+  0x000C:'GPSSpeedRef', 0x000D:'GPSSpeed', 0x000E:'GPSTrackRef',
+  0x000F:'GPSTrack', 0x0010:'GPSImgDirectionRef', 0x0011:'GPSImgDirection',
+  0x0012:'GPSMapDatum', 0x0013:'GPSDestLatitudeRef', 0x0014:'GPSDestLatitude',
+  0x0015:'GPSDestLongitudeRef', 0x0016:'GPSDestLongitude', 0x0017:'GPSDestBearingRef',
+  0x0018:'GPSDestBearing', 0x0019:'GPSDestDistanceRef', 0x001A:'GPSDestDistance',
+  0x001B:'GPSProcessingMethod', 0x001C:'GPSAreaInformation', 0x001D:'GPSDateStamp',
+  0x001E:'GPSDifferential',
+};
+
+const TYPE_SIZES = [0,1,1,2,4,8,1,1,2,4,8,4,8];
+const EXPOSURE_PROGRAMS = {0:'Undefined',1:'Manual',2:'Normal',3:'Aperture priority',4:'Shutter priority',5:'Creative',6:'Action',7:'Portrait',8:'Landscape'};
+const METERING_MODES = {0:'Unknown',1:'Average',2:'Center-weighted',3:'Spot',4:'Multi-spot',5:'Pattern',6:'Partial',255:'Other'};
+const FLASH_MAP = {0:'No flash',1:'Flash fired',5:'Flash fired, no strobe',7:'Flash fired, strobe',9:'Flash fired, compulsory',13:'Flash fired, compulsory, no strobe',15:'Flash fired, compulsory, strobe',16:'No flash, compulsory',24:'No flash, auto',25:'Flash fired, auto',29:'Flash fired, auto, no strobe',31:'Flash fired, auto, strobe',32:'No flash function',65:'Flash fired, red-eye reduction',69:'Flash fired, no strobe, red-eye reduction',71:'Flash fired, strobe, red-eye reduction',73:'Flash fired, compulsory, red-eye reduction',77:'Flash fired, compulsory, no strobe, red-eye reduction',79:'Flash fired, compulsory, strobe, red-eye reduction',89:'Flash fired, auto, red-eye reduction',93:'Flash fired, auto, no strobe, red-eye reduction',95:'Flash fired, auto, strobe, red-eye reduction'};
+const ORIENTATION_MAP = {1:'Normal',2:'Mirror horizontal',3:'Rotate 180°',4:'Mirror vertical',5:'Mirror horizontal, rotate 270° CW',6:'Rotate 90° CW',7:'Mirror horizontal, rotate 90° CW',8:'Rotate 270° CW'};
+
+function parseExif(buf) {
+  const dv = new DataView(buf);
+  const tags = [];
+
+  // Check JPEG SOI
+  if (dv.getUint16(0) !== 0xFFD8) return tags;
+
+  let offset = 2;
+  let exifOffset = -1;
+
+  // Scan for APP1 segment
+  while (offset < dv.byteLength - 4) {
+    const marker = dv.getUint16(offset);
+    const segLen = dv.getUint16(offset + 2);
+    if (marker === 0xFFE1) {
+      // Check for 'Exif\0\0'
+      if (dv.getUint32(offset + 4) === 0x45786966 && dv.getUint16(offset + 8) === 0x0000) {
+        exifOffset = offset + 10;
+        break;
+      }
+    }
+    offset += 2 + segLen;
+  }
+
+  if (exifOffset < 0) return tags;
+
+  // Parse TIFF header
+  const tiff = exifOffset;
+  const byteOrder = dv.getUint16(tiff);
+  const le = byteOrder === 0x4949; // Intel LE
+
+  function u16(o) { return dv.getUint16(tiff + o, le); }
+  function u32(o) { return dv.getUint32(tiff + o, le); }
+  function i32(o) { return dv.getInt32(tiff + o, le); }
+
+  function rational(o) {
+    const num = u32(o);
+    const den = u32(o + 4);
+    return den === 0 ? 0 : num / den;
+  }
+  function srational(o) {
+    const num = i32(o);
+    const den = i32(o + 4);
+    return den === 0 ? 0 : num / den;
+  }
+
+  const ifdOffset = u32(4);
+
+  function readValue(type, count, valueOffset) {
+    const size = TYPE_SIZES[type] || 1;
+    const totalBytes = size * count;
+    // Value is inline if <= 4 bytes, else at offset
+    const dataStart = totalBytes <= 4 ? valueOffset : u32(valueOffset);
+
+    if (type === 2) { // ASCII
+      let str = '';
+      for (let i = 0; i < count - 1; i++) {
+        const c = dv.getUint8(tiff + dataStart + i);
+        if (c === 0) break;
+        str += String.fromCharCode(c);
+      }
+      return str;
+    }
+    if (type === 1 || type === 7) { // BYTE/UNDEFINED
+      const arr = [];
+      for (let i = 0; i < Math.min(count, 32); i++) arr.push(dv.getUint8(tiff + dataStart + i));
+      return arr;
+    }
+    if (type === 3) { // SHORT
+      const arr = [];
+      for (let i = 0; i < count; i++) arr.push(dv.getUint16(tiff + dataStart + i * 2, le));
+      return count === 1 ? arr[0] : arr;
+    }
+    if (type === 4) { // LONG
+      const arr = [];
+      for (let i = 0; i < count; i++) arr.push(u32(dataStart + i * 4));
+      return count === 1 ? arr[0] : arr;
+    }
+    if (type === 5) { // RATIONAL
+      const arr = [];
+      for (let i = 0; i < count; i++) arr.push(rational(dataStart + i * 8));
+      return count === 1 ? arr[0] : arr;
+    }
+    if (type === 9) { // SLONG
+      const arr = [];
+      for (let i = 0; i < count; i++) arr.push(i32(dataStart + i * 4));
+      return count === 1 ? arr[0] : arr;
+    }
+    if (type === 10) { // SRATIONAL
+      const arr = [];
+      for (let i = 0; i < count; i++) arr.push(srational(dataStart + i * 8));
+      return count === 1 ? arr[0] : arr;
+    }
+    return null;
+  }
+
+  function readIFD(ifdStart, group, context = 'main') {
+    if (ifdStart + 2 > dv.byteLength - tiff) return;
+    const count = u16(ifdStart);
+    for (let i = 0; i < count; i++) {
+      const entryOffset = ifdStart + 2 + i * 12;
+      if (entryOffset + 12 > dv.byteLength - tiff) break;
+      const tag = u16(entryOffset);
+      const type = u16(entryOffset + 2);
+      const cnt = u32(entryOffset + 4);
+      const valueField = entryOffset + 8; // offset within IFD, not absolute
+
+      // For sub-IFD pointers
+      if ((tag === 0x8769 || tag === 0x8825 || tag === 0xA005) && type === 4) {
+        const subOffset = u32(entryOffset + 8);
+        const subGroup = tag === 0x8825 ? 'GPS' : tag === 0xA005 ? 'Interop' : 'Exif';
+        readIFD(subOffset, subGroup, subGroup);
+        continue;
+      }
+
+      const name = TAG_NAMES[tag] || `Tag_0x${tag.toString(16).toUpperCase().padStart(4,'0')}`;
+      // Skip MakerNote (large binary blob)
+      if (name === 'MakerNote') continue;
+
+      const size = TYPE_SIZES[type] || 1;
+      const totalBytes = size * cnt;
+      const valueOffset = totalBytes <= 4 ? entryOffset + 8 - ifdStart + ifdStart : u32(entryOffset + 8);
+
+      const raw = readValue(type, cnt, entryOffset + 8 - ifdStart);
+      let display = formatValue(tag, name, raw, type, cnt);
+      tags.push({ group, tag, name, raw, display });
+    }
+  }
+
+  function formatValue(tag, name, raw, type, count) {
+    if (raw === null || raw === undefined) return '';
+    if (name === 'Orientation') return ORIENTATION_MAP[raw] || String(raw);
+    if (name === 'ExposureProgram') return EXPOSURE_PROGRAMS[raw] || String(raw);
+    if (name === 'MeteringMode') return METERING_MODES[raw] || String(raw);
+    if (name === 'Flash') return FLASH_MAP[raw] || String(raw);
+    if (name === 'ExposureTime') {
+      if (typeof raw === 'number') {
+        if (raw < 1) return `1/${Math.round(1/raw)}s`;
+        return `${raw}s`;
+      }
+    }
+    if (name === 'FNumber') return typeof raw === 'number' ? `f/${raw.toFixed(1)}` : String(raw);
+    if (name === 'FocalLength') return typeof raw === 'number' ? `${raw.toFixed(1)}mm` : String(raw);
+    if (name === 'FocalLengthIn35mmFilm') return typeof raw === 'number' ? `${raw}mm` : String(raw);
+    if (name === 'GPSLatitude' || name === 'GPSLongitude' || name === 'GPSDestLatitude' || name === 'GPSDestLongitude') {
+      if (Array.isArray(raw) && raw.length === 3) {
+        const d = raw[0], m = raw[1], s = raw[2];
+        return `${d}° ${m}' ${s.toFixed(4)}"`;
+      }
+    }
+    if (name === 'GPSAltitude') return typeof raw === 'number' ? `${raw.toFixed(2)}m` : String(raw);
+    if (name === 'ExifVersion' || name === 'FlashPixVersion') {
+      if (Array.isArray(raw)) return raw.map(b => String.fromCharCode(b)).join('');
+    }
+    if (name === 'UserComment') {
+      if (Array.isArray(raw) && raw.length > 8) return raw.slice(8).map(b => b > 31 && b < 127 ? String.fromCharCode(b) : '').join('').trim() || '[binary]';
+    }
+    if (name === 'ISOSpeedRatings') return typeof raw === 'number' ? `ISO ${raw}` : (Array.isArray(raw) ? `ISO ${raw[0]}` : String(raw));
+    if (name === 'ColorSpace') return raw === 1 ? 'sRGB' : raw === 65535 ? 'Uncalibrated' : String(raw);
+    if (name === 'ResolutionUnit') return {1:'None',2:'inch',3:'centimeter'}[raw] || String(raw);
+    if (name === 'WhiteBalance') return raw === 0 ? 'Auto' : 'Manual';
+    if (name === 'ExposureMode') return {0:'Auto',1:'Manual',2:'Auto bracket'}[raw] || String(raw);
+    if (name === 'SceneCaptureType') return {0:'Standard',1:'Landscape',2:'Portrait',3:'Night scene'}[raw] || String(raw);
+    if (name === 'SensingMethod') return {1:'Undefined',2:'One-chip color area',3:'Two-chip color area',4:'Three-chip color area',5:'Color sequential area',7:'Trilinear',8:'Color sequential linear'}[raw] || String(raw);
+
+    if (Array.isArray(raw)) return raw.join(', ');
+    if (typeof raw === 'number') return Number.isInteger(raw) ? String(raw) : raw.toFixed(4).replace(/\.?0+$/, '');
+    return String(raw);
+  }
+
+  readIFD(ifdOffset, 'IFD0');
+  return tags;
+}
+
+function decimalGPS(tags) {
+  const latTag = tags.find(t => t.name === 'GPSLatitude');
+  const latRef = tags.find(t => t.name === 'GPSLatitudeRef');
+  const lonTag = tags.find(t => t.name === 'GPSLongitude');
+  const lonRef = tags.find(t => t.name === 'GPSLongitudeRef');
+  if (!latTag || !lonTag) return null;
+
+  function dms2dec(arr) {
+    if (!Array.isArray(arr) || arr.length < 3) return null;
+    return arr[0] + arr[1] / 60 + arr[2] / 3600;
+  }
+  let lat = dms2dec(latTag.raw);
+  let lon = dms2dec(lonTag.raw);
+  if (lat === null || lon === null) return null;
+  if (latRef && latRef.raw === 'S') lat = -lat;
+  if (lonRef && lonRef.raw === 'W') lon = -lon;
+  return { lat: lat.toFixed(6), lon: lon.toFixed(6) };
+}
+
+// UI
+function handleDragOver(e) { e.preventDefault(); document.getElementById('drop-zone').classList.add('drag-over'); }
+function handleDragLeave(e) { document.getElementById('drop-zone').classList.remove('drag-over'); }
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if (f) handleFile(f);
+}
+
+function handleFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const buf = e.target.result;
+    const tags = parseExif(buf);
+    displayResult(file, buf, tags);
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+let allTags = [];
+function displayResult(file, buf, tags) {
+  allTags = tags;
+  document.getElementById('output').style.display = '';
+  document.getElementById('empty-msg').style.display = 'none';
+
+  // Thumb
+  const blob = new Blob([buf], { type: file.type });
+  document.getElementById('thumb').src = URL.createObjectURL(blob);
+
+  // File info
+  const sizeFmt = file.size > 1048576 ? `${(file.size/1048576).toFixed(2)} MB` : `${(file.size/1024).toFixed(1)} KB`;
+  const gps = decimalGPS(tags);
+  document.getElementById('file-info').innerHTML = `
+    <strong>Name:</strong> ${file.name}<br/>
+    <strong>Size:</strong> ${sizeFmt}<br/>
+    <strong>Type:</strong> ${file.type || 'image/jpeg'}<br/>
+    <strong>Tags found:</strong> ${tags.length}
+    ${gps ? `<br/><strong>GPS:</strong> ${gps.lat}, ${gps.lon} <a class="gps-link" href="https://maps.google.com/?q=${gps.lat},${gps.lon}" target="_blank" rel="noopener">Open in Maps ↗</a>` : ''}
+  `;
+
+  renderTable(tags);
+}
+
+function renderTable(tags) {
+  const wrap = document.getElementById('exif-table-wrap');
+  if (tags.length === 0) { wrap.innerHTML = '<div class="no-exif">No EXIF data found in this image.</div>'; return; }
+
+  const groups = {};
+  tags.forEach(t => {
+    if (!groups[t.group]) groups[t.group] = [];
+    groups[t.group].push(t);
+  });
+
+  const groupOrder = ['IFD0', 'Exif', 'GPS', 'Interop'];
+  let html = '<table id="exif-table">';
+  groupOrder.forEach(g => {
+    if (!groups[g]) return;
+    html += `<tr><td colspan="2" class="tag-group">${g}</td></tr>`;
+    groups[g].forEach(t => {
+      html += `<tr data-tag="${t.name.toLowerCase()} ${t.display.toLowerCase()}"><td>${t.name}</td><td>${escHtml(String(t.display))}</td></tr>`;
+    });
+  });
+  // Any remaining groups
+  Object.keys(groups).forEach(g => {
+    if (groupOrder.includes(g)) return;
+    html += `<tr><td colspan="2" class="tag-group">${g}</td></tr>`;
+    groups[g].forEach(t => {
+      html += `<tr data-tag="${t.name.toLowerCase()} ${t.display.toLowerCase()}"><td>${t.name}</td><td>${escHtml(String(t.display))}</td></tr>`;
+    });
+  });
+  html += '</table>';
+  wrap.innerHTML = html;
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function filterTags() {
+  const q = document.getElementById('filter-input').value.toLowerCase();
+  document.querySelectorAll('#exif-table tr[data-tag]').forEach(row => {
+    row.style.display = !q || row.dataset.tag.includes(q) ? '' : 'none';
+  });
+}
+
+function copyAll() {
+  const lines = allTags.map(t => `${t.name}\t${t.display}`).join('\n');
+  navigator.clipboard.writeText(lines);
+}
+</script>
+</body>
+</html>

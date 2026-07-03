@@ -198,6 +198,7 @@
     .badge-DevOps    { background: var(--badge-devops);    border-color: #1f6feb; color: #58a6ff; }
     .badge-Math      { background: var(--badge-math);      border-color: #bd561d; color: #ffa657; }
     .badge-Data      { background: var(--badge-data);      border-color: #2ea043; color: #3fb950; }
+    .badge-Reference { background: #1a2535;                border-color: #38bdf8; color: #7dd3fc; }
 
     /* ── Footer ── */
     footer {
@@ -223,6 +224,8 @@
       .hero { padding: 2rem 1rem 1.5rem; }
     }
   </style>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602"
+       crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -233,13 +236,14 @@
 
 <div class="hero">
   <h1>Tools that <em>just work.</em></h1>
-  <p>12 free online utilities for developers — open instantly in the browser, no account required.</p>
+  <p>86 free online utilities for developers — open instantly in the browser, no account required.</p>
 </div>
 
 <main>
   <p class="section-label">All Tools</p>
   <div class="grid" id="grid"></div>
 </main>
+
 
 <footer>
   Built with ❤️ for developers &nbsp;·&nbsp; © 2026 devnestio
@@ -248,76 +252,1090 @@
 <script>
 const tools = [
   {
-    name: "Regex Tester",
-    desc: "Test and debug regular expressions with real-time match highlighting.",
-    url:  "https://regex-tester-dfe.pages.dev",
-    cat:  "Text"
+    "name": "Base64 Encoder / Decoder",
+    "desc": "Encode text or files to Base64 and decode back. Text and file modes, URL-safe mode, MIME line breaks (RFC 2045), drag-and-drop, and UTF-8 multi-byte support.",
+    "url": "https://devnestio.pages.dev/base64-tool/",
+    "cat": "Text"
   },
   {
-    name: "JWT Decoder",
-    desc: "Decode and inspect JSON Web Tokens — header, payload, and signature.",
-    url:  "https://jwt-decoder.pages.dev",
-    cat:  "Security"
+    "name": "JSON Diff Tool",
+    "desc": "Compare two JSON objects side-by-side and highlight the differences.",
+    "url": "https://json-diff-tool-bvs.pages.dev",
+    "cat": "Data"
   },
   {
-    name: "Unix Timestamp Converter",
-    desc: "Convert between Unix timestamps and human-readable date/time formats.",
-    url:  "https://unix-timestamp-converter-37v.pages.dev",
-    cat:  "Time"
+    "name": "SQL Formatter & Beautifier",
+    "desc": "Format and beautify SQL queries instantly — uppercase keywords, proper indentation, minify. 100% in-browser.",
+    "url": "https://sql-formatter-dev.pages.dev",
+    "cat": "Data"
   },
   {
-    name: "Hash Generator",
-    desc: "Generate MD5, SHA-1, SHA-256, and SHA-512 hashes from any string.",
-    url:  "https://hash-generator-745.pages.dev",
-    cat:  "Security"
+    "name": "YAML Formatter & Validator",
+    "desc": "Format, validate, and convert YAML. Syntax highlighting, YAML ↔ JSON conversion, minify. 100% in-browser.",
+    "url": "https://devnestio.pages.dev/yaml-formatter/",
+    "cat": "Data"
   },
   {
-    name: "CSS Color Converter",
-    desc: "Convert colors between HEX, RGB, HSL, and HSV color spaces instantly.",
-    url:  "https://css-color-converter.pages.dev",
-    cat:  "Design"
+    "name": "CSV ↔ JSON Converter",
+    "desc": "Convert CSV to JSON and JSON to CSV. Header detection, type inference, nested object flattening, custom delimiters. 100% in-browser.",
+    "url": "https://devnestio.pages.dev/csv-json-converter/",
+    "cat": "Data"
   },
   {
-    name: "URL Encoder / Decoder",
-    desc: "Encode or decode URLs and query strings with percent-encoding.",
-    url:  "https://url-encoder-decoder-ezs.pages.dev",
-    cat:  "Text"
+    "name": "Markdown Preview",
+    "desc": "Real-time Markdown editor and previewer. Left pane for input, right pane for rendered HTML. Syntax highlighting, tables, code blocks, dark mode. Zero dependencies.",
+    "url": "https://devnestio.pages.dev/markdown-preview/",
+    "cat": "Text"
   },
   {
-    name: "Base64 Encoder / Decoder",
-    desc: "Encode text or binary data to Base64 and decode it back.",
-    url:  "https://base64-encoder-decoder-3yw.pages.dev",
-    cat:  "Text"
+    "name": "HTML Entity Encoder / Decoder",
+    "desc": "Encode text to HTML entities (&amp;amp; &amp;lt; &amp;gt;) and decode them back. Named, decimal, and hex modes. 250+ HTML5 named entities. Real-time, zero dependencies.",
+    "url": "https://html-entity-encoder.pages.dev",
+    "cat": "Text"
   },
   {
-    name: "Cron Expression Builder",
-    desc: "Build and validate cron expressions with a visual schedule preview.",
-    url:  "https://cron-expression-builder.pages.dev",
-    cat:  "DevOps"
+    "name": "IP / CIDR Calculator",
+    "desc": "IPv4 and IPv6 subnet calculator. Network address, broadcast, subnet mask, wildcard, host range, usable hosts, IP class, and type. Binary breakdown with color-coded net/host bits. Subnet splitter, supernet, and prefix reference table.",
+    "url": "https://devnestio.pages.dev/cidr-calculator/",
+    "cat": "DevOps"
   },
   {
-    name: "Number Base Converter",
-    desc: "Convert numbers between binary, octal, decimal, and hexadecimal.",
-    url:  "https://number-base-converter-eo2.pages.dev",
-    cat:  "Math"
+    "name": "CSS Gradient Generator",
+    "desc": "Visual CSS gradient builder. Create linear, radial, and conic gradients with real-time preview. Add/remove color stops, set alpha transparency, choose angles and positions, apply 12 presets, and copy the CSS instantly.",
+    "url": "https://devnestio.pages.dev/css-gradient-generator/",
+    "cat": "Design"
   },
   {
-    name: "String Case Converter",
-    desc: "Transform strings between camelCase, snake_case, PascalCase, and more.",
-    url:  "https://string-case-converter.pages.dev",
-    cat:  "Text"
+    "name": "SVG Wave Generator",
+    "desc": "Visual SVG wave builder for section dividers and hero areas. Choose from Sine, Layered, Shark Fin, Step, and Bumps wave types. Control amplitude, period, height, layers, gradient colors, and flip transforms. Download SVG or PNG and copy CSS background code instantly.",
+    "url": "https://devnestio.pages.dev/svg-wave-generator/",
+    "cat": "Design"
   },
   {
-    name: "JSON Diff Tool",
-    desc: "Compare two JSON objects side-by-side and highlight the differences.",
-    url:  "https://json-diff-tool-bvs.pages.dev",
-    cat:  "Data"
+    "name": "HTTP Header Analyzer",
+    "desc": "Paste HTTP response headers to get an instant security score (0–100), missing header warnings, cache analysis, and recommended values. Covers HSTS, CSP, X-Frame-Options, Referrer-Policy, Permissions-Policy, CORS, Set-Cookie, and more. Includes sample sets for Nginx, Express, and Apache.",
+    "url": "https://devnestio.pages.dev/http-header-analyzer/",
+    "cat": "Security"
   },
   {
-    name: "Lorem Ipsum Generator",
-    desc: "Generate placeholder text — words, sentences, or paragraphs on demand.",
-    url:  "https://lorem-ipsum-generator-adt.pages.dev",
-    cat:  "Text"
+    "name": "Unit Converter",
+    "desc": "Convert between units for length, weight, temperature, volume, area, speed, and data. Real-time conversion — runs entirely in your browser, zero dependencies.",
+    "url": "https://devnestio.pages.dev/unit-converter/",
+    "cat": "Math"
+  },
+  {
+    "name": "Password Strength Checker",
+    "desc": "Check password entropy, detect patterns (keyboard sequences, dates, leet speak), and estimate crack times across 5 attack scenarios. Never leaves your browser.",
+    "url": "https://password-strength-checker.pages.dev",
+    "cat": "Security"
+  },
+  {
+    "name": "URL Parser & Builder",
+    "desc": "Parse any URL into scheme, host, path, query parameters and fragment. Rebuild URLs from components. Encode/decode query params. XSS-safe, browser-only.",
+    "url": "https://url-parser-builder.pages.dev",
+    "cat": "DevOps"
+  },
+  {
+    "name": "Byte & Bit Converter",
+    "desc": "Convert data sizes between bits, bytes, KiB, MiB, GiB, TiB and KB, MB, GB, TB. Supports binary (IEC ÷1024) and decimal (SI ÷1000) standards.",
+    "url": "https://byte-bit-converter.pages.dev",
+    "cat": "Math"
+  },
+  {
+    "name": "Cron Expression Parser",
+    "desc": "Parse and explain cron expressions in plain English. Preview next 10 run times. Supports 5-field and 6-field (with seconds) formats. 16 common examples included.",
+    "url": "https://cron-expression-parser.pages.dev",
+    "cat": "DevOps"
+  },
+  {
+    "name": "Character Counter & Text Analyzer",
+    "desc": "Count characters, words, sentences, paragraphs, and lines. Get reading time, speaking time, unique words, keyword density, and character frequency.",
+    "url": "https://char-counter-analyzer.pages.dev",
+    "cat": "Text"
+  },
+  {
+    "name": "JSON Formatter & Validator",
+    "desc": "Paste JSON to format with syntax highlighting, validate structure, minify, or sort keys alphabetically. Live auto-format on input, copy output button. All in-browser — nothing sent to a server.",
+    "url": "https://devnestio.pages.dev/json-formatter/",
+    "cat": "Dev"
+  },
+  {
+    "name": "CSS Animation Generator",
+    "desc": "Build CSS keyframe animations visually. Set easing, duration, delay, opacity, and translate offsets. Copy ready-to-use @keyframes code instantly — no server, no signup.",
+    "url": "https://css-animation-generator.pages.dev",
+    "cat": "CSS"
+  },
+  {
+    "name": "Color Palette Generator",
+    "desc": "Generate complementary, triadic, analogous, split-complementary, square, and monochromatic palettes from any base color. Copy HEX, RGB, or HSL values with one click. Export as CSS variables.",
+    "url": "https://color-palette-gen-bxd.pages.dev",
+    "cat": "Design"
+  },
+  {
+    "name": "HTML Beautifier & Minifier",
+    "desc": "Format messy HTML with proper indentation (2 spaces, 4 spaces, or tabs), or minify it for production. Preserves script/style/pre blocks. Shows char count, line count, and size savings.",
+    "url": "https://html-beautifier-dev.pages.dev",
+    "cat": "HTML"
+  },
+  {
+    "name": "Number System Converter",
+    "desc": "Instantly convert between binary (base 2), octal (base 8), decimal (base 10), and hexadecimal (base 16). Supports negative numbers, grouped binary nibbles, custom base 2–36, and ASCII lookup.",
+    "url": "https://number-system-converter.pages.dev",
+    "cat": "Numbers"
+  },
+  {
+    "name": "Unix Permissions Calculator",
+    "desc": "Convert chmod octal (755) ↔ symbolic (rwxr-xr-x) instantly. Click bits to toggle owner/group/other permissions and see the chmod command, ls -l style, and binary representation.",
+    "url": "https://devnestio.pages.dev/unix-permissions-calc/",
+    "cat": "DevOps"
+  },
+  {
+    "name": "API Request Tester",
+    "desc": "Send GET, POST, PUT, PATCH, DELETE requests with custom headers and JSON body. View response status, timing, size, formatted JSON with syntax highlighting, and response headers.",
+    "url": "https://api-tester-dev.pages.dev",
+    "cat": "API"
+  },
+  {
+    "name": "Markdown to HTML Converter",
+    "desc": "Convert Markdown to HTML with live side-by-side preview. Supports headings, bold, italic, code blocks with syntax highlighting, tables, blockquotes, and lists. Copy HTML or download as a file.",
+    "url": "https://markdown-to-html-dev.pages.dev",
+    "cat": "Text"
+  },
+  {
+    "name": "Lorem Ipsum Generator",
+    "desc": "Generate placeholder text in paragraphs, sentences, or words. Choose from Latin, Cicero, Business, Tech, or Hipster variants. Copy as plain text or wrapped in HTML paragraph tags.",
+    "url": "https://lorem-ipsum-gen.pages.dev",
+    "cat": "Text"
+  },
+  {
+    "name": "Image Color Picker",
+    "desc": "Upload any image and click to sample pixel colors. Get HEX, RGB, and HSL values instantly. Magnifier lens for precision, palette history to track picked colors, and one-click copy.",
+    "url": "https://image-color-picker-ebm.pages.dev",
+    "cat": "Design"
+  },
+  {
+    "name": "Git Cheat Sheet",
+    "desc": "Searchable Git command reference — 72 commands across Setup, Init & Clone, Staging, Committing, Branching, Merge & Rebase, Remote, Stash, Undoing, and Tags. Dangerous commands highlighted in red. Click any command to copy.",
+    "url": "https://devnestio.pages.dev/git-cheatsheet/",
+    "cat": "DevOps"
+  },
+  {
+    "name": "Env Var Manager",
+    "desc": "Parse .env files, edit key/value pairs in a table editor, detect duplicates and empty values, then export in .env, JSON, or shell export format. Everything runs in the browser.",
+    "url": "https://env-var-manager.pages.dev",
+    "cat": "DevOps"
+  },
+  {
+    "name": "HTTP Status Code Reference",
+    "desc": "Complete HTTP status code reference covering 1xx–5xx. Search by code, name, or keyword. See descriptions, use cases, and RFC specs. Click any card for details and copy the code instantly.",
+    "url": "https://devnestio.pages.dev/http-status-ref/",
+    "cat": "Reference"
+  },
+  {
+    "name": "CSP Generator",
+    "desc": "Build Content Security Policy headers visually. Toggle directives, select sources from preset lists, add custom values, and copy the final Content-Security-Policy header string instantly.",
+    "url": "https://csp-generator.pages.dev",
+    "cat": "Security"
+  },
+  {
+    "name": "Docker Cheatsheet",
+    "desc": "Searchable Docker command reference covering containers, images, networks, volumes, exec, system, and registry. Interactive command builder lets you toggle flags and copy the result.",
+    "url": "https://docker-cheatsheet.pages.dev",
+    "cat": "DevOps"
+  },
+  {
+    "name": "Code Snippet Manager",
+    "desc": "Save, search, tag, and copy code snippets entirely in the browser. Syntax highlighting for 19 languages, tag filtering, local storage persistence. Export/import as JSON. No account needed.",
+    "url": "https://code-snippet-manager-bdd.pages.dev",
+    "cat": "Productivity"
+  },
+  {
+    "name": "Unix Timestamp Converter Pro",
+    "desc": "Convert Unix timestamps to human-readable dates and back. Auto-detects seconds vs milliseconds. 40+ timezones, ISO 8601, RFC 2822, batch conversion, duration calculator, and notable timestamp references.",
+    "url": "https://timestamp-converter-aaz.pages.dev",
+    "cat": "Utilities"
+  },
+  {
+    "name": "Regex Tester",
+    "desc": "Real-time regex testing with live match highlighting, named groups, all flags (g/i/m/s/u/d), 5-color match visualization, zero-width match protection, and quick reference cheat sheet.",
+    "url": "https://devnestio.pages.dev/regex-tester/",
+    "cat": "Developer Tools"
+  },
+  {
+    "name": "JSON Schema Validator",
+    "desc": "Validate JSON against JSON Schema with inline error reporting, Draft-07/2019-09/2020-12 support, syntax highlighting, schema inference from JSON, and 6 ready-to-use sample schemas.",
+    "url": "https://json-schema-validator-abb.pages.dev",
+    "cat": "Developer Tools"
+  },
+  {
+    "name": "cURL Command Builder",
+    "desc": "Build cURL commands visually. Supports all HTTP methods, custom headers, JSON/form/multipart/binary body, Basic/Bearer/API-key/Digest/NTLM auth, 15+ curl options, and single/multi-line/Windows output.",
+    "url": "https://curl-builder-abc.pages.dev",
+    "cat": "Developer Tools"
+  },
+  {
+    "name": "Webhook Tester & Inspector",
+    "desc": "Build and send webhook payloads with 12 platform templates (GitHub, Stripe, Slack, Shopify…). Inspect payload structure, flatten all paths, validate HMAC-SHA256 signatures, and track request history.",
+    "url": "https://webhook-tester-abd.pages.dev",
+    "cat": "Developer Tools"
+  },
+  {
+    "name": "JWT Debugger",
+    "desc": "Decode JWT header and payload with color-coded visualization. Verify HMAC-SHA256/384/512 signatures using the Web Crypto API, inspect registered and custom claims, and check expiry status — all in your browser.",
+    "url": "https://jwt-debugger-abe.pages.dev",
+    "cat": "Security"
+  },
+  {
+    "name": ".htpasswd Generator",
+    "desc": "Generate Apache-compatible .htpasswd entries with bcrypt, MD5-APR1, or SHA1 hashing. Bulk generation from username:password pairs, random password generator, and one-click .htpasswd file download.",
+    "url": "https://htpasswd-generator-abf.pages.dev",
+    "cat": "Security"
+  },
+  {
+    "name": "DNS Lookup Tool",
+    "desc": "Query A, AAAA, MX, TXT, CNAME, NS, SOA, and PTR records for any domain. Choose between Cloudflare (1.1.1.1), Google (8.8.8.8), or Quad9 (9.9.9.9) resolvers. TTL display and copy support.",
+    "url": "https://dns-lookup-abg.pages.dev",
+    "cat": "Network"
+  },
+  {
+    "name": "SSL Certificate Checker",
+    "desc": "Check SSL certificate expiry, issuer, subject alternative names, and chain details by domain lookup (via crt.sh) or PEM paste. Shows days remaining, expiry bar, self-signed detection, and wildcard SANs.",
+    "url": "https://ssl-checker-abh.pages.dev",
+    "cat": "Security"
+  },
+  {
+    "name": "MIME Type Lookup",
+    "desc": "Look up MIME types by file extension or reverse-search by MIME type. 400+ types covering text, image, audio, video, application, font, and model categories. Filter by category, search, and copy instantly.",
+    "url": "https://mime-type-lookup-abi.pages.dev",
+    "cat": "Reference"
+  },
+  {
+    "name": "Password Generator",
+    "desc": "Generate secure passwords with custom length (4–128), charset options (upper/lower/digits/symbols), ambiguous character exclusion, no-repeat mode, strength meter with entropy display, and bulk generation up to 1000 passwords.",
+    "url": "https://password-generator-abj.pages.dev",
+    "cat": "Security"
+  },
+  {
+    "name": "UUID Generator",
+    "desc": "Generate UUIDs in v1 (time-based), v3 (MD5 name-based), v4 (random), and v5 (SHA-1 name-based) formats. Bulk generate up to 1000 UUIDs, produce the NIL UUID, use DNS/URL/OID/X500 namespace presets, and validate any UUID.",
+    "url": "https://uuid-generator-abk.pages.dev",
+    "cat": "Developer"
+  },
+  {
+    "name": "Hash Generator",
+    "desc": "Generate MD5, SHA-1, SHA-256, and SHA-512 hashes from text or file input. Supports HMAC with secret key, hash comparison, uppercase/lowercase output, drag-and-drop file hashing with progress bar, and instant copy.",
+    "url": "https://hash-generator-abl.pages.dev",
+    "cat": "Security"
+  },
+  {
+    "name": "QR Code Generator",
+    "desc": "Generate QR codes for text, URLs, email addresses (mailto: with subject/body), vCards (v3.0 contact), and Wi-Fi credentials. Customize size (128–1024px), foreground/background colors, error correction level (L/M/Q/H), and download as PNG.",
+    "url": "https://qr-code-generator-abm.pages.dev",
+    "cat": "Utilities"
+  },
+  {
+    "name": "Color Converter",
+    "desc": "Convert colors between HEX, RGB, HSL, HSV, and CMYK formats instantly. Includes an interactive color picker, palette history, harmony colors, and CIE Lab values.",
+    "url": "https://color-converter-51e.pages.dev",
+    "cat": "Utilities"
+  },
+  {
+    "name": "Text Case Converter",
+    "desc": "Convert text between 15 naming conventions: camelCase, PascalCase, snake_case, kebab-case, CONSTANT_CASE, Title Case, Sentence case, dot.case, path/case, flatcase, UPPERFLATCASE, Train-Case, COBOL-CASE, aLtErNaTiNg, and tOGGLE. Live conversion with history.",
+    "url": "https://text-case-converter-cjj.pages.dev",
+    "cat": "Text"
+  },
+  {
+    "name": "Crontab Visualizer",
+    "desc": "Parse cron expressions and visualize schedules. See the next 10 run times with relative offsets, get a field-by-field breakdown, and view which days of the month are hit on a calendar. Includes 10 common presets.",
+    "url": "https://crontab-visualizer-bmw.pages.dev",
+    "cat": "DevTools"
+  },
+  {
+    "name": "Image Resizer",
+    "desc": "Resize, crop, and rotate images in your browser using canvas. Supports PNG, JPEG, and WebP output with quality control, aspect ratio lock, scale slider, flip operations, and custom rotation angle. No upload required.",
+    "url": "https://image-resizer-abs.pages.dev",
+    "cat": "Utilities"
+  },
+  {
+    "name": "CSS Flexbox Playground",
+    "desc": "Interactive live editor for all CSS flexbox properties. Adjust flex-direction, justify-content, align-items, wrap, gap, and per-item properties (flex-grow, flex-shrink, flex-basis, align-self, order). Exports clean CSS instantly.",
+    "url": "https://css-flexbox-playground-abt.pages.dev",
+    "cat": "DevTools"
+  },
+  {
+    "name": "ASCII Art Generator",
+    "desc": "Convert text to ASCII art with 10 font styles: Block, Banner, Shadow, Thin Lines, Bubble, Digital, Graffiti, Mini, Slant, and Doom. Customize width, scale (1–3×), and color theme. Copy or download as .txt.",
+    "url": "https://ascii-art-generator-abu.pages.dev",
+    "cat": "Text"
+  },
+  {
+    "name": "Diff Checker",
+    "desc": "Compare two text blocks with LCS-based diffing. Side-by-side, inline, and unified diff views with line numbers. Shows added/removed/unchanged line counts and exports unified diff output.",
+    "url": "https://diff-checker-abv.pages.dev",
+    "cat": "Developer"
+  },
+  {
+    "name": "URL Encoder / Decoder",
+    "desc": "Encode and decode URLs with encodeURIComponent or encodeURI (full URL) mode. Shows a per-character breakdown of what changed, URL part breakdown (protocol/host/path/query/hash), batch mode for multiple lines, and copy output instantly.",
+    "url": "https://url-encoder-decoder-abw.pages.dev",
+    "cat": "Developer"
+  },
+  {
+    "name": "Markdown Table Generator",
+    "desc": "Paste CSV or TSV and instantly generate Markdown tables. Supports comma, tab, semicolon, and pipe separators, per-column alignment (left/center/right/none), add/remove rows and columns, optional cell padding, and one-click copy.",
+    "url": "https://markdown-table-gen.pages.dev",
+    "cat": "Text"
+  },
+  {
+    "name": "Icon Font Viewer",
+    "desc": "Browse and search Font Awesome 6 and Material Icons by name or category. Preview each icon, copy the CSS class name or HTML snippet, and filter by category (Arrows, Developer, Media, Social, UI, etc.).",
+    "url": "https://icon-font-viewer.pages.dev",
+    "cat": "Design"
+  },
+  {
+    "name": "HTTP Mock Server Configurator",
+    "desc": "Define mock HTTP endpoints with method, path, status, headers, and JSON response body. Export as json-server db.json, MSW (Mock Service Worker) handlers, or a ready-to-run Express.js mock server file.",
+    "url": "https://http-mock-server.pages.dev",
+    "cat": "Developer"
+  },
+  {
+    "name": "Text Statistics",
+    "desc": "Instant text analysis: word, character, sentence, and paragraph counts, average word and sentence length, Flesch Reading Ease score with difficulty label, estimated reading time at three speeds, and top keyword frequency list.",
+    "url": "https://text-statistics.pages.dev",
+    "cat": "Text"
+  },
+  {
+    "name": "CSS Grid Generator",
+    "desc": "Visual CSS Grid builder. Set grid-template-columns/rows, column/row gaps, justify/align-items and content, and grid-auto-flow. Click any preview cell to set per-item placement overrides. Copy or download the generated CSS instantly.",
+    "url": "https://css-grid-generator-arc.pages.dev",
+    "cat": "Design"
+  },
+  {
+    "name": "Binary / Hex / Octal Converter",
+    "desc": "Live multi-base converter: Binary, Octal, Decimal, Hexadecimal. Interactive bit viewer with click-to-toggle bits, IEEE 754 float parser (32/64-bit), and two's complement calculator.",
+    "url": "https://binary-converter-alg.pages.dev",
+    "cat": "Math"
+  },
+  {
+    "name": "SSH Key Generator Helper",
+    "desc": "Build the exact ssh-keygen command for your needs. Choose key type (Ed25519, RSA, ECDSA), bit size, file path, passphrase options, and KDF rounds. Includes known_hosts, authorized_keys, and ssh-agent tips.",
+    "url": "https://ssh-keygen-helper.pages.dev",
+    "cat": "DevOps"
+  },
+  {
+    "name": "Nginx Config Generator",
+    "desc": "Generate production-ready Nginx server blocks: static site, reverse proxy, and PHP-FPM modes. Toggle SSL/TLS, gzip, browser caching, security headers, rate limiting, and dotfile denial. Copy or download instantly.",
+    "url": "https://nginx-config-gen.pages.dev",
+    "cat": "DevOps"
+  },
+  {
+    "name": "Docker Compose Generator",
+    "desc": "Visual multi-service docker-compose.yml builder. Configure images, ports, volumes, environment variables, networks, restart policies, health checks, and depends_on. Quick presets for Node+Postgres, WordPress, Redis, and Nginx.",
+    "url": "https://docker-compose-gen-7l6.pages.dev",
+    "cat": "DevOps"
+  },
+  {
+    "name": "API Response Formatter",
+    "desc": "Pretty-print, minify, and validate JSON, XML, and YAML API responses. Syntax highlighting, line/size stats, and a side-by-side diff mode to compare two responses. Paste, format, copy — instantly.",
+    "url": "https://api-response-formatter.pages.dev",
+    "cat": "Data"
+  },
+  {
+    "name": "Makefile Generator",
+    "desc": "Generate Makefiles with common targets: build, test, clean, lint, fmt, docker, release, ci. Language templates for Go, Python, Node.js, Rust, and C/C++. Configure targets, project name, Docker image, and download instantly.",
+    "url": "https://makefile-generator-ach.pages.dev",
+    "cat": "DevOps"
+  },
+  {
+    "name": ".gitignore Generator",
+    "desc": "Generate .gitignore files from 34+ language and framework templates: Go, Python, Node, Rust, Java, React, Django, Terraform, Docker, and more. Search by name or category, merge multiple templates, and download instantly.",
+    "url": "https://gitignore-gen-aci.pages.dev",
+    "cat": "DevOps"
+  },
+  {
+    "name": "Character Counter Pro",
+    "desc": "Real-time character, word, sentence, paragraph, and line counter. Check Twitter/LinkedIn/Instagram limits with progress bars, estimate reading time at 3 speeds, and view top word frequency.",
+    "url": "https://character-counter-acj.pages.dev",
+    "cat": "Text"
+  },
+  {
+    "name": "Number Formatter",
+    "desc": "Format any number in 20+ ways: locale-aware (15 locales), currency (15 currencies), scientific notation, compact (1M/1B), bytes/KB/MB/GB, hexadecimal, binary, octal, ordinal, Roman numerals, and more.",
+    "url": "https://number-formatter-ack.pages.dev",
+    "cat": "Math"
+  },
+  {
+    "name": "Color Palette Extractor",
+    "desc": "Upload any image to extract its dominant color palette using k-means clustering. Get HEX, RGB, and HSL values for each color, adjust palette size (2–16 colors), and download the palette as a PNG.",
+    "url": "https://color-palette-extractor-8es.pages.dev",
+    "cat": "Design"
+  },
+  {
+    "name": "Font Pairing Tool",
+    "desc": "Discover perfect Google Fonts pairings for your projects. Browse curated heading + body font combinations, preview live with custom text, adjust sizes and colors, then export ready-to-use CSS @import or full HTML templates.",
+    "url": "https://font-pairing-tool-33r.pages.dev",
+    "cat": "Design"
+  },
+  {
+    "name": "Image to Base64 Converter",
+    "desc": "Convert any image file to Base64 encoded string instantly. Supports PNG, JPG, GIF, WebP, SVG, BMP and more. Get Data URI, raw Base64, CSS background, or HTML img tag output with one click.",
+    "url": "https://image-to-base64-acn.pages.dev",
+    "cat": "Design"
+  },
+  {
+    "name": "SVG Code Editor",
+    "desc": "Edit SVG code with live preview, syntax-aware formatting, minify, optimize, and export. Includes built-in samples for circles, gradients, animations and patterns. Download as SVG or PNG.",
+    "url": "https://svg-editor-aco.pages.dev",
+    "cat": "Design"
+  },
+  {
+    "name": "Placeholder Image Generator",
+    "desc": "Generate custom placeholder images in any size, color, and text. Choose flat, rounded, circle, diagonal, or grid styles. Download as SVG or PNG, or copy as HTML or Data URI.",
+    "url": "https://placeholder-image-gen-acp.pages.dev",
+    "cat": "Design"
+  },
+  {
+    "name": "Meta Tag Generator",
+    "desc": "Generate complete HTML meta tags for SEO, Open Graph (Facebook/LinkedIn), and Twitter Cards. Live preview shows how your page looks in Google search, social shares, and Twitter. Copy all tags instantly.",
+    "url": "https://meta-tag-generator-acq.pages.dev",
+    "cat": "SEO"
+  },
+  {
+    "name": "Favicon Generator",
+    "desc": "Create favicons from text, emoji, or uploaded images. Choose background shape (square, rounded, circle, transparent), customize colors and padding, then download all sizes (16–192px) as PNG with HTML tags.",
+    "url": "https://favicon-generator-acr.pages.dev",
+    "cat": "Design"
+  },
+  {
+    "name": "CSS Unit Converter",
+    "desc": "Convert between all CSS units instantly: px, rem, em, vw, vh, vmin, vmax, pt, pc, cm, mm, in, %. Set custom base font size and viewport dimensions. Includes unit reference table and copy-per-unit.",
+    "url": "https://css-unit-converter-acs.pages.dev",
+    "cat": "CSS"
+  },
+  {
+    "name": "CSS Box Shadow Generator",
+    "desc": "Build multi-layer CSS box shadows with live preview. Control offset, blur, spread, color, opacity and inset per layer. Choose from presets or design from scratch. Copy CSS instantly.",
+    "url": "https://box-shadow-generator-act.pages.dev",
+    "cat": "CSS"
+  },
+  {
+    "name": "Text Diff Viewer",
+    "desc": "Compare two texts side by side with LCS-based diff. Line-by-line and word-level highlights, side-by-side and inline modes, swap and clear buttons, copy diff output.",
+    "url": "https://devnestio.pages.dev/text-diff/",
+    "cat": "Text"
+  },
+  {
+    "name": "Cron Expression Builder",
+    "desc": "Build cron expressions visually — toggle fields, explain schedule in plain English, preview next 10 run times. Supports standard 5-field and extended 6-field syntax.",
+    "url": "https://devnestio.pages.dev/cron-expression-builder/",
+    "cat": "DevOps"
+  },
+  {
+    "name": "IP Address Info",
+    "desc": "Look up any IP address to get geolocation (country, city, region), ISP, ASN, timezone, and more. Shows your own IP on load, links to map, keeps lookup history.",
+    "url": "https://devnestio.pages.dev/ip-address-info/",
+    "cat": "Network"
+  },
+  {
+    "name": "CSS Specificity Calculator",
+    "desc": "Calculate specificity scores for CSS selectors. See (a,b,c) breakdown by ID, class, and element tokens. Compare multiple selectors to find which rule wins.",
+    "url": "https://devnestio.pages.dev/css-specificity-calculator/",
+    "cat": "CSS"
+  },
+  {
+    "name": "Aspect Ratio Calculator",
+    "desc": "Calculate aspect ratios from any WxH dimensions, resize while preserving ratio, and explore 12 common ratios (16:9, 4:3, 1:1, etc.) with visual preview.",
+    "url": "https://devnestio.pages.dev/aspect-ratio-calculator/",
+    "cat": "Design"
+  },
+  {
+    "name": "Code Snippet Formatter",
+    "desc": "Syntax-highlight code snippets for sharing. 19 languages, 6 themes (One Dark, Dracula, Nord, etc.), line numbers, window frame, and PNG export.",
+    "url": "https://devnestio.pages.dev/code-snippet-formatter/",
+    "cat": "Code"
+  },
+  {
+    "name": "Keyboard Shortcut Reference",
+    "desc": "Searchable keyboard shortcut reference for VS Code, Chrome, and Mac. 150+ shortcuts organized by app and category with instant copy.",
+    "url": "https://devnestio.pages.dev/keyboard-shortcut-ref/",
+    "cat": "Productivity"
+  },
+  {
+    "name": "Color Contrast Checker",
+    "desc": "Check foreground/background color contrast for WCAG AA and AAA compliance. Live preview, hex/RGB display, and all four WCAG 2.1 levels at once.",
+    "url": "https://devnestio.pages.dev/color-contrast-checker/",
+    "cat": "Design"
+  },
+  {
+    "name": "JWT Decoder",
+    "desc": "Decode and inspect JWT tokens instantly. View color-coded header, payload, and signature. Expiry check, claim descriptions, syntax-highlighted JSON, and RFC 7519 reference.",
+    "url": "https://devnestio.pages.dev/jwt-decoder/",
+    "cat": "Security"
+  },
+  {
+    "name": "Hash Generator",
+    "desc": "Generate MD5, SHA-1, SHA-256, SHA-384, SHA-512 hashes from text or files. Drag-and-drop file support, uppercase/lowercase toggle, hash compare/verify, algorithm reference table.",
+    "url": "https://devnestio.pages.dev/hash-generator/",
+    "cat": "Security"
+  },
+  {
+    "name": "Lorem Ipsum Generator",
+    "desc": "Generate lorem ipsum placeholder text in paragraphs, sentences, or words. Classic opening, HTML <p> tags option, quick counts, regenerate, and one-click copy.",
+    "url": "https://devnestio.pages.dev/lorem-ipsum-gen/",
+    "cat": "Text"
+  },
+  {
+    "name": "URL Encoder / Decoder",
+    "desc": "Encode and decode URLs with encodeURIComponent or encodeURI. URL breakdown into parts, query string builder, swap/copy, and encoding reference table.",
+    "url": "https://devnestio.pages.dev/url-encoder/",
+    "cat": "Developer Tools"
+  },
+  {
+    "name": "JWT Creator & Signer",
+    "desc": "Create and sign JSON Web Tokens with HS256, HS384, or HS512. Edit header and payload, generate random secrets, verify existing tokens, expiry check. Browser-only, uses Web Crypto API.",
+    "url": "https://devnestio.pages.dev/jwt-creator/",
+    "cat": "Security"
+  },
+  {
+    "name": "HTTP Cookie Inspector",
+    "desc": "Parse Set-Cookie headers into structured attributes: name, value, expires, max-age, domain, path, Secure, HttpOnly, SameSite. Security score with XSS/CSRF risk analysis.",
+    "url": "https://devnestio.pages.dev/cookie-inspector/",
+    "cat": "Developer Tools"
+  },
+  {
+    "name": "Robots.txt Generator",
+    "desc": "Build robots.txt files visually. Select bots (Googlebot, GPTBot, CCBot, anthropic-ai), add Disallow/Allow paths, set crawl-delay and sitemap URL. Common templates included.",
+    "url": "https://devnestio.pages.dev/robots-txt-gen/",
+    "cat": "SEO"
+  },
+  {
+    "name": "JSON to TypeScript",
+    "desc": "Convert JSON objects to TypeScript interfaces. Auto-detects string, number, boolean, null, nested objects and arrays. Optional, readonly, export, semicolon options. Syntax highlighted output.",
+    "url": "https://devnestio.pages.dev/json-to-typescript/",
+    "cat": "Developer Tools"
+  },
+  {
+    "name": "CSS Minifier & Beautifier",
+    "desc": "Minify CSS by removing comments, whitespace, and trailing semicolons. Beautify minified CSS back to readable format. Shows byte savings and compression ratio.",
+    "url": "https://devnestio.pages.dev/css-minifier/",
+    "cat": "CSS"
+  },
+  {
+    "name": "TOTP Generator",
+    "desc": "Generate Time-based One-Time Passwords (TOTP/2FA) from a Base32 secret key. RFC 6238 compliant, supports SHA-1/256/512, 6/8 digits, 30/60s periods. Browser-only.",
+    "url": "https://devnestio.pages.dev/totp-generator/",
+    "cat": "Security"
+  },
+  {
+    "name": "Base32 Encoder / Decoder",
+    "desc": "Encode text to Base32 and decode Base32 back to text. RFC 4648 compliant. Supports standard and hex (extended) alphabets, optional padding. Browser-only.",
+    "url": "https://devnestio.pages.dev/base32-encoder/",
+    "cat": "Encoding"
+  },
+  {
+    "name": ".htaccess Generator",
+    "desc": "Generate Apache .htaccess configuration files. Toggle sections for redirects, force HTTPS, basic auth, CORS headers, custom error pages, and directory listing.",
+    "url": "https://devnestio.pages.dev/htaccess-gen/",
+    "cat": "Server"
+  },
+  {
+    "name": "OpenAPI / Swagger Validator",
+    "desc": "Validate OpenAPI 3.0/3.1 and Swagger 2.0 documents. Checks required fields, path syntax, operation IDs, response codes, and schemas. Browser-only, no upload.",
+    "url": "https://devnestio.pages.dev/openapi-validator/",
+    "cat": "API"
+  },
+  {
+    "name": "SVG Path Command Inspector",
+    "desc": "Parse and inspect SVG path 'd' attribute commands. View M, L, C, Q, A, Z commands with parameters, preview the shape, and visualize control points.",
+    "url": "https://devnestio.pages.dev/svg-path-editor/",
+    "cat": "SVG"
+  },
+  {
+    "name": "XML Formatter & Validator",
+    "desc": "Format, minify, and validate XML in your browser. Syntax-highlighted output with configurable indentation (2/4 spaces or tab). Detects parse errors. Zero upload.",
+    "url": "https://devnestio.pages.dev/xml-formatter/",
+    "cat": "Format"
+  },
+  {
+    "name": "CSS Unit Converter",
+    "desc": "Convert between CSS units: px, rem, em, vw, vh, pt, pc, cm, mm, in. Set custom base font size, parent font size, and viewport dimensions. Instant conversion.",
+    "url": "https://devnestio.pages.dev/px-rem-converter/",
+    "cat": "CSS"
+  },
+  {
+    "name": "Text Statistics & Readability",
+    "desc": "Analyze text: word count, character count, sentences, paragraphs, reading time, unique words, top keywords, and Flesch Reading Ease score. Browser-only.",
+    "url": "https://devnestio.pages.dev/text-stats/",
+    "cat": "Text"
+  },
+  {
+    "name": "JSON ↔ CSV Converter",
+    "desc": "Convert JSON arrays to CSV and CSV back to JSON. Configurable delimiter (comma, semicolon, tab, pipe), quote style, BOM for Excel, and header row. Preview table included.",
+    "url": "https://devnestio.pages.dev/json-to-csv/",
+    "cat": "JSON"
+  },
+  {
+    "name": "URL Slug Generator",
+    "desc": "Convert text to URL-friendly slugs or identifiers. Supports kebab-case, snake_case, camelCase, PascalCase, dot.case, UPPER_SNAKE, and path/case. Handles accents and batch conversion.",
+    "url": "https://devnestio.pages.dev/slug-generator/",
+    "cat": "Text"
+  },
+  {
+    "name": "Semantic Version Calculator",
+    "desc": "Parse, bump (major/minor/patch/pre-release), compare, and validate semver strings. Supports ^ and ~ range constraints. Clickable bump cards and version history. Browser-only.",
+    "url": "https://devnestio.pages.dev/semver-calc/",
+    "cat": "DevOps"
+  },
+  {
+    "name": "Line Sorter & Transformer",
+    "desc": "Sort, deduplicate, reverse, shuffle, filter by regex, find/replace, and add prefix/suffix to text lines. Supports numeric and length-based sort. Browser-only.",
+    "url": "https://devnestio.pages.dev/line-sorter/",
+    "cat": "Text"
+  },
+  {
+    "name": "Markdown to HTML Converter",
+    "desc": "Convert Markdown to HTML with live preview. Supports headings, bold, italic, code blocks, tables, blockquotes, lists, and links. Syntax-highlighted HTML output. Browser-only.",
+    "url": "https://devnestio.pages.dev/markdown-to-html/",
+    "cat": "Text"
+  },
+  {
+    "name": "YAML ↔ JSON Converter",
+    "desc": "Convert between YAML and JSON instantly. Auto-detects input format, supports nested objects, arrays, and all scalar types. Sort keys, choose indent, download output. Browser-only.",
+    "url": "https://devnestio.pages.dev/yaml-json-converter/",
+    "cat": "Data"
+  },
+  {
+    "name": "Bitwise Calculator",
+    "desc": "AND, OR, XOR, NOT, NAND, NOR, XNOR, shift left/right, arithmetic shift, rotate left/right on 32-bit integers. Visual bit grid with clickable bits. Hex, decimal, binary, octal output.",
+    "url": "https://devnestio.pages.dev/bitwise-calc/",
+    "cat": "Developer Tools"
+  },
+  {
+    "name": "ANSI Color Code Generator",
+    "desc": "Generate ANSI terminal escape codes for colored and styled output. 8-color, 256-color, and RGB truecolor modes. Bold, italic, underline, blink, reverse. Live preview with bash, Python, and raw output.",
+    "url": "https://devnestio.pages.dev/ansi-color-gen/",
+    "cat": "Developer Tools"
+  },
+  {
+    "name": "JSONPath Tester",
+    "desc": "Test JSONPath expressions against JSON data live in your browser. Dot notation, bracket notation, wildcards, recursive descent, array slices, union, and filter expressions. Shows matched paths and values.",
+    "url": "https://devnestio.pages.dev/jsonpath-tester/",
+    "cat": "JSON"
+  },
+  {
+    "name": "HTML to Markdown Converter",
+    "desc": "Convert HTML markup to clean Markdown in your browser. Supports headings, bold, italic, links, images, lists, tables, code blocks, blockquotes, and strikethrough. Fenced or indented code blocks.",
+    "url": "https://devnestio.pages.dev/html-to-markdown/",
+    "cat": "Text"
+  },
+  {
+    "name": "Unicode Character Search",
+    "desc": "Search Unicode characters by name, codepoint (U+XXXX), or paste a character. Shows UTF-8 bytes, UTF-16 code units, HTML entity, JS escape, CSS escape, and Unicode block. 500+ named characters.",
+    "url": "https://devnestio.pages.dev/unicode-search/",
+    "cat": "Developer Tools"
+  },
+  {
+    "name": "IPv6 Address Calculator",
+    "desc": "Expand or compress IPv6 addresses, calculate network prefix and host range, view binary bit map, and generate EUI-64 interface IDs from MAC addresses. Detects address type (link-local, multicast, etc.).",
+    "url": "https://devnestio.pages.dev/ipv6-calc/",
+    "cat": "Network"
+  },
+  {
+    "name": "Number to Words Converter",
+    "desc": "Convert any number to English words. Supports integers up to decillions, decimal fractions, negative numbers, ordinals (1st, 2nd…), and currency amounts in USD, EUR, and GBP. Browser-only.",
+    "url": "https://devnestio.pages.dev/number-to-words/",
+    "cat": "Text"
+  },
+  {
+    "name": "Percentage Calculator",
+    "desc": "Six percentage calculation modes: X% of Y, X is what percent of Y, percentage change, add percent (e.g. tax), subtract percent (e.g. discount), and tip calculator with per-person split.",
+    "url": "https://devnestio.pages.dev/percent-calc/",
+    "cat": "Math"
+  },
+  {
+    "name": "CSS Triangle Generator",
+    "desc": "Generate pure CSS triangles in 8 directions using the classic border trick or modern clip-path. Set size and color, get copy-ready CSS instantly with a live preview. No dependencies.",
+    "url": "https://devnestio.pages.dev/css-triangle-gen/",
+    "cat": "CSS"
+  },
+  {
+    "name": "Image EXIF Viewer",
+    "desc": "View EXIF metadata from JPEG and TIFF images without uploading anything. Read camera make/model, shutter speed, aperture, ISO, GPS coordinates, and dozens more tags. Fully local.",
+    "url": "https://devnestio.pages.dev/exif-viewer/",
+    "cat": "Image"
+  },
+  {
+    "name": "Morse Code Converter",
+    "desc": "Convert text to Morse code and decode Morse back to text. Supports all letters, digits, and punctuation. Includes Web Audio API playback with adjustable WPM speed and a visual flash indicator.",
+    "url": "https://devnestio.pages.dev/morse-code/",
+    "cat": "Text"
+  },
+  {
+    "name": "Roman Numeral Converter",
+    "desc": "Convert between Arabic numbers and Roman numerals. Supports 1–3,999,999 with extended vinculum notation. Step-by-step breakdown shows how each symbol contributes to the value. Browser-only.",
+    "url": "https://devnestio.pages.dev/roman-numeral/",
+    "cat": "Math"
+  },
+  {
+    "name": "CSS Filter Generator",
+    "desc": "Build CSS filter() declarations visually. Adjust brightness, contrast, blur, saturation, hue-rotate, sepia, grayscale, invert, opacity, and drop-shadow with sliders. Live preview and copy-ready CSS.",
+    "url": "https://devnestio.pages.dev/css-filter-gen/",
+    "cat": "CSS"
+  },
+  {
+    "name": "Luhn Algorithm Checker",
+    "desc": "Validate numbers using the Luhn (mod 10) checksum algorithm. Checks credit cards, IMEI codes, and barcodes. Generate valid check digits from a prefix. Step-by-step digit breakdown included.",
+    "url": "https://devnestio.pages.dev/luhn-checker/",
+    "cat": "Developer Tools"
+  },
+  {
+    "name": "Timezone Converter",
+    "desc": "Convert time between any world timezones using the browser's Intl API. Add multiple target zones, see UTC offsets, and convert any date and time instantly. Includes ISO 8601 UTC output.",
+    "url": "https://devnestio.pages.dev/timezone-converter/",
+    "cat": "Developer Tools"
+  },
+  {
+    "name": "TCP/UDP Port Reference",
+    "desc": "Searchable reference of well-known TCP and UDP port numbers. Filter by port number, protocol, service name, or keyword. Covers 100+ ports from system ports to modern developer services.",
+    "url": "https://devnestio.pages.dev/tcp-port-ref/",
+    "cat": "Network"
+  },
+  {
+    "name": "CSS Text Shadow Generator",
+    "desc": "Build multi-layer CSS text-shadow declarations visually. Adjust offset, blur, color, and opacity per layer with sliders. Live preview on custom text with multiple background options. Copy-ready CSS output.",
+    "url": "https://devnestio.pages.dev/css-text-shadow/",
+    "cat": "CSS"
+  },
+  {
+    "name": "CSS Border Radius Generator",
+    "desc": "Build CSS border-radius declarations visually. Set each corner independently or link all corners. Supports px, %, em, rem units. One-click presets for pill, circle, blob, and directional radii. Copy-ready CSS shorthand.",
+    "url": "https://devnestio.pages.dev/css-border-radius/",
+    "cat": "CSS"
+  },
+  {
+    "name": "Nano ID Generator",
+    "desc": "Generate Nano IDs, ULIDs, hex tokens, and custom-alphabet IDs in the browser. Configure length, alphabet, and batch count. Includes ULID (lexicographically sortable) and cryptographically random hex tokens. Zero dependencies.",
+    "url": "https://devnestio.pages.dev/nanoid-gen/",
+    "cat": "Developer Tools"
+  },
+  {
+    "name": "HTTP Headers Reference",
+    "desc": "Searchable reference of 100+ HTTP request and response headers. Filter by direction (request/response/both) and category (Auth, Caching, CORS, Security, etc.). Shows description and example value. Click any header to copy.",
+    "url": "https://devnestio.pages.dev/http-headers-ref/",
+    "cat": "Network"
+  },
+  {
+    "name": "CSS Easing Visualizer",
+    "desc": "Visualize CSS easing functions interactively. Drag cubic-bezier control points or build steps() functions. Animated ball preview with adjustable duration, 12 named presets (ease-in, ease-out, bounce, expo), and copy-ready CSS.",
+    "url": "https://devnestio.pages.dev/css-easing-viz/",
+    "cat": "CSS"
+  },
+  {
+    "name": "CSS Clip Path Generator",
+    "desc": "Build CSS clip-path shapes visually. Drag polygon handles on a canvas, or configure circle, ellipse, and inset shapes with sliders. 8 polygon presets (triangle, diamond, star, hexagon, arrow…). Copy clip-path value or full CSS declaration.",
+    "url": "https://devnestio.pages.dev/css-clip-path/",
+    "cat": "CSS"
+  },
+  {
+    "name": "ASCII Table Reference",
+    "desc": "Interactive ASCII table with decimal, hex, octal, and binary values for all 128 characters. Filter by control vs printable, search by char, decimal, or hex. Toggle column visibility. Click any row to copy the character.",
+    "url": "https://devnestio.pages.dev/ascii-table-ref/",
+    "cat": "Reference"
+  },
+  {
+    "name": "Keyboard Event Tester",
+    "desc": "Inspect keyboard events in real time. See key, code, keyCode, which, charCode, location, and active modifiers for every keydown, keypress, and keyup. Scrollable event log with per-type filtering. Zero dependencies.",
+    "url": "https://devnestio.pages.dev/keyboard-event-tester/",
+    "cat": "Developer Tools"
+  },
+  {
+    "name": "Git Commit Message Helper",
+    "desc": "Build Conventional Commits messages interactively. Pick type (feat/fix/docs/…), add scope, mark breaking changes, write body and footer. Live validation: length, imperative mood, no trailing period. Copy message or full git commit command.",
+    "url": "https://devnestio.pages.dev/git-commit-helper/",
+    "cat": "Developer Tools"
+  },
+  {
+    "name": "CSS Background Patterns",
+    "desc": "Generate pure-CSS background patterns: dots, grid, lines, checkerboard, diagonal stripes, zigzag, cross, triangles, and hexagons. Customize two colors and size. Live preview with thumbnail grid. Copy-ready CSS, zero images.",
+    "url": "https://devnestio.pages.dev/css-bg-patterns/",
+    "cat": "CSS"
+  },
+  {
+    "name": "Color Blindness Simulator",
+    "desc": "Simulate how colors appear to people with color vision deficiencies. Covers Deuteranopia, Protanopia, Tritanopia, Achromatopsia, and Deuteranomaly. Enter individual colors or load a palette. Presets for rainbow, traffic lights, UI, and brand palettes.",
+    "url": "https://devnestio.pages.dev/color-blindness-sim/",
+    "cat": "Design"
+  },
+  {
+    "name": "Type Scale Generator",
+    "desc": "Generate typographic scales for CSS. Choose from 8 named ratios (Minor Second to Golden Ratio), set base size and unit (px, rem, em), configure steps above and below base. Outputs CSS custom properties, Tailwind config, or SCSS map.",
+    "url": "https://devnestio.pages.dev/type-scale-gen/",
+    "cat": "Design"
+  },
+  {
+    "name": "CSS Selectors Reference",
+    "desc": "Searchable reference of 70+ CSS selectors: basic, combinators, attribute, pseudo-classes (:hover, :nth-child, :has, :is, :where…), and pseudo-elements (::before, ::marker, ::part). Filter by category, browser support. Click to copy.",
+    "url": "https://devnestio.pages.dev/css-selectors-ref/",
+    "cat": "Reference"
+  },
+  {
+    "name": "cURL to Fetch Converter",
+    "desc": "Convert cURL commands to JavaScript fetch() calls instantly. Handles -H headers, -d body, -X method, --data-raw, -u auth. Options for async/await, try/catch wrapper, and auto JSON parsing. 5 built-in examples.",
+    "url": "https://devnestio.pages.dev/curl-to-fetch/",
+    "cat": "Developer Tools"
+  },
+  {
+    "name": "Responsive Breakpoints Reference",
+    "desc": "Compare CSS breakpoints from Bootstrap 5, Tailwind CSS, Material UI, Bulma, and Chakra UI side-by-side. Interactive viewport ruler shows your current window width. Click any media query to copy it. Covers sm, md, lg, xl and more.",
+    "url": "https://devnestio.pages.dev/breakpoints-ref/",
+    "cat": "Reference"
+  },
+  {
+    "name": "CSS Named Colors Reference",
+    "desc": "Browse all 148 CSS named colors — from aliceblue to yellowgreen. Search by name or hex value. Sort by hue, lightness, or saturation. Click any swatch to open a detail panel with HEX, RGB, and HSL values ready to copy.",
+    "url": "https://devnestio.pages.dev/css-named-colors/",
+    "cat": "CSS Tools"
+  },
+  {
+    "name": "AES Encrypt & Decrypt",
+    "desc": "Browser-based AES-256-GCM encryption using the Web Crypto API. Derive keys with PBKDF2 (100K iterations). Encrypt plaintext to base64 ciphertext or decrypt it back. No data leaves your browser — fully client-side.",
+    "url": "https://devnestio.pages.dev/aes-encrypt/",
+    "cat": "Security"
+  },
+  {
+    "name": "Markdown Cheat Sheet",
+    "desc": "Complete CommonMark and GitHub Flavored Markdown reference. Side-by-side syntax and live preview for headings, emphasis, links, images, code blocks, tables, task lists, blockquotes, and more. Filter by category or search.",
+    "url": "https://devnestio.pages.dev/markdown-cheatsheet/",
+    "cat": "Reference"
+  },
+  {
+    "name": "Date Calculator",
+    "desc": "Calculate days between two dates with optional business-day counting. Or add and subtract years, months, weeks, and days from any date. Shows the result with day of week, ISO format, Unix timestamp, and ISO week number.",
+    "url": "https://devnestio.pages.dev/date-calc/",
+    "cat": "Utilities"
+  },
+  {
+    "name": "HTML Input Types Reference",
+    "desc": "Explore all 22 HTML input types with live interactive demos and key attributes. Filter by category (Text, Numeric, Date & Time, Button, etc.) or search by type name. Each entry includes a copyable HTML code snippet.",
+    "url": "https://devnestio.pages.dev/html-input-ref/",
+    "cat": "Reference"
+  },
+  {
+    "name": "HTTP Methods Reference",
+    "desc": "Complete reference for all 9 HTTP methods — GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS, CONNECT, TRACE. Includes a safety and idempotency matrix, request body support, cacheability, and real-world use cases with example request snippets.",
+    "url": "https://devnestio.pages.dev/http-methods-ref/",
+    "cat": "Reference"
+  },
+  {
+    "name": "CSS Grid Cheat Sheet",
+    "desc": "All 30 CSS Grid Layout properties — container and item — with allowed values, descriptions, and copy-ready examples. Covers grid-template-columns, grid-area, gap, auto-flow, justify/align properties, and the repeat(), minmax(), fit-content() functions.",
+    "url": "https://devnestio.pages.dev/css-grid-cheatsheet/",
+    "cat": "CSS Tools"
+  },
+  {
+    "name": "CSS Flexbox Cheat Sheet",
+    "desc": "All 18 CSS Flexbox properties — container and item — with values and examples. Covers flex-direction, flex-wrap, justify-content, align-items, flex shorthand, flex-grow, flex-shrink, flex-basis, order, and alignment properties.",
+    "url": "https://devnestio.pages.dev/flexbox-cheatsheet/",
+    "cat": "CSS Tools"
+  },
+  {
+    "name": "HTML5 Semantic Elements Reference",
+    "desc": "60+ HTML5 semantic elements with descriptions, ARIA roles, and usage examples. Covers Document Structure (header, main, nav, aside), Text Content, Inline Text, Media elements (video, audio, picture, canvas), Forms, and Interactive elements.",
+    "url": "https://devnestio.pages.dev/html-semantic-ref/",
+    "cat": "Reference"
+  },
+  {
+    "name": "Color Theory Wheel",
+    "desc": "Interactive color theory wheel for generating color harmonies. Pick a base color by clicking the wheel or entering a HEX value. Generates Complementary, Split Complementary, Analogous, Triadic, Tetradic, and Tints & Shades palettes with CSS variable output.",
+    "url": "https://devnestio.pages.dev/color-wheel/",
+    "cat": "CSS Tools"
+  },
+  {
+    "name": "CSS Custom Properties Reference",
+    "desc": "Comprehensive guide to CSS custom properties (variables) — declaring and using var(), fallback values, scoping, @property, design tokens, dark mode theming, JavaScript interop with getPropertyValue/setProperty, and common gotchas.",
+    "url": "https://devnestio.pages.dev/css-variables-ref/",
+    "cat": "CSS Tools"
+  },
+  {
+    "name": "Regex Cheat Sheet",
+    "desc": "Regular expression quick reference — anchors (^, $, \\b), character classes (\\d, \\w, \\s, []), quantifiers (*, +, ?, {n,m}), capturing/non-capturing groups, lookaheads/lookbehinds, flags (g, i, m, s, u), and common patterns for email, URL, IP, hex color.",
+    "url": "https://devnestio.pages.dev/regex-cheatsheet/",
+    "cat": "Reference"
+  },
+  {
+    "name": "SQL Cheat Sheet",
+    "desc": "Essential SQL reference with copy-ready examples — SELECT/WHERE/ORDER BY/LIMIT, JOIN types (INNER, LEFT, RIGHT, FULL, self), GROUP BY and aggregates, CASE expressions, subqueries, CTEs (WITH), window functions (ROW_NUMBER, LAG/LEAD, running totals), and DDL/DML statements.",
+    "url": "https://devnestio.pages.dev/sql-cheatsheet/",
+    "cat": "Reference"
+  },
+  {
+    "name": "JavaScript Array Methods",
+    "desc": "Complete JavaScript Array methods reference — iteration (forEach, map, filter, reduce, flatMap), search (find, findIndex, includes, some, every), transformation (flat, slice, concat, sort, reverse), mutating methods (push, pop, splice, fill), and creation helpers (Array.from, Array.of). Shows mutates vs. pure.",
+    "url": "https://devnestio.pages.dev/js-array-methods-ref/",
+    "cat": "Reference"
+  },
+  {
+    "name": "Core Web Vitals Reference",
+    "desc": "Core Web Vitals guide covering LCP, INP, CLS, FCP, and TTFB — good/needs improvement/poor thresholds, what each metric measures, optimization tips (preload LCP image, avoid long tasks, set image dimensions, CDN), and measurement tools (PageSpeed Insights, DevTools, Lighthouse, CrUX).",
+    "url": "https://devnestio.pages.dev/web-vitals-ref/",
+    "cat": "Reference"
+  },
+  {
+    "name": "CSS Animations & Transitions Reference",
+    "desc": "Complete reference for CSS animations and transitions — transition shorthand, timing functions, @keyframes, animation-direction/fill-mode/play-state, transform functions, transform-origin, will-change, and copy-ready patterns for fade-in, hover lift, skeleton shimmer, and CSS spinner.",
+    "url": "https://devnestio.pages.dev/css-animations-ref/",
+    "cat": "CSS Tools"
+  },
+  {
+    "name": "Unicode Symbol Table",
+    "desc": "Browse and copy 121 Unicode symbols across 6 categories: Arrows, Math operators, Punctuation, Shapes, Tech & keyboard symbols, and Currency signs. Click any symbol to see its codepoint, HTML entity, and JS escape — copy in one click.",
+    "url": "https://devnestio.pages.dev/unicode-table/",
+    "cat": "Text"
+  },
+  {
+    "name": "TypeScript Utility Types Reference",
+    "desc": "Complete interactive reference for all 22 TypeScript built-in utility types. Covers Partial, Required, Readonly, Record, Pick, Omit, Exclude, Extract, NonNullable, ReturnType, Parameters, Awaited, and string manipulation types (Uppercase, Capitalize) — each with syntax, example, TS version, and category filter.",
+    "url": "https://devnestio.pages.dev/ts-utility-types/",
+    "cat": "Reference"
+  },
+  {
+    "name": "CORS Headers Generator",
+    "desc": "Generate CORS (Cross-Origin Resource Sharing) response headers for any configuration. Set allowed origins (single, multi, or wildcard), methods, request headers, exposed headers, credentials, and preflight max-age. Get copy-ready code for Express.js, nginx, Apache, and Cloudflare Workers.",
+    "url": "https://devnestio.pages.dev/cors-generator/",
+    "cat": "Dev"
+  },
+  {
+    "name": "HTTP Cache-Control Builder",
+    "desc": "Visual builder for HTTP Cache-Control response headers. Toggle directives — public, private, no-store, no-cache, max-age, s-maxage, immutable, stale-while-revalidate, stale-if-error — with conflict detection. Quick presets for static assets, HTML, API, CDN, and SWR patterns. Snippets for Express, nginx, Apache, and CloudFront.",
+    "url": "https://devnestio.pages.dev/cache-control-builder/",
+    "cat": "Dev"
+  },
+  {
+    "name": "CSS Backdrop Filter Generator",
+    "desc": "Visually generate CSS backdrop-filter effects with live sliders for blur, brightness, contrast, grayscale, hue-rotate, invert, opacity, saturate, and sepia. See the result on a glassmorphism card with a colorful background. Quick presets: Frosted Glass, Dark Overlay, Vintage, Noir. Outputs backdrop-filter and -webkit-backdrop-filter CSS.",
+    "url": "https://devnestio.pages.dev/css-backdrop-filter/",
+    "cat": "CSS Tools"
+  },
+  {
+    "name": "HTTP Security Headers Reference",
+    "desc": "Complete reference for 11 HTTP security response headers — HSTS, Content-Security-Policy, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, COEP, COOP, CORP, X-XSS-Protection, and Cache-Control. Risk levels (Critical/High/Medium/Low), attacks mitigated, recommended values, and code snippets for Express, nginx, and Apache.",
+    "url": "https://devnestio.pages.dev/security-headers-ref/",
+    "cat": "Security"
+  },
+  {
+    "name": "Timestamp Converter",
+    "desc": "Convert Unix timestamps to human-readable dates and vice versa. Supports seconds and milliseconds auto-detection, multiple timezones (18 zones), ISO 8601, UTC string, day-of-week, and relative time. Live clock showing current Unix time.",
+    "url": "https://devnestio.pages.dev/timestamp-converter/",
+    "cat": "Time"
+  },
+  {
+    "name": "Password Generator",
+    "desc": "Generate cryptographically secure passwords using the Web Crypto API. Choose length (8–128), character sets (uppercase, lowercase, digits, symbols), exclude ambiguous characters, view entropy estimate, and bulk-generate up to 100 passwords at once.",
+    "url": "https://devnestio.pages.dev/password-generator/",
+    "cat": "Security"
+  },
+  {
+    "name": "JWT Debugger",
+    "desc": "Decode and inspect JSON Web Tokens — header algorithm, payload claims, expiry (exp), issued-at (iat), and not-before (nbf) with relative time display. Syntax-highlighted JSON output. Browser-only: no tokens are sent to any server.",
+    "url": "https://devnestio.pages.dev/jwt-debugger/",
+    "cat": "Security"
+  },
+  {
+    "name": "CSS Box Shadow Generator",
+    "desc": "Visual CSS box-shadow builder with real-time preview. Configure single and multi-layer shadows with offset, blur, spread, color, and inset toggle. Copy ready-to-use CSS code instantly.",
+    "url": "https://devnestio.pages.dev/box-shadow-generator/",
+    "cat": "CSS Tools"
+  },
+  {
+    "name": "QR Code Generator",
+    "desc": "Generate QR codes from any text or URL instantly in the browser. Download as PNG. Supports custom error correction levels. No sign-up or server required.",
+    "url": "https://devnestio.pages.dev/qr-code-generator/",
+    "cat": "Utilities"
+  },
+  {
+    "name": "GraphQL Query Formatter & Minifier",
+    "desc": "Format and minify GraphQL queries, mutations, subscriptions, and fragments online. Syntax highlight, validate brace structure, detect named operations, and convert between compact and pretty-printed forms instantly.",
+    "url": "https://devnestio.pages.dev/graphql-formatter/",
+    "cat": "API"
+  },
+  {
+    "name": "Protobuf (.proto) Formatter & Validator",
+    "desc": "Format, validate, and syntax-highlight Protocol Buffer (.proto) files online. Check field numbers, types, message structure, enum definitions, and nested types instantly. Browser-only.",
+    "url": "https://devnestio.pages.dev/protobuf-formatter/",
+    "cat": "Developer Tools"
+  },
+  {
+    "name": "Docker Compose Validator",
+    "desc": "Validate your docker-compose.yml online. Check service structure, port mappings, depends_on references, volume declarations, and restart policies. Detects circular dependencies. Browser-only, no upload.",
+    "url": "https://devnestio.pages.dev/docker-compose-validator/",
+    "cat": "DevOps"
+  },
+  {
+    "name": "Dockerfile Analyzer & Linter",
+    "desc": "Analyze and lint your Dockerfile for best practice violations and security issues. Detects :latest tags, apt cache leaks, sudo usage, root user, sensitive ENV vars, ADD vs COPY misuse, and consecutive RUN layers.",
+    "url": "https://devnestio.pages.dev/dockerfile-analyzer/",
+    "cat": "DevOps"
+  },
+  {
+    "name": "Email Header Analyzer",
+    "desc": "Analyze raw email headers online. Parse From, To, Subject, Date, Message-ID, SPF/DKIM/DMARC authentication results, routing hops, and detect phishing signals like Reply-To mismatch. Browser-only.",
+    "url": "https://devnestio.pages.dev/email-header-analyzer/",
+    "cat": "Security"
+  },
+  {
+    "name": "TOML Formatter & Validator",
+    "desc": "Format, validate, and convert TOML configuration files online. TOML→JSON and JSON→TOML conversion. Works with Cargo.toml, pyproject.toml, Hugo config. Browser-only.",
+    "url": "https://devnestio.pages.dev/toml-formatter/",
+    "cat": "Format"
+  },
+  {
+    "name": "MAC Address Tool",
+    "desc": "Validate MAC addresses, convert between colon/hyphen/Cisco dot formats, look up OUI vendor (Apple, Cisco, Intel…), generate random MACs, and convert EUI-48 to EUI-64. Browser-only.",
+    "url": "https://devnestio.pages.dev/mac-address-tool/",
+    "cat": "Network"
+  },
+  {
+    "name": "TLS Cipher Suite Analyzer",
+    "desc": "Browse, filter, and analyze TLS 1.2/1.3 cipher suites. Check security ratings, forward secrecy, key exchange algorithms. Paste nginx ssl_ciphers or Apache SSLCipherSuite to grade your config.",
+    "url": "https://devnestio.pages.dev/tls-cipher-analyzer/",
+    "cat": "Security"
+  },
+  {
+    "name": "CSP Policy Evaluator",
+    "desc": "Paste your Content-Security-Policy header and get an instant security grade. Detects unsafe-inline, unsafe-eval, wildcard sources, missing directives, and suggests a hardened CSP. Browser-only.",
+    "url": "https://devnestio.pages.dev/csp-evaluator/",
+    "cat": "Security"
+  },
+  {
+    "name": "HAR Analyzer",
+    "desc": "Upload or paste a HAR (HTTP Archive) file to analyze web performance. View request timings, slowest requests, largest assets, per-domain breakdown, and export to CSV. Browser-only.",
+    "url": "https://devnestio.pages.dev/har-analyzer/",
+    "cat": "Network"
+  },
+  {
+    "name": "WebSocket Tester",
+    "desc": "Connect to ws:// or wss:// endpoints, send text or JSON messages, and view incoming/outgoing frames with timestamps. Auto-reconnect, subprotocol support. Browser-only.",
+    "url": "https://devnestio.pages.dev/websocket-tester/",
+    "cat": "Network"
+  },
+  {
+    "name": "UUID Generator",
+    "desc": "Generate UUID v4 (random), v1 (time-based), and v5 (name-based SHA-1) in bulk. Toggle case, remove hyphens, copy all, or download as .txt. Browser-only, instant.",
+    "url": "https://devnestio.pages.dev/uuid-generator/",
+    "cat": "Generators"
+  },
+  {
+    "name": "Cron Expression Parser",
+    "desc": "Parse cron expressions into human-readable descriptions. Field-by-field breakdown, next 20 run times with relative timestamps, @yearly/@monthly/@weekly alias support.",
+    "url": "https://devnestio.pages.dev/cron-expression-parser/",
+    "cat": "Dev"
+  },
+  {
+    "name": "Diff Tool",
+    "desc": "Side-by-side and unified text diff with line-level highlighting. Shows added, removed, and unchanged lines. Ignore whitespace/case options. Paste two texts and see changes instantly.",
+    "url": "https://devnestio.pages.dev/diff-tool/",
+    "cat": "Text"
   }
 ];
 

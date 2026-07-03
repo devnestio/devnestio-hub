@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TLS Cipher Suite Analyzer – devnestio</title>
+  <meta name="description" content="Browse, filter, and analyze TLS 1.2/1.3 cipher suites. Check security ratings, forward secrecy, key exchange algorithms. Paste nginx ssl_ciphers or Apache SSLCipherSuite to grade your config." />
+  <link rel="canonical" href="https://devnestio.pages.dev/tls-cipher-analyzer/" />
+  <meta property="og:title" content="TLS Cipher Suite Analyzer – devnestio" />
+  <meta property="og:description" content="Browse, filter, and analyze TLS 1.2/1.3 cipher suites. Check security ratings, forward secrecy, key exchange algorithms." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f1117;
+      --bg-card: #1e293b;
+      --bg-input: #0f1117;
+      --border: #334155;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --accent: #0891b2;
+      --accent-hover: #06b6d4;
+      --radius: 10px;
+      --c-recommended: #4ade80;
+      --c-secure: #86efac;
+      --c-weak: #fbbf24;
+      --c-insecure: #f87171;
+      --c-deprecated: #94a3b8;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: #1e293b;
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .back-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: color 0.15s;
+    }
+    .back-link:hover { color: var(--accent); }
+
+    .header-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-left: 0.5rem;
+    }
+    .header-title span { color: var(--accent); }
+
+    main {
+      flex: 1;
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+      width: 100%;
+    }
+
+    h1 { font-size: 1.55rem; font-weight: 700; margin-bottom: 0.35rem; }
+    .subtitle { color: var(--text-muted); font-size: 0.92rem; margin-bottom: 1.75rem; }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      padding: 0.6rem 1.1rem;
+      margin-bottom: -1px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .card-title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+    }
+
+    /* ── Filters row ── */
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: flex-end;
+      margin-bottom: 1.25rem;
+    }
+    .filter-group { display: flex; flex-direction: column; gap: 0.35rem; }
+    .filter-group label { font-size: 0.78rem; color: var(--text-muted); font-weight: 500; }
+
+    select, input[type="text"], textarea {
+      background: var(--bg-input);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.45rem 0.75rem;
+      font-size: 0.88rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    select:focus, input[type="text"]:focus, textarea:focus {
+      border-color: var(--accent);
+    }
+    select { cursor: pointer; min-width: 130px; }
+
+    input[type="text"] { min-width: 220px; }
+
+    textarea {
+      width: 100%;
+      min-height: 130px;
+      resize: vertical;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.82rem;
+    }
+
+    button.btn {
+      background: var(--accent);
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 0.48rem 1.1rem;
+      transition: background 0.15s;
+    }
+    button.btn:hover { background: var(--accent-hover); }
+    button.btn-ghost {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+    button.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Table ── */
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+    thead th {
+      background: #0f1923;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0.6rem 0.9rem;
+      text-align: left;
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+    }
+    thead th:hover { color: var(--text); }
+    thead th.sorted-asc::after { content: " ▲"; font-size: 0.7rem; }
+    thead th.sorted-desc::after { content: " ▼"; font-size: 0.7rem; }
+
+    tbody tr {
+      border-bottom: 1px solid #1e2d3d;
+      transition: background 0.1s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(8, 145, 178, 0.06); }
+
+    td {
+      padding: 0.55rem 0.9rem;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    td.wrap { white-space: normal; max-width: 260px; word-break: break-all; }
+    td code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.78rem;
+      background: #0f1923;
+      border-radius: 4px;
+      padding: 0.15rem 0.4rem;
+    }
+
+    .badge {
+      display: inline-block;
+      border-radius: 4px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      padding: 0.15rem 0.5rem;
+    }
+    .badge-recommended { background: rgba(74,222,128,0.15); color: var(--c-recommended); }
+    .badge-secure      { background: rgba(134,239,172,0.12); color: var(--c-secure); }
+    .badge-weak        { background: rgba(251,191,36,0.15); color: var(--c-weak); }
+    .badge-insecure    { background: rgba(248,113,113,0.15); color: var(--c-insecure); }
+    .badge-deprecated  { background: rgba(148,163,184,0.12); color: var(--c-deprecated); }
+
+    .badge-tls13 { background: rgba(8,145,178,0.15); color: #38bdf8; }
+    .badge-tls12 { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+
+    .fs-yes { color: var(--c-recommended); font-weight: 600; }
+    .fs-no  { color: var(--text-muted); }
+
+    .row-count { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.6rem; }
+
+    /* ── Analyze tab ── */
+    .analyze-btn-row { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+
+    .grade-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      font-size: 1.6rem;
+      font-weight: 800;
+      border: 3px solid;
+    }
+    .grade-A { border-color: var(--c-recommended); color: var(--c-recommended); }
+    .grade-B { border-color: var(--c-secure); color: var(--c-secure); }
+    .grade-C { border-color: var(--c-weak); color: var(--c-weak); }
+    .grade-D { border-color: #fb923c; color: #fb923c; }
+    .grade-F { border-color: var(--c-insecure); color: var(--c-insecure); }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    .stat-box {
+      background: #0f1923;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      text-align: center;
+    }
+    .stat-num { font-size: 1.6rem; font-weight: 700; line-height: 1; }
+    .stat-label { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem; }
+
+    /* ── Config tab ── */
+    .config-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.25rem;
+    }
+    .config-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+    }
+    .config-card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.35rem; }
+    .config-card .config-desc { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.9rem; }
+    .config-card pre {
+      background: #0a0f18;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.85rem 1rem;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.76rem;
+      white-space: pre-wrap;
+      word-break: break-all;
+      color: #a5f3fc;
+      margin-bottom: 0.75rem;
+    }
+    .copy-btn {
+      font-size: 0.78rem;
+      padding: 0.35rem 0.8rem;
+    }
+
+    .tag-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.75rem; }
+    .tag {
+      font-size: 0.75rem;
+      padding: 0.15rem 0.55rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    /* ── Legend ── */
+    .legend { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem; }
+    .legend-item { display: flex; align-items: center; gap: 0.35rem; font-size: 0.8rem; color: var(--text-muted); }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+    .empty-state { text-align: center; padding: 2.5rem 1rem; color: var(--text-muted); font-size: 0.9rem; }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+      margin-top: 1rem;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    @media (max-width: 700px) {
+      .filters { flex-direction: column; align-items: stretch; }
+      select, input[type="text"] { min-width: 100%; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="/" class="back-link">&#8592; devnestio</a>
+  <span class="header-title">TLS Cipher Suite <span>Analyzer</span></span>
+</header>
+
+<main>
+  <h1>TLS Cipher Suite Analyzer</h1>
+  <p class="subtitle">Browse, filter, and analyze TLS 1.2/1.3 cipher suites. Check security ratings, forward secrecy, and key exchange algorithms.</p>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="browse">Browse All</button>
+    <button class="tab-btn" data-tab="analyze">Analyze Input</button>
+    <button class="tab-btn" data-tab="config">Configuration Templates</button>
+  </div>
+
+  <!-- ═══════════════ BROWSE TAB ═══════════════ -->
+  <div id="tab-browse" class="tab-panel active">
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--c-recommended)"></div> Recommended</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--c-secure)"></div> Secure</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--c-weak)"></div> Weak</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--c-insecure)"></div> Insecure</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--c-deprecated)"></div> Deprecated</div>
+    </div>
+
+    <div class="filters">
+      <div class="filter-group">
+        <label>Search</label>
+        <input type="text" id="search-input" placeholder="IANA name, OpenSSL name, hex…" />
+      </div>
+      <div class="filter-group">
+        <label>TLS Version</label>
+        <select id="filter-version">
+          <option value="">All</option>
+          <option value="1.3">TLS 1.3</option>
+          <option value="1.2">TLS 1.2</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Security Rating</label>
+        <select id="filter-rating">
+          <option value="">All</option>
+          <option value="Recommended">Recommended</option>
+          <option value="Secure">Secure</option>
+          <option value="Weak">Weak</option>
+          <option value="Insecure">Insecure</option>
+          <option value="Deprecated">Deprecated</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Forward Secrecy</label>
+        <select id="filter-fs">
+          <option value="">All</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Key Exchange</label>
+        <select id="filter-kex">
+          <option value="">All</option>
+          <option value="ECDHE">ECDHE</option>
+          <option value="DHE">DHE</option>
+          <option value="RSA">RSA</option>
+          <option value="TLS 1.3">TLS 1.3 (built-in)</option>
+        </select>
+      </div>
+      <div class="filter-group" style="justify-content:flex-end">
+        <button class="btn btn-ghost" id="reset-filters">Reset</button>
+      </div>
+    </div>
+
+    <div class="row-count" id="row-count"></div>
+
+    <div class="table-wrap">
+      <table id="cipher-table">
+        <thead>
+          <tr>
+            <th data-col="iana">IANA Name</th>
+            <th data-col="openssl">OpenSSL Name</th>
+            <th data-col="code">Code</th>
+            <th data-col="version">Version</th>
+            <th data-col="rating">Rating</th>
+            <th data-col="kex">Key Exchange</th>
+            <th data-col="auth">Auth</th>
+            <th data-col="enc">Encryption</th>
+            <th data-col="mac">MAC/Hash</th>
+            <th data-col="fs">FS</th>
+          </tr>
+        </thead>
+        <tbody id="cipher-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════════════ ANALYZE TAB ═══════════════ -->
+  <div id="tab-analyze" class="tab-panel">
+    <div class="card">
+      <div class="card-title">Paste Your Cipher Configuration</div>
+      <p style="font-size:0.83rem;color:var(--text-muted);margin-bottom:0.75rem;">
+        Supports: OpenSSL cipher strings (<code>ECDHE+AESGCM:DHE+AES256</code>), lists of cipher names (one per line),
+        nginx <code>ssl_ciphers</code> directives, or Apache <code>SSLCipherSuite</code> lines.
+      </p>
+      <textarea id="analyze-input" placeholder="Example:
+ECDHE-RSA-AES128-GCM-SHA256
+ECDHE-RSA-AES256-GCM-SHA384
+TLS_AES_256_GCM_SHA384
+DHE-RSA-AES128-GCM-SHA256
+RC4-SHA"></textarea>
+      <div class="analyze-btn-row">
+        <button class="btn" id="analyze-btn">Analyze</button>
+        <button class="btn btn-ghost" id="clear-analyze">Clear</button>
+      </div>
+    </div>
+
+    <div id="analyze-results" style="display:none">
+      <!-- Summary -->
+      <div class="card" id="analyze-summary">
+        <div class="card-title">Summary</div>
+        <div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap">
+          <div>
+            <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:0.35rem">Overall Grade</div>
+            <div class="grade-badge" id="grade-badge">A</div>
+          </div>
+          <div class="summary-grid" id="summary-grid" style="flex:1"></div>
+        </div>
+        <div id="grade-explanation" style="font-size:0.83rem;color:var(--text-muted);margin-top:0.9rem"></div>
+      </div>
+
+      <!-- Matched -->
+      <div id="analyze-matched-section">
+        <div class="card-title" style="padding:0 0 0.5rem 0">Matched Cipher Suites</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>IANA Name</th>
+                <th>OpenSSL Name</th>
+                <th>Code</th>
+                <th>Version</th>
+                <th>Rating</th>
+                <th>Key Exchange</th>
+                <th>FS</th>
+              </tr>
+            </thead>
+            <tbody id="analyze-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Unrecognized -->
+      <div id="unrecognized-section" style="margin-top:1.25rem;display:none">
+        <div class="card-title" style="padding:0 0 0.5rem 0;color:var(--c-weak)">Unrecognized / Unknown</div>
+        <div id="unrecognized-list" style="font-size:0.83rem;color:var(--text-muted)"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ CONFIG TAB ═══════════════ -->
+  <div id="tab-config" class="tab-panel">
+    <p style="font-size:0.88rem;color:var(--text-muted);margin-bottom:1.25rem">
+      Production-ready cipher configurations based on <a href="https://ssl-config.mozilla.org/" target="_blank" rel="noopener" style="color:var(--accent)">Mozilla SSL Configuration Generator</a> recommendations.
+    </p>
+    <div class="config-grid" id="config-grid"></div>
+  </div>
+</main>
+
+<footer>
+  <a href="/">devnestio</a> &mdash; TLS Cipher Suite Analyzer &mdash; Client-side only, no data sent to any server.
+</footer>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   CIPHER SUITE DATABASE
+   ═══════════════════════════════════════════════════ */
+const CIPHERS = [
+  /* ── TLS 1.3 (all Recommended) ── */
+  {
+    iana:    "TLS_AES_256_GCM_SHA384",
+    openssl: "TLS_AES_256_GCM_SHA384",
+    code:    "0x1302",
+    version: "1.3",
+    rating:  "Recommended",
+    kex:     "TLS 1.3",
+    auth:    "TLS 1.3",
+    enc:     "AES-256-GCM",
+    mac:     "SHA-384",
+    fs:      "yes"
+  },
+  {
+    iana:    "TLS_AES_128_GCM_SHA256",
+    openssl: "TLS_AES_128_GCM_SHA256",
+    code:    "0x1301",
+    version: "1.3",
+    rating:  "Recommended",
+    kex:     "TLS 1.3",
+    auth:    "TLS 1.3",
+    enc:     "AES-128-GCM",
+    mac:     "SHA-256",
+    fs:      "yes"
+  },
+  {
+    iana:    "TLS_CHACHA20_POLY1305_SHA256",
+    openssl: "TLS_CHACHA20_POLY1305_SHA256",
+    code:    "0x1303",
+    version: "1.3",
+    rating:  "Recommended",
+    kex:     "TLS 1.3",
+    auth:    "TLS 1.3",
+    enc:     "ChaCha20-Poly1305",
+    mac:     "SHA-256",
+    fs:      "yes"
+  },
+  {
+    iana:    "TLS_AES_128_CCM_SHA256",
+    openssl: "TLS_AES_128_CCM_SHA256",
+    code:    "0x1304",
+    version: "1.3",
+    rating:  "Recommended",
+    kex:     "TLS 1.3",
+    auth:    "TLS 1.3",
+    enc:     "AES-128-CCM",
+    mac:     "SHA-256",
+    fs:      "yes"
+  },
+  {
+    iana:    "TLS_AES_128_CCM_8_SHA256",
+    openssl: "TLS_AES_128_CCM_8_SHA256",
+    code:    "0x1305",
+    version: "1.3",
+    rating:  "Recommended",
+    kex:     "TLS 1.3",
+    auth:    "TLS 1.3",
+    enc:     "AES-128-CCM-8",
+    mac:     "SHA-256",
+    fs:      "yes"
+  },
+
+  /* ── TLS 1.2 — Recommended (ECDHE+AESGCM) ── */
+  {
+    iana:    "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+    openssl: "ECDHE-RSA-AES128-GCM-SHA256",
+    code:    "0xC02F",
+    version: "1.2",
+    rating:  "Recommended",
+    kex:     "ECDHE",
+    auth:    "RSA",
+    enc:     "AES-128-GCM",
+    mac:     "SHA-256",
+    fs:      "yes"
+  },
+  {
+    iana:    "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+    openssl: "ECDHE-RSA-AES256-GCM-SHA384",
+    code:    "0xC030",
+    version: "1.2",
+    rating:  "Recommended",
+    kex:     "ECDHE",
+    auth:    "RSA",
+    enc:     "AES-256-GCM",
+    mac:     "SHA-384",
+    fs:      "yes"
+  },
+  {
+    iana:    "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+    openssl: "ECDHE-ECDSA-AES128-GCM-SHA256",
+    code:    "0xC02B",
+    version: "1.2",
+    rating:  "Recommended",
+    kex:     "ECDHE",
+    auth:    "ECDSA",
+    enc:     "AES-128-GCM",
+    mac:     "SHA-256",
+    fs:      "yes"
+  },
+  {
+    iana:    "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+    openssl: "ECDHE-ECDSA-AES256-GCM-SHA384",
+    code:    "0xC02C",
+    version: "1.2",
+    rating:  "Recommended",
+    kex:     "ECDHE",
+    auth:    "ECDSA",
+    enc:     "AES-256-GCM",
+    mac:     "SHA-384",
+    fs:      "yes"
+  },
+  {
+    iana:    "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256",
+    openssl: "ECDHE-RSA-CHACHA20-POLY1305",
+    code:    "0xCCA8",
+    version: "1.2",
+    rating:  "Recommended",
+    kex:     "ECDHE",
+    auth:    "RSA",
+    enc:     "ChaCha20-Poly1305",
+    mac:     "SHA-256",
+    fs:      "yes"
+  },
+  {
+    iana:    "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256",
+    openssl: "ECDHE-ECDSA-CHACHA20-POLY1305",
+    code:    "0xCCA9",
+    version: "1.2",
+    rating:  "Recommended",
+    kex:     "ECDHE",
+    auth:    "ECDSA",
+    enc:     "ChaCha20-Poly1305",
+    mac:     "SHA-256",
+    fs:      "yes"
+  },
+
+  /* ── TLS 1.2 — Secure (DHE) ── */
+  {
+    iana:    "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256",
+    openssl: "DHE-RSA-AES128-GCM-SHA256",
+    code:    "0x009E",
+    version: "1.2",
+    rating:  "Secure",
+    kex:     "DHE",
+    auth:    "RSA",
+    enc:     "AES-128-GCM",
+    mac:     "SHA-256",
+    fs:      "yes"
+  },
+  {
+    iana:    "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384",
+    openssl: "DHE-RSA-AES256-GCM-SHA384",
+    code:    "0x009F",
+    version: "1.2",
+    rating:  "Secure",
+    kex:     "DHE",
+    auth:    "RSA",
+    enc:     "AES-256-GCM",
+    mac:     "SHA-384",
+    fs:      "yes"
+  },
+  {
+    iana:    "TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256",
+    openssl: "DHE-RSA-CHACHA20-POLY1305",
+    code:    "0xCCAA",
+    version: "1.2",
+    rating:  "Secure",
+    kex:     "DHE",
+    auth:    "RSA",
+    enc:     "ChaCha20-Poly1305",
+    mac:     "SHA-256",
+    fs:      "yes"
+  },
+  {
+    iana:    "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256",
+    openssl: "ECDHE-RSA-AES128-SHA256",
+    code:    "0xC027",
+    version: "1.2",
+    rating:  "Secure",
+    kex:     "ECDHE",
+    auth:    "RSA",
+    enc:     "AES-128-CBC",
+    mac:     "SHA-256",
+    fs:      "yes"
+  },
+  {
+    iana:    "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384",
+    openssl: "ECDHE-RSA-AES256-SHA384",
+    code:    "0xC028",
+    version: "1.2",
+    rating:  "Secure",
+    kex:     "ECDHE",
+    auth:    "RSA",
+    enc:     "AES-256-CBC",
+    mac:     "SHA-384",
+    fs:      "yes"
+  },
+  {
+    iana:    "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
+    openssl: "ECDHE-ECDSA-AES128-SHA256",
+    code:    "0xC023",
+    version: "1.2",
+    rating:  "Secure",
+    kex:     "ECDHE",
+    auth:    "ECDSA",
+    enc:     "AES-128-CBC",
+    mac:     "SHA-256",
+    fs:      "yes"
+  },
+  {
+    iana:    "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384",
+    openssl: "ECDHE-ECDSA-AES256-SHA384",
+    code:    "0xC024",
+    version: "1.2",
+    rating:  "Secure",
+    kex:     "ECDHE",
+    auth:    "ECDSA",
+    enc:     "AES-256-CBC",
+    mac:     "SHA-384",
+    fs:      "yes"
+  },
+  {
+    iana:    "TLS_DHE_RSA_WITH_AES_128_CBC_SHA256",
+    openssl: "DHE-RSA-AES128-SHA256",
+    code:    "0x0067",
+    version: "1.2",
+    rating:  "Secure",
+    kex:     "DHE",
+    auth:    "RSA",
+    enc:     "AES-128-CBC",
+    mac:     "SHA-256",
+    fs:      "yes"
+  },
+  {
+    iana:    "TLS_DHE_RSA_WITH_AES_256_CBC_SHA256",
+    openssl: "DHE-RSA-AES256-SHA256",
+    code:    "0x006B",
+    version: "1.2",
+    rating:  "Secure",
+    kex:     "DHE",
+    auth:    "RSA",
+    enc:     "AES-256-CBC",
+    mac:     "SHA-256",
+    fs:      "yes"
+  },
+
+  /* ── TLS 1.2 — Weak (RSA key exchange) ── */
+  {
+    iana:    "TLS_RSA_WITH_AES_128_GCM_SHA256",
+    openssl: "AES128-GCM-SHA256",
+    code:    "0x009C",
+    version: "1.2",
+    rating:  "Weak",
+    kex:     "RSA",
+    auth:    "RSA",
+    enc:     "AES-128-GCM",
+    mac:     "SHA-256",
+    fs:      "no"
+  },
+  {
+    iana:    "TLS_RSA_WITH_AES_256_GCM_SHA384",
+    openssl: "AES256-GCM-SHA384",
+    code:    "0x009D",
+    version: "1.2",
+    rating:  "Weak",
+    kex:     "RSA",
+    auth:    "RSA",
+    enc:     "AES-256-GCM",
+    mac:     "SHA-384",
+    fs:      "no"
+  },
+  {
+    iana:    "TLS_RSA_WITH_AES_128_CBC_SHA256",
+    openssl: "AES128-SHA256",
+    code:    "0x003C",
+    version: "1.2",
+    rating:  "Weak",
+    kex:     "RSA",
+    auth:    "RSA",
+    enc:     "AES-128-CBC",
+    mac:     "SHA-256",
+    fs:      "no"
+  },
+  {
+    iana:    "TLS_RSA_WITH_AES_256_CBC_SHA256",
+    openssl: "AES256-SHA256",
+    code:    "0x003D",
+    version: "1.2",
+    rating:  "Weak",
+    kex:     "RSA",
+    auth:    "RSA",
+    enc:     "AES-256-CBC",
+    mac:     "SHA-256",
+    fs:      "no"
+  },
+  {
+    iana:    "TLS_RSA_WITH_AES_128_CBC_SHA",
+    openssl: "AES128-SHA",
+    code:    "0x002F",
+    version: "1.2",
+    rating:  "Weak",
+    kex:     "RSA",
+    auth:    "RSA",
+    enc:     "AES-128-CBC",
+    mac:     "SHA-1",
+    fs:      "no"
+  },
+  {
+    iana:    "TLS_RSA_WITH_AES_256_CBC_SHA",
+    openssl: "AES256-SHA",
+    code:    "0x0035",
+    version: "1.2",
+    rating:  "Weak",
+    kex:     "RSA",
+    auth:    "RSA",
+    enc:     "AES-256-CBC",
+    mac:     "SHA-1",
+    fs:      "no"
+  },
+  {
+    iana:    "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
+    openssl: "ECDHE-RSA-AES128-SHA",
+    code:    "0xC013",
+    version: "1.2",
+    rating:  "Weak",
+    kex:     "ECDHE",
+    auth:    "RSA",
+    enc:     "AES-128-CBC",
+    mac:     "SHA-1",
+    fs:      "yes"
+  },
+  {
+    iana:    "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
+    openssl: "ECDHE-RSA-AES256-SHA",
+    code:    "0xC014",
+    version: "1.2",
+    rating:  "Weak",
+    kex:     "ECDHE",
+    auth:    "RSA",
+    enc:     "AES-256-CBC",
+    mac:     "SHA-1",
+    fs:      "yes"
+  },
+  {
+    iana:    "TLS_DHE_RSA_WITH_AES_128_CBC_SHA",
+    openssl: "DHE-RSA-AES128-SHA",
+    code:    "0x0033",
+    version: "1.2",
+    rating:  "Weak",
+    kex:     "DHE",
+    auth:    "RSA",
+    enc:     "AES-128-CBC",
+    mac:     "SHA-1",
+    fs:      "yes"
+  },
+
+  /* ── TLS 1.2 — Insecure (RC4, NULL, anon) ── */
+  {
+    iana:    "TLS_RSA_WITH_RC4_128_SHA",
+    openssl: "RC4-SHA",
+    code:    "0x0005",
+    version: "1.2",
+    rating:  "Insecure",
+    kex:     "RSA",
+    auth:    "RSA",
+    enc:     "RC4-128",
+    mac:     "SHA-1",
+    fs:      "no"
+  },
+  {
+    iana:    "TLS_RSA_WITH_RC4_128_MD5",
+    openssl: "RC4-MD5",
+    code:    "0x0004",
+    version: "1.2",
+    rating:  "Insecure",
+    kex:     "RSA",
+    auth:    "RSA",
+    enc:     "RC4-128",
+    mac:     "MD5",
+    fs:      "no"
+  },
+  {
+    iana:    "TLS_RSA_WITH_NULL_SHA256",
+    openssl: "NULL-SHA256",
+    code:    "0x003B",
+    version: "1.2",
+    rating:  "Insecure",
+    kex:     "RSA",
+    auth:    "RSA",
+    enc:     "NULL",
+    mac:     "SHA-256",
+    fs:      "no"
+  },
+  {
+    iana:    "TLS_ECDH_anon_WITH_AES_128_CBC_SHA",
+    openssl: "AECDH-AES128-SHA",
+    code:    "0xC018",
+    version: "1.2",
+    rating:  "Insecure",
+    kex:     "ECDH",
+    auth:    "None",
+    enc:     "AES-128-CBC",
+    mac:     "SHA-1",
+    fs:      "no"
+  },
+  {
+    iana:    "TLS_RSA_EXPORT_WITH_RC4_40_MD5",
+    openssl: "EXP-RC4-MD5",
+    code:    "0x0003",
+    version: "1.2",
+    rating:  "Insecure",
+    kex:     "RSA",
+    auth:    "RSA",
+    enc:     "RC4-40 (EXPORT)",
+    mac:     "MD5",
+    fs:      "no"
+  },
+  {
+    iana:    "TLS_RSA_EXPORT_WITH_DES40_CBC_SHA",
+    openssl: "EXP-DES-CBC-SHA",
+    code:    "0x0008",
+    version: "1.2",
+    rating:  "Insecure",
+    kex:     "RSA",
+    auth:    "RSA",
+    enc:     "DES-40-CBC (EXPORT)",
+    mac:     "SHA-1",
+    fs:      "no"
+  },
+  {
+    iana:    "TLS_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA",
+    openssl: "EXP-EDH-RSA-DES-CBC-SHA",
+    code:    "0x0014",
+    version: "1.2",
+    rating:  "Insecure",
+    kex:     "DHE",
+    auth:    "RSA",
+    enc:     "DES-40-CBC (EXPORT)",
+    mac:     "SHA-1",
+    fs:      "yes"
+  },
+
+  /* ── TLS 1.2 — Deprecated (3DES, MD5, weak DHE) ── */
+  {
+    iana:    "TLS_RSA_WITH_3DES_EDE_CBC_SHA",
+    openssl: "DES-CBC3-SHA",
+    code:    "0x000A",
+    version: "1.2",
+    rating:  "Deprecated",
+    kex:     "RSA",
+    auth:    "RSA",
+    enc:     "3DES-EDE-CBC",
+    mac:     "SHA-1",
+    fs:      "no"
+  },
+  {
+    iana:    "TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA",
+    openssl: "ECDHE-RSA-DES-CBC3-SHA",
+    code:    "0xC012",
+    version: "1.2",
+    rating:  "Deprecated",
+    kex:     "ECDHE",
+    auth:    "RSA",
+    enc:     "3DES-EDE-CBC",
+    mac:     "SHA-1",
+    fs:      "yes"
+  },
+  {
+    iana:    "TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA",
+    openssl: "EDH-RSA-DES-CBC3-SHA",
+    code:    "0x0016",
+    version: "1.2",
+    rating:  "Deprecated",
+    kex:     "DHE",
+    auth:    "RSA",
+    enc:     "3DES-EDE-CBC",
+    mac:     "SHA-1",
+    fs:      "yes"
+  },
+  {
+    iana:    "TLS_RSA_WITH_DES_CBC_SHA",
+    openssl: "DES-CBC-SHA",
+    code:    "0x0009",
+    version: "1.2",
+    rating:  "Deprecated",
+    kex:     "RSA",
+    auth:    "RSA",
+    enc:     "DES-CBC",
+    mac:     "SHA-1",
+    fs:      "no"
+  },
+  {
+    iana:    "TLS_RSA_WITH_SEED_CBC_SHA",
+    openssl: "SEED-SHA",
+    code:    "0x0096",
+    version: "1.2",
+    rating:  "Deprecated",
+    kex:     "RSA",
+    auth:    "RSA",
+    enc:     "SEED-CBC",
+    mac:     "SHA-1",
+    fs:      "no"
+  },
+  {
+    iana:    "TLS_RSA_WITH_IDEA_CBC_SHA",
+    openssl: "IDEA-CBC-SHA",
+    code:    "0x0007",
+    version: "1.2",
+    rating:  "Deprecated",
+    kex:     "RSA",
+    auth:    "RSA",
+    enc:     "IDEA-CBC",
+    mac:     "SHA-1",
+    fs:      "no"
+  },
+  {
+    iana:    "TLS_RSA_WITH_CAMELLIA_128_CBC_SHA",
+    openssl: "CAMELLIA128-SHA",
+    code:    "0x0041",
+    version: "1.2",
+    rating:  "Deprecated",
+    kex:     "RSA",
+    auth:    "RSA",
+    enc:     "Camellia-128-CBC",
+    mac:     "SHA-1",
+    fs:      "no"
+  },
+  {
+    iana:    "TLS_ECDHE_RSA_WITH_CAMELLIA_128_CBC_SHA256",
+    openssl: "ECDHE-RSA-CAMELLIA128-SHA256",
+    code:    "0xC076",
+    version: "1.2",
+    rating:  "Deprecated",
+    kex:     "ECDHE",
+    auth:    "RSA",
+    enc:     "Camellia-128-CBC",
+    mac:     "SHA-256",
+    fs:      "yes"
+  },
+  {
+    iana:    "TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA256",
+    openssl: "DHE-RSA-CAMELLIA256-SHA256",
+    code:    "0x00C4",
+    version: "1.2",
+    rating:  "Deprecated",
+    kex:     "DHE",
+    auth:    "RSA",
+    enc:     "Camellia-256-CBC",
+    mac:     "SHA-256",
+    fs:      "yes"
+  }
+];
+
+/* ═══════════════════════════════════════════════════
+   CONFIGURATION TEMPLATES
+   ═══════════════════════════════════════════════════ */
+const CONFIGS = [
+  {
+    name: "Mozilla Modern",
+    desc: "TLS 1.3 only. Maximum security, requires modern clients (Chrome 70+, Firefox 63+, Safari 12.1+). No TLS 1.2 support.",
+    tags: ["TLS 1.3 only", "Grade A+", "No legacy support"],
+    nginx: `# Nginx
+ssl_protocols TLSv1.3;
+ssl_prefer_server_ciphers off;
+# TLS 1.3 cipher suites are managed by the protocol`,
+    apache: `# Apache
+SSLProtocol -all +TLSv1.3
+SSLHonorCipherOrder off`,
+    ciphers: ["TLS_AES_256_GCM_SHA384", "TLS_AES_128_GCM_SHA256", "TLS_CHACHA20_POLY1305_SHA256"]
+  },
+  {
+    name: "Mozilla Intermediate",
+    desc: "TLS 1.2 + TLS 1.3. Recommended for most servers. Supports clients back to Firefox 27, Android 4.4.2, Chrome 31, Edge, IE 11, Java 8, OpenSSL 1.0.1.",
+    tags: ["TLS 1.2+", "Grade A", "Recommended"],
+    nginx: `# Nginx
+ssl_protocols TLSv1.2 TLSv1.3;
+ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-CHACHA20-POLY1305;
+ssl_prefer_server_ciphers off;`,
+    apache: `# Apache
+SSLProtocol -all +TLSv1.2 +TLSv1.3
+SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-CHACHA20-POLY1305
+SSLHonorCipherOrder off`,
+    ciphers: ["ECDHE-RSA-AES128-GCM-SHA256", "ECDHE-RSA-AES256-GCM-SHA384"]
+  },
+  {
+    name: "Mozilla Old (Compatibility)",
+    desc: "TLS 1.0, 1.1, 1.2, 1.3 with older cipher suites. Use only when you must support very old clients (IE8/WinXP, Java 6, OpenSSL 0.9.8). Not recommended for new deployments.",
+    tags: ["TLS 1.0+", "Grade B/C", "Legacy support"],
+    nginx: `# Nginx
+ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
+ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA;
+ssl_prefer_server_ciphers on;`,
+    apache: `# Apache
+SSLProtocol -all +TLSv1 +TLSv1.1 +TLSv1.2 +TLSv1.3
+SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA
+SSLHonorCipherOrder on`,
+    ciphers: ["ECDHE-RSA-AES128-GCM-SHA256", "AES128-SHA", "DES-CBC3-SHA"]
+  }
+];
+
+/* ═══════════════════════════════════════════════════
+   CORE FUNCTIONS (exported on window for testing)
+   ═══════════════════════════════════════════════════ */
+
+/** Look up a cipher by IANA name, OpenSSL name, or hex code (case-insensitive). */
+function lookupCipher(query) {
+  if (!query) return null;
+  const q = query.trim().toLowerCase();
+  return CIPHERS.find(c =>
+    c.iana.toLowerCase() === q ||
+    c.openssl.toLowerCase() === q ||
+    c.code.toLowerCase() === q
+  ) || null;
+}
+
+/** Filter the cipher list by criteria object. All keys are optional. */
+function filterCiphers({ version, rating, fs, kex } = {}) {
+  return CIPHERS.filter(c => {
+    if (version && c.version !== version) return false;
+    if (rating  && c.rating  !== rating)  return false;
+    if (fs      && c.fs      !== fs)      return false;
+    if (kex     && c.kex     !== kex)     return false;
+    return true;
+  });
+}
+
+/**
+ * Parse an input string into cipher names.
+ * Handles: colon-separated OpenSSL strings, nginx ssl_ciphers directive,
+ * Apache SSLCipherSuite lines, and newline-separated lists.
+ */
+function parseInput(input) {
+  if (!input) return [];
+  let s = input.trim();
+
+  // strip directive keywords
+  s = s.replace(/^\s*ssl_ciphers\s+/i, '');
+  s = s.replace(/^\s*SSLCipherSuite\s+/i, '');
+  // strip surrounding quotes and trailing semicolons
+  s = s.replace(/^['"]|['"];?\s*$/g, '').replace(/;$/, '');
+
+  // Split on colons, newlines, or spaces
+  const tokens = s.split(/[:\n\r\s]+/).map(t => t.trim()).filter(Boolean);
+
+  // Filter out OpenSSL meta-tokens like +AESGCM, !aNULL, @STRENGTH
+  return tokens.filter(t => !/^[!@+\-]/.test(t));
+}
+
+/**
+ * Analyze a list of cipher names (OpenSSL or IANA).
+ * Returns { matched, unrecognized, counts, grade }.
+ */
+function analyzeCiphers(names) {
+  const matched = [];
+  const unrecognized = [];
+
+  for (const name of names) {
+    // Try to expand OpenSSL meta-strings by checking substrings
+    const cipher = lookupCipher(name) || findByPartial(name);
+    if (cipher) {
+      if (!matched.find(c => c.iana === cipher.iana)) matched.push(cipher);
+    } else {
+      unrecognized.push(name);
+    }
+  }
+
+  const counts = { Recommended: 0, Secure: 0, Weak: 0, Insecure: 0, Deprecated: 0 };
+  for (const c of matched) counts[c.rating] = (counts[c.rating] || 0) + 1;
+
+  return { matched, unrecognized, counts, grade: calculateGrade(counts) };
+}
+
+/** Try to find a cipher by partial/substring match for OpenSSL shorthand. */
+function findByPartial(name) {
+  const n = name.toLowerCase();
+  return CIPHERS.find(c =>
+    c.openssl.toLowerCase().includes(n) ||
+    c.iana.toLowerCase().includes(n)
+  ) || null;
+}
+
+/**
+ * Calculate an overall grade from rating counts.
+ * F  – any Insecure cipher
+ * D  – any Deprecated cipher
+ * C  – any Weak cipher
+ * B  – Secure only (no Recommended)
+ * A  – has Recommended (even alongside Secure)
+ */
+function calculateGrade(counts) {
+  if (counts.Insecure  > 0) return 'F';
+  if (counts.Deprecated > 0) return 'D';
+  if (counts.Weak       > 0) return 'C';
+  if (counts.Recommended > 0) return 'A';
+  if (counts.Secure     > 0) return 'B';
+  return 'F';
+}
+
+// Expose for testing
+window.TLSAnalyzer = { CIPHERS, lookupCipher, filterCiphers, parseInput, analyzeCiphers, calculateGrade };
+
+/* ═══════════════════════════════════════════════════
+   UI HELPERS
+   ═══════════════════════════════════════════════════ */
+function ratingBadge(r) {
+  const cls = `badge badge-${r.toLowerCase()}`;
+  return `<span class="${cls}">${r}</span>`;
+}
+
+function versionBadge(v) {
+  return `<span class="badge badge-tls${v.replace('.','')}">${v === '1.3' ? 'TLS 1.3' : 'TLS 1.2'}</span>`;
+}
+
+function fsBadge(fs) {
+  return fs === 'yes'
+    ? '<span class="fs-yes" title="Forward Secrecy">&#10003;</span>'
+    : '<span class="fs-no">&#8212;</span>';
+}
+
+/* ═══════════════════════════════════════════════════
+   BROWSE TABLE
+   ═══════════════════════════════════════════════════ */
+let sortCol = 'rating';
+let sortDir = 1; // 1=asc, -1=desc
+const RATING_ORDER = { Recommended: 0, Secure: 1, Weak: 2, Insecure: 3, Deprecated: 4 };
+
+function getSortValue(cipher, col) {
+  if (col === 'rating') return RATING_ORDER[cipher.rating] ?? 99;
+  return (cipher[col] || '').toLowerCase();
+}
+
+function renderTable() {
+  const search  = document.getElementById('search-input').value.trim().toLowerCase();
+  const version = document.getElementById('filter-version').value;
+  const rating  = document.getElementById('filter-rating').value;
+  const fs      = document.getElementById('filter-fs').value;
+  const kex     = document.getElementById('filter-kex').value;
+
+  let rows = CIPHERS.filter(c => {
+    if (version && c.version !== version) return false;
+    if (rating  && c.rating  !== rating)  return false;
+    if (fs      && c.fs      !== fs)      return false;
+    if (kex     && c.kex     !== kex)     return false;
+    if (search) {
+      const hay = (c.iana + c.openssl + c.code).toLowerCase();
+      if (!hay.includes(search)) return false;
+    }
+    return true;
+  });
+
+  rows.sort((a, b) => {
+    const av = getSortValue(a, sortCol);
+    const bv = getSortValue(b, sortCol);
+    return av < bv ? -sortDir : av > bv ? sortDir : 0;
+  });
+
+  document.getElementById('row-count').textContent = `${rows.length} cipher suite${rows.length !== 1 ? 's' : ''}`;
+
+  const tbody = document.getElementById('cipher-tbody');
+  tbody.innerHTML = rows.length
+    ? rows.map(c => `
+        <tr>
+          <td class="wrap"><code>${c.iana}</code></td>
+          <td><code>${c.openssl}</code></td>
+          <td><code>${c.code}</code></td>
+          <td>${versionBadge(c.version)}</td>
+          <td>${ratingBadge(c.rating)}</td>
+          <td>${c.kex}</td>
+          <td>${c.auth}</td>
+          <td>${c.enc}</td>
+          <td>${c.mac}</td>
+          <td>${fsBadge(c.fs)}</td>
+        </tr>`).join('')
+    : `<tr><td colspan="10"><div class="empty-state">No cipher suites match the current filters.</div></td></tr>`;
+
+  // Update sort indicators
+  document.querySelectorAll('#cipher-table thead th').forEach(th => {
+    th.classList.remove('sorted-asc', 'sorted-desc');
+    if (th.dataset.col === sortCol) {
+      th.classList.add(sortDir === 1 ? 'sorted-asc' : 'sorted-desc');
+    }
+  });
+}
+
+/* ═══════════════════════════════════════════════════
+   ANALYZE TAB
+   ═══════════════════════════════════════════════════ */
+function runAnalyze() {
+  const raw = document.getElementById('analyze-input').value;
+  const names = parseInput(raw);
+
+  if (!names.length) {
+    alert('Please enter at least one cipher name or cipher string.');
+    return;
+  }
+
+  const { matched, unrecognized, counts, grade } = analyzeCiphers(names);
+  const resultsEl = document.getElementById('analyze-results');
+  resultsEl.style.display = 'block';
+
+  // Grade
+  const gradeBadge = document.getElementById('grade-badge');
+  gradeBadge.textContent = grade;
+  gradeBadge.className = `grade-badge grade-${grade}`;
+
+  // Summary grid
+  const summaryGrid = document.getElementById('summary-grid');
+  const gradeMessages = {
+    A: 'Excellent — all ciphers are Recommended.',
+    B: 'Good — all ciphers are at least Secure, but none are Recommended.',
+    C: 'Fair — weak ciphers present. Consider removing CBC+SHA1 suites.',
+    D: 'Poor — deprecated algorithms (3DES, DES, IDEA) detected.',
+    F: 'Fail — insecure ciphers (RC4, EXPORT, NULL, anonymous) present. Fix immediately.'
+  };
+  document.getElementById('grade-explanation').textContent = gradeMessages[grade] || '';
+
+  summaryGrid.innerHTML = [
+    { label: 'Recommended', count: counts.Recommended, color: 'var(--c-recommended)' },
+    { label: 'Secure',      count: counts.Secure,      color: 'var(--c-secure)' },
+    { label: 'Weak',        count: counts.Weak,        color: 'var(--c-weak)' },
+    { label: 'Insecure',    count: counts.Insecure,    color: 'var(--c-insecure)' },
+    { label: 'Deprecated',  count: counts.Deprecated,  color: 'var(--c-deprecated)' },
+    { label: 'Total',       count: matched.length,     color: 'var(--text)' }
+  ].map(s => `
+    <div class="stat-box">
+      <div class="stat-num" style="color:${s.color}">${s.count}</div>
+      <div class="stat-label">${s.label}</div>
+    </div>`).join('');
+
+  // Matched table
+  const tbody = document.getElementById('analyze-tbody');
+  tbody.innerHTML = matched.length
+    ? matched.map(c => `
+        <tr>
+          <td class="wrap"><code>${c.iana}</code></td>
+          <td><code>${c.openssl}</code></td>
+          <td><code>${c.code}</code></td>
+          <td>${versionBadge(c.version)}</td>
+          <td>${ratingBadge(c.rating)}</td>
+          <td>${c.kex}</td>
+          <td>${fsBadge(c.fs)}</td>
+        </tr>`).join('')
+    : `<tr><td colspan="7"><div class="empty-state">No recognized cipher suites found.</div></td></tr>`;
+
+  // Unrecognized
+  const unrecSection = document.getElementById('unrecognized-section');
+  if (unrecognized.length) {
+    unrecSection.style.display = 'block';
+    document.getElementById('unrecognized-list').innerHTML =
+      unrecognized.map(u => `<code style="margin-right:0.5rem;margin-bottom:0.4rem;display:inline-block">${u}</code>`).join('');
+  } else {
+    unrecSection.style.display = 'none';
+  }
+
+  resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* ═══════════════════════════════════════════════════
+   CONFIG TAB
+   ═══════════════════════════════════════════════════ */
+function renderConfig() {
+  const grid = document.getElementById('config-grid');
+  grid.innerHTML = CONFIGS.map((cfg, i) => `
+    <div class="config-card">
+      <h3>${cfg.name}</h3>
+      <p class="config-desc">${cfg.desc}</p>
+      <div class="tag-row">${cfg.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+
+      <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.3rem;font-weight:600">Nginx</div>
+      <pre id="cfg-nginx-${i}">${cfg.nginx}</pre>
+      <button class="btn copy-btn" onclick="copyText('cfg-nginx-${i}', this)">Copy Nginx</button>
+
+      <div style="font-size:0.78rem;color:var(--text-muted);margin:0.85rem 0 0.3rem;font-weight:600">Apache</div>
+      <pre id="cfg-apache-${i}">${cfg.apache}</pre>
+      <button class="btn copy-btn" onclick="copyText('cfg-apache-${i}', this)" style="margin-top:0.4rem">Copy Apache</button>
+    </div>
+  `).join('');
+}
+
+function copyText(id, btn) {
+  const text = document.getElementById(id).textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = orig; }, 1800);
+  }).catch(() => {
+    // fallback
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    const orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = orig; }, 1800);
+  });
+}
+
+/* ═══════════════════════════════════════════════════
+   TABS
+   ═══════════════════════════════════════════════════ */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+/* ═══════════════════════════════════════════════════
+   EVENT LISTENERS
+   ═══════════════════════════════════════════════════ */
+['search-input','filter-version','filter-rating','filter-fs','filter-kex'].forEach(id => {
+  document.getElementById(id).addEventListener('input', renderTable);
+});
+
+document.getElementById('reset-filters').addEventListener('click', () => {
+  document.getElementById('search-input').value = '';
+  document.getElementById('filter-version').value = '';
+  document.getElementById('filter-rating').value = '';
+  document.getElementById('filter-fs').value = '';
+  document.getElementById('filter-kex').value = '';
+  renderTable();
+});
+
+document.querySelectorAll('#cipher-table thead th[data-col]').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = th.dataset.col;
+    if (sortCol === col) {
+      sortDir *= -1;
+    } else {
+      sortCol = col;
+      sortDir = 1;
+    }
+    renderTable();
+  });
+});
+
+document.getElementById('analyze-btn').addEventListener('click', runAnalyze);
+document.getElementById('clear-analyze').addEventListener('click', () => {
+  document.getElementById('analyze-input').value = '';
+  document.getElementById('analyze-results').style.display = 'none';
+});
+document.getElementById('analyze-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.ctrlKey) runAnalyze();
+});
+
+/* ═══════════════════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════════════════ */
+renderTable();
+renderConfig();
+</script>
+</body>
+</html>

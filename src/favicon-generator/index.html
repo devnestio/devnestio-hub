@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Favicon Generator — Text & Emoji to ICO/PNG | DevNestio</title>
+  <meta name="description" content="Free browser-based favicon generator. Create favicons from text or emoji. Export PNG (16×16 to 180×180) and ICO. Zero upload, 100% private.">
+  <meta name="keywords" content="favicon generator, favicon maker, ICO generator, PNG favicon, emoji favicon, browser tool, no upload">
+  <meta property="og:title" content="Favicon Generator — Text & Emoji to ICO/PNG">
+  <meta property="og:description" content="Create favicons from text or emoji. Download PNG and ICO. Zero upload, 100% browser-based.">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3248;
+      --accent: #6c63ff;
+      --accent-glow: rgba(108,99,255,0.25);
+      --accent2: #00d4aa;
+      --text: #e2e8f0;
+      --text2: #94a3b8;
+      --text3: #64748b;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+    /* Header */
+    .header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .tagline {
+      color: var(--text2);
+      font-size: 0.85rem;
+      margin-left: auto;
+    }
+    /* Layout */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    .main {
+      padding: 28px 0 60px;
+    }
+    .tool-grid {
+      display: grid;
+      grid-template-columns: 300px 1fr 260px;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 900px) {
+      .tool-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    .card-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text2);
+      margin-bottom: 16px;
+    }
+    /* Form controls */
+    .field {
+      margin-bottom: 16px;
+    }
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--text2);
+      margin-bottom: 6px;
+    }
+    input[type="text"], textarea, select {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      padding: 9px 12px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    input[type="text"]:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+    textarea { resize: vertical; min-height: 100px; font-family: 'SF Mono', Consolas, monospace; font-size: 0.85rem; }
+    select { appearance: none; cursor: pointer; }
+    /* Color row */
+    .color-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .color-swatch {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      border: 2px solid var(--border);
+      cursor: pointer;
+      flex-shrink: 0;
+      overflow: hidden;
+      position: relative;
+    }
+    .color-swatch input[type="color"] {
+      position: absolute;
+      inset: -4px;
+      width: calc(100% + 8px);
+      height: calc(100% + 8px);
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      background: none;
+    }
+    .color-hex {
+      font-family: 'SF Mono', Consolas, monospace;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    /* Range slider */
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    input[type="range"] {
+      flex: 1;
+      height: 4px;
+      -webkit-appearance: none;
+      background: var(--border);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+    }
+    .slider-value {
+      font-size: 0.85rem;
+      color: var(--text2);
+      min-width: 36px;
+      text-align: right;
+    }
+    /* Tabs */
+    .tab-bar {
+      display: flex;
+      gap: 4px;
+      background: var(--surface2);
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 16px;
+    }
+    .tab {
+      flex: 1;
+      padding: 7px 12px;
+      border-radius: 7px;
+      border: none;
+      background: transparent;
+      color: var(--text2);
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+    }
+    .tab.active {
+      background: var(--accent);
+      color: #fff;
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    /* Big text input */
+    .big-input {
+      font-size: 2.5rem;
+      text-align: center;
+      padding: 14px;
+      letter-spacing: 0.05em;
+    }
+    .input-hint {
+      font-size: 0.78rem;
+      color: var(--text3);
+      margin-top: 4px;
+      text-align: center;
+    }
+    /* Preview panel */
+    .preview-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    .preview-main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    #previewCanvas {
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      image-rendering: pixelated;
+      width: 200px;
+      height: 200px;
+      background: #fff;
+    }
+    .preview-label {
+      font-size: 0.78rem;
+      color: var(--text3);
+    }
+    /* Browser tab mock */
+    .browser-mock {
+      width: 100%;
+      background: #2b2d3a;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid #3a3d52;
+    }
+    .browser-chrome {
+      background: #1e2030;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .browser-dots {
+      display: flex;
+      gap: 5px;
+    }
+    .browser-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .browser-dot:nth-child(1) { background: #ff5f57; }
+    .browser-dot:nth-child(2) { background: #ffbd2e; }
+    .browser-dot:nth-child(3) { background: #28c840; }
+    .browser-tabs {
+      display: flex;
+      padding: 6px 12px 0;
+      background: #1e2030;
+      gap: 2px;
+    }
+    .browser-tab-item {
+      background: #2b2d3a;
+      border-radius: 8px 8px 0 0;
+      padding: 6px 14px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.8rem;
+      color: var(--text);
+      max-width: 180px;
+    }
+    .browser-tab-favicon {
+      width: 14px;
+      height: 14px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    .browser-tab-close {
+      margin-left: auto;
+      opacity: 0.5;
+      font-size: 0.7rem;
+    }
+    .browser-content {
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text3);
+      font-size: 0.8rem;
+    }
+    /* Phone mock */
+    .phone-mock {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .phone-screen {
+      width: 160px;
+      height: 120px;
+      background: #1a1d27;
+      border: 2px solid #3a3d52;
+      border-radius: 16px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      padding: 16px 12px;
+      align-content: start;
+    }
+    .phone-icon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+    .phone-icon-img {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+    }
+    .phone-icon-label {
+      font-size: 0.55rem;
+      color: var(--text2);
+      text-align: center;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      width: 100%;
+    }
+    .phone-icon.highlight .phone-icon-img {
+      box-shadow: 0 0 0 2px var(--accent);
+    }
+    /* Download panel */
+    .size-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .size-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      padding: 8px 4px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .size-btn:hover {
+      border-color: var(--accent);
+      background: var(--accent-glow);
+    }
+    .size-btn .sz {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .size-btn .unit {
+      font-size: 0.7rem;
+      color: var(--text3);
+    }
+    /* Action buttons */
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      border: none;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      width: 100%;
+      margin-bottom: 8px;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover { filter: brightness(1.15); }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-outline:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .btn-success {
+      background: var(--success);
+      color: #fff;
+    }
+    .btn-success:hover { filter: brightness(1.1); }
+    /* Presets */
+    .presets-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .preset {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 8px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      transition: all 0.15s;
+    }
+    .preset:hover { border-color: var(--accent); transform: scale(1.05); }
+    /* Badge */
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+    .badge-accent { background: var(--accent-glow); color: var(--accent); border: 1px solid var(--accent); }
+    /* How to use */
+    .how-to {
+      margin-top: 40px;
+      padding: 28px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    .how-to h2 { font-size: 1.1rem; margin-bottom: 16px; }
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+    }
+    .step {
+      display: flex;
+      gap: 12px;
+    }
+    .step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .step-text { font-size: 0.85rem; color: var(--text2); }
+    /* Footer */
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 20px 0;
+      text-align: center;
+      color: var(--text3);
+      font-size: 0.82rem;
+    }
+    .footer a { color: var(--text2); text-decoration: none; }
+    .footer a:hover { color: var(--accent); }
+    /* Divider */
+    .divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      padding: 10px 20px;
+      font-size: 0.88rem;
+      transition: transform 0.3s ease;
+      z-index: 999;
+      white-space: nowrap;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+    /* SVG mode note */
+    .svg-hint {
+      font-size: 0.78rem;
+      color: var(--text3);
+      margin-top: 6px;
+      padding: 8px;
+      background: var(--surface2);
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">🎨</div>
+      Favicon Generator
+    </div>
+    <span class="badge badge-accent">v1.0</span>
+    <span class="tagline">Text &amp; Emoji → ICO / PNG · 100% Browser · Zero Upload</span>
+  </div>
+</header>
+
+<!-- AdSense -->
+<ins class="adsbygoogle"
+  style="display:block;height:90px;"
+  data-ad-client="ca-pub-7162190147304602"
+  data-ad-slot="auto"
+  data-ad-format="horizontal"></ins>
+<script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+
+<!-- EthicalAds placeholder -->
+<div class="container" style="margin-top:12px;">
+  <div data-ea-publisher="devnestio" data-ea-type="image" style="display:none"></div>
+</div>
+
+<!-- Main -->
+<main class="main container">
+  <div class="tool-grid">
+
+    <!-- LEFT: Controls -->
+    <div>
+      <div class="card">
+        <div class="card-title">Input</div>
+
+        <!-- Tabs -->
+        <div class="tab-bar">
+          <button class="tab active" data-tab="text">Text / Emoji</button>
+          <button class="tab" data-tab="svg">SVG Code</button>
+        </div>
+
+        <!-- Text tab -->
+        <div class="tab-panel active" id="tab-text">
+          <div class="field">
+            <label for="textInput">Character(s) — up to 3 glyphs</label>
+            <input type="text" id="textInput" class="big-input" value="Fg" maxlength="8" placeholder="Fg or 🚀" autocomplete="off" spellcheck="false">
+            <div class="input-hint">Type 1–3 letters, an emoji, or a symbol</div>
+          </div>
+        </div>
+
+        <!-- SVG tab -->
+        <div class="tab-panel" id="tab-svg">
+          <div class="field">
+            <label for="svgInput">SVG Code</label>
+            <textarea id="svgInput" rows="5" placeholder='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">...</svg>'></textarea>
+            <div class="svg-hint">Paste any valid SVG. The viewBox will be scaled to fill the canvas.</div>
+          </div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- Colors -->
+        <div class="card-title">Colors</div>
+
+        <div class="field">
+          <label>Background</label>
+          <div class="color-row">
+            <div class="color-swatch">
+              <input type="color" id="bgColor" value="#6c63ff">
+            </div>
+            <input type="text" id="bgHex" class="color-hex" value="#6c63ff" maxlength="7">
+          </div>
+        </div>
+
+        <div class="field" id="textColorField">
+          <label>Text / Emoji Color</label>
+          <div class="color-row">
+            <div class="color-swatch">
+              <input type="color" id="fgColor" value="#ffffff">
+            </div>
+            <input type="text" id="fgHex" class="color-hex" value="#ffffff" maxlength="7">
+          </div>
+        </div>
+
+        <button class="btn btn-outline" id="autoContrastBtn" style="margin-bottom:12px;font-size:0.82rem;padding:7px;">
+          ⚡ Auto-contrast text color
+        </button>
+
+        <hr class="divider">
+
+        <!-- Style -->
+        <div class="card-title">Style</div>
+
+        <div class="field">
+          <label>Border Radius</label>
+          <div class="slider-row">
+            <input type="range" id="borderRadius" min="0" max="50" value="20">
+            <span class="slider-value" id="borderRadiusVal">20%</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Font Size (auto if 0)</label>
+          <div class="slider-row">
+            <input type="range" id="fontSize" min="0" max="100" value="0">
+            <span class="slider-value" id="fontSizeVal">auto</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Font</label>
+          <select id="fontFamily">
+            <option value="system-ui,sans-serif">System (sans-serif)</option>
+            <option value="'Georgia',serif">Serif</option>
+            <option value="'SF Mono',Consolas,monospace">Monospace</option>
+            <option value="Impact,'Arial Narrow Bold',sans-serif">Impact</option>
+          </select>
+        </div>
+
+        <hr class="divider">
+
+        <!-- Presets -->
+        <div class="card-title">Presets</div>
+        <div class="presets-grid" id="presetsGrid"></div>
+      </div>
+    </div>
+
+    <!-- CENTER: Preview -->
+    <div class="preview-panel">
+      <div class="card" style="width:100%">
+        <div class="card-title" style="text-align:center">Live Preview</div>
+        <div class="preview-main">
+          <canvas id="previewCanvas" width="256" height="256"></canvas>
+          <div class="preview-label">256 × 256 preview</div>
+        </div>
+      </div>
+
+      <!-- Browser tab mock -->
+      <div class="card" style="width:100%">
+        <div class="card-title">Browser Tab</div>
+        <div class="browser-mock">
+          <div class="browser-chrome">
+            <div class="browser-dots">
+              <div class="browser-dot"></div>
+              <div class="browser-dot"></div>
+              <div class="browser-dot"></div>
+            </div>
+          </div>
+          <div class="browser-tabs">
+            <div class="browser-tab-item">
+              <img id="tabFavicon" class="browser-tab-favicon" src="" alt="">
+              <span id="tabTitle" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">My Website</span>
+              <span class="browser-tab-close">✕</span>
+            </div>
+          </div>
+          <div class="browser-content">Your website content here</div>
+        </div>
+      </div>
+
+      <!-- Phone mock -->
+      <div class="card" style="width:100%">
+        <div class="card-title">Phone Home Screen</div>
+        <div class="phone-mock">
+          <div class="phone-screen" id="phoneScreen">
+            <!-- Placeholder icons + the favicon -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Download -->
+    <div>
+      <div class="card">
+        <div class="card-title">Download PNG</div>
+        <div class="size-grid" id="sizeGrid">
+          <!-- Filled by JS -->
+        </div>
+
+        <hr class="divider">
+        <div class="card-title">Bulk Export</div>
+        <button class="btn btn-primary" id="downloadZipBtn">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download all as ZIP
+        </button>
+        <button class="btn btn-outline" id="downloadIcoBtn">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8M12 8v8"/></svg>
+          Download .ico (16 + 32px)
+        </button>
+
+        <hr class="divider">
+        <div class="card-title" style="margin-bottom:8px;">Selected Sizes</div>
+        <div id="sizeCheckboxes" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;"></div>
+        <div class="preview-label" style="margin-bottom:0">Uncheck to exclude from ZIP</div>
+      </div>
+
+      <!-- AdSense sidebar -->
+      <div style="margin-top:16px;">
+        <ins class="adsbygoogle"
+          style="display:block;min-height:250px;"
+          data-ad-client="ca-pub-7162190147304602"
+          data-ad-slot="auto"
+          data-ad-format="rectangle"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+      </div>
+    </div>
+  </div>
+
+  <!-- How to use -->
+  <div class="how-to">
+    <h2>How to use</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">Type 1–3 characters or paste an emoji in the input field (e.g., "Fg" or "🚀").</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">Pick background and text colors, adjust border radius and font.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">Preview how your favicon looks in browser tabs and phone home screens.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-text">Download individual PNGs, a ZIP bundle, or the multi-size .ico file.</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <p>
+      <a href="https://devnestio.pages.dev">DevNestio</a> · Favicon Generator v1.0
+      · All processing happens in your browser · No files are uploaded
+    </p>
+  </div>
+</footer>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+/* =========================================================
+   PURE UTILITY FUNCTIONS (canvas-independent, testable)
+   ========================================================= */
+
+// CRC32 lookup table (for ZIP)
+const CRC32_TABLE = (() => {
+  const t = new Uint32Array(256);
+  for (let i = 0; i < 256; i++) {
+    let c = i;
+    for (let j = 0; j < 8; j++) {
+      c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    }
+    t[i] = c;
+  }
+  return t;
+})();
+
+function crc32(data) {
+  if (!(data instanceof Uint8Array)) data = new Uint8Array(data);
+  let crc = 0xFFFFFFFF;
+  for (let i = 0; i < data.length; i++) {
+    crc = (crc >>> 8) ^ CRC32_TABLE[(crc ^ data[i]) & 0xFF];
+  }
+  return (crc ^ 0xFFFFFFFF) >>> 0;
+}
+
+// Write uint16 LE into a DataView
+function setU16(view, offset, value) {
+  view.setUint16(offset, value, true);
+}
+// Write uint32 LE into a DataView
+function setU32(view, offset, value) {
+  view.setUint32(offset, value, true);
+}
+
+/**
+ * Create a ZIP archive (STORE, no compression).
+ * @param {Array<{name:string, data:Uint8Array}>} files
+ * @returns {Uint8Array}
+ */
+function createZip(files) {
+  const enc = new TextEncoder();
+  const localChunks = [];
+  const centralEntries = [];
+  let localOffset = 0;
+
+  for (const file of files) {
+    const nameBytes = enc.encode(file.name);
+    const data = file.data instanceof Uint8Array ? file.data : enc.encode(String(file.data));
+    const crc = crc32(data);
+    const size = data.length;
+
+    // Local file header (30 + name)
+    const lhBuf = new ArrayBuffer(30 + nameBytes.length);
+    const lhView = new DataView(lhBuf);
+    setU32(lhView,  0, 0x04034B50); // PK\3\4
+    setU16(lhView,  4, 20);          // version needed
+    setU16(lhView,  6, 0);           // flags
+    setU16(lhView,  8, 0);           // compression: STORE
+    setU16(lhView, 10, 0);           // mod time
+    setU16(lhView, 12, 0);           // mod date
+    setU32(lhView, 14, crc);         // CRC-32
+    setU32(lhView, 18, size);        // compressed size
+    setU32(lhView, 22, size);        // uncompressed size
+    setU16(lhView, 26, nameBytes.length); // filename length
+    setU16(lhView, 28, 0);           // extra field length
+    const lhArr = new Uint8Array(lhBuf);
+    lhArr.set(nameBytes, 30);
+
+    localChunks.push(lhArr, data);
+
+    // Central directory entry (46 + name)
+    const ceBuf = new ArrayBuffer(46 + nameBytes.length);
+    const ceView = new DataView(ceBuf);
+    setU32(ceView,  0, 0x02014B50); // PK\1\2
+    setU16(ceView,  4, 20);          // version made by
+    setU16(ceView,  6, 20);          // version needed
+    setU16(ceView,  8, 0);           // flags
+    setU16(ceView, 10, 0);           // compression
+    setU16(ceView, 12, 0);           // mod time
+    setU16(ceView, 14, 0);           // mod date
+    setU32(ceView, 16, crc);         // CRC-32
+    setU32(ceView, 20, size);        // compressed size
+    setU32(ceView, 24, size);        // uncompressed size
+    setU16(ceView, 28, nameBytes.length); // filename length
+    setU16(ceView, 30, 0);           // extra field length
+    setU16(ceView, 32, 0);           // comment length
+    setU16(ceView, 34, 0);           // disk number start
+    setU16(ceView, 36, 0);           // internal attrs
+    setU32(ceView, 38, 0);           // external attrs
+    setU32(ceView, 42, localOffset); // local header offset
+    const ceArr = new Uint8Array(ceBuf);
+    ceArr.set(nameBytes, 46);
+
+    centralEntries.push(ceArr);
+    localOffset += lhArr.length + size;
+  }
+
+  const centralDirOffset = localOffset;
+  let centralDirSize = 0;
+  for (const e of centralEntries) centralDirSize += e.length;
+
+  // End of central directory (22 bytes)
+  const eocdBuf = new ArrayBuffer(22);
+  const eocdView = new DataView(eocdBuf);
+  setU32(eocdView,  0, 0x06054B50);           // PK\5\6
+  setU16(eocdView,  4, 0);                    // disk number
+  setU16(eocdView,  6, 0);                    // start disk
+  setU16(eocdView,  8, files.length);         // entries on this disk
+  setU16(eocdView, 10, files.length);         // total entries
+  setU32(eocdView, 12, centralDirSize);       // central dir size
+  setU32(eocdView, 16, centralDirOffset);     // central dir offset
+  setU16(eocdView, 20, 0);                    // comment length
+  const eocd = new Uint8Array(eocdBuf);
+
+  // Assemble
+  const allChunks = [...localChunks, ...centralEntries, eocd];
+  const total = allChunks.reduce((acc, c) => acc + c.length, 0);
+  const out = new Uint8Array(total);
+  let pos = 0;
+  for (const chunk of allChunks) {
+    out.set(chunk, pos);
+    pos += chunk.length;
+  }
+  return out;
+}
+
+/**
+ * Create an ICO file containing one or more PNG images.
+ * @param {Array<{width:number, height:number, pngData:Uint8Array}>} images
+ * @returns {Uint8Array}
+ */
+function createIco(images) {
+  const count = images.length;
+  const headerSize = 6;
+  const entrySize = 16;
+  const dirSize = headerSize + count * entrySize;
+
+  // Calculate offsets
+  let offset = dirSize;
+  const enriched = images.map(img => {
+    const entry = { ...img, offset };
+    offset += img.pngData.length;
+    return entry;
+  });
+
+  // ICONDIR header
+  const header = new ArrayBuffer(6);
+  const hv = new DataView(header);
+  setU16(hv, 0, 0);     // Reserved, must be 0
+  setU16(hv, 2, 1);     // Type: 1 = ICO
+  setU16(hv, 4, count); // Number of images
+
+  // ICONDIRENTRY × count
+  const dirBuf = new ArrayBuffer(count * 16);
+  enriched.forEach((img, i) => {
+    const dv = new DataView(dirBuf, i * 16, 16);
+    // Width/height: 0 means 256
+    dv.setUint8(0, img.width >= 256 ? 0 : img.width);
+    dv.setUint8(1, img.height >= 256 ? 0 : img.height);
+    dv.setUint8(2, 0);   // Color count (0 = no palette)
+    dv.setUint8(3, 0);   // Reserved
+    setU16(dv, 4, 1);    // Color planes
+    setU16(dv, 6, 32);   // Bits per pixel
+    setU32(dv, 8,  img.pngData.length); // Size of image data
+    setU32(dv, 12, img.offset);         // Offset of image data
+  });
+
+  // Assemble
+  const totalSize = dirSize + enriched.reduce((acc, img) => acc + img.pngData.length, 0);
+  const out = new Uint8Array(totalSize);
+  out.set(new Uint8Array(header), 0);
+  out.set(new Uint8Array(dirBuf), 6);
+  let pos = dirSize;
+  for (const img of enriched) {
+    out.set(img.pngData, pos);
+    pos += img.pngData.length;
+  }
+  return out;
+}
+
+/** Hex color string → {r,g,b} */
+function hexToRgb(hex) {
+  hex = hex.replace(/^#/, '');
+  if (hex.length === 3) {
+    hex = hex.split('').map(c => c + c).join('');
+  }
+  if (!/^[0-9a-fA-F]{6}$/.test(hex)) return null;
+  const n = parseInt(hex, 16);
+  return { r: (n >> 16) & 0xFF, g: (n >> 8) & 0xFF, b: n & 0xFF };
+}
+
+/** {r,g,b} → "#rrggbb" */
+function rgbToHex(r, g, b) {
+  return '#' + [r, g, b].map(v => Math.max(0, Math.min(255, v)).toString(16).padStart(2, '0')).join('');
+}
+
+/** Relative luminance (WCAG 2.1) */
+function luminance(r, g, b) {
+  const srgb = [r, g, b].map(v => {
+    const s = v / 255;
+    return s <= 0.04045 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * srgb[0] + 0.7152 * srgb[1] + 0.0722 * srgb[2];
+}
+
+/** Returns "#ffffff" or "#000000" for best contrast with given background hex */
+function autoContrast(bgHex) {
+  const rgb = hexToRgb(bgHex);
+  if (!rgb) return '#ffffff';
+  const lum = luminance(rgb.r, rgb.g, rgb.b);
+  return lum > 0.179 ? '#000000' : '#ffffff';
+}
+
+/** Count visible glyphs (grapheme clusters) in a string */
+function countGlyphs(str) {
+  if (!str) return 0;
+  if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+    const seg = new Intl.Segmenter();
+    return [...seg.segment(str)].length;
+  }
+  // Fallback: spread (works for emoji but not all ZWJ sequences)
+  return [...str].length;
+}
+
+/** Returns true if the string is (or starts with) an emoji */
+function isEmoji(str) {
+  if (!str) return false;
+  // Basic Unicode emoji ranges
+  const emojiRe = /[\u{1F000}-\u{1FFFF}\u{2600}-\u{27FF}\u{2B00}-\u{2BFF}\u{FE00}-\u{FEFF}\u{1F300}-\u{1FAFF}]/u;
+  return emojiRe.test(str);
+}
+
+/** Clamp value to [min, max] */
+function clamp(val, min, max) {
+  return Math.max(min, Math.min(max, val));
+}
+
+/** Sanitize text input: trim, keep only first 3 grapheme clusters */
+function sanitizeText(str) {
+  if (!str) return '';
+  str = str.trim();
+  if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+    const seg = new Intl.Segmenter();
+    const segs = [...seg.segment(str)];
+    return segs.slice(0, 3).map(s => s.segment).join('');
+  }
+  return [...str].slice(0, 3).join('');
+}
+
+/** Validate a #rrggbb hex color string */
+function isValidHex(hex) {
+  return /^#[0-9a-fA-F]{6}$/.test(hex);
+}
+
+/** Normalize hex (add # if missing, lowercase) */
+function normalizeHex(hex) {
+  hex = hex.trim();
+  if (!hex.startsWith('#')) hex = '#' + hex;
+  if (hex.length === 4) {
+    hex = '#' + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
+  }
+  return hex.toLowerCase();
+}
+
+/** Parse an integer from DataView at offset, little-endian */
+function readU16LE(bytes, offset) {
+  return bytes[offset] | (bytes[offset + 1] << 8);
+}
+
+function readU32LE(bytes, offset) {
+  return (bytes[offset] | (bytes[offset + 1] << 8) | (bytes[offset + 2] << 16) | (bytes[offset + 3] << 24)) >>> 0;
+}
+
+/* =========================================================
+   CANVAS RENDERING
+   ========================================================= */
+
+const SIZES = [16, 32, 64, 128, 180];
+
+/**
+ * Draw favicon content onto the given canvas.
+ * @param {HTMLCanvasElement} canvas
+ * @param {Object} opts
+ */
+function renderToCanvas(canvas, opts) {
+  const {
+    text = '',
+    bgColor = '#6c63ff',
+    fgColor = '#ffffff',
+    borderRadius = 20,
+    fontSize = 0,
+    fontFamily = 'system-ui,sans-serif',
+    svgCode = '',
+    mode = 'text',
+  } = opts;
+
+  const size = canvas.width;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, size, size);
+
+  // Background with border-radius
+  const r = (borderRadius / 100) * (size / 2);
+  ctx.beginPath();
+  ctx.moveTo(r, 0);
+  ctx.lineTo(size - r, 0);
+  ctx.quadraticCurveTo(size, 0, size, r);
+  ctx.lineTo(size, size - r);
+  ctx.quadraticCurveTo(size, size, size - r, size);
+  ctx.lineTo(r, size);
+  ctx.quadraticCurveTo(0, size, 0, size - r);
+  ctx.lineTo(0, r);
+  ctx.quadraticCurveTo(0, 0, r, 0);
+  ctx.closePath();
+  ctx.fillStyle = bgColor;
+  ctx.fill();
+
+  if (mode === 'svg' && svgCode.trim()) {
+    // SVG rendering is async; caller should use renderSvgToCanvas
+    return;
+  }
+
+  if (!text.trim()) return;
+
+  // Auto-size font
+  let actualFontSize = fontSize > 0 ? (fontSize / 100) * size : 0;
+  if (!actualFontSize) {
+    const glyphs = countGlyphs(text);
+    if (glyphs === 1)      actualFontSize = size * 0.62;
+    else if (glyphs === 2) actualFontSize = size * 0.44;
+    else                   actualFontSize = size * 0.34;
+  }
+
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = fgColor;
+  ctx.font = `bold ${Math.round(actualFontSize)}px ${fontFamily}`;
+
+  // For emoji, don't apply fillStyle (let the browser use emoji colors)
+  if (isEmoji(text)) {
+    ctx.font = `${Math.round(actualFontSize)}px sans-serif`;
+  }
+
+  ctx.fillText(text, size / 2, size / 2 + size * 0.03);
+}
+
+/**
+ * Draw SVG onto canvas (async).
+ */
+function renderSvgToCanvas(canvas, svgCode, bgColor, borderRadius) {
+  return new Promise((resolve, reject) => {
+    const size = canvas.width;
+    const ctx = canvas.getContext('2d');
+
+    // Draw background first
+    const r = (borderRadius / 100) * (size / 2);
+    ctx.clearRect(0, 0, size, size);
+    ctx.beginPath();
+    ctx.moveTo(r, 0);
+    ctx.lineTo(size - r, 0);
+    ctx.quadraticCurveTo(size, 0, size, r);
+    ctx.lineTo(size, size - r);
+    ctx.quadraticCurveTo(size, size, size - r, size);
+    ctx.lineTo(r, size);
+    ctx.quadraticCurveTo(0, size, 0, size - r);
+    ctx.lineTo(0, r);
+    ctx.quadraticCurveTo(0, 0, r, 0);
+    ctx.closePath();
+    ctx.fillStyle = bgColor;
+    ctx.fill();
+
+    try {
+      const blob = new Blob([svgCode], { type: 'image/svg+xml' });
+      const url = URL.createObjectURL(blob);
+      const img = new Image();
+      img.onload = () => {
+        ctx.save();
+        // Clip to rounded rect
+        ctx.beginPath();
+        ctx.moveTo(r, 0);
+        ctx.lineTo(size - r, 0);
+        ctx.quadraticCurveTo(size, 0, size, r);
+        ctx.lineTo(size, size - r);
+        ctx.quadraticCurveTo(size, size, size - r, size);
+        ctx.lineTo(r, size);
+        ctx.quadraticCurveTo(0, size, 0, size - r);
+        ctx.lineTo(0, r);
+        ctx.quadraticCurveTo(0, 0, r, 0);
+        ctx.closePath();
+        ctx.clip();
+        const margin = size * 0.08;
+        ctx.drawImage(img, margin, margin, size - margin * 2, size - margin * 2);
+        ctx.restore();
+        URL.revokeObjectURL(url);
+        resolve();
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Invalid SVG')); };
+      img.src = url;
+    } catch (e) {
+      reject(e);
+    }
+  });
+}
+
+/** Convert canvas to PNG Uint8Array */
+function canvasToPng(canvas) {
+  const dataUrl = canvas.toDataURL('image/png');
+  const base64 = dataUrl.split(',')[1];
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
+/** Download bytes as a file */
+function downloadBytes(bytes, filename, mime) {
+  const blob = new Blob([bytes], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/** Show toast message */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+/* =========================================================
+   UI SETUP
+   ========================================================= */
+
+const PRESETS = [
+  { text: '🚀', bg: '#1a1d27', fg: '#ffffff' },
+  { text: '⚡', bg: '#f59e0b', fg: '#1a1d27' },
+  { text: '🔥', bg: '#ef4444', fg: '#ffffff' },
+  { text: '💎', bg: '#0ea5e9', fg: '#ffffff' },
+  { text: '🌿', bg: '#22c55e', fg: '#ffffff' },
+  { text: 'Fg', bg: '#6c63ff', fg: '#ffffff' },
+  { text: 'JS', bg: '#f7df1e', fg: '#1a1d27' },
+  { text: 'Go', bg: '#00acd7', fg: '#ffffff' },
+  { text: 'Py', bg: '#306998', fg: '#ffd343' },
+  { text: 'TS', bg: '#3178c6', fg: '#ffffff' },
+];
+
+const DUMMY_PHONE_ICONS = ['📧', '📸', '🗺️', '📱', '🎵', '📅', '⚙️'];
+
+let currentOpts = {
+  text: 'Fg',
+  bgColor: '#6c63ff',
+  fgColor: '#ffffff',
+  borderRadius: 20,
+  fontSize: 0,
+  fontFamily: 'system-ui,sans-serif',
+  svgCode: '',
+  mode: 'text',
+};
+
+let selectedSizes = new Set([16, 32, 64, 128, 180]);
+
+function getOpts() { return { ...currentOpts }; }
+
+// Build size download buttons
+function buildSizeGrid() {
+  const grid = document.getElementById('sizeGrid');
+  grid.innerHTML = '';
+  SIZES.forEach(sz => {
+    const btn = document.createElement('button');
+    btn.className = 'size-btn';
+    btn.innerHTML = `<span class="sz">${sz}</span><span class="unit">×${sz} px</span>`;
+    btn.title = `Download ${sz}×${sz} PNG`;
+    btn.addEventListener('click', () => downloadSize(sz));
+    grid.appendChild(btn);
+  });
+}
+
+// Build size checkboxes
+function buildSizeCheckboxes() {
+  const cont = document.getElementById('sizeCheckboxes');
+  cont.innerHTML = '';
+  SIZES.forEach(sz => {
+    const label = document.createElement('label');
+    label.style.cssText = 'display:flex;align-items:center;gap:5px;font-size:0.82rem;color:var(--text2);cursor:pointer;';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = true;
+    cb.value = sz;
+    cb.style.accentColor = 'var(--accent)';
+    cb.addEventListener('change', () => {
+      if (cb.checked) selectedSizes.add(sz);
+      else selectedSizes.delete(sz);
+    });
+    label.appendChild(cb);
+    label.appendChild(document.createTextNode(`${sz}px`));
+    cont.appendChild(label);
+  });
+}
+
+// Build preset buttons
+function buildPresets() {
+  const grid = document.getElementById('presetsGrid');
+  PRESETS.forEach(p => {
+    const btn = document.createElement('button');
+    btn.className = 'preset';
+    btn.style.background = p.bg;
+    btn.style.color = p.fg;
+    btn.title = `${p.text} preset`;
+    btn.textContent = p.text;
+    btn.addEventListener('click', () => applyPreset(p));
+    grid.appendChild(btn);
+  });
+}
+
+function applyPreset(p) {
+  document.getElementById('textInput').value = p.text;
+  document.getElementById('bgColor').value = p.bg;
+  document.getElementById('bgHex').value = p.bg;
+  document.getElementById('fgColor').value = p.fg;
+  document.getElementById('fgHex').value = p.fg;
+  currentOpts.text = p.text;
+  currentOpts.bgColor = p.bg;
+  currentOpts.fgColor = p.fg;
+  update();
+}
+
+// Build phone screen mock
+function buildPhoneScreen() {
+  const screen = document.getElementById('phoneScreen');
+  screen.innerHTML = '';
+  DUMMY_PHONE_ICONS.forEach(icon => {
+    const div = document.createElement('div');
+    div.className = 'phone-icon';
+    div.innerHTML = `<div class="phone-icon-img" style="display:flex;align-items:center;justify-content:center;font-size:18px;background:#22263a;">${icon}</div>`;
+    screen.appendChild(div);
+  });
+  // Add favicon icon (highlight)
+  const faviconDiv = document.createElement('div');
+  faviconDiv.className = 'phone-icon highlight';
+  faviconDiv.innerHTML = `<canvas id="phoneCanvas" class="phone-icon-img" width="180" height="180" style="border-radius:8px;"></canvas><span class="phone-icon-label">My App</span>`;
+  screen.appendChild(faviconDiv);
+}
+
+/* =========================================================
+   RENDER & UPDATE
+   ========================================================= */
+
+let updateTimer = null;
+
+function scheduleUpdate() {
+  clearTimeout(updateTimer);
+  updateTimer = setTimeout(update, 50);
+}
+
+async function update() {
+  const opts = getOpts();
+
+  // Main preview canvas
+  const previewCanvas = document.getElementById('previewCanvas');
+  previewCanvas.width = 256;
+  previewCanvas.height = 256;
+
+  if (opts.mode === 'svg' && opts.svgCode.trim()) {
+    try {
+      await renderSvgToCanvas(previewCanvas, opts.svgCode, opts.bgColor, opts.borderRadius);
+    } catch (e) {
+      renderToCanvas(previewCanvas, { ...opts, text: '?', mode: 'text' });
+    }
+  } else {
+    renderToCanvas(previewCanvas, opts);
+  }
+
+  // Update browser tab favicon (32x32)
+  const tabImg = document.getElementById('tabFavicon');
+  tabImg.src = previewCanvas.toDataURL('image/png');
+
+  // Update phone canvas
+  const phoneCanvas = document.getElementById('phoneCanvas');
+  if (phoneCanvas) {
+    phoneCanvas.width = 180;
+    phoneCanvas.height = 180;
+    if (opts.mode === 'svg' && opts.svgCode.trim()) {
+      try {
+        await renderSvgToCanvas(phoneCanvas, opts.svgCode, opts.bgColor, opts.borderRadius);
+      } catch (e) {
+        renderToCanvas(phoneCanvas, { ...opts, text: '?', mode: 'text' });
+      }
+    } else {
+      renderToCanvas(phoneCanvas, opts);
+    }
+  }
+}
+
+/* =========================================================
+   DOWNLOAD FUNCTIONS
+   ========================================================= */
+
+async function getRenderedPng(size) {
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const opts = getOpts();
+  if (opts.mode === 'svg' && opts.svgCode.trim()) {
+    await renderSvgToCanvas(canvas, opts.svgCode, opts.bgColor, opts.borderRadius);
+  } else {
+    renderToCanvas(canvas, opts);
+  }
+  return canvasToPng(canvas);
+}
+
+async function downloadSize(size) {
+  try {
+    const png = await getRenderedPng(size);
+    downloadBytes(png, `favicon-${size}x${size}.png`, 'image/png');
+    showToast(`Downloaded ${size}×${size} PNG`);
+  } catch (e) {
+    showToast('Error generating PNG');
+  }
+}
+
+async function downloadZip() {
+  const sizes = SIZES.filter(s => selectedSizes.has(s));
+  if (sizes.length === 0) { showToast('Select at least one size'); return; }
+
+  showToast('Generating ZIP…');
+  try {
+    const files = [];
+    for (const sz of sizes) {
+      const png = await getRenderedPng(sz);
+      files.push({ name: `favicon-${sz}x${sz}.png`, data: png });
+    }
+    const zip = createZip(files);
+    downloadBytes(zip, 'favicons.zip', 'application/zip');
+    showToast(`Downloaded ZIP with ${files.length} files`);
+  } catch (e) {
+    showToast('Error generating ZIP');
+  }
+}
+
+async function downloadIco() {
+  showToast('Generating ICO…');
+  try {
+    const [png16, png32] = await Promise.all([getRenderedPng(16), getRenderedPng(32)]);
+    const ico = createIco([
+      { width: 16, height: 16, pngData: png16 },
+      { width: 32, height: 32, pngData: png32 },
+    ]);
+    downloadBytes(ico, 'favicon.ico', 'image/x-icon');
+    showToast('Downloaded favicon.ico (16+32px)');
+  } catch (e) {
+    showToast('Error generating ICO');
+  }
+}
+
+/* =========================================================
+   WIRE UP EVENTS
+   ========================================================= */
+
+// Tabs
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    const tabId = btn.dataset.tab;
+    document.getElementById('tab-' + tabId).classList.add('active');
+    currentOpts.mode = tabId === 'svg' ? 'svg' : 'text';
+    // Show/hide fg color field
+    document.getElementById('textColorField').style.display = tabId === 'svg' ? 'none' : '';
+    scheduleUpdate();
+  });
+});
+
+// Text input
+document.getElementById('textInput').addEventListener('input', (e) => {
+  const sanitized = sanitizeText(e.target.value);
+  if (e.target.value !== sanitized) e.target.value = sanitized;
+  currentOpts.text = sanitized;
+  scheduleUpdate();
+});
+
+// SVG input
+document.getElementById('svgInput').addEventListener('input', (e) => {
+  currentOpts.svgCode = e.target.value;
+  scheduleUpdate();
+});
+
+// BG color picker
+document.getElementById('bgColor').addEventListener('input', (e) => {
+  currentOpts.bgColor = e.target.value;
+  document.getElementById('bgHex').value = e.target.value;
+  scheduleUpdate();
+});
+
+// BG hex input
+document.getElementById('bgHex').addEventListener('input', (e) => {
+  const hex = normalizeHex(e.target.value);
+  if (isValidHex(hex)) {
+    currentOpts.bgColor = hex;
+    document.getElementById('bgColor').value = hex;
+    scheduleUpdate();
+  }
+});
+
+// FG color picker
+document.getElementById('fgColor').addEventListener('input', (e) => {
+  currentOpts.fgColor = e.target.value;
+  document.getElementById('fgHex').value = e.target.value;
+  scheduleUpdate();
+});
+
+// FG hex input
+document.getElementById('fgHex').addEventListener('input', (e) => {
+  const hex = normalizeHex(e.target.value);
+  if (isValidHex(hex)) {
+    currentOpts.fgColor = hex;
+    document.getElementById('fgColor').value = hex;
+    scheduleUpdate();
+  }
+});
+
+// Auto contrast
+document.getElementById('autoContrastBtn').addEventListener('click', () => {
+  const fg = autoContrast(currentOpts.bgColor);
+  currentOpts.fgColor = fg;
+  document.getElementById('fgColor').value = fg;
+  document.getElementById('fgHex').value = fg;
+  scheduleUpdate();
+});
+
+// Border radius
+document.getElementById('borderRadius').addEventListener('input', (e) => {
+  const val = parseInt(e.target.value, 10);
+  currentOpts.borderRadius = val;
+  document.getElementById('borderRadiusVal').textContent = val + '%';
+  scheduleUpdate();
+});
+
+// Font size
+document.getElementById('fontSize').addEventListener('input', (e) => {
+  const val = parseInt(e.target.value, 10);
+  currentOpts.fontSize = val;
+  document.getElementById('fontSizeVal').textContent = val === 0 ? 'auto' : val + '%';
+  scheduleUpdate();
+});
+
+// Font family
+document.getElementById('fontFamily').addEventListener('change', (e) => {
+  currentOpts.fontFamily = e.target.value;
+  scheduleUpdate();
+});
+
+// Download buttons
+document.getElementById('downloadZipBtn').addEventListener('click', downloadZip);
+document.getElementById('downloadIcoBtn').addEventListener('click', downloadIco);
+
+// Init
+buildSizeGrid();
+buildSizeCheckboxes();
+buildPresets();
+buildPhoneScreen();
+update();
+
+// Export for testing (no-op in browser)
+if (typeof module !== 'undefined') {
+  module.exports = {
+    crc32, createZip, createIco,
+    hexToRgb, rgbToHex, luminance, autoContrast,
+    countGlyphs, isEmoji, clamp, sanitizeText,
+    isValidHex, normalizeHex, readU16LE, readU32LE,
+    setU16, setU32, CRC32_TABLE,
+  };
+}
+</script>
+</body>
+</html>

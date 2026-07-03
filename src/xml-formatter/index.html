@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>XML Formatter & Validator | DevNestio</title>
+  <meta name="description" content="Format, minify, and validate XML in your browser. Syntax highlighting, error detection, pretty-print with configurable indent. Zero upload, browser-only." />
+  <meta property="og:title" content="XML Formatter & Validator | DevNestio" />
+  <meta property="og:description" content="Paste XML to format, minify, and validate it instantly. Syntax-highlighted output, error highlighting. Browser-only, no server." />
+  <meta property="og:url" content="https://devnestio.pages.dev/xml-formatter/" />
+  <meta name="twitter:card" content="summary" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    #privacy-banner { background: #1e293b; border-bottom: 1px solid #334155; padding: 8px 16px; font-size: 12px; color: #94a3b8; text-align: center; }
+    header { background: #1e293b; border-bottom: 1px solid #334155; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+    header a { color: #64748b; font-size: 13px; text-decoration: none; margin-left: auto; }
+    header a:hover { color: #94a3b8; }
+    .badge { background: #16a34a; color: #fff; font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+    main { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+    .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+    .btn { padding: 8px 16px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; }
+    .btn-primary { background: #16a34a; color: #fff; }
+    .btn-primary:hover { background: #15803d; }
+    .btn-secondary { background: #334155; color: #e2e8f0; }
+    .btn-secondary:hover { background: #475569; }
+    .opt { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #94a3b8; }
+    select.opt-sel { padding: 5px 8px; background: #0f1117; border: 1px solid #334155; border-radius: 5px; color: #e2e8f0; font-size: 12px; outline: none; }
+    select.opt-sel:focus { border-color: #16a34a; }
+    .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 700px) { .layout { grid-template-columns: 1fr; } }
+    .panel { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 16px; }
+    .panel-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .panel-hdr h2 { font-size: 13px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em; }
+    textarea { width: 100%; padding: 10px 12px; background: #0f1117; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 12px; font-family: 'JetBrains Mono', monospace; outline: none; resize: vertical; min-height: 380px; }
+    textarea:focus { border-color: #16a34a; }
+    .output-box { background: #0f1117; border: 1px solid #334155; border-radius: 6px; padding: 10px 12px; font-size: 12px; font-family: 'JetBrains Mono', monospace; min-height: 380px; max-height: 480px; overflow: auto; white-space: pre; word-break: break-word; line-height: 1.6; }
+    .status-bar { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px; padding: 7px 12px; border-radius: 6px; font-size: 12px; }
+    .status-bar.ok { background: #052e16; border: 1px solid #166534; color: #4ade80; }
+    .status-bar.err { background: #450a0a; border: 1px solid #7f1d1d; color: #fca5a5; }
+    .status-bar.idle { background: #0f1117; border: 1px solid #334155; color: #94a3b8; }
+    .btn-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+    .stats { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 8px; }
+    .stat { font-size: 11px; color: #64748b; }
+    .stat strong { color: #94a3b8; }
+    /* Syntax colors */
+    .x-tag { color: #38bdf8; }
+    .x-attr { color: #fb923c; }
+    .x-val { color: #86efac; }
+    .x-comment { color: #64748b; font-style: italic; }
+    .x-cdata { color: #fbbf24; }
+    .x-pi { color: #c084fc; }
+    .x-text { color: #e2e8f0; }
+    #ad-slot { margin: 20px auto; text-align: center; }
+  </style>
+</head>
+<body>
+<div id="privacy-banner">🔒 All processing happens in your browser. No data is sent to any server.</div>
+<header>
+  <span class="badge">FREE</span>
+  <h1>XML Formatter & Validator</h1>
+  <a href="https://devnestio.pages.dev">← All Tools</a>
+</header>
+<main>
+  <div class="toolbar">
+    <button class="btn btn-primary" onclick="format()">Format</button>
+    <button class="btn btn-secondary" onclick="minify()">Minify</button>
+    <button class="btn btn-secondary" onclick="validate()">Validate Only</button>
+    <button class="btn btn-secondary" onclick="loadSample()">Sample</button>
+    <button class="btn btn-secondary" onclick="clearAll()">Clear</button>
+    <div class="opt">
+      <label for="indent-sel">Indent:</label>
+      <select class="opt-sel" id="indent-sel">
+        <option value="2">2 spaces</option>
+        <option value="4" selected>4 spaces</option>
+        <option value="tab">Tab</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="panel">
+      <div class="panel-hdr">
+        <h2>Input XML</h2>
+        <span id="input-stats" style="font-size:11px;color:#64748b"></span>
+      </div>
+      <textarea id="input-xml" spellcheck="false" placeholder="Paste XML here…"></textarea>
+      <div id="input-status" class="status-bar idle" style="display:none"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-hdr">
+        <h2>Output</h2>
+        <span id="output-stats" style="font-size:11px;color:#64748b"></span>
+      </div>
+      <div id="output-box" class="output-box"><span style="color:#334155">Output will appear here…</span></div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="copyOutput()">Copy</button>
+        <button class="btn btn-secondary" onclick="downloadOutput()">Download</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="ad-slot" data-ea-publisher="devnestio" data-ea-type="image"></div>
+</main>
+<script>
+function getIndent() {
+  const v = document.getElementById('indent-sel').value;
+  if (v === 'tab') return '\t';
+  return ' '.repeat(parseInt(v));
+}
+
+// ── Parse via DOMParser ───────────────────────────────────────
+function parseXml(text) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(text, 'application/xml');
+  const err = doc.querySelector('parsererror');
+  if (err) {
+    const msg = err.textContent.replace(/\s+/g, ' ').trim().slice(0, 200);
+    throw new Error(msg);
+  }
+  return doc;
+}
+
+// ── Formatter ─────────────────────────────────────────────────
+function formatNode(node, indent, indentChar) {
+  let out = '';
+  if (node.nodeType === Node.DOCUMENT_NODE) {
+    for (const child of node.childNodes) out += formatNode(child, indent, indentChar);
+    return out;
+  }
+  if (node.nodeType === Node.PROCESSING_INSTRUCTION_NODE) {
+    return indent + `<span class="x-pi">&lt;?${escHtml(node.target)} ${escHtml(node.data)}?&gt;</span>\n`;
+  }
+  if (node.nodeType === Node.COMMENT_NODE) {
+    return indent + `<span class="x-comment">&lt;!--${escHtml(node.nodeValue)}--&gt;</span>\n`;
+  }
+  if (node.nodeType === Node.CDATA_SECTION_NODE) {
+    return indent + `<span class="x-cdata">&lt;![CDATA[${escHtml(node.nodeValue)}]]&gt;</span>\n`;
+  }
+  if (node.nodeType === Node.TEXT_NODE) {
+    const text = node.nodeValue.trim();
+    if (!text) return '';
+    return indent + `<span class="x-text">${escHtml(text)}</span>\n`;
+  }
+  if (node.nodeType !== Node.ELEMENT_NODE) return '';
+
+  const tag = node.tagName;
+  let attrs = '';
+  for (const attr of node.attributes) {
+    attrs += ` <span class="x-attr">${escHtml(attr.name)}</span>=<span class="x-val">"${escHtml(attr.value)}"</span>`;
+  }
+
+  const children = Array.from(node.childNodes);
+  const hasElementChildren = children.some(c => c.nodeType === Node.ELEMENT_NODE);
+  const textOnly = children.every(c => c.nodeType === Node.TEXT_NODE || c.nodeType === Node.CDATA_SECTION_NODE);
+  const isEmpty = children.length === 0;
+
+  if (isEmpty) {
+    return indent + `<span class="x-tag">&lt;${escHtml(tag)}</span>${attrs}<span class="x-tag"> /&gt;</span>\n`;
+  }
+
+  if (textOnly && children.length === 1) {
+    const text = escHtml(children[0].nodeValue || '');
+    return indent + `<span class="x-tag">&lt;${escHtml(tag)}</span>${attrs}<span class="x-tag">&gt;</span><span class="x-text">${text}</span><span class="x-tag">&lt;/${escHtml(tag)}&gt;</span>\n`;
+  }
+
+  out = indent + `<span class="x-tag">&lt;${escHtml(tag)}</span>${attrs}<span class="x-tag">&gt;</span>\n`;
+  for (const child of children) out += formatNode(child, indent + indentChar, indentChar);
+  out += indent + `<span class="x-tag">&lt;/${escHtml(tag)}&gt;</span>\n`;
+  return out;
+}
+
+function xmlToString(node, indent, indentChar) {
+  let out = '';
+  if (node.nodeType === Node.DOCUMENT_NODE) {
+    for (const child of node.childNodes) out += xmlToString(child, indent, indentChar);
+    return out;
+  }
+  if (node.nodeType === Node.PROCESSING_INSTRUCTION_NODE) return indent + `<?${node.target} ${node.data}?>\n`;
+  if (node.nodeType === Node.COMMENT_NODE) return indent + `<!--${node.nodeValue}-->\n`;
+  if (node.nodeType === Node.CDATA_SECTION_NODE) return indent + `<![CDATA[${node.nodeValue}]]>\n`;
+  if (node.nodeType === Node.TEXT_NODE) {
+    const text = node.nodeValue.trim();
+    return text ? indent + text + '\n' : '';
+  }
+  if (node.nodeType !== Node.ELEMENT_NODE) return '';
+  const tag = node.tagName;
+  let attrs = '';
+  for (const attr of node.attributes) attrs += ` ${attr.name}="${attr.value}"`;
+  const children = Array.from(node.childNodes);
+  if (children.length === 0) return indent + `<${tag}${attrs} />\n`;
+  if (children.length === 1 && children[0].nodeType === Node.TEXT_NODE) {
+    return indent + `<${tag}${attrs}>${children[0].nodeValue.trim()}</${tag}>\n`;
+  }
+  out = indent + `<${tag}${attrs}>\n`;
+  for (const child of children) out += xmlToString(child, indent + indentChar, indentChar);
+  out += indent + `</${tag}>\n`;
+  return out;
+}
+
+let rawOutput = '';
+
+function format() {
+  const text = document.getElementById('input-xml').value.trim();
+  if (!text) return;
+  const indentChar = getIndent();
+  try {
+    const doc = parseXml(text);
+    const highlighted = formatNode(doc, '', indentChar);
+    rawOutput = xmlToString(doc, '', indentChar);
+    document.getElementById('output-box').innerHTML = highlighted;
+    showStatus('ok', '✅ Valid XML — formatted successfully');
+    updateStats(text, rawOutput);
+  } catch(e) {
+    showStatus('err', '❌ Parse error: ' + e.message);
+  }
+}
+
+function minify() {
+  const text = document.getElementById('input-xml').value.trim();
+  if (!text) return;
+  try {
+    const doc = parseXml(text);
+    const s = new XMLSerializer();
+    rawOutput = s.serializeToString(doc).replace(/\s{2,}/g, ' ').trim();
+    document.getElementById('output-box').textContent = rawOutput;
+    showStatus('ok', '✅ Minified successfully');
+    updateStats(text, rawOutput);
+  } catch(e) {
+    showStatus('err', '❌ Parse error: ' + e.message);
+  }
+}
+
+function validate() {
+  const text = document.getElementById('input-xml').value.trim();
+  if (!text) return;
+  try {
+    parseXml(text);
+    showStatus('ok', '✅ Valid XML');
+  } catch(e) {
+    showStatus('err', '❌ ' + e.message);
+  }
+}
+
+function showStatus(type, msg) {
+  const el = document.getElementById('input-status');
+  el.style.display = '';
+  el.className = 'status-bar ' + type;
+  el.textContent = msg;
+}
+
+function updateStats(input, output) {
+  const enc = new TextEncoder();
+  const inBytes = enc.encode(input).length;
+  const outBytes = enc.encode(output).length;
+  const saved = inBytes - outBytes;
+  document.getElementById('input-stats').textContent = `${inBytes.toLocaleString()} bytes`;
+  document.getElementById('output-stats').textContent = `${outBytes.toLocaleString()} bytes${saved > 0 ? ` (−${saved.toLocaleString()})` : saved < 0 ? ` (+${Math.abs(saved).toLocaleString()})` : ''}`;
+}
+
+function copyOutput() {
+  if (rawOutput) navigator.clipboard.writeText(rawOutput);
+}
+
+function downloadOutput() {
+  if (!rawOutput) return;
+  const blob = new Blob([rawOutput], { type: 'application/xml' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'formatted.xml';
+  a.click();
+}
+
+function clearAll() {
+  document.getElementById('input-xml').value = '';
+  document.getElementById('output-box').innerHTML = '<span style="color:#334155">Output will appear here…</span>';
+  document.getElementById('input-status').style.display = 'none';
+  document.getElementById('input-stats').textContent = '';
+  document.getElementById('output-stats').textContent = '';
+  rawOutput = '';
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+const SAMPLE_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<!-- Book catalog example -->
+<catalog>
+  <book id="bk101" available="true">
+    <author>Gambardella, Matthew</author>
+    <title>XML Developer's Guide</title>
+    <genre>Computer</genre>
+    <price>44.95</price>
+    <publish_date>2000-10-01</publish_date>
+    <description>An in-depth look at creating applications with XML.</description>
+  </book>
+  <book id="bk102" available="false">
+    <author>Ralls, Kim</author>
+    <title>Midnight Rain</title>
+    <genre>Fantasy</genre>
+    <price>5.95</price>
+    <publish_date>2000-12-16</publish_date>
+    <description>A former architect battles corporate zombies.</description>
+  </book>
+</catalog>`;
+
+function loadSample() {
+  document.getElementById('input-xml').value = SAMPLE_XML;
+  format();
+}
+
+// Auto-format with debounce
+let debounce;
+document.getElementById('input-xml').addEventListener('input', () => {
+  const v = document.getElementById('input-xml').value;
+  document.getElementById('input-stats').textContent = new TextEncoder().encode(v).length.toLocaleString() + ' bytes';
+  clearTimeout(debounce);
+  debounce = setTimeout(() => { if (v.trim()) format(); }, 600);
+});
+
+// Load sample on startup
+loadSample();
+</script>
+</body>
+</html>

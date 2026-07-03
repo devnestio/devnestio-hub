@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSS Easing Visualizer — devnestio</title>
+  <meta name="description" content="Visualize and compare CSS easing functions. See cubic-bezier curves, steps(), and named easings on an animated graph. Copy-ready CSS output." />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    header { background: #1a1d2e; border-bottom: 1px solid #2d3748; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+    header a { color: #7c85f3; text-decoration: none; font-size: 14px; }
+    header h1 { font-size: 18px; font-weight: 700; color: #fff; }
+    .container { max-width: 960px; margin: 0 auto; padding: 24px 16px; display: grid; grid-template-columns: 280px 1fr; gap: 24px; }
+    @media (max-width: 720px) { .container { grid-template-columns: 1fr; } }
+    .panel { background: #1a1d2e; border: 1px solid #2d3748; border-radius: 10px; padding: 18px; }
+    .panel h2 { font-size: 13px; font-weight: 600; color: #a0aec0; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 14px; }
+    .preset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 16px; }
+    .preset-btn { background: #0f1117; border: 1px solid #2d3748; border-radius: 6px; padding: 7px 10px; font-size: 12px; color: #a0aec0; cursor: pointer; text-align: center; }
+    .preset-btn:hover, .preset-btn.active { border-color: #7c85f3; color: #7c85f3; background: #1a1d2e; }
+    .divider { border: none; border-top: 1px solid #2d3748; margin: 14px 0; }
+    .field { margin-bottom: 12px; }
+    .field label { display: flex; justify-content: space-between; font-size: 12px; color: #a0aec0; margin-bottom: 4px; }
+    .field label span { color: #7c85f3; font-weight: 700; }
+    .field input[type=range] { width: 100%; accent-color: #7c85f3; }
+    .handle-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .steps-row { display: flex; gap: 8px; align-items: center; }
+    .steps-row input[type=number] { width: 60px; background: #0f1117; border: 1px solid #2d3748; border-radius: 4px; padding: 5px 8px; color: #e2e8f0; font-size: 13px; }
+    .steps-row select { flex: 1; background: #0f1117; border: 1px solid #2d3748; border-radius: 4px; padding: 5px 8px; color: #e2e8f0; font-size: 13px; }
+    .mode-tabs { display: flex; gap: 4px; margin-bottom: 14px; }
+    .mode-tab { flex: 1; text-align: center; background: #0f1117; border: 1px solid #2d3748; border-radius: 6px; padding: 6px; font-size: 12px; cursor: pointer; color: #718096; }
+    .mode-tab.active { background: #7c85f3; border-color: #7c85f3; color: #fff; }
+    .output-box { background: #0f1117; border: 1px solid #2d3748; border-radius: 8px; padding: 12px; font-family: 'Courier New', monospace; font-size: 13px; color: #7ee787; word-break: break-all; margin-bottom: 10px; }
+    .btn-row { display: flex; gap: 8px; }
+    .btn { background: #7c85f3; color: #fff; border: none; border-radius: 6px; padding: 8px 16px; font-size: 13px; cursor: pointer; font-weight: 600; }
+    .btn:hover { background: #6b74e0; }
+    .btn-sm { padding: 5px 12px; font-size: 12px; }
+    .btn-secondary { background: #2d3748; }
+    .btn-secondary:hover { background: #3d4a5c; }
+    .copied { background: #276749 !important; }
+    canvas { display: block; background: #0f1117; border-radius: 8px; border: 1px solid #2d3748; }
+    .preview-strip { height: 60px; display: flex; align-items: center; justify-content: center; position: relative; background: #0f1117; border: 1px solid #2d3748; border-radius: 8px; margin-top: 12px; overflow: hidden; }
+    .ball { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #7c85f3, #a855f7); position: absolute; left: 20px; transition: none; }
+    .preview-label { font-size: 11px; color: #4a5568; position: absolute; bottom: 4px; right: 8px; }
+    .play-btn { background: #2d3748; border: none; border-radius: 6px; padding: 6px 14px; font-size: 12px; color: #e2e8f0; cursor: pointer; margin-top: 8px; }
+    .play-btn:hover { background: #3d4a5c; }
+    .duration-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 12px; color: #718096; }
+    .duration-row input[type=range] { flex: 1; accent-color: #7c85f3; }
+  </style>
+</head>
+<body>
+<header>
+  <a href="/">← devnestio</a>
+  <h1>CSS Easing Visualizer</h1>
+</header>
+<div class="container">
+  <div style="display:flex;flex-direction:column;gap:16px;">
+    <div class="panel">
+      <h2>Presets</h2>
+      <div class="preset-grid" id="presets"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Custom</h2>
+      <div class="mode-tabs">
+        <div class="mode-tab active" onclick="setMode('bezier',this)">cubic-bezier</div>
+        <div class="mode-tab" onclick="setMode('steps',this)">steps()</div>
+      </div>
+
+      <div id="bezier-controls">
+        <div class="handle-row">
+          <div class="field">
+            <label>P1 X <span id="p1x-val">0.25</span></label>
+            <input type="range" id="p1x" min="0" max="1" step="0.01" value="0.25" oninput="updateBezier()">
+          </div>
+          <div class="field">
+            <label>P1 Y <span id="p1y-val">0.1</span></label>
+            <input type="range" id="p1y" min="-1" max="2" step="0.01" value="0.1" oninput="updateBezier()">
+          </div>
+          <div class="field">
+            <label>P2 X <span id="p2x-val">0.25</span></label>
+            <input type="range" id="p2x" min="0" max="1" step="0.01" value="0.25" oninput="updateBezier()">
+          </div>
+          <div class="field">
+            <label>P2 Y <span id="p2y-val">1</span></label>
+            <input type="range" id="p2y" min="-1" max="2" step="0.01" value="1" oninput="updateBezier()">
+          </div>
+        </div>
+      </div>
+
+      <div id="steps-controls" style="display:none">
+        <div class="field">
+          <label>Steps <span id="steps-val">5</span></label>
+          <input type="range" id="steps-count" min="1" max="20" step="1" value="5" oninput="document.getElementById('steps-val').textContent=this.value;updateSteps()">
+        </div>
+        <div class="field">
+          <label>Jump term</label>
+          <select id="steps-jump" onchange="updateSteps()">
+            <option value="jump-start">jump-start (start)</option>
+            <option value="jump-end" selected>jump-end (end)</option>
+            <option value="jump-both">jump-both</option>
+            <option value="jump-none">jump-none</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:16px;">
+    <div class="panel">
+      <h2>Curve</h2>
+      <canvas id="canvas" width="500" height="320"></canvas>
+      <div class="preview-strip">
+        <div class="ball" id="ball"></div>
+        <span class="preview-label">preview</span>
+      </div>
+      <div class="duration-row">
+        Duration: <input type="range" id="dur-range" min="200" max="3000" step="100" value="800"> <span id="dur-val">0.8s</span>
+        <button class="play-btn" onclick="playAnimation()">▶ Play</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>CSS Output</h2>
+      <div class="output-box" id="output-box">transition: all 0.8s ease;</div>
+      <div class="btn-row">
+        <button class="btn btn-secondary btn-sm" onclick="copyCSS()">Copy</button>
+        <button class="btn btn-secondary btn-sm" onclick="copyValue()">Copy value only</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const PRESETS = [
+  { name: 'ease', fn: 'ease', v: [0.25, 0.1, 0.25, 1] },
+  { name: 'linear', fn: 'linear', v: [0, 0, 1, 1] },
+  { name: 'ease-in', fn: 'ease-in', v: [0.42, 0, 1, 1] },
+  { name: 'ease-out', fn: 'ease-out', v: [0, 0, 0.58, 1] },
+  { name: 'ease-in-out', fn: 'ease-in-out', v: [0.42, 0, 0.58, 1] },
+  { name: 'bounce-in', fn: null, v: [0.6, -0.28, 0.735, 0.045] },
+  { name: 'bounce-out', fn: null, v: [0.175, 0.885, 0.32, 1.275] },
+  { name: 'circ-in', fn: null, v: [0.6, 0.04, 0.98, 0.335] },
+  { name: 'circ-out', fn: null, v: [0.075, 0.82, 0.165, 1] },
+  { name: 'expo-in', fn: null, v: [0.95, 0.05, 0.795, 0.035] },
+  { name: 'expo-out', fn: null, v: [0.19, 1, 0.22, 1] },
+  { name: 'back-in', fn: null, v: [0.6, -0.28, 0.735, 0.045] },
+];
+
+let mode = 'bezier';
+let currentFn = 'ease';
+let currentV = [0.25, 0.1, 0.25, 1];
+let stepsCount = 5;
+let stepsJump = 'jump-end';
+let duration = 800;
+
+function buildPresets() {
+  const el = document.getElementById('presets');
+  PRESETS.forEach((p, i) => {
+    const btn = document.createElement('div');
+    btn.className = 'preset-btn' + (i === 0 ? ' active' : '');
+    btn.textContent = p.name;
+    btn.onclick = () => {
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      setMode('bezier', document.querySelector('.mode-tab'));
+      currentFn = p.fn;
+      currentV = [...p.v];
+      document.getElementById('p1x').value = p.v[0];
+      document.getElementById('p1y').value = p.v[1];
+      document.getElementById('p2x').value = p.v[2];
+      document.getElementById('p2y').value = p.v[3];
+      document.getElementById('p1x-val').textContent = p.v[0];
+      document.getElementById('p1y-val').textContent = p.v[1];
+      document.getElementById('p2x-val').textContent = p.v[2];
+      document.getElementById('p2y-val').textContent = p.v[3];
+      render();
+    };
+    el.appendChild(btn);
+  });
+}
+
+function setMode(m, el) {
+  mode = m;
+  document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('bezier-controls').style.display = m === 'bezier' ? '' : 'none';
+  document.getElementById('steps-controls').style.display = m === 'steps' ? '' : 'none';
+  render();
+}
+
+function updateBezier() {
+  const p1x = +document.getElementById('p1x').value;
+  const p1y = +document.getElementById('p1y').value;
+  const p2x = +document.getElementById('p2x').value;
+  const p2y = +document.getElementById('p2y').value;
+  document.getElementById('p1x-val').textContent = p1x.toFixed(2);
+  document.getElementById('p1y-val').textContent = p1y.toFixed(2);
+  document.getElementById('p2x-val').textContent = p2x.toFixed(2);
+  document.getElementById('p2y-val').textContent = p2y.toFixed(2);
+  currentV = [p1x, p1y, p2x, p2y];
+  currentFn = null;
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  render();
+}
+
+function updateSteps() {
+  stepsCount = +document.getElementById('steps-count').value;
+  stepsJump = document.getElementById('steps-jump').value;
+  render();
+}
+
+function getEasingValue() {
+  if (mode === 'steps') return `steps(${stepsCount}, ${stepsJump})`;
+  if (currentFn && ['ease','linear','ease-in','ease-out','ease-in-out'].includes(currentFn)) return currentFn;
+  return `cubic-bezier(${currentV.map(v => parseFloat(v.toFixed(3))).join(', ')})`;
+}
+
+function render() {
+  const easingVal = getEasingValue();
+  duration = +document.getElementById('dur-range').value;
+  document.getElementById('dur-val').textContent = (duration/1000).toFixed(1) + 's';
+  document.getElementById('output-box').textContent =
+    `transition: all ${(duration/1000).toFixed(1)}s ${easingVal};\n/* or */\nanimation-timing-function: ${easingVal};`;
+  drawCurve(easingVal);
+}
+
+// Cubic bezier evaluation
+function cubicBezier(t, p1x, p1y, p2x, p2y) {
+  const cx = 3 * p1x, bx = 3 * (p2x - p1x) - cx, ax = 1 - cx - bx;
+  const cy = 3 * p1y, by = 3 * (p2y - p1y) - cy, ay = 1 - cy - by;
+  function sampleX(t) { return ((ax * t + bx) * t + cx) * t; }
+  function sampleY(t) { return ((ay * t + by) * t + cy) * t; }
+  function sampleDX(t) { return (3 * ax * t + 2 * bx) * t + cx; }
+  function solveT(x) {
+    let t2 = x;
+    for (let i = 0; i < 8; i++) {
+      const x2 = sampleX(t2) - x;
+      if (Math.abs(x2) < 1e-7) return t2;
+      const d2 = sampleDX(t2);
+      if (Math.abs(d2) < 1e-7) break;
+      t2 -= x2 / d2;
+    }
+    return t2;
+  }
+  return sampleY(solveT(t));
+}
+
+function drawCurve(easingVal) {
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const pad = 48;
+  const w = W - pad * 2, h = H - pad * 2;
+  ctx.clearRect(0, 0, W, H);
+
+  // Grid
+  ctx.strokeStyle = '#2d3748';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const x = pad + (w / 4) * i;
+    const y = pad + (h / 4) * i;
+    ctx.beginPath(); ctx.moveTo(x, pad); ctx.lineTo(x, pad + h); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(pad, y); ctx.lineTo(pad + w, y); ctx.stroke();
+  }
+
+  // Axes
+  ctx.strokeStyle = '#4a5568';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(pad, pad); ctx.lineTo(pad, pad + h); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(pad, pad + h); ctx.lineTo(pad + w, pad + h); ctx.stroke();
+
+  // Labels
+  ctx.fillStyle = '#4a5568';
+  ctx.font = '11px system-ui';
+  ctx.textAlign = 'center';
+  ctx.fillText('Time', pad + w / 2, H - 6);
+  ctx.save(); ctx.translate(12, pad + h / 2); ctx.rotate(-Math.PI/2);
+  ctx.fillText('Progress', 0, 0); ctx.restore();
+  ctx.textAlign = 'right';
+  ['0', '0.25', '0.5', '0.75', '1'].forEach((v, i) => {
+    ctx.fillText(v, pad - 4, pad + h - (h / 4) * i + 4);
+  });
+
+  if (mode === 'bezier') {
+    const [p1x, p1y, p2x, p2y] = currentV;
+    // Control handles
+    ctx.setLineDash([4, 4]);
+    ctx.strokeStyle = '#4a5568';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(pad, pad + h);
+    ctx.lineTo(pad + p1x * w, pad + h - p1y * h);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(pad + w, pad);
+    ctx.lineTo(pad + p2x * w, pad + h - p2y * h);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    // Control points
+    [
+      [p1x, p1y], [p2x, p2y]
+    ].forEach(([px, py]) => {
+      ctx.fillStyle = '#7c85f3';
+      ctx.beginPath();
+      ctx.arc(pad + px * w, pad + h - py * h, 5, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    // Curve
+    ctx.strokeStyle = '#7c85f3';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    for (let i = 0; i <= 200; i++) {
+      const t = i / 200;
+      const y = cubicBezier(t, p1x, p1y, p2x, p2y);
+      const cx2 = pad + t * w;
+      const cy2 = pad + h - y * h;
+      i === 0 ? ctx.moveTo(cx2, cy2) : ctx.lineTo(cx2, cy2);
+    }
+    ctx.stroke();
+  } else {
+    // Steps curve
+    const n = stepsCount;
+    const jump = stepsJump;
+    ctx.strokeStyle = '#7c85f3';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    for (let i = 0; i <= n; i++) {
+      let startX, startY, endX, endY;
+      if (jump === 'jump-start') {
+        startX = pad + (i / n) * w;
+        endX = pad + ((i + 1) / n) * w;
+        startY = pad + h - ((i + 1) / n) * h;
+        endY = startY;
+      } else if (jump === 'jump-end') {
+        startX = pad + (i / n) * w;
+        endX = pad + ((i + 1) / n) * w;
+        startY = pad + h - (i / n) * h;
+        endY = startY;
+      } else if (jump === 'jump-both') {
+        startX = pad + (i / n) * w;
+        endX = pad + ((i + 1) / n) * w;
+        startY = pad + h - ((i + 1) / (n + 1)) * h;
+        endY = startY;
+      } else { // jump-none
+        if (i === n) break;
+        startX = pad + (i / (n - 1)) * w;
+        endX = pad + ((i + 1) / (n - 1)) * w;
+        startY = pad + h - (i / (n - 1)) * h;
+        endY = startY;
+      }
+      if (i === 0) ctx.moveTo(startX, startY);
+      ctx.lineTo(endX, endY);
+      if (i < n - 1) {
+        ctx.moveTo(endX, pad + h - ((i + 1) / n) * h);
+      }
+    }
+    ctx.stroke();
+  }
+}
+
+function playAnimation() {
+  const ball = document.getElementById('ball');
+  const strip = document.querySelector('.preview-strip');
+  const maxX = strip.offsetWidth - 48;
+  ball.style.transition = 'none';
+  ball.style.left = '20px';
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const easing = getEasingValue();
+      ball.style.transition = `left ${duration}ms ${easing}`;
+      ball.style.left = maxX + 'px';
+      setTimeout(() => {
+        ball.style.transition = 'none';
+        ball.style.left = '20px';
+      }, duration + 100);
+    });
+  });
+}
+
+document.getElementById('dur-range').oninput = function() {
+  duration = +this.value;
+  render();
+};
+
+buildPresets();
+render();
+</script>
+</body>
+</html>

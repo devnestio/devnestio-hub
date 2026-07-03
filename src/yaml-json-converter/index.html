@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YAML ↔ JSON Converter | DevNestio</title>
+  <meta name="description" content="Convert YAML to JSON and JSON to YAML instantly in your browser. Auto-detects input format. Supports nested objects, arrays, comments, and multiline strings." />
+  <meta property="og:title" content="YAML ↔ JSON Converter | DevNestio" />
+  <meta property="og:description" content="Instantly convert between YAML and JSON. Auto-detect mode, pretty-print JSON, clean YAML output. Browser-only, no data sent anywhere." />
+  <meta property="og:url" content="https://devnestio.pages.dev/yaml-json-converter/" />
+  <meta name="twitter:card" content="summary" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    #privacy-banner { background: #1e293b; border-bottom: 1px solid #334155; padding: 8px 16px; font-size: 12px; color: #94a3b8; text-align: center; }
+    header { background: #1e293b; border-bottom: 1px solid #334155; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+    header a { color: #64748b; font-size: 13px; text-decoration: none; margin-left: auto; }
+    header a:hover { color: #94a3b8; }
+    .badge { background: #0ea5e9; color: #fff; font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+    main { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
+    .toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; }
+    .btn { padding: 7px 14px; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; }
+    .btn-primary { background: #0ea5e9; color: #fff; }
+    .btn-primary:hover { background: #0284c7; }
+    .btn-secondary { background: #334155; color: #e2e8f0; }
+    .btn-secondary:hover { background: #475569; }
+    .btn-danger { background: #dc2626; color: #fff; }
+    .btn-danger:hover { background: #b91c1c; }
+    .sep { width: 1px; height: 28px; background: #334155; }
+    .opt { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #94a3b8; }
+    .opt input[type="checkbox"] { accent-color: #0ea5e9; cursor: pointer; }
+    select { background: #0f1117; border: 1px solid #334155; border-radius: 5px; color: #e2e8f0; font-size: 12px; padding: 5px 8px; outline: none; cursor: pointer; }
+    select:focus { border-color: #0ea5e9; }
+    .layout { display: grid; grid-template-columns: 1fr auto 1fr; gap: 0; align-items: stretch; }
+    @media (max-width: 700px) { .layout { grid-template-columns: 1fr; } .arrow-col { display: none; } }
+    .panel { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+    .panel-hdr { display: flex; align-items: center; justify-content: space-between; }
+    .panel-hdr h2 { font-size: 13px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em; }
+    .format-tag { font-size: 10px; padding: 2px 8px; border-radius: 99px; font-weight: 700; margin-left: 8px; }
+    .fmt-yaml { background: #854d0e; color: #fef3c7; }
+    .fmt-json { background: #1d4ed8; color: #dbeafe; }
+    .fmt-none { background: #334155; color: #94a3b8; }
+    textarea { width: 100%; padding: 10px 12px; background: #0f1117; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 13px; font-family: 'JetBrains Mono', 'Fira Code', monospace; outline: none; resize: vertical; min-height: 460px; line-height: 1.6; flex: 1; }
+    textarea:focus { border-color: #0ea5e9; }
+    .arrow-col { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 12px; gap: 8px; }
+    .arrow-btn { background: #1e293b; border: 1px solid #334155; border-radius: 8px; color: #94a3b8; font-size: 18px; cursor: pointer; padding: 10px 14px; transition: all 0.15s; }
+    .arrow-btn:hover { background: #334155; color: #e2e8f0; border-color: #0ea5e9; }
+    .error-msg { background: #450a0a; border: 1px solid #dc2626; border-radius: 6px; color: #fca5a5; font-size: 12px; padding: 8px 12px; font-family: monospace; white-space: pre-wrap; }
+    .btn-row { display: flex; gap: 8px; }
+    .info-bar { font-size: 11px; color: #64748b; }
+    #ad-slot { margin: 20px auto; text-align: center; }
+  </style>
+</head>
+<body>
+<div id="privacy-banner">🔒 All processing happens in your browser. No data is sent to any server.</div>
+<header>
+  <span class="badge">FREE</span>
+  <h1>YAML ↔ JSON Converter</h1>
+  <a href="https://devnestio.pages.dev">← All Tools</a>
+</header>
+<main>
+  <div class="toolbar">
+    <button class="btn btn-primary" onclick="convert('yaml-to-json')">YAML → JSON</button>
+    <button class="btn btn-primary" onclick="convert('json-to-yaml')">JSON → YAML</button>
+    <div class="sep"></div>
+    <button class="btn btn-secondary" onclick="autoConvert()">Auto-detect & Convert</button>
+    <div class="sep"></div>
+    <label class="opt" style="font-size:12px;color:#94a3b8;">Indent:</label>
+    <select id="json-indent">
+      <option value="2" selected>2 spaces</option>
+      <option value="4">4 spaces</option>
+      <option value="tab">Tab</option>
+    </select>
+    <div class="opt">
+      <input type="checkbox" id="opt-sort" />
+      <label for="opt-sort">Sort keys</label>
+    </div>
+    <div class="sep"></div>
+    <button class="btn btn-secondary" onclick="swapPanels()">⇄ Swap</button>
+    <button class="btn btn-secondary" onclick="loadSample()">Sample</button>
+    <button class="btn btn-danger" onclick="clearAll()">Clear</button>
+  </div>
+
+  <div class="layout">
+    <div class="panel" id="left-panel">
+      <div class="panel-hdr">
+        <div style="display:flex;align-items:center">
+          <h2 id="left-label">Input</h2>
+          <span class="format-tag fmt-none" id="left-fmt">—</span>
+        </div>
+        <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px" onclick="copyText('left-ta')">Copy</button>
+      </div>
+      <textarea id="left-ta" spellcheck="false" placeholder="Paste YAML or JSON here…" oninput="onInputChange()"></textarea>
+      <div class="info-bar" id="left-info"></div>
+    </div>
+
+    <div class="arrow-col">
+      <button class="arrow-btn" title="YAML → JSON" onclick="convert('yaml-to-json')">→</button>
+      <button class="arrow-btn" title="JSON → YAML" onclick="convert('json-to-yaml')">←</button>
+    </div>
+
+    <div class="panel" id="right-panel">
+      <div class="panel-hdr">
+        <div style="display:flex;align-items:center">
+          <h2 id="right-label">Output</h2>
+          <span class="format-tag fmt-none" id="right-fmt">—</span>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px" onclick="copyText('right-ta')">Copy</button>
+          <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px" onclick="downloadOutput()">Download</button>
+        </div>
+      </div>
+      <textarea id="right-ta" spellcheck="false" readonly placeholder="Output will appear here…"></textarea>
+      <div id="error-area"></div>
+      <div class="info-bar" id="right-info"></div>
+    </div>
+  </div>
+
+  <div id="ad-slot" data-ea-publisher="devnestio" data-ea-type="image"></div>
+</main>
+<script>
+// ─── YAML Parser ─────────────────────────────────────────────────────────────
+function parseYaml(text) {
+  // Strip comments and handle empty
+  const lines = text.split('\n');
+  return parseYamlLines(lines, 0, -1).value;
+}
+
+function parseYamlLines(lines, startIdx, parentIndent) {
+  const result = {};
+  const arr = [];
+  let isArr = null;
+  let i = startIdx;
+
+  while (i < lines.length) {
+    const raw = lines[i];
+    const stripped = raw.replace(/#.*$/, '').trimEnd();
+    if (stripped.trim() === '') { i++; continue; }
+
+    const indent = stripped.length - stripped.trimStart().length;
+    if (indent <= parentIndent) break;
+
+    const line = stripped.trimStart();
+
+    if (line.startsWith('- ') || line === '-') {
+      isArr = true;
+      const val = line.slice(2).trim();
+      if (val === '' || val === null) {
+        // nested mapping or array
+        i++;
+        const sub = parseYamlLines(lines, i, indent);
+        arr.push(sub.value);
+        i = sub.nextIdx;
+      } else if (val.includes(': ')) {
+        // inline map item
+        const obj = {};
+        parseInlineKV(val, obj);
+        // check if next lines belong to this item
+        const sub = parseYamlLines(lines, i + 1, indent);
+        if (sub.nextIdx > i + 1) {
+          Object.assign(obj, sub.value);
+          i = sub.nextIdx;
+        } else {
+          i++;
+        }
+        arr.push(obj);
+      } else {
+        arr.push(parseScalar(val));
+        i++;
+      }
+    } else if (line.includes(': ') || line.endsWith(':')) {
+      isArr = false;
+      const colonIdx = line.indexOf(': ');
+      let key, val;
+      if (colonIdx === -1) {
+        key = line.slice(0, -1);
+        val = '';
+      } else {
+        key = line.slice(0, colonIdx);
+        val = line.slice(colonIdx + 2).trim();
+      }
+      if (val === '' || val === '|' || val === '>') {
+        // nested value
+        i++;
+        const sub = parseYamlLines(lines, i, indent);
+        result[key] = sub.value;
+        i = sub.nextIdx;
+      } else {
+        result[key] = parseScalar(val);
+        i++;
+      }
+    } else {
+      i++;
+    }
+  }
+
+  return { value: isArr === true ? arr : (Object.keys(result).length > 0 ? result : (isArr === null ? null : arr)), nextIdx: i };
+}
+
+function parseInlineKV(str, obj) {
+  const parts = str.split(', ');
+  for (const p of parts) {
+    const idx = p.indexOf(': ');
+    if (idx > -1) obj[p.slice(0, idx)] = parseScalar(p.slice(idx + 2));
+  }
+}
+
+function parseScalar(v) {
+  if (v === 'true' || v === 'yes') return true;
+  if (v === 'false' || v === 'no') return false;
+  if (v === 'null' || v === '~' || v === '') return null;
+  if (/^-?\d+$/.test(v)) return parseInt(v, 10);
+  if (/^-?\d*\.\d+$/.test(v)) return parseFloat(v);
+  if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) {
+    return v.slice(1, -1);
+  }
+  return v;
+}
+
+// ─── YAML Serializer ──────────────────────────────────────────────────────────
+function toYaml(obj, indent, sortKeys) {
+  return serializeYaml(obj, 0, indent, sortKeys).trimEnd() + '\n';
+}
+
+function serializeYaml(val, depth, indent, sortKeys) {
+  const pad = ' '.repeat(depth * indent);
+  if (val === null || val === undefined) return 'null';
+  if (typeof val === 'boolean') return val ? 'true' : 'false';
+  if (typeof val === 'number') return String(val);
+  if (typeof val === 'string') return yamlStr(val);
+  if (Array.isArray(val)) {
+    if (val.length === 0) return '[]';
+    return val.map(item => {
+      if (item !== null && typeof item === 'object') {
+        const sub = serializeYaml(item, depth + 1, indent, sortKeys);
+        return `${pad}- ${sub.trimStart()}`;
+      }
+      return `${pad}- ${serializeYaml(item, depth + 1, indent, sortKeys)}`;
+    }).join('\n');
+  }
+  if (typeof val === 'object') {
+    const keys = Object.keys(val);
+    if (keys.length === 0) return '{}';
+    if (sortKeys) keys.sort();
+    return keys.map(k => {
+      const v = val[k];
+      if (v !== null && typeof v === 'object' && !Array.isArray(v) && Object.keys(v).length > 0) {
+        return `${pad}${yamlKey(k)}:\n${serializeYaml(v, depth + 1, indent, sortKeys)}`;
+      }
+      if (Array.isArray(v) && v.length > 0) {
+        return `${pad}${yamlKey(k)}:\n${serializeYaml(v, depth + 1, indent, sortKeys)}`;
+      }
+      return `${pad}${yamlKey(k)}: ${serializeYaml(v, depth, indent, sortKeys)}`;
+    }).join('\n');
+  }
+  return String(val);
+}
+
+function yamlKey(k) {
+  return /[:\[\]{},#|>&*!%@`'"?]|\s/.test(k) ? `"${k.replace(/"/g, '\\"')}"` : k;
+}
+
+function yamlStr(s) {
+  if (s === '') return '""';
+  if (s === 'true' || s === 'false' || s === 'null' || s === 'yes' || s === 'no' || s === '~') return `"${s}"`;
+  if (/^\d+$/.test(s) || /^\d*\.\d+$/.test(s)) return `"${s}"`;
+  if (s.includes('\n')) return `|\n  ${s.split('\n').join('\n  ')}`;
+  if (/[:#{}\[\],&*?|<>=!%@`]/.test(s) || s.startsWith(' ') || s.endsWith(' ') || s.startsWith('"') || s.startsWith("'")) {
+    return `"${s.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+  }
+  return s;
+}
+
+// ─── Format detection ─────────────────────────────────────────────────────────
+function detectFormat(text) {
+  const t = text.trim();
+  if (!t) return 'unknown';
+  if (t.startsWith('{') || t.startsWith('[')) return 'json';
+  try { JSON.parse(t); return 'json'; } catch(_) {}
+  return 'yaml';
+}
+
+// ─── UI ───────────────────────────────────────────────────────────────────────
+let lastDirection = null;
+
+function getIndent() {
+  const v = document.getElementById('json-indent').value;
+  return v === 'tab' ? '\t' : parseInt(v);
+}
+
+function getSortKeys() {
+  return document.getElementById('opt-sort').checked;
+}
+
+function setFmt(id, fmt) {
+  const el = document.getElementById(id);
+  el.textContent = fmt.toUpperCase();
+  el.className = `format-tag fmt-${fmt === 'YAML' ? 'yaml' : fmt === 'JSON' ? 'json' : 'none'}`;
+}
+
+function setError(msg) {
+  const el = document.getElementById('error-area');
+  if (msg) {
+    el.innerHTML = `<div class="error-msg">${msg}</div>`;
+  } else {
+    el.innerHTML = '';
+  }
+}
+
+function updateInfo(id, text) {
+  const lines = text.split('\n').length;
+  const chars = text.length;
+  document.getElementById(id).textContent = lines + ' lines · ' + chars + ' chars';
+}
+
+function convert(direction) {
+  const input = document.getElementById('left-ta').value.trim();
+  if (!input) return;
+  setError('');
+  lastDirection = direction;
+
+  try {
+    let output;
+    if (direction === 'yaml-to-json') {
+      const obj = parseYaml(input);
+      const ind = getIndent();
+      const replacer = getSortKeys() ? (k, v) => {
+        if (v && typeof v === 'object' && !Array.isArray(v)) {
+          return Object.keys(v).sort().reduce((a, k2) => { a[k2] = v[k2]; return a; }, {});
+        }
+        return v;
+      } : null;
+      output = JSON.stringify(obj, replacer, ind);
+      setFmt('left-fmt', 'YAML');
+      setFmt('right-fmt', 'JSON');
+      document.getElementById('left-label').textContent = 'YAML Input';
+      document.getElementById('right-label').textContent = 'JSON Output';
+    } else {
+      const obj = JSON.parse(input);
+      output = toYaml(obj, 2, getSortKeys());
+      setFmt('left-fmt', 'JSON');
+      setFmt('right-fmt', 'YAML');
+      document.getElementById('left-label').textContent = 'JSON Input';
+      document.getElementById('right-label').textContent = 'YAML Output';
+    }
+    document.getElementById('right-ta').value = output;
+    updateInfo('right-info', output);
+  } catch(e) {
+    setError('Error: ' + e.message);
+  }
+}
+
+function autoConvert() {
+  const input = document.getElementById('left-ta').value.trim();
+  if (!input) return;
+  const fmt = detectFormat(input);
+  if (fmt === 'json') {
+    convert('json-to-yaml');
+  } else {
+    convert('yaml-to-json');
+  }
+}
+
+function onInputChange() {
+  const input = document.getElementById('left-ta').value.trim();
+  updateInfo('left-info', document.getElementById('left-ta').value);
+  if (!input) {
+    setFmt('left-fmt', 'none');
+    setFmt('right-fmt', 'none');
+    document.getElementById('right-ta').value = '';
+    setError('');
+    return;
+  }
+  const fmt = detectFormat(input);
+  setFmt('left-fmt', fmt === 'json' ? 'JSON' : fmt === 'yaml' ? 'YAML' : '—');
+}
+
+function swapPanels() {
+  const leftTa = document.getElementById('left-ta');
+  const rightTa = document.getElementById('right-ta');
+  const rightVal = rightTa.value;
+  if (!rightVal) return;
+  leftTa.value = rightVal;
+  rightTa.value = '';
+  setFmt('left-fmt', 'none');
+  setFmt('right-fmt', 'none');
+  setError('');
+  document.getElementById('left-label').textContent = 'Input';
+  document.getElementById('right-label').textContent = 'Output';
+  onInputChange();
+}
+
+function copyText(id) {
+  const v = document.getElementById(id).value;
+  if (v) navigator.clipboard.writeText(v);
+}
+
+function downloadOutput() {
+  const val = document.getElementById('right-ta').value;
+  if (!val) return;
+  const fmt = document.getElementById('right-fmt').textContent.toLowerCase();
+  const ext = fmt === 'yaml' ? 'yaml' : 'json';
+  const mime = fmt === 'yaml' ? 'text/yaml' : 'application/json';
+  const blob = new Blob([val], { type: mime });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `output.${ext}`;
+  a.click();
+}
+
+function clearAll() {
+  document.getElementById('left-ta').value = '';
+  document.getElementById('right-ta').value = '';
+  setFmt('left-fmt', 'none');
+  setFmt('right-fmt', 'none');
+  setError('');
+  document.getElementById('left-info').textContent = '';
+  document.getElementById('right-info').textContent = '';
+  document.getElementById('left-label').textContent = 'Input';
+  document.getElementById('right-label').textContent = 'Output';
+}
+
+const SAMPLE_YAML = `# DevNestio sample config
+name: my-app
+version: "1.0.0"
+debug: false
+port: 8080
+
+database:
+  host: localhost
+  port: 5432
+  name: appdb
+  ssl: true
+  pool:
+    min: 2
+    max: 10
+
+features:
+  - authentication
+  - caching
+  - logging
+
+admins:
+  - name: Alice
+    email: alice@example.com
+    role: superadmin
+  - name: Bob
+    email: bob@example.com
+    role: admin
+`;
+
+function loadSample() {
+  document.getElementById('left-ta').value = SAMPLE_YAML;
+  onInputChange();
+  convert('yaml-to-json');
+}
+
+loadSample();
+</script>
+</body>
+</html>

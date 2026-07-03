@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Number to Words Converter — Spell Out Numbers in English | DevNestio</title>
+  <meta name="description" content="Convert numbers to English words instantly. Supports integers up to vigintillions, decimals, negative numbers, ordinals, and currency (USD/EUR/GBP). Browser-only." />
+  <meta property="og:title" content="Number to Words Converter | DevNestio" />
+  <meta property="og:description" content="Spell out any number in English words. Integers, decimals, negatives, ordinals, and currency amounts. No server, no upload." />
+  <meta property="og:url" content="https://devnestio.pages.dev/number-to-words/" />
+  <meta name="twitter:card" content="summary" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    #privacy-banner { background: #1e293b; border-bottom: 1px solid #334155; padding: 8px 16px; font-size: 12px; color: #94a3b8; text-align: center; }
+    header { background: #1e293b; border-bottom: 1px solid #334155; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+    header a { color: #64748b; font-size: 13px; text-decoration: none; margin-left: auto; }
+    header a:hover { color: #94a3b8; }
+    .badge { background: #f59e0b; color: #000; font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+    main { max-width: 760px; margin: 0 auto; padding: 24px 16px; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 18px; margin-bottom: 16px; }
+    .card-title { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 12px; }
+    label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 5px; font-weight: 600; }
+    input[type=text] { width: 100%; padding: 12px 16px; background: #0f1117; border: 1px solid #334155; border-radius: 8px; color: #e2e8f0; font-size: 18px; font-family: 'Menlo','Courier New',monospace; outline: none; }
+    input[type=text]:focus { border-color: #f59e0b; }
+    input[type=text].error { border-color: #ef4444; }
+    .opts-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .opt-tab { padding: 5px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid #334155; background: #0f1117; color: #64748b; }
+    .opt-tab.active { background: #f59e0b; border-color: #f59e0b; color: #000; }
+    .result-area { background: #0f1117; border: 1px solid #334155; border-radius: 8px; padding: 16px; min-height: 80px; font-size: 18px; line-height: 1.5; color: #f1f5f9; position: relative; }
+    .result-copy { position: absolute; top: 10px; right: 10px; padding: 3px 10px; border-radius: 5px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid #334155; background: #1e293b; color: #64748b; }
+    .result-copy:hover { border-color: #f59e0b; color: #f59e0b; }
+    .err-msg { color: #f87171; font-size: 14px; }
+    .examples { display: flex; flex-wrap: wrap; gap: 6px; }
+    .ex-chip { padding: 4px 10px; border-radius: 6px; font-size: 12px; font-family: monospace; cursor: pointer; border: 1px solid #334155; background: #0f1117; color: #94a3b8; }
+    .ex-chip:hover { border-color: #f59e0b; color: #f59e0b; }
+    #ad-slot { margin: 20px auto; text-align: center; }
+  </style>
+</head>
+<body>
+<div id="privacy-banner">🔒 All processing happens in your browser. No data is sent to any server.</div>
+<header>
+  <span class="badge">FREE</span>
+  <h1>Number to Words Converter</h1>
+  <a href="https://devnestio.pages.dev">← All Tools</a>
+</header>
+<main>
+
+  <div class="card">
+    <div class="card-title">Number Input</div>
+    <input type="text" id="num-input" placeholder="e.g. 1234567.89 or -42 or 1000000" oninput="convert()" />
+    <div class="opts-row" id="mode-tabs">
+      <button class="opt-tab active" data-mode="cardinal" onclick="setMode('cardinal')">Cardinal</button>
+      <button class="opt-tab" data-mode="ordinal" onclick="setMode('ordinal')">Ordinal</button>
+      <button class="opt-tab" data-mode="usd" onclick="setMode('usd')">USD</button>
+      <button class="opt-tab" data-mode="eur" onclick="setMode('eur')">EUR</button>
+      <button class="opt-tab" data-mode="gbp" onclick="setMode('gbp')">GBP</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Result</div>
+    <div class="result-area" id="result">
+      <button class="result-copy" onclick="copyResult()">Copy</button>
+      <span id="result-text">—</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Examples</div>
+    <div class="examples" id="examples"></div>
+  </div>
+
+  <div id="ad-slot" data-ea-publisher="devnestio" data-ea-type="image"></div>
+</main>
+<script>
+const ONES = ['','one','two','three','four','five','six','seven','eight','nine',
+  'ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+const TENS = ['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+const SCALE = ['','thousand','million','billion','trillion','quadrillion','quintillion',
+  'sextillion','septillion','octillion','nonillion','decillion','undecillion','duodecillion',
+  'tredecillion','quattuordecillion','quindecillion','sexdecillion','septendecillion',
+  'octodecillion','novemdecillion','vigintillion'];
+
+function threeDigits(n) {
+  n = Math.abs(Math.floor(n));
+  if (n === 0) return '';
+  const h = Math.floor(n / 100);
+  const rest = n % 100;
+  const t = Math.floor(rest / 10);
+  const o = rest % 10;
+  let out = '';
+  if (h) out += ONES[h] + ' hundred';
+  if (rest) {
+    if (out) out += ' ';
+    if (rest < 20) out += ONES[rest];
+    else out += TENS[t] + (o ? '-' + ONES[o] : '');
+  }
+  return out;
+}
+
+function integerToWords(n) {
+  if (n === 0) return 'zero';
+  const neg = n < 0;
+  const absN = Math.abs(n);
+  if (absN > Number.MAX_SAFE_INTEGER) return null;
+
+  const chunks = [];
+  let remaining = absN;
+  while (remaining > 0) {
+    chunks.push(remaining % 1000);
+    remaining = Math.floor(remaining / 1000);
+  }
+
+  const parts = [];
+  for (let i = chunks.length - 1; i >= 0; i--) {
+    const chunk = chunks[i];
+    if (!chunk) continue;
+    const w = threeDigits(chunk);
+    parts.push(w + (SCALE[i] ? ' ' + SCALE[i] : ''));
+  }
+
+  return (neg ? 'negative ' : '') + parts.join(', ');
+}
+
+function decimalToWords(numStr) {
+  const clean = numStr.replace(/,/g, '').trim();
+  const neg = clean.startsWith('-');
+  const abs = neg ? clean.slice(1) : clean;
+  const [intPart, decPart] = abs.split('.');
+
+  const intN = parseInt(intPart || '0', 10);
+  const intW = integerToWords(neg ? -intN : intN);
+  if (!decPart) return intW;
+
+  // Read digits individually after decimal point
+  const decW = decPart.split('').map(d => ONES[parseInt(d)] || 'zero').join(' ');
+  return intW + ' point ' + decW;
+}
+
+const ORDINAL_SUFFIX = { one:'first', two:'second', three:'third', four:'fourth', five:'fifth',
+  six:'sixth', seven:'seventh', eight:'eighth', nine:'ninth', ten:'tenth', eleven:'eleventh',
+  twelve:'twelfth', thirteen:'thirteenth', fourteen:'fourteenth', fifteen:'fifteenth',
+  sixteen:'sixteenth', seventeen:'seventeenth', eighteen:'eighteenth', nineteen:'nineteenth',
+  twenty:'twentieth', thirty:'thirtieth', forty:'fortieth', fifty:'fiftieth',
+  sixty:'sixtieth', seventy:'seventieth', eighty:'eightieth', ninety:'ninetieth',
+  hundred:'hundredth', thousand:'thousandth', million:'millionth', billion:'billionth' };
+
+function toOrdinal(words) {
+  const parts = words.split(' ');
+  let last = parts[parts.length - 1];
+  // Handle hyphenated tens: twenty-one -> twenty-first
+  if (last.includes('-')) {
+    const [tens, ones] = last.split('-');
+    last = tens + '-' + (ORDINAL_SUFFIX[ones] || ones + 'th');
+  } else {
+    last = ORDINAL_SUFFIX[last] || last + 'th';
+  }
+  parts[parts.length - 1] = last;
+  return parts.join(' ');
+}
+
+function toCurrency(numStr, sym, mainUnit, centsUnit, centsName) {
+  const clean = numStr.replace(/,/g, '').trim();
+  const neg = clean.startsWith('-');
+  const abs = neg ? clean.slice(1) : clean;
+  const [intPart, decPart] = abs.split('.');
+  const intN = parseInt(intPart || '0', 10);
+  const cents = decPart ? parseInt(decPart.padEnd(2,'0').slice(0,2), 10) : 0;
+
+  let out = (neg ? 'negative ' : '') + integerToWords(intN) + ' ' +
+    (intN === 1 ? mainUnit : mainUnit + 's');
+  if (cents > 0) {
+    out += ' and ' + integerToWords(cents) + ' ' + (cents === 1 ? centsName : centsName + 's');
+  }
+  return out;
+}
+
+let mode = 'cardinal';
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll('.opt-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === m));
+  convert();
+}
+
+function convert() {
+  const raw = document.getElementById('num-input').value.trim();
+  const inp = document.getElementById('num-input');
+  const resultEl = document.getElementById('result-text');
+  inp.classList.remove('error');
+
+  if (!raw) { resultEl.textContent = '—'; return; }
+  const clean = raw.replace(/,/g, '');
+  if (!/^-?(\d+\.?\d*|\.\d+)$/.test(clean)) {
+    inp.classList.add('error');
+    resultEl.innerHTML = '<span class="err-msg">Invalid number</span>';
+    return;
+  }
+
+  try {
+    let result;
+    if (mode === 'cardinal') {
+      result = decimalToWords(clean);
+    } else if (mode === 'ordinal') {
+      const n = parseInt(clean, 10);
+      if (isNaN(n)) { inp.classList.add('error'); resultEl.innerHTML='<span class="err-msg">Ordinals need integers</span>'; return; }
+      result = toOrdinal(integerToWords(n));
+    } else if (mode === 'usd') {
+      result = toCurrency(clean, '$', 'dollar', 'cents', 'cent');
+    } else if (mode === 'eur') {
+      result = toCurrency(clean, '€', 'euro', 'cents', 'cent');
+    } else if (mode === 'gbp') {
+      result = toCurrency(clean, '£', 'pound', 'pence', 'penny');
+    }
+    resultEl.textContent = result;
+  } catch(e) {
+    inp.classList.add('error');
+    resultEl.innerHTML = '<span class="err-msg">Error: ' + e.message + '</span>';
+  }
+}
+
+function copyResult() {
+  const t = document.getElementById('result-text').textContent;
+  if (t && t !== '—') navigator.clipboard.writeText(t);
+}
+
+const EXAMPLES = ['0','1','13','42','100','1000','1234567','1000000000','-7',
+  '3.14','99.99','1234567.89','1000000000000'];
+document.getElementById('examples').innerHTML = EXAMPLES.map(e =>
+  `<span class="ex-chip" onclick="document.getElementById('num-input').value='${e}';convert()">${e}</span>`
+).join('');
+</script>
+</body>
+</html>

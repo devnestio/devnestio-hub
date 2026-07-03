@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Markdown Preview — Real-Time Editor | devnestio</title>
+  <meta name="description" content="Free real-time Markdown editor and previewer. Type on the left, see the rendered HTML on the right instantly. Supports headings, code blocks with syntax highlighting, tables, lists, and more. Zero dependencies." />
+  <meta name="robots" content="index, follow" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Markdown Preview — Real-Time Editor | devnestio" />
+  <meta property="og:description" content="Free real-time Markdown editor and previewer. Zero dependencies, works 100% in your browser." />
+  <meta property="og:url" content="https://markdown-preview-3a2.pages.dev" />
+  <meta property="og:locale" content="en_US" />
+  <link rel="canonical" href="https://markdown-preview-3a2.pages.dev" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Markdown Preview — Real-Time Editor | devnestio" />
+  <meta name="twitter:description" content="Free real-time Markdown editor and previewer. Zero dependencies, works 100% in your browser." />
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Markdown Preview",
+  "description": "Free real-time Markdown editor and previewer — runs 100% in your browser",
+  "url": "https://markdown-preview-3a2.pages.dev",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+  "author": {"@type": "Organization", "name": "devnestio", "url": "https://devnestio.pages.dev"}
+}
+  </script>
+  <!-- EthicalAds -->
+  <script async src="https://media.ethicalads.io/media/client/ethicalads.min.js"></script>
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #ffffff;
+      --surface: #f8f9fa;
+      --surface2: #e9ecef;
+      --border: #dee2e6;
+      --text: #212529;
+      --muted: #6c757d;
+      --accent: #4361ee;
+      --accent-light: #4895ef;
+      --header-bg: #212529;
+      --header-text: #f8f9fa;
+      --code-bg: #f1f3f5;
+      --code-text: #e83e8c;
+      --pre-bg: #1e1e1e;
+      --pre-text: #d4d4d4;
+      --hl-kw: #569cd6;
+      --hl-str: #ce9178;
+      --hl-cmt: #6a9955;
+      --hl-num: #b5cea8;
+      --hl-sel: #d7ba7d;
+      --hl-prop: #9cdcfe;
+      --hl-tag: #4ec9b0;
+      --radius: 6px;
+      --shadow: 0 1px 3px rgba(0,0,0,.1);
+      --mono: 'Fira Code','Cascadia Code','JetBrains Mono',Consolas,monospace;
+    }
+
+    [data-theme="dark"] {
+      --bg: #1e1e2e;
+      --surface: #181825;
+      --surface2: #313244;
+      --border: #45475a;
+      --text: #cdd6f4;
+      --muted: #6c7086;
+      --accent: #89b4fa;
+      --accent-light: #89dceb;
+      --header-bg: #11111b;
+      --header-text: #cdd6f4;
+      --code-bg: #313244;
+      --code-text: #f38ba8;
+      --pre-bg: #11111b;
+      --pre-text: #cdd6f4;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      transition: background .2s, color .2s;
+    }
+
+    /* Privacy Banner */
+    .privacy-banner {
+      background: linear-gradient(90deg, #064e3b, #065f46);
+      border-bottom: 1px solid #059669;
+      padding: 7px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #6ee7b7;
+      flex-shrink: 0;
+    }
+    .privacy-banner button {
+      background: none;
+      border: 1px solid #059669;
+      color: #6ee7b7;
+      padding: 1px 8px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .privacy-banner button:hover { background: rgba(255,255,255,.1); }
+
+    /* Header */
+    header {
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 0 20px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .logo { font-size: 16px; font-weight: 700; letter-spacing: -.3px; }
+    .logo span { color: var(--muted); font-size: 12px; font-weight: 400; margin-left: 8px; }
+    .header-right { display: flex; gap: 8px; align-items: center; }
+
+    /* Toolbar */
+    .toolbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .toolbar button {
+      padding: 4px 12px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      transition: background .15s, border-color .15s;
+    }
+    .toolbar button:hover { background: var(--surface2); border-color: var(--accent); }
+    #theme-btn {
+      margin-left: auto;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 4px 10px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 12px;
+    }
+    #theme-btn:hover { border-color: var(--accent); }
+    .status {
+      font-size: 11px;
+      color: var(--muted);
+      margin-left: 4px;
+      min-width: 60px;
+    }
+
+    /* Split pane */
+    #split-pane {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .pane {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      overflow: hidden;
+    }
+    #editor-pane { flex: 1; }
+    #preview-pane { flex: 1; }
+
+    .pane-header {
+      padding: 4px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--muted);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    #preview-pane .pane-header { border-left: 1px solid var(--border); }
+
+    #editor {
+      flex: 1;
+      resize: none;
+      border: none;
+      padding: 16px;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.7;
+      background: var(--surface);
+      color: var(--text);
+      outline: none;
+      tab-size: 2;
+      min-height: 0;
+    }
+    #editor::placeholder { color: var(--muted); }
+
+    /* Splitter */
+    #splitter {
+      width: 5px;
+      background: var(--border);
+      cursor: col-resize;
+      flex-shrink: 0;
+      transition: background .15s;
+    }
+    #splitter:hover, #splitter.dragging { background: var(--accent); }
+
+    /* Preview */
+    #preview {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 24px;
+      background: var(--bg);
+      border-left: 1px solid var(--border);
+      min-height: 0;
+    }
+
+    /* Preview typography */
+    #preview h1, #preview h2, #preview h3,
+    #preview h4, #preview h5, #preview h6 {
+      color: var(--text);
+      font-weight: 700;
+      line-height: 1.3;
+      margin-top: 1.4em;
+      margin-bottom: .5em;
+    }
+    #preview h1 { font-size: 2em; border-bottom: 2px solid var(--border); padding-bottom: .3em; }
+    #preview h2 { font-size: 1.5em; border-bottom: 1px solid var(--border); padding-bottom: .2em; }
+    #preview h3 { font-size: 1.25em; }
+    #preview h4 { font-size: 1.1em; }
+    #preview h5 { font-size: 1em; }
+    #preview h6 { font-size: .9em; color: var(--muted); }
+
+    #preview p { margin-bottom: .9em; }
+    #preview a { color: var(--accent); text-decoration: none; }
+    #preview a:hover { text-decoration: underline; }
+    #preview img { max-width: 100%; border-radius: var(--radius); }
+
+    #preview strong { font-weight: 700; }
+    #preview em { font-style: italic; }
+    #preview del { text-decoration: line-through; color: var(--muted); }
+
+    #preview code {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: .15em .4em;
+      border-radius: 3px;
+      font-family: var(--mono);
+      font-size: .88em;
+    }
+
+    #preview pre {
+      background: var(--pre-bg);
+      color: var(--pre-text);
+      padding: 16px;
+      border-radius: var(--radius);
+      overflow-x: auto;
+      margin-bottom: 1em;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    #preview pre code {
+      background: none;
+      color: inherit;
+      padding: 0;
+      font-size: inherit;
+    }
+
+    #preview blockquote {
+      border-left: 4px solid var(--accent);
+      margin: .8em 0;
+      padding: .4em 1em;
+      background: var(--surface);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      color: var(--muted);
+    }
+    #preview blockquote p { margin-bottom: 0; }
+
+    #preview ul, #preview ol { margin: .5em 0 .9em 1.5em; }
+    #preview li { margin-bottom: .25em; }
+
+    #preview table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 1em;
+      font-size: 13px;
+    }
+    #preview th, #preview td {
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      text-align: left;
+    }
+    #preview th {
+      background: var(--surface2);
+      font-weight: 600;
+    }
+    #preview tr:nth-child(even) td { background: var(--surface); }
+
+    #preview hr {
+      border: none;
+      border-top: 2px solid var(--border);
+      margin: 1.5em 0;
+    }
+
+    /* Syntax highlighting */
+    .hl-keyword  { color: var(--hl-kw);   font-weight: 600; }
+    .hl-string   { color: var(--hl-str); }
+    .hl-comment_line, .hl-comment_block,
+    .hl-comment  { color: var(--hl-cmt); font-style: italic; }
+    .hl-number   { color: var(--hl-num); }
+    .hl-selector { color: var(--hl-sel); }
+    .hl-property { color: var(--hl-prop); }
+    .hl-tag      { color: var(--hl-tag); }
+
+    /* Footer */
+    footer {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      text-align: center;
+      padding: 8px;
+      font-size: 11px;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    /* EthicalAds */
+    .ea-slot { display: none; }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      #split-pane { flex-direction: column; }
+      #splitter { width: 100%; height: 5px; cursor: row-resize; }
+      #preview { border-left: none; border-top: 1px solid var(--border); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="privacy-banner">
+  <span>🔒 Everything runs in your browser — no data is ever sent to a server.</span>
+  <button onclick="this.parentElement.style.display='none'">✕</button>
+</div>
+
+<!-- EthicalAds placeholder -->
+<div data-ea-publisher="devnestio" data-ea-type="text" class="ea-slot"></div>
+
+<header>
+  <div class="logo">📝 Markdown Preview <span>by devnestio</span></div>
+  <div class="header-right">
+    <a href="https://devnestio.pages.dev" target="_blank" rel="noopener" style="color:var(--muted);font-size:12px;text-decoration:none">← More Tools</a>
+  </div>
+</header>
+
+<div class="toolbar">
+  <button id="btn-copy-html">Copy HTML</button>
+  <button id="btn-copy-md">Copy Markdown</button>
+  <button id="btn-download">Download .md</button>
+  <button id="btn-clear">Clear</button>
+  <span class="status" id="status"></span>
+  <button id="theme-btn">🌙 Dark</button>
+</div>
+
+<div id="split-pane">
+  <div class="pane" id="editor-pane">
+    <div class="pane-header">Markdown</div>
+    <textarea id="editor" spellcheck="false" placeholder="Type your Markdown here..."></textarea>
+  </div>
+  <div id="splitter"></div>
+  <div class="pane" id="preview-pane">
+    <div class="pane-header">Preview</div>
+    <div id="preview"></div>
+  </div>
+</div>
+
+<footer>
+  <a href="https://devnestio.pages.dev" target="_blank" rel="noopener">devnestio</a> — Free developer tools, 100% browser-based · Zero dependencies
+</footer>
+
+<script>
+'use strict';
+
+/* ═══════════════════════════════════════════════════════════════
+   MARKDOWN PARSER — core functions (exported for tests)
+   ═══════════════════════════════════════════════════════════════ */
+
+function escapeHtml(str) {
+  return String(str === null || str === undefined ? '' : str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function parseCells(line) {
+  return line.replace(/^\s*\||\|\s*$/g, '').split('|');
+}
+
+function isBlockStart(line) {
+  if (/^#{1,6}\s/.test(line)) return true;
+  if (/^(`{3,}|~{3,})/.test(line)) return true;
+  if (/^>\s?/.test(line)) return true;
+  if (/^[ \t]*[*+\-]\s/.test(line)) return true;
+  if (/^\d+\.\s/.test(line)) return true;
+  if (/^\|/.test(line)) return true;
+  if (/^[ \t]*([-*_])([ \t]*\1[ \t]*){2,}[ \t]*$/.test(line)) return true;
+  return false;
+}
+
+function getHighlightPatterns(lang) {
+  var norm = String(lang || '').toLowerCase().split(/[\s{]/)[0];
+  var JS_KW = /\b(async|await|break|case|catch|class|const|continue|debugger|default|delete|do|else|export|extends|finally|for|function|if|import|in|instanceof|let|new|null|of|return|static|super|switch|this|throw|true|false|try|typeof|undefined|var|void|while|with|yield|get|set)\b/;
+  var PY_KW = /\b(False|None|True|and|as|assert|async|await|break|class|continue|def|del|elif|else|except|finally|for|from|global|if|import|in|is|lambda|nonlocal|not|or|pass|raise|return|try|while|with|yield)\b/;
+  var RUST_KW = /\b(as|async|await|break|const|continue|crate|dyn|else|enum|extern|false|fn|for|if|impl|in|let|loop|match|mod|move|mut|pub|ref|return|self|Self|static|struct|super|trait|true|type|union|unsafe|use|where|while)\b/;
+  var SQL_KW = /\b(SELECT|FROM|WHERE|JOIN|LEFT|RIGHT|INNER|OUTER|ON|AS|GROUP|BY|ORDER|HAVING|LIMIT|OFFSET|INSERT|INTO|VALUES|UPDATE|SET|DELETE|CREATE|TABLE|INDEX|DROP|ALTER|ADD|COLUMN|PRIMARY|KEY|FOREIGN|REFERENCES|UNIQUE|NOT|NULL|AND|OR|IN|LIKE|BETWEEN|EXISTS|UNION|ALL|DISTINCT|COUNT|SUM|AVG|MAX|MIN|CASE|WHEN|THEN|ELSE|END)\b/i;
+  var JS_STR = /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`/;
+  var JS_CMT_L = /\/\/.*/;
+  var JS_CMT_B = /\/\*[\s\S]*?\*\//;
+  var JS_NUM = /\b\d+(?:\.\d+)?\b/;
+  var map = {
+    js:         { comment_line: JS_CMT_L, comment_block: JS_CMT_B, string: JS_STR, number: JS_NUM, keyword: JS_KW },
+    javascript: { comment_line: JS_CMT_L, comment_block: JS_CMT_B, string: JS_STR, number: JS_NUM, keyword: JS_KW },
+    ts:         { comment_line: JS_CMT_L, comment_block: JS_CMT_B, string: JS_STR, number: JS_NUM, keyword: /\b(as|async|await|break|case|catch|class|const|continue|debugger|default|delete|do|else|enum|export|extends|finally|for|function|if|implements|import|in|instanceof|interface|let|new|null|of|package|private|protected|public|return|static|super|switch|this|throw|true|false|try|type|typeof|undefined|var|void|while|with|yield)\b/ },
+    typescript: { comment_line: JS_CMT_L, comment_block: JS_CMT_B, string: JS_STR, number: JS_NUM, keyword: /\b(as|async|await|break|case|catch|class|const|continue|debugger|default|delete|do|else|enum|export|extends|finally|for|function|if|implements|import|in|instanceof|interface|let|new|null|of|package|private|protected|public|return|static|super|switch|this|throw|true|false|try|type|typeof|undefined|var|void|while|with|yield)\b/ },
+    py:         { comment_line: /#.*/, string: /"""[\s\S]*?"""|'''[\s\S]*?'''|"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/, number: /\b\d+(?:\.\d+)?\b/, keyword: PY_KW },
+    python:     { comment_line: /#.*/, string: /"""[\s\S]*?"""|'''[\s\S]*?'''|"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/, number: /\b\d+(?:\.\d+)?\b/, keyword: PY_KW },
+    rust:       { comment_line: JS_CMT_L, comment_block: JS_CMT_B, string: /"(?:[^"\\]|\\.)*"/, number: /\b\d+(?:\.\d+)?\b/, keyword: RUST_KW },
+    go:         { comment_line: JS_CMT_L, comment_block: JS_CMT_B, string: /"(?:[^"\\]|\\.)*"/, number: /\b\d+(?:\.\d+)?\b/, keyword: /\b(break|case|chan|const|continue|default|defer|else|fallthrough|for|func|go|goto|if|import|interface|map|package|range|return|select|struct|switch|type|var|true|false|nil)\b/ },
+    bash:       { comment_line: /#.*/, string: /"(?:[^"\\]|\\.)*"|'[^']*'/, number: /\b\d+\b/, keyword: /\b(if|then|else|elif|fi|for|while|do|done|case|esac|function|return|local|export|echo|cd|ls|grep|awk|sed|cat|mkdir|rm|cp|mv|source|readonly|declare)\b/ },
+    sh:         { comment_line: /#.*/, string: /"(?:[^"\\]|\\.)*"|'[^']*'/, number: /\b\d+\b/, keyword: /\b(if|then|else|elif|fi|for|while|do|done|case|esac|function|return|local|export|echo|cd|ls|grep|awk|sed|cat|mkdir|rm|cp|mv|source|readonly|declare)\b/ },
+    css:        { comment_block: JS_CMT_B, string: /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/, number: /\b\d+(?:\.\d+)?(?:px|em|rem|%|vh|vw|pt|ex|ch|vmin|vmax|s|ms)?\b/, selector: /[.#:][a-zA-Z][\w-]*/, property: /(?<![a-zA-Z])[a-z][\w-]*(?=\s*:)/ },
+    html:       { comment: /<!--[\s\S]*?-->/, tag: /<\/?[a-zA-Z][a-zA-Z0-9-]*(?:\s[^>]*)?\/?>/,  string: /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/ },
+    xml:        { comment: /<!--[\s\S]*?-->/, tag: /<\/?[a-zA-Z][a-zA-Z0-9:.-]*(?:\s[^>]*)?\/?>/,  string: /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/ },
+    sql:        { comment_line: /--[^\r\n]*/, comment_block: JS_CMT_B, string: /'(?:[^'\\]|\\.)*'/, number: /\b\d+(?:\.\d+)?\b/, keyword: SQL_KW },
+    json:       { string: /"(?:[^"\\]|\\.)*"/, number: /-?\b\d+(?:\.\d+)?\b/, keyword: /\b(true|false|null)\b/ }
+  };
+  return map[norm] || null;
+}
+
+function highlightSyntax(code, lang) {
+  var patterns = getHighlightPatterns(lang);
+  if (!patterns) return escapeHtml(code);
+  var remaining = code;
+  var result = '';
+  while (remaining.length > 0) {
+    var earliest = null;
+    var earliestIdx = Infinity;
+    var earliestType = null;
+    var keys = Object.keys(patterns);
+    for (var ki = 0; ki < keys.length; ki++) {
+      var type = keys[ki];
+      var re = patterns[type];
+      var flags = re.flags && re.flags.includes('i') ? 'i' : '';
+      var r = new RegExp(re.source, flags);
+      var m = r.exec(remaining);
+      if (m !== null && m.index < earliestIdx) {
+        earliest = m;
+        earliestIdx = m.index;
+        earliestType = type;
+      }
+    }
+    if (earliest !== null) {
+      if (earliestIdx > 0) result += escapeHtml(remaining.slice(0, earliestIdx));
+      result += '<span class="hl-' + earliestType + '">' + escapeHtml(earliest[0]) + '</span>';
+      remaining = remaining.slice(earliestIdx + earliest[0].length);
+    } else {
+      result += escapeHtml(remaining);
+      break;
+    }
+  }
+  return result;
+}
+
+function parseInline(text) {
+  if (!text) return '';
+  var codeSpans = [];
+  text = text.replace(/`([^`]+)`/g, function(_, code) {
+    var idx = codeSpans.length;
+    codeSpans.push('<code>' + escapeHtml(code) + '</code>');
+    return '\x02CODE' + idx + '\x03';
+  });
+  text = text.replace(/!\[([^\]]*)\]\(([^)]*)\)/g, function(_, alt, src) {
+    return '<img src="' + escapeHtml(src) + '" alt="' + escapeHtml(alt) + '">';
+  });
+  text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, function(_, label, href) {
+    return '<a href="' + escapeHtml(href) + '" target="_blank" rel="noopener noreferrer">' + label + '</a>';
+  });
+  text = text.replace(/\*{3}(.+?)\*{3}/g, '<strong><em>$1</em></strong>');
+  text = text.replace(/_{3}(.+?)_{3}/g, '<strong><em>$1</em></strong>');
+  text = text.replace(/\*{2}(.+?)\*{2}/g, '<strong>$1</strong>');
+  text = text.replace(/_{2}(.+?)_{2}/g, '<strong>$1</strong>');
+  text = text.replace(/\*(.+?)\*/g, '<em>$1</em>');
+  text = text.replace(/_([^_\n]+)_/g, '<em>$1</em>');
+  text = text.replace(/~~(.+?)~~/g, '<del>$1</del>');
+  text = text.replace(/\x02CODE(\d+)\x03/g, function(_, i) { return codeSpans[+i]; });
+  return text;
+}
+
+function parseMarkdown(text) {
+  if (!text || text.trim() === '') return '';
+  var lines = text.split('\n');
+  var html = '';
+  var i = 0;
+  while (i < lines.length) {
+    var line = lines[i];
+
+    /* fenced code block */
+    var fenceM = line.match(/^(`{3,}|~{3,})(.*)/);
+    if (fenceM) {
+      var fenceCh = fenceM[1][0];
+      var fenceLen = fenceM[1].length;
+      var fence = fenceCh.repeat(fenceLen);
+      var lang = fenceM[2].trim().split(/\s+/)[0];
+      var codeLines = [];
+      i++;
+      while (i < lines.length && !lines[i].startsWith(fence)) {
+        codeLines.push(lines[i]);
+        i++;
+      }
+      i++;
+      var langAttr = lang ? ' class="language-' + escapeHtml(lang) + '"' : '';
+      var highlighted = highlightSyntax(codeLines.join('\n'), lang);
+      html += '<pre><code' + langAttr + '>' + highlighted + '</code></pre>\n';
+      continue;
+    }
+
+    /* ATX heading */
+    var headM = line.match(/^(#{1,6})\s+(.*)/);
+    if (headM) {
+      var lvl = headM[1].length;
+      html += '<h' + lvl + '>' + parseInline(headM[2].trim()) + '</h' + lvl + '>\n';
+      i++;
+      continue;
+    }
+
+    /* setext heading */
+    if (i + 1 < lines.length && line.trim() !== '' && !isBlockStart(line)) {
+      var nxt = lines[i + 1];
+      if (/^=+\s*$/.test(nxt)) {
+        html += '<h1>' + parseInline(line.trim()) + '</h1>\n';
+        i += 2;
+        continue;
+      }
+      if (/^-{2,}\s*$/.test(nxt) && !/^[ \t]*[*+\-]\s/.test(line)) {
+        html += '<h2>' + parseInline(line.trim()) + '</h2>\n';
+        i += 2;
+        continue;
+      }
+    }
+
+    /* horizontal rule */
+    if (/^[ \t]*([-*_])([ \t]*\1[ \t]*){2,}[ \t]*$/.test(line)) {
+      html += '<hr>\n';
+      i++;
+      continue;
+    }
+
+    /* blockquote */
+    if (/^>/.test(line)) {
+      var qLines = [];
+      while (i < lines.length && /^>/.test(lines[i])) {
+        qLines.push(lines[i].replace(/^>\s?/, ''));
+        i++;
+      }
+      html += '<blockquote>\n' + parseMarkdown(qLines.join('\n')) + '</blockquote>\n';
+      continue;
+    }
+
+    /* table */
+    if (/^\|/.test(line) && i + 1 < lines.length && /^\|?[ \t]*:?-+:?[ \t]*(\|[ \t]*:?-+:?[ \t]*)*\|?\s*$/.test(lines[i + 1])) {
+      var hdrCells = parseCells(line);
+      var sepCells = parseCells(lines[i + 1]);
+      var aligns = sepCells.map(function(c) {
+        var t = c.trim();
+        if (t.startsWith(':') && t.endsWith(':')) return 'center';
+        if (t.endsWith(':')) return 'right';
+        if (t.startsWith(':')) return 'left';
+        return '';
+      });
+      var tbl = '<table>\n<thead>\n<tr>\n';
+      hdrCells.forEach(function(cell, j) {
+        var al = aligns[j] ? ' style="text-align:' + aligns[j] + '"' : '';
+        tbl += '<th' + al + '>' + parseInline(cell.trim()) + '</th>\n';
+      });
+      tbl += '</tr>\n</thead>\n<tbody>\n';
+      i += 2;
+      while (i < lines.length && /^\|/.test(lines[i])) {
+        var cells = parseCells(lines[i]);
+        tbl += '<tr>\n';
+        cells.forEach(function(cell, j) {
+          var al = aligns[j] ? ' style="text-align:' + aligns[j] + '"' : '';
+          tbl += '<td' + al + '>' + parseInline(cell.trim()) + '</td>\n';
+        });
+        tbl += '</tr>\n';
+        i++;
+      }
+      tbl += '</tbody>\n</table>\n';
+      html += tbl;
+      continue;
+    }
+
+    /* unordered list */
+    if (/^[ \t]*[*+\-]\s/.test(line)) {
+      var ulIndent = (line.match(/^([ \t]*)/) || ['',''])[1].length;
+      html += '<ul>\n';
+      while (i < lines.length && /^[ \t]*[*+\-]\s/.test(lines[i])) {
+        var liIndent = (lines[i].match(/^([ \t]*)/) || ['',''])[1].length;
+        if (liIndent > ulIndent + 3) break;
+        var liContent = lines[i].replace(/^[ \t]*[*+\-]\s+/, '');
+        html += '<li>' + parseInline(liContent) + '</li>\n';
+        i++;
+      }
+      html += '</ul>\n';
+      continue;
+    }
+
+    /* ordered list */
+    if (/^\d+\.\s/.test(line)) {
+      html += '<ol>\n';
+      while (i < lines.length && /^\d+\.\s/.test(lines[i])) {
+        var olContent = lines[i].replace(/^\d+\.\s+/, '');
+        html += '<li>' + parseInline(olContent) + '</li>\n';
+        i++;
+      }
+      html += '</ol>\n';
+      continue;
+    }
+
+    /* empty line */
+    if (line.trim() === '') {
+      i++;
+      continue;
+    }
+
+    /* paragraph */
+    var paraLines = [];
+    while (i < lines.length && lines[i].trim() !== '' && !isBlockStart(lines[i])) {
+      if (i + 1 < lines.length && (/^=+\s*$/.test(lines[i + 1]) || /^-{2,}\s*$/.test(lines[i + 1]))) {
+        break;
+      }
+      paraLines.push(lines[i]);
+      i++;
+    }
+    if (paraLines.length > 0) {
+      html += '<p>' + parseInline(paraLines.join(' ').trim()) + '</p>\n';
+    } else {
+      i++;
+    }
+  }
+  return html;
+}
+
+/* ── Expose for tests ──────────────────────────────────────── */
+if (typeof window !== 'undefined') {
+  window.__markdownPreview = { escapeHtml: escapeHtml, parseCells: parseCells, parseMarkdown: parseMarkdown, parseInline: parseInline, highlightSyntax: highlightSyntax, isBlockStart: isBlockStart };
+}
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { escapeHtml: escapeHtml, parseCells: parseCells, parseMarkdown: parseMarkdown, parseInline: parseInline, highlightSyntax: highlightSyntax, isBlockStart: isBlockStart };
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   UI — browser only (wrapped in try/catch for test safety)
+   ═══════════════════════════════════════════════════════════════ */
+try {
+  var editor   = document.getElementById('editor');
+  var preview  = document.getElementById('preview');
+  var statusEl = document.getElementById('status');
+  var themeBtn = document.getElementById('theme-btn');
+  var splitter = document.getElementById('splitter');
+  var edPane   = document.getElementById('editor-pane');
+
+  var DEFAULT_MD = [
+    '# Welcome to Markdown Preview',
+    '',
+    'A **real-time** Markdown editor that runs *entirely in your browser*.',
+    'Zero dependencies. Zero server. Just pure JavaScript.',
+    '',
+    '## Features',
+    '',
+    '- **Headings** (H1–H6)',
+    '- **Bold**, *Italic*, ***Bold Italic***',
+    '- `Inline code` and fenced code blocks',
+    '- Tables with alignment',
+    '- Blockquotes',
+    '- Ordered and unordered lists',
+    '- ~~Strikethrough~~',
+    '- [Links](https://devnestio.pages.dev) and images',
+    '- Horizontal rules',
+    '',
+    '## Code Example',
+    '',
+    '```javascript',
+    'function greet(name) {',
+    '  const msg = `Hello, ${name}!`;',
+    '  return msg; // return greeting',
+    '}',
+    '```',
+    '',
+    '## Table',
+    '',
+    '| Feature | Support |',
+    '|---------|:-------:|',
+    '| Headings | ✅ |',
+    '| Bold/Italic | ✅ |',
+    '| Tables | ✅ |',
+    '| Code blocks | ✅ |',
+    '',
+    '## Blockquote',
+    '',
+    '> "Any fool can write code that a computer can understand.',
+    '> Good programmers write code that humans can understand."',
+    '> — Martin Fowler',
+    '',
+    '---',
+    '',
+    '*Built with ❤️ by [devnestio](https://devnestio.pages.dev)*'
+  ].join('\n');
+
+  function showStatus(msg) {
+    statusEl.textContent = msg;
+    setTimeout(function() { statusEl.textContent = ''; }, 2000);
+  }
+
+  function render() {
+    try { preview.innerHTML = parseMarkdown(editor.value); } catch(e) {}
+  }
+
+  editor.addEventListener('input', render);
+
+  /* theme toggle */
+  var isDark = false;
+  themeBtn.addEventListener('click', function() {
+    isDark = !isDark;
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    themeBtn.textContent = isDark ? '☀️ Light' : '🌙 Dark';
+  });
+
+  /* toolbar buttons */
+  document.getElementById('btn-copy-html').addEventListener('click', function() {
+    var html = parseMarkdown(editor.value);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(html).then(function() { showStatus('Copied HTML!'); });
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = html;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showStatus('Copied HTML!');
+    }
+  });
+
+  document.getElementById('btn-copy-md').addEventListener('click', function() {
+    var md = editor.value;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(md).then(function() { showStatus('Copied Markdown!'); });
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = md;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showStatus('Copied Markdown!');
+    }
+  });
+
+  document.getElementById('btn-download').addEventListener('click', function() {
+    var blob = new Blob([editor.value], { type: 'text/markdown' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'document.md';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showStatus('Downloaded!');
+  });
+
+  document.getElementById('btn-clear').addEventListener('click', function() {
+    if (editor.value && window.confirm('Clear the editor?')) {
+      editor.value = '';
+      preview.innerHTML = '';
+    }
+  });
+
+  /* splitter drag */
+  var dragging = false;
+  var dragStartX = 0;
+  var dragStartW = 0;
+
+  splitter.addEventListener('mousedown', function(e) {
+    dragging = true;
+    dragStartX = e.clientX;
+    dragStartW = edPane.getBoundingClientRect().width;
+    splitter.classList.add('dragging');
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', function(e) {
+    if (!dragging) return;
+    var main = document.getElementById('split-pane');
+    var totalW = main.getBoundingClientRect().width;
+    var delta = e.clientX - dragStartX;
+    var newW = Math.max(120, Math.min(dragStartW + delta, totalW - 120));
+    edPane.style.flex = 'none';
+    edPane.style.width = newW + 'px';
+  });
+
+  document.addEventListener('mouseup', function() {
+    if (!dragging) return;
+    dragging = false;
+    splitter.classList.remove('dragging');
+  });
+
+  /* init */
+  editor.value = DEFAULT_MD;
+  render();
+
+} catch (_) { /* test environment */ }
+</script>
+</body>
+</html>

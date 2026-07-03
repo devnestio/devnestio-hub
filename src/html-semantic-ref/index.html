@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML5 Semantic Elements Reference — devnestio</title>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#0f1117;color:#e2e8f0;min-height:100vh}
+header{padding:24px 32px;border-bottom:1px solid #1e2535}
+h1{font-size:1.5rem;font-weight:700;color:#f8fafc}
+h1 span{color:#60a5fa}
+.desc{color:#94a3b8;margin-top:4px;font-size:.9rem}
+.controls{display:flex;gap:12px;flex-wrap:wrap;padding:16px 32px;border-bottom:1px solid #1e2535;align-items:center}
+.search-wrap{position:relative;flex:1;min-width:200px}
+.search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#64748b}
+#search{width:100%;background:#1e2535;border:1px solid #334155;color:#e2e8f0;padding:8px 12px 8px 34px;border-radius:6px;font-size:.9rem;outline:none}
+#search:focus{border-color:#60a5fa}
+.cat-filters{display:flex;gap:8px;flex-wrap:wrap}
+.cat-btn{padding:5px 12px;border-radius:99px;border:1px solid #334155;background:#1e2535;color:#94a3b8;font-size:.8rem;cursor:pointer}
+.cat-btn.active,.cat-btn:hover{background:#2563eb;border-color:#2563eb;color:#fff}
+.content{max-width:1000px;margin:0 auto;padding:24px 32px}
+.section{margin-bottom:28px}
+.section-title{font-size:.95rem;font-weight:700;color:#60a5fa;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #1e2535}
+.elem-card{display:grid;grid-template-columns:180px 1fr;gap:0;background:#141924;border:1px solid #1e2535;border-radius:8px;margin-bottom:10px;overflow:hidden}
+.elem-card:hover{border-color:#334155}
+@media(max-width:560px){.elem-card{grid-template-columns:1fr}}
+.elem-left{padding:14px 16px;border-right:1px solid #1e2535;display:flex;flex-direction:column;justify-content:center;gap:8px}
+.elem-tag{font-family:monospace;font-size:.9rem;color:#7dd3fc;font-weight:700;cursor:pointer}
+.elem-tag:hover{text-decoration:underline}
+.elem-right{padding:14px 16px}
+.elem-desc{font-size:.85rem;color:#94a3b8;line-height:1.5;margin-bottom:8px}
+.elem-example{font-family:monospace;font-size:.78rem;color:#a5b4fc;background:#0f1117;border:1px solid #1e2535;border-radius:4px;padding:6px 8px;word-break:break-all}
+.role-chip{font-size:.72rem;padding:2px 7px;border-radius:99px;border:1px solid;display:inline-block}
+.r-landmark{background:#14532d;border-color:#16a34a;color:#4ade80}
+.r-text{background:#1e3a5f;border-color:#1d4ed8;color:#60a5fa}
+.r-group{background:#422006;border-color:#c2410c;color:#fb923c}
+.r-media{background:#3b0764;border-color:#7c3aed;color:#c4b5fd}
+.r-form{background:#450a0a;border-color:#dc2626;color:#f87171}
+.r-table{background:#1a2b1a;border-color:#16a34a;color:#86efac}
+.no-results{text-align:center;color:#64748b;padding:48px}
+</style>
+</head>
+<body>
+<header>
+  <h1>HTML5 Semantic <span>Elements Reference</span></h1>
+  <p class="desc">60+ semantic HTML5 elements — purpose, ARIA role, and usage examples</p>
+</header>
+<div class="controls">
+  <div class="search-wrap">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="search" placeholder="Search elements…">
+  </div>
+  <div class="cat-filters" id="cats"></div>
+</div>
+<div class="content" id="content"></div>
+<script>
+const ELEMS = [
+  {cat:'Document Structure',tag:'<header>',role:'landmark',desc:'Introductory content for its nearest ancestor sectioning element or the page. Typically contains logo, site title, and navigation.',example:'<header>\n  <h1>Site Title</h1>\n  <nav>…</nav>\n</header>'},
+  {cat:'Document Structure',tag:'<main>',role:'landmark',desc:'The dominant content of the document. There should be only one <main> per page. Skipped by browser "skip to content" links.',example:'<main>\n  <h1>Page Heading</h1>\n  <article>…</article>\n</main>'},
+  {cat:'Document Structure',tag:'<footer>',role:'landmark',desc:'Footer for the nearest ancestor sectioning content. Typically contains copyright, links, and contact information.',example:'<footer>\n  <p>&copy; 2025 Company</p>\n</footer>'},
+  {cat:'Document Structure',tag:'<nav>',role:'landmark',desc:'A section with navigation links — major navigation blocks. Not every group of links needs a <nav>.',example:'<nav aria-label="Main">\n  <a href="/">Home</a>\n  <a href="/about">About</a>\n</nav>'},
+  {cat:'Document Structure',tag:'<aside>',role:'landmark',desc:'Content tangentially related to the main content — sidebars, pull quotes, advertising, or related links.',example:'<aside>\n  <h2>Related Articles</h2>\n  <ul>…</ul>\n</aside>'},
+  {cat:'Document Structure',tag:'<article>',role:'group',desc:'A self-contained composition that could be distributed independently — a blog post, news article, or forum post.',example:'<article>\n  <h2>Post Title</h2>\n  <p>Content…</p>\n</article>'},
+  {cat:'Document Structure',tag:'<section>',role:'group',desc:'A thematic grouping of content, typically with a heading. Use when content doesn\'t have a more specific element.',example:'<section>\n  <h2>Features</h2>\n  <p>…</p>\n</section>'},
+  {cat:'Document Structure',tag:'<h1>–<h6>',role:'text',desc:'Six levels of section headings. Don\'t skip levels. Use only one <h1> per page. Hierarchy is important for accessibility.',example:'<h1>Page Title</h1>\n<h2>Section</h2>\n<h3>Subsection</h3>'},
+  {cat:'Text Content',tag:'<p>',role:'text',desc:'A paragraph of text. Block-level element with implicit margins.',example:'<p>This is a paragraph of text.</p>'},
+  {cat:'Text Content',tag:'<blockquote>',role:'text',desc:'A block quotation from another source. Use the cite attribute for the source URL.',example:'<blockquote cite="https://example.com">\n  <p>Famous quote here.</p>\n  <footer>— Author</footer>\n</blockquote>'},
+  {cat:'Text Content',tag:'<figure>',role:'group',desc:'Self-contained content, often with a caption — images, code, diagrams, etc.',example:'<figure>\n  <img src="chart.png" alt="Sales chart">\n  <figcaption>Q3 Sales</figcaption>\n</figure>'},
+  {cat:'Text Content',tag:'<figcaption>',role:'text',desc:'A caption or legend for the content of its parent <figure> element.',example:'<figure>\n  <img src="photo.jpg" alt="Photo">\n  <figcaption>A beautiful photo.</figcaption>\n</figure>'},
+  {cat:'Text Content',tag:'<ul>',role:'group',desc:'Unordered (bulleted) list. Items have no intrinsic order.',example:'<ul>\n  <li>Apple</li>\n  <li>Banana</li>\n</ul>'},
+  {cat:'Text Content',tag:'<ol>',role:'group',desc:'Ordered (numbered) list. Items have a meaningful sequence.',example:'<ol>\n  <li>Step one</li>\n  <li>Step two</li>\n</ol>'},
+  {cat:'Text Content',tag:'<li>',role:'group',desc:'A list item. Must be a child of <ul>, <ol>, or <menu>.',example:'<ul>\n  <li>List item</li>\n</ul>'},
+  {cat:'Text Content',tag:'<dl>',role:'group',desc:'Description list — for name-value pairs like glossaries or metadata.',example:'<dl>\n  <dt>HTML</dt>\n  <dd>HyperText Markup Language</dd>\n</dl>'},
+  {cat:'Text Content',tag:'<dt>',role:'text',desc:'Term in a description list.',example:'<dl>\n  <dt>API</dt>\n  <dd>Application Programming Interface</dd>\n</dl>'},
+  {cat:'Text Content',tag:'<dd>',role:'text',desc:'Description for the preceding <dt> term in a description list.',example:'<dl>\n  <dt>HTML</dt>\n  <dd>The standard markup language for web pages.</dd>\n</dl>'},
+  {cat:'Text Content',tag:'<pre>',role:'text',desc:'Preformatted text — preserves whitespace and line breaks. Typically rendered in a monospace font.',example:'<pre><code>const x = 1;</code></pre>'},
+  {cat:'Text Content',tag:'<hr>',role:'text',desc:'Thematic break — a horizontal rule representing a paragraph-level topic shift.',example:'<p>Section one.</p>\n<hr>\n<p>Section two.</p>'},
+  {cat:'Inline Text',tag:'<a>',role:'text',desc:'Hyperlink. Use href for the URL. The download attribute triggers a download. rel="noopener" for external links.',example:'<a href="https://example.com" target="_blank" rel="noopener">Visit</a>'},
+  {cat:'Inline Text',tag:'<strong>',role:'text',desc:'Strong importance — serious, urgent, or otherwise important content. Rendered bold by default.',example:'<p>This is <strong>very important</strong>.</p>'},
+  {cat:'Inline Text',tag:'<em>',role:'text',desc:'Stress emphasis — changes the meaning of the sentence. Rendered italic by default.',example:'<p>I <em>really</em> like this.</p>'},
+  {cat:'Inline Text',tag:'<code>',role:'text',desc:'Inline code fragment. For a block of code, wrap in <pre><code>.',example:'<p>Use the <code>Array.map()</code> method.</p>'},
+  {cat:'Inline Text',tag:'<abbr>',role:'text',desc:'An abbreviation or acronym. Use the title attribute for the full expansion.',example:'<abbr title="HyperText Markup Language">HTML</abbr>'},
+  {cat:'Inline Text',tag:'<time>',role:'text',desc:'A specific time or date. Use the datetime attribute for machine-readable format.',example:'<time datetime="2025-01-15">January 15, 2025</time>'},
+  {cat:'Inline Text',tag:'<mark>',role:'text',desc:'Text highlighted for reference — search results, relevant text.',example:'<p>Search results: <mark>flexbox</mark> guide.</p>'},
+  {cat:'Inline Text',tag:'<small>',role:'text',desc:'Small print — side comments, legal text, copyright notices.',example:'<footer><small>&copy; 2025 Company</small></footer>'},
+  {cat:'Inline Text',tag:'<s>',role:'text',desc:'Strikethrough — no longer accurate or relevant content (not deleted, use <del> for edits).',example:'<p>Price: <s>$99</s> $49</p>'},
+  {cat:'Inline Text',tag:'<cite>',role:'text',desc:'A citation — the title of a creative work (book, film, article).',example:'<p>From <cite>Clean Code</cite> by Robert Martin.</p>'},
+  {cat:'Inline Text',tag:'<q>',role:'text',desc:'Short inline quotation. Browsers add quotation marks automatically.',example:'<p>He said <q>hello</q>.</p>'},
+  {cat:'Inline Text',tag:'<sup>',role:'text',desc:'Superscript text — footnotes, exponents.',example:'E = mc<sup>2</sup>'},
+  {cat:'Inline Text',tag:'<sub>',role:'text',desc:'Subscript text — chemical formulas, footnotes.',example:'H<sub>2</sub>O'},
+  {cat:'Inline Text',tag:'<kbd>',role:'text',desc:'Keyboard input — represents a key combination or keyboard shortcut.',example:'Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to copy.'},
+  {cat:'Inline Text',tag:'<samp>',role:'text',desc:'Sample output from a program or computer.',example:'<samp>Error: file not found</samp>'},
+  {cat:'Inline Text',tag:'<var>',role:'text',desc:'A mathematical variable or programming variable.',example:'<var>x</var> = <var>y</var> + 2'},
+  {cat:'Inline Text',tag:'<bdi>',role:'text',desc:'Bidirectional Isolation — isolates inline text that might be in a different text direction.',example:'<li>Username: <bdi>مرحبا</bdi></li>'},
+  {cat:'Inline Text',tag:'<wbr>',role:'text',desc:'Word Break Opportunity — a hint where it\'s okay to add a line break.',example:'https://www.example.com/very<wbr>long<wbr>url'},
+  {cat:'Media',tag:'<img>',role:'media',desc:'Embeds an image. Always include a meaningful alt attribute. Use srcset for responsive images.',example:'<img src="photo.jpg"\n  alt="Sunset over mountains"\n  width="800" height="600"\n  loading="lazy">'},
+  {cat:'Media',tag:'<picture>',role:'media',desc:'Container for multiple image sources. Browser picks the best match based on media queries or format support.',example:'<picture>\n  <source srcset="img.avif" type="image/avif">\n  <source srcset="img.webp" type="image/webp">\n  <img src="img.jpg" alt="Photo">\n</picture>'},
+  {cat:'Media',tag:'<video>',role:'media',desc:'Embeds video content. Use multiple <source> elements for format fallbacks.',example:'<video controls width="640">\n  <source src="video.mp4" type="video/mp4">\n  <source src="video.webm" type="video/webm">\n</video>'},
+  {cat:'Media',tag:'<audio>',role:'media',desc:'Embeds audio content. Use the controls attribute to show the browser\'s audio player.',example:'<audio controls>\n  <source src="audio.mp3" type="audio/mpeg">\n  <source src="audio.ogg" type="audio/ogg">\n</audio>'},
+  {cat:'Media',tag:'<source>',role:'media',desc:'Specifies multiple media resources for <picture>, <audio>, or <video>.',example:'<video>\n  <source src="movie.mp4" type="video/mp4" media="(min-width: 800px)">\n  <source src="movie-small.mp4" type="video/mp4">\n</video>'},
+  {cat:'Media',tag:'<track>',role:'media',desc:'Text tracks for <video> or <audio> — subtitles, captions, descriptions.',example:'<video controls>\n  <source src="movie.mp4" type="video/mp4">\n  <track src="captions_en.vtt" kind="captions" srclang="en" label="English">\n</video>'},
+  {cat:'Media',tag:'<canvas>',role:'media',desc:'A drawable region for graphics via the Canvas API (JavaScript). No fallback content needed for non-visual use.',example:'<canvas id="chart" width="400" height="200">\n  Chart not available\n</canvas>'},
+  {cat:'Media',tag:'<svg>',role:'media',desc:'Embeds scalable vector graphics inline. Can be styled with CSS and manipulated with JavaScript.',example:'<svg width="100" height="100" viewBox="0 0 100 100">\n  <circle cx="50" cy="50" r="40" fill="blue"/>\n</svg>'},
+  {cat:'Forms',tag:'<form>',role:'form',desc:'An interactive form with controls. Use action for the URL and method for GET or POST.',example:'<form action="/submit" method="post">\n  <input type="text" name="name">\n  <button type="submit">Send</button>\n</form>'},
+  {cat:'Forms',tag:'<label>',role:'form',desc:'A label for a form control. Associate with a control using the for attribute matching the control\'s id.',example:'<label for="email">Email</label>\n<input type="email" id="email" name="email">'},
+  {cat:'Forms',tag:'<input>',role:'form',desc:'An interactive control. Has 22 types including text, email, number, date, checkbox, radio, and more.',example:'<input type="text" name="username" placeholder="Enter username" required>'},
+  {cat:'Forms',tag:'<textarea>',role:'form',desc:'A multi-line text input control.',example:'<textarea name="message" rows="4" cols="40"\n  placeholder="Your message…"></textarea>'},
+  {cat:'Forms',tag:'<select>',role:'form',desc:'A control that provides a menu of options. Use multiple for multi-select.',example:'<select name="country">\n  <option value="us">United States</option>\n  <option value="jp">Japan</option>\n</select>'},
+  {cat:'Forms',tag:'<option>',role:'form',desc:'An option in a <select> element, or a suggestion in a <datalist>.',example:'<select>\n  <option value="">Choose…</option>\n  <option value="a">Option A</option>\n</select>'},
+  {cat:'Forms',tag:'<optgroup>',role:'form',desc:'Groups related options in a <select> element.',example:'<select>\n  <optgroup label="Fruits">\n    <option>Apple</option>\n    <option>Banana</option>\n  </optgroup>\n</select>'},
+  {cat:'Forms',tag:'<fieldset>',role:'form',desc:'Groups related form controls, typically with a <legend>. Useful for accessibility — especially for radio button groups.',example:'<fieldset>\n  <legend>Payment Method</legend>\n  <input type="radio" name="pay" value="card"> Card\n  <input type="radio" name="pay" value="cash"> Cash\n</fieldset>'},
+  {cat:'Forms',tag:'<legend>',role:'form',desc:'A caption for a <fieldset> element.',example:'<fieldset>\n  <legend>Contact Info</legend>\n  …\n</fieldset>'},
+  {cat:'Forms',tag:'<button>',role:'form',desc:'A clickable button. Default type is "submit" inside a form. Always specify type="button" for non-submit buttons.',example:'<button type="button" onclick="doSomething()">Click Me</button>\n<button type="submit">Submit Form</button>'},
+  {cat:'Forms',tag:'<datalist>',role:'form',desc:'Provides a list of predefined options for an <input> element via its list attribute.',example:'<input list="browsers" name="browser">\n<datalist id="browsers">\n  <option value="Chrome">\n  <option value="Firefox">\n</datalist>'},
+  {cat:'Forms',tag:'<output>',role:'form',desc:'Displays the result of a calculation or user action.',example:'<input type="range" id="a" value="50">\n<output for="a" id="result">50</output>'},
+  {cat:'Forms',tag:'<progress>',role:'form',desc:'Displays the progress of a task. Use value and max for determinate progress.',example:'<progress value="70" max="100">70%</progress>'},
+  {cat:'Forms',tag:'<meter>',role:'form',desc:'Represents a scalar measurement within a known range — disk usage, relevance score.',example:'<meter value="0.7" min="0" max="1"\n  low="0.3" high="0.8" optimum="0.9">70%</meter>'},
+  {cat:'Interactive',tag:'<details>',role:'group',desc:'A disclosure widget — content is hidden by default and revealed when toggled.',example:'<details>\n  <summary>Show more</summary>\n  <p>Hidden content here.</p>\n</details>'},
+  {cat:'Interactive',tag:'<summary>',role:'text',desc:'A summary, caption, or legend for the <details> element. Always the first child of <details>.',example:'<details>\n  <summary>Click to expand</summary>\n  <p>Detail content…</p>\n</details>'},
+  {cat:'Interactive',tag:'<dialog>',role:'group',desc:'A dialog box or interactive component. Use showModal() for modal behavior.',example:'<dialog id="d">\n  <form method="dialog">\n    <p>Are you sure?</p>\n    <button>Cancel</button>\n    <button value="ok">OK</button>\n  </form>\n</dialog>'},
+  {cat:'Interactive',tag:'<menu>',role:'group',desc:'A list of commands or options. Semantically equivalent to <ul> but expresses interactive intent.',example:'<menu>\n  <li><button onclick="copy()">Copy</button></li>\n  <li><button onclick="paste()">Paste</button></li>\n</menu>'},
+];
+
+const CATS=['All',...new Set(ELEMS.map(e=>e.cat))];
+const ROLE_CLASS={landmark:'r-landmark',text:'r-text',group:'r-group',media:'r-media',form:'r-form',table:'r-table'};
+let activeCat='All', query='';
+
+function render(){
+  const visible=ELEMS.filter(e=>{
+    const mc=activeCat==='All'||e.cat===activeCat;
+    const mq=!query||e.tag.includes(query)||e.desc.toLowerCase().includes(query)||e.cat.toLowerCase().includes(query);
+    return mc&&mq;
+  });
+  const el=document.getElementById('content');
+  if(!visible.length){el.innerHTML='<div class="no-results">No results found</div>';return;}
+  const byCat={};
+  visible.forEach(e=>{(byCat[e.cat]=byCat[e.cat]||[]).push(e);});
+  el.innerHTML=Object.entries(byCat).map(([cat,items])=>`
+    <div class="section">
+      <div class="section-title">${cat}</div>
+      ${items.map(e=>`
+        <div class="elem-card">
+          <div class="elem-left">
+            <span class="elem-tag" onclick="cp('${e.tag}',this)">${escHtml(e.tag)}</span>
+            <span class="role-chip ${ROLE_CLASS[e.role]||''}">${e.role}</span>
+          </div>
+          <div class="elem-right">
+            <div class="elem-desc">${e.desc}</div>
+            <div class="elem-example">${escHtml(e.example)}</div>
+          </div>
+        </div>`).join('')}
+    </div>`).join('');
+}
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function cp(text,btn){
+  navigator.clipboard.writeText(text.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&'));
+  if(btn){const orig=btn.textContent;btn.textContent='Copied!';setTimeout(()=>btn.textContent=orig,1400);}
+}
+document.getElementById('cats').innerHTML=CATS.map(c=>`
+  <button class="cat-btn${c==='All'?' active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
+function setCat(c){
+  activeCat=c;
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.toggle('active',b.textContent===c));
+  render();
+}
+document.getElementById('search').addEventListener('input',e=>{query=e.target.value.toLowerCase();render();});
+render();
+</script>
+</body>
+</html>

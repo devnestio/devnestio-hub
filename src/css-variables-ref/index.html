@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS Custom Properties Reference — devnestio</title>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#0f1117;color:#e2e8f0;min-height:100vh}
+header{padding:24px 32px;border-bottom:1px solid #1e2535}
+h1{font-size:1.5rem;font-weight:700;color:#f8fafc}
+h1 span{color:#60a5fa}
+.desc{color:#94a3b8;margin-top:4px;font-size:.9rem}
+.controls{display:flex;gap:12px;flex-wrap:wrap;padding:16px 32px;border-bottom:1px solid #1e2535;align-items:center}
+.search-wrap{position:relative;flex:1;min-width:200px}
+.search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#64748b}
+#search{width:100%;background:#1e2535;border:1px solid #334155;color:#e2e8f0;padding:8px 12px 8px 34px;border-radius:6px;font-size:.9rem;outline:none}
+#search:focus{border-color:#60a5fa}
+.cat-filters{display:flex;gap:8px;flex-wrap:wrap}
+.cat-btn{padding:5px 12px;border-radius:99px;border:1px solid #334155;background:#1e2535;color:#94a3b8;font-size:.8rem;cursor:pointer}
+.cat-btn.active,.cat-btn:hover{background:#2563eb;border-color:#2563eb;color:#fff}
+.content{max-width:900px;margin:0 auto;padding:24px 32px}
+.section{margin-bottom:28px}
+.section-title{font-size:.95rem;font-weight:700;color:#60a5fa;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #1e2535}
+.entry{background:#141924;border:1px solid #1e2535;border-radius:8px;margin-bottom:10px;overflow:hidden}
+.entry:hover{border-color:#334155}
+.entry-header{padding:12px 16px;border-bottom:1px solid #1e2535;display:flex;align-items:center;gap:10px}
+.entry-title{font-family:monospace;font-size:.88rem;font-weight:700;color:#7dd3fc;flex:1}
+.badge{font-size:.72rem;padding:2px 7px;border-radius:99px;border:1px solid;white-space:nowrap}
+.badge-syntax{background:#1e3a5f;border-color:#1d4ed8;color:#93c5fd}
+.badge-tip{background:#14532d;border-color:#16a34a;color:#4ade80}
+.badge-gotcha{background:#450a0a;border-color:#dc2626;color:#f87171}
+.entry-body{padding:12px 16px}
+.entry-desc{font-size:.85rem;color:#94a3b8;line-height:1.5;margin-bottom:10px}
+pre{background:#0f1117;border:1px solid #1e2535;border-radius:4px;padding:10px;font-size:.8rem;overflow:auto;line-height:1.6;position:relative}
+code{font-family:'Courier New',monospace;color:#7dd3fc}
+.copy-btn{position:absolute;top:8px;right:8px;background:#1e2535;border:1px solid #334155;color:#64748b;padding:3px 8px;border-radius:4px;font-size:.73rem;cursor:pointer}
+.copy-btn:hover{color:#e2e8f0;background:#334155}
+.no-results{text-align:center;color:#64748b;padding:48px}
+</style>
+</head>
+<body>
+<header>
+  <h1>CSS <span>Custom Properties</span> Reference</h1>
+  <p class="desc">Everything about CSS variables — syntax, scoping, fallbacks, JavaScript interop, and patterns</p>
+</header>
+<div class="controls">
+  <div class="search-wrap">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="search" placeholder="Search topics…">
+  </div>
+  <div class="cat-filters" id="cats"></div>
+</div>
+<div class="content" id="content"></div>
+<script>
+const ENTRIES = [
+  {cat:'Basics',title:'Declaring a custom property',badge:'syntax',
+   desc:'Custom properties start with two dashes. Declared inside a selector (usually :root for global scope). Case-sensitive.',
+   code:`:root {
+  --color-primary: #2563eb;
+  --spacing-md: 16px;
+  --font-size-base: 1rem;
+}`},
+  {cat:'Basics',title:'Using var()',badge:'syntax',
+   desc:'Reference a custom property with var(). Includes an optional fallback value after a comma.',
+   code:`/* Basic usage */
+color: var(--color-primary);
+
+/* With fallback */
+color: var(--color-primary, #1d4ed8);
+
+/* Chained fallback */
+color: var(--color-brand, var(--color-primary, blue));`},
+  {cat:'Basics',title:'Fallback values',badge:'tip',
+   desc:'The fallback can be any valid CSS value including another var(). Fallback is used when the property is not defined or is invalid.',
+   code:`/* Fallback to a literal value */
+margin: var(--spacing, 16px);
+
+/* Fallback to another variable */
+background: var(--surface, var(--bg-secondary, #1e2535));
+
+/* Fallback with spaces (valid!) */
+font-family: var(--font-stack, system-ui, sans-serif);`},
+  {cat:'Basics',title:'Initial and inherited values',badge:'tip',
+   desc:'Custom properties are inherited by default. A child element inherits the property from its parent. Use @property to opt out of inheritance.',
+   code:`.parent {
+  --color: red;
+}
+.child {
+  color: var(--color); /* red — inherited from parent */
+}
+.child-override {
+  --color: blue;
+  color: var(--color); /* blue — local value wins */
+}`},
+  {cat:'Scoping',title:'Local scope',badge:'syntax',
+   desc:'Custom properties cascade like regular CSS. You can redeclare a property on any selector to scope it to that subtree.',
+   code:`:root { --btn-bg: #2563eb; }     /* Global default */
+
+.theme-dark {
+  --btn-bg: #1d4ed8;               /* Override for dark theme */
+}
+
+.btn {
+  background: var(--btn-bg);       /* Uses nearest ancestor's value */
+}`},
+  {cat:'Scoping',title:'Component-scoped variables',badge:'tip',
+   desc:'Declare variables on the component\'s root element to avoid polluting the global scope.',
+   code:`.card {
+  --card-padding: 24px;
+  --card-radius: 8px;
+  --card-shadow: 0 2px 8px rgba(0,0,0,.2);
+
+  padding: var(--card-padding);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+}`},
+  {cat:'Scoping',title:'@property — typed custom properties (CSS Houdini)',badge:'syntax',
+   desc:'@property allows declaring typed custom properties with default values and inheritance control. Enables animation of custom properties.',
+   code:`@property --progress {
+  syntax: '<number>';
+  initial-value: 0;
+  inherits: false;
+}
+
+.bar {
+  --progress: 0.7;
+  width: calc(var(--progress) * 100%);
+  transition: --progress 0.3s ease; /* Animatable! */
+}`},
+  {cat:'Patterns',title:'Design token system',badge:'tip',
+   desc:'Use custom properties as design tokens. Layer primitives (raw values) and semantic tokens (purpose-named).',
+   code:`:root {
+  /* Primitive tokens */
+  --blue-500: #3b82f6;
+  --blue-600: #2563eb;
+  --gray-100: #f3f4f6;
+  --gray-900: #111827;
+
+  /* Semantic tokens */
+  --color-primary: var(--blue-600);
+  --color-surface: var(--gray-100);
+  --color-text: var(--gray-900);
+}
+
+[data-theme="dark"] {
+  --color-surface: var(--gray-900);
+  --color-text: var(--gray-100);
+}`},
+  {cat:'Patterns',title:'Dark mode theming',badge:'tip',
+   desc:'Use :root and prefers-color-scheme or a data attribute to switch themes. Only change semantic tokens.',
+   code:`:root {
+  --bg: #ffffff;
+  --text: #0f172a;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f172a;
+    --text: #f8fafc;
+  }
+}
+
+/* Or toggle with JS by setting data-theme */
+[data-theme="dark"] {
+  --bg: #0f172a;
+  --text: #f8fafc;
+}`},
+  {cat:'Patterns',title:'Responsive spacing scale',badge:'tip',
+   desc:'Combine custom properties with clamp() or media queries for fluid responsive scales.',
+   code:`:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --space-4: 20px;
+    --space-6: 32px;
+    --space-8: 48px;
+  }
+}`},
+  {cat:'JavaScript',title:'Reading custom properties with JS',badge:'syntax',
+   desc:'Use getComputedStyle and getPropertyValue to read custom property values. Note: the value includes leading/trailing spaces.',
+   code:`const root = document.documentElement;
+
+// Read a custom property
+const value = getComputedStyle(root).getPropertyValue('--color-primary');
+// Returns '  #2563eb' (may have leading space — trim it)
+console.log(value.trim()); // '#2563eb'
+
+// Read from any element
+const card = document.querySelector('.card');
+getComputedStyle(card).getPropertyValue('--card-padding'); // '24px'`},
+  {cat:'JavaScript',title:'Setting custom properties with JS',badge:'syntax',
+   desc:'Use style.setProperty to set custom properties at runtime. This enables dynamic theming and animation.',
+   code:`const root = document.documentElement;
+
+// Set a value globally
+root.style.setProperty('--color-primary', '#9333ea');
+
+// Remove a custom property (reset to parent value)
+root.style.removeProperty('--color-primary');
+
+// Set on a specific element
+const el = document.querySelector('.card');
+el.style.setProperty('--card-padding', '32px');`},
+  {cat:'JavaScript',title:'Animating with custom properties',badge:'tip',
+   desc:'Without @property, custom properties cannot be transitioned directly. Use JS requestAnimationFrame or register with @property.',
+   code:`/* Method 1: Register with @property for CSS transition */
+@property --hue {
+  syntax: '<number>';
+  initial-value: 0;
+  inherits: false;
+}
+.button {
+  background: hsl(var(--hue), 80%, 50%);
+  transition: --hue 0.3s;
+}
+.button:hover { --hue: 200; }
+
+/* Method 2: JS animation loop */
+let hue = 0;
+function animate() {
+  document.documentElement.style.setProperty('--hue', hue++);
+  requestAnimationFrame(animate);
+}`},
+  {cat:'Gotchas',title:'Invalid at computed value time',badge:'gotcha',
+   desc:'If a custom property resolves to an invalid value for the property it\'s used in, the property uses its inherited or initial value — NOT the fallback.',
+   code:`.example {
+  --size: "large";          /* String — invalid for font-size */
+  font-size: var(--size);   /* Falls back to inherited font-size, NOT 16px! */
+  font-size: var(--size, 16px); /* Fallback NOT used either */
+}`},
+  {cat:'Gotchas',title:'Custom properties in media queries',badge:'gotcha',
+   desc:'Custom properties cannot be used directly in @media query conditions — only in property values.',
+   code:`/* ✗ Does NOT work */
+:root { --breakpoint-md: 768px; }
+@media (min-width: var(--breakpoint-md)) { ... }
+
+/* ✓ Use a preprocessor or plain values for media queries */
+@media (min-width: 768px) { ... }`},
+  {cat:'Gotchas',title:'Whitespace is significant',badge:'gotcha',
+   desc:'Custom property values preserve whitespace. This can cause issues when used in calc() or other math functions.',
+   code:`:root { --gap: 16px; }
+
+/* Works fine */
+margin: var(--gap);
+
+/* May fail — whitespace is included in the value */
+:root { --gap:  16 ; }  /* ' 16 ' not '16' */
+width: calc(var(--gap) * 2); /* Works: ' 16  * 2' = 32 */
+width: var(--gap)px; /* Does NOT work — can't append units to var() */`},
+  {cat:'Gotchas',title:'Cannot use var() in property names',badge:'gotcha',
+   desc:'Custom properties can only be used as VALUES, not property names or selectors.',
+   code:`/* ✗ Does NOT work */
+:root { --prop: color; }
+.el { var(--prop): red; }   /* Invalid */
+
+/* ✓ Custom properties are always values */
+:root { --text-color: red; }
+.el { color: var(--text-color); }`},
+];
+
+const CATS=['All',...new Set(ENTRIES.map(e=>e.cat))];
+let activeCat='All', query='';
+
+function render(){
+  const visible=ENTRIES.filter(e=>{
+    const mc=activeCat==='All'||e.cat===activeCat;
+    const mq=!query||e.title.toLowerCase().includes(query)||e.desc.toLowerCase().includes(query)||e.code.toLowerCase().includes(query);
+    return mc&&mq;
+  });
+  const el=document.getElementById('content');
+  if(!visible.length){el.innerHTML='<div class="no-results">No results</div>';return;}
+  const byCat={};
+  visible.forEach(e=>{(byCat[e.cat]=byCat[e.cat]||[]).push(e);});
+  el.innerHTML=Object.entries(byCat).map(([cat,items])=>`
+    <div class="section">
+      <div class="section-title">${cat}</div>
+      ${items.map(e=>`
+        <div class="entry">
+          <div class="entry-header">
+            <span class="entry-title">${e.title}</span>
+            <span class="badge badge-${e.badge}">${e.badge}</span>
+          </div>
+          <div class="entry-body">
+            <div class="entry-desc">${e.desc}</div>
+            <pre><code>${escHtml(e.code)}</code><button class="copy-btn" onclick="cp(${JSON.stringify(e.code)},this)">Copy</button></pre>
+          </div>
+        </div>`).join('')}
+    </div>`).join('');
+}
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function cp(text,btn){
+  navigator.clipboard.writeText(text);
+  const orig=btn.textContent;btn.textContent='Copied!';setTimeout(()=>btn.textContent=orig,1400);
+}
+document.getElementById('cats').innerHTML=CATS.map(c=>`
+  <button class="cat-btn${c==='All'?' active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
+function setCat(c){
+  activeCat=c;
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.toggle('active',b.textContent===c));
+  render();
+}
+document.getElementById('search').addEventListener('input',e=>{query=e.target.value.toLowerCase();render();});
+render();
+</script>
+</body>
+</html>

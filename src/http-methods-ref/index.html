@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTTP Methods Reference — devnestio</title>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#0f1117;color:#e2e8f0;min-height:100vh}
+header{padding:24px 32px;border-bottom:1px solid #1e2535}
+h1{font-size:1.5rem;font-weight:700;color:#f8fafc}
+h1 span{color:#60a5fa}
+.desc{color:#94a3b8;margin-top:4px;font-size:.9rem}
+.main{max-width:1000px;margin:0 auto;padding:32px}
+.matrix-card{background:#141924;border:1px solid #1e2535;border-radius:10px;overflow:auto;margin-bottom:28px}
+.matrix-card table{width:100%;border-collapse:collapse;min-width:600px}
+.matrix-card th{background:#1e2535;padding:10px 14px;font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#64748b;text-align:center;border-bottom:1px solid #1e2535}
+.matrix-card th:first-child{text-align:left}
+.matrix-card td{padding:10px 14px;border-bottom:1px solid #0f1117;font-size:.85rem;text-align:center;vertical-align:middle}
+.matrix-card tr:last-child td{border-bottom:none}
+.matrix-card td:first-child{text-align:left;font-weight:700}
+.matrix-card tr:hover td{background:#1a2030}
+.method-badge{display:inline-block;padding:3px 10px;border-radius:4px;font-family:monospace;font-size:.85rem;font-weight:700}
+.m-GET{background:#14532d;color:#4ade80;border:1px solid #16a34a}
+.m-POST{background:#1e3a5f;color:#60a5fa;border:1px solid #1d4ed8}
+.m-PUT{background:#422006;color:#fb923c;border:1px solid #c2410c}
+.m-PATCH{background:#3b0764;color:#c4b5fd;border:1px solid #7c3aed}
+.m-DELETE{background:#450a0a;color:#f87171;border:1px solid #dc2626}
+.m-HEAD{background:#14532d;color:#86efac;border:1px solid #15803d}
+.m-OPTIONS{background:#1e293b;color:#94a3b8;border:1px solid #334155}
+.m-CONNECT{background:#1e293b;color:#94a3b8;border:1px solid #334155}
+.m-TRACE{background:#1e293b;color:#94a3b8;border:1px solid #334155}
+.yes{color:#4ade80}
+.no{color:#f87171}
+.varies{color:#fb923c}
+.sect-title{font-size:1rem;font-weight:700;color:#60a5fa;margin-bottom:14px}
+.method-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:28px}
+.method-card{background:#141924;border:1px solid #1e2535;border-radius:8px;padding:18px}
+.method-card:hover{border-color:#334155}
+.method-name{font-size:1rem;font-weight:700;font-family:monospace;margin-bottom:8px}
+.method-desc{font-size:.85rem;color:#94a3b8;line-height:1.5;margin-bottom:10px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.tag{font-size:.73rem;padding:2px 8px;border-radius:99px;border:1px solid}
+.tag-safe{background:#14532d;border-color:#16a34a;color:#4ade80}
+.tag-idempotent{background:#1e3a5f;border-color:#1d4ed8;color:#60a5fa}
+.tag-body{background:#3b0764;border-color:#7c3aed;color:#c4b5fd}
+.tag-cacheable{background:#422006;border-color:#c2410c;color:#fb923c}
+.example-label{font-size:.73rem;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+pre{background:#0f1117;border:1px solid #1e2535;border-radius:4px;padding:8px;font-size:.78rem;overflow:auto}
+code{font-family:monospace;color:#7dd3fc}
+</style>
+</head>
+<body>
+<header>
+  <h1>HTTP <span>Methods Reference</span></h1>
+  <p class="desc">GET, POST, PUT, PATCH, DELETE and more — safety, idempotency, and use cases</p>
+</header>
+<div class="main">
+  <div class="sect-title">Safety & Idempotency Matrix</div>
+  <div class="matrix-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Safe</th>
+          <th>Idempotent</th>
+          <th>Has Body</th>
+          <th>Cacheable</th>
+          <th>Use Case</th>
+        </tr>
+      </thead>
+      <tbody id="matrix"></tbody>
+    </table>
+  </div>
+  <div class="sect-title">Method Details</div>
+  <div class="method-cards" id="cards"></div>
+</div>
+<script>
+const METHODS = [
+  {
+    name:'GET', safe:true, idempotent:true, body:false, cacheable:true,
+    useCase:'Retrieve a resource',
+    desc:'Fetches data from the server. Should never modify state. Responses can be cached. Safe and idempotent — multiple identical requests have the same effect.',
+    tags:['safe','idempotent','cacheable'],
+    example:'GET /users/42 HTTP/1.1\nHost: api.example.com\nAuthorization: Bearer <token>'
+  },
+  {
+    name:'POST', safe:false, idempotent:false, body:true, cacheable:false,
+    useCase:'Create a new resource',
+    desc:'Submits data to create a new resource. Not idempotent — calling twice may create two resources. The response Location header often contains the new resource URL.',
+    tags:['body'],
+    example:'POST /users HTTP/1.1\nHost: api.example.com\nContent-Type: application/json\n\n{"name": "Alice", "email": "alice@example.com"}'
+  },
+  {
+    name:'PUT', safe:false, idempotent:true, body:true, cacheable:false,
+    useCase:'Replace a resource completely',
+    desc:'Replaces an entire resource with the request body. Idempotent — calling with the same body multiple times has the same result. If the resource doesn\'t exist, it may be created.',
+    tags:['idempotent','body'],
+    example:'PUT /users/42 HTTP/1.1\nHost: api.example.com\nContent-Type: application/json\n\n{"name": "Alice", "email": "alice@example.com"}'
+  },
+  {
+    name:'PATCH', safe:false, idempotent:false, body:true, cacheable:false,
+    useCase:'Partially update a resource',
+    desc:'Applies a partial update to a resource. Unlike PUT, only the provided fields are modified. May not be idempotent (e.g., incrementing a counter).',
+    tags:['body'],
+    example:'PATCH /users/42 HTTP/1.1\nHost: api.example.com\nContent-Type: application/json\n\n{"email": "new@example.com"}'
+  },
+  {
+    name:'DELETE', safe:false, idempotent:true, body:'varies', cacheable:false,
+    useCase:'Delete a resource',
+    desc:'Removes the specified resource. Idempotent — deleting an already-deleted resource should return 404 or 204 consistently. Body is rarely used.',
+    tags:['idempotent'],
+    example:'DELETE /users/42 HTTP/1.1\nHost: api.example.com\nAuthorization: Bearer <token>'
+  },
+  {
+    name:'HEAD', safe:true, idempotent:true, body:false, cacheable:true,
+    useCase:'Get headers without body',
+    desc:'Identical to GET but the server must not return a body. Used to check if a resource exists, get its Content-Length, or validate a cached response — without transferring the full content.',
+    tags:['safe','idempotent','cacheable'],
+    example:'HEAD /large-file.zip HTTP/1.1\nHost: cdn.example.com\n# Check Content-Length before downloading'
+  },
+  {
+    name:'OPTIONS', safe:true, idempotent:true, body:false, cacheable:false,
+    useCase:'CORS preflight / discover allowed methods',
+    desc:'Describes the communication options for a resource. Used by browsers for CORS preflight requests. The response includes an Allow header listing supported methods.',
+    tags:['safe','idempotent'],
+    example:'OPTIONS /api/users HTTP/1.1\nHost: api.example.com\nOrigin: https://app.example.com\nAccess-Control-Request-Method: POST'
+  },
+  {
+    name:'CONNECT', safe:false, idempotent:false, body:false, cacheable:false,
+    useCase:'Establish a tunnel (HTTPS proxies)',
+    desc:'Establishes a TCP tunnel through an HTTP proxy. Commonly used to create HTTPS connections through a proxy server. The proxy forwards traffic without interpreting it.',
+    tags:[],
+    example:'CONNECT api.example.com:443 HTTP/1.1\nHost: api.example.com:443\nProxy-Authorization: Basic <credentials>'
+  },
+  {
+    name:'TRACE', safe:true, idempotent:true, body:false, cacheable:false,
+    useCase:'Diagnostic / request echo',
+    desc:'Echoes the received request back to the client for diagnostic purposes. Rarely used in production. Often disabled on servers due to security concerns (XST attacks).',
+    tags:['safe','idempotent'],
+    example:'TRACE / HTTP/1.1\nHost: api.example.com\n# Response body echoes the request'
+  },
+];
+
+const tagLabels={'safe':'Safe','idempotent':'Idempotent','body':'Has Body','cacheable':'Cacheable'};
+
+function icon(val){
+  if(val===true) return '<span class="yes">✓</span>';
+  if(val===false) return '<span class="no">✗</span>';
+  return '<span class="varies">~</span>';
+}
+
+document.getElementById('matrix').innerHTML=METHODS.map(m=>`
+  <tr>
+    <td><span class="method-badge m-${m.name}">${m.name}</span></td>
+    <td>${icon(m.safe)}</td>
+    <td>${icon(m.idempotent)}</td>
+    <td>${icon(m.body)}</td>
+    <td>${icon(m.cacheable)}</td>
+    <td style="text-align:left;color:#94a3b8;font-size:.82rem">${m.useCase}</td>
+  </tr>`).join('');
+
+document.getElementById('cards').innerHTML=METHODS.map(m=>`
+  <div class="method-card">
+    <div class="method-name"><span class="method-badge m-${m.name}">${m.name}</span></div>
+    <div class="method-desc">${m.desc}</div>
+    <div class="tags">${m.tags.map(t=>`<span class="tag tag-${t}">${tagLabels[t]}</span>`).join('')}</div>
+    <div class="example-label">Example</div>
+    <pre><code>${m.example.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</code></pre>
+  </div>`).join('');
+</script>
+</body>
+</html>

@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>URL Encoder / Decoder – encodeURIComponent & Full URL | DevNestio</title>
+  <meta name="description" content="Encode and decode URLs instantly. encodeURIComponent, encodeURI, full URL parsing, query string builder. Highlights special characters. Free, runs in browser." />
+  <link rel="canonical" href="https://devnestio.pages.dev/url-encoder/" />
+  <meta property="og:title" content="URL Encoder / Decoder – encodeURIComponent & Full URL" />
+  <meta property="og:description" content="Encode and decode URLs. encodeURIComponent, encodeURI, query string parsing. Instant, no server." />
+  <meta property="og:url" content="https://devnestio.pages.dev/url-encoder/" />
+  <meta property="og:type" content="website" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1117; --surface: #1a1d27; --surface2: #22263a; --border: #2e3248;
+      --text: #e2e8f0; --muted: #8892a4;
+      --accent: #38bdf8; --green: #4ade80; --red: #f87171; --yellow: #fbbf24; --orange: #fb923c;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1.1rem 1.5rem; }
+    header h1 { font-size: 1.35rem; font-weight: 700; color: var(--accent); }
+    header p { font-size: .85rem; color: var(--muted); margin-top: .2rem; }
+    .main { max-width: 860px; margin: 0 auto; padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; }
+
+    /* Mode tabs */
+    .tabs { display: flex; gap: .4rem; flex-wrap: wrap; }
+    .tab { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); border-radius: 6px; padding: .35rem .85rem; font-size: .82rem; cursor: pointer; transition: all .15s; }
+    .tab.active { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 600; }
+
+    /* Cards */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.1rem; }
+    .section-label { font-size: .78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: .45rem; }
+
+    /* Two-panel layout */
+    .two-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 640px) { .two-panel { grid-template-columns: 1fr; } }
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .panel-header { padding: .55rem 1rem; background: var(--surface2); border-bottom: 1px solid var(--border); font-size: .78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; display: flex; justify-content: space-between; align-items: center; }
+    textarea.panel-ta { width: 100%; min-height: 160px; background: transparent; border: none; color: var(--text); font-family: 'Fira Code', monospace; font-size: .83rem; line-height: 1.6; padding: .75rem 1rem; resize: vertical; outline: none; }
+
+    /* Buttons */
+    .btn { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); border-radius: 6px; padding: .3rem .7rem; font-size: .78rem; cursor: pointer; transition: all .15s; }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn.copied { border-color: var(--green); color: var(--green); }
+    .btn-row { display: flex; gap: .4rem; flex-wrap: wrap; margin-top: .6rem; }
+
+    /* URL breakdown */
+    .breakdown-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .breakdown-header { padding: .55rem 1rem; background: var(--surface2); border-bottom: 1px solid var(--border); font-size: .78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+    .breakdown-row { display: grid; grid-template-columns: 110px 1fr; gap: .5rem; padding: .45rem 1rem; border-bottom: 1px solid var(--border); align-items: baseline; font-size: .82rem; }
+    .breakdown-row:last-child { border-bottom: none; }
+    .bd-key { color: var(--accent); font-family: monospace; font-size: .8rem; }
+    .bd-val { color: var(--text); font-family: 'Fira Code', monospace; font-size: .8rem; word-break: break-all; }
+    .bd-val.empty { color: var(--muted); font-style: italic; }
+
+    /* Query builder */
+    .qs-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .qs-header { padding: .55rem 1rem; background: var(--surface2); border-bottom: 1px solid var(--border); font-size: .78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; display: flex; justify-content: space-between; align-items: center; }
+    .qs-rows { padding: .65rem 1rem; display: flex; flex-direction: column; gap: .4rem; }
+    .qs-row { display: flex; gap: .4rem; align-items: center; }
+    .qs-input { flex: 1; background: var(--surface2); border: 1px solid var(--border); color: var(--text); font-family: 'Fira Code', monospace; font-size: .8rem; border-radius: 6px; padding: .3rem .6rem; outline: none; transition: border-color .2s; min-width: 0; }
+    .qs-input:focus { border-color: var(--accent); }
+    .qs-sep { color: var(--muted); font-size: .85rem; flex-shrink: 0; }
+    .qs-del { background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 5px; padding: .2rem .45rem; font-size: .75rem; cursor: pointer; transition: all .15s; flex-shrink: 0; }
+    .qs-del:hover { border-color: var(--red); color: var(--red); }
+    .qs-output { font-family: 'Fira Code', monospace; font-size: .8rem; color: var(--accent); padding: .55rem 1rem; background: var(--surface2); border-top: 1px solid var(--border); word-break: break-all; min-height: 2.2rem; }
+
+    /* Reference table */
+    .ref-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .ref-card h2 { font-size: .78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; padding: .55rem 1rem; background: var(--surface2); border-bottom: 1px solid var(--border); }
+    .ref-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+    .ref-table th { padding: .4rem .85rem; text-align: left; color: var(--muted); font-weight: 600; background: var(--surface2); border-bottom: 1px solid var(--border); }
+    .ref-table td { padding: .4rem .85rem; border-bottom: 1px solid var(--border); font-family: monospace; }
+    .ref-table tr:last-child td { border-bottom: none; }
+    .ref-char { color: var(--yellow); font-size: .88rem; }
+    .ref-enc { color: var(--accent); }
+    .ref-note { color: var(--muted); font-family: 'Segoe UI', system-ui, sans-serif; font-size: .78rem; }
+
+    footer { text-align: center; padding: 1.5rem; color: var(--muted); font-size: .8rem; border-top: 1px solid var(--border); margin-top: .5rem; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>URL Encoder / Decoder</h1>
+  <p>Encode &amp; decode URLs · encodeURIComponent · encodeURI · query string builder · URL breakdown</p>
+</header>
+
+<div class="main">
+  <!-- Mode tabs -->
+  <div class="tabs">
+    <button class="tab active" data-mode="component" onclick="setMode('component')">encodeURIComponent</button>
+    <button class="tab" data-mode="uri" onclick="setMode('uri')">encodeURI</button>
+    <button class="tab" data-mode="breakdown" onclick="setMode('breakdown')">URL Breakdown</button>
+    <button class="tab" data-mode="query" onclick="setMode('query')">Query Builder</button>
+  </div>
+
+  <!-- Encode/decode panels (component + uri modes) -->
+  <div id="encodePanel">
+    <div class="two-panel">
+      <div class="panel">
+        <div class="panel-header">
+          <span id="inputLabel">Original</span>
+          <button class="btn" onclick="copyPanel('input')">Copy</button>
+        </div>
+        <textarea class="panel-ta" id="inputTa" placeholder="Type or paste text to encode…" spellcheck="false" oninput="encodeInput()"></textarea>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <span id="outputLabel">Encoded</span>
+          <button class="btn" id="copyEncoded" onclick="copyPanel('encoded')">Copy</button>
+        </div>
+        <textarea class="panel-ta" id="encodedTa" placeholder="Encoded output appears here…" spellcheck="false" oninput="decodeInput()"></textarea>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="swapPanels()">⇄ Swap</button>
+      <button class="btn" onclick="clearPanels()">Clear</button>
+    </div>
+  </div>
+
+  <!-- URL Breakdown -->
+  <div id="breakdownPanel" style="display:none">
+    <div class="card">
+      <div class="section-label">Enter a URL</div>
+      <textarea class="panel-ta" id="urlInput" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;min-height:60px" placeholder="https://example.com/path?foo=bar&baz=qux#section" spellcheck="false" oninput="parseURL()"></textarea>
+      <div class="btn-row">
+        <button class="btn" onclick="loadExampleURL()">Load Example</button>
+        <button class="btn" onclick="clearURL()">Clear</button>
+      </div>
+    </div>
+    <div class="breakdown-card">
+      <div class="breakdown-header">URL Parts</div>
+      <div class="breakdown-row"><span class="bd-key">protocol</span><span class="bd-val" id="bd-protocol">—</span></div>
+      <div class="breakdown-row"><span class="bd-key">host</span><span class="bd-val" id="bd-host">—</span></div>
+      <div class="breakdown-row"><span class="bd-key">hostname</span><span class="bd-val" id="bd-hostname">—</span></div>
+      <div class="breakdown-row"><span class="bd-key">port</span><span class="bd-val" id="bd-port">—</span></div>
+      <div class="breakdown-row"><span class="bd-key">pathname</span><span class="bd-val" id="bd-pathname">—</span></div>
+      <div class="breakdown-row"><span class="bd-key">search</span><span class="bd-val" id="bd-search">—</span></div>
+      <div class="breakdown-row"><span class="bd-key">hash</span><span class="bd-val" id="bd-hash">—</span></div>
+      <div class="breakdown-row"><span class="bd-key">origin</span><span class="bd-val" id="bd-origin">—</span></div>
+    </div>
+    <div class="breakdown-card" id="queryParamsCard" style="display:none">
+      <div class="breakdown-header">Query Parameters</div>
+      <div id="queryParamsList"></div>
+    </div>
+  </div>
+
+  <!-- Query Builder -->
+  <div id="queryPanel" style="display:none">
+    <div class="qs-card">
+      <div class="qs-header">
+        <span>Parameters</span>
+        <button class="btn" onclick="addQSRow()">+ Add</button>
+      </div>
+      <div class="qs-rows" id="qsRows">
+        <div class="qs-row">
+          <input type="text" class="qs-input" placeholder="key" oninput="buildQS()" spellcheck="false" />
+          <span class="qs-sep">=</span>
+          <input type="text" class="qs-input" placeholder="value" oninput="buildQS()" spellcheck="false" />
+          <button class="qs-del" onclick="removeQSRow(this)">✕</button>
+        </div>
+      </div>
+      <div class="qs-output" id="qsOutput">—</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="copyQS()">Copy Query String</button>
+      <button class="btn" onclick="clearQS()">Clear All</button>
+    </div>
+  </div>
+
+  <!-- Reference table -->
+  <div class="ref-card">
+    <h2>Common URL Encoding Reference</h2>
+    <table class="ref-table">
+      <thead><tr><th>Char</th><th>Encoded</th><th>Name / note</th></tr></thead>
+      <tbody>
+        <tr><td class="ref-char">Space</td><td class="ref-enc">%20</td><td class="ref-note">or + in query strings</td></tr>
+        <tr><td class="ref-char">!</td><td class="ref-enc">%21</td><td class="ref-note">Exclamation mark</td></tr>
+        <tr><td class="ref-char">#</td><td class="ref-enc">%23</td><td class="ref-note">Hash / fragment delimiter</td></tr>
+        <tr><td class="ref-char">$</td><td class="ref-enc">%24</td><td class="ref-note">Dollar sign</td></tr>
+        <tr><td class="ref-char">&amp;</td><td class="ref-enc">%26</td><td class="ref-note">Ampersand – query param separator</td></tr>
+        <tr><td class="ref-char">+</td><td class="ref-enc">%2B</td><td class="ref-note">Plus (also decodes as space)</td></tr>
+        <tr><td class="ref-char">,</td><td class="ref-enc">%2C</td><td class="ref-note">Comma</td></tr>
+        <tr><td class="ref-char">/</td><td class="ref-enc">%2F</td><td class="ref-note">Slash – path delimiter</td></tr>
+        <tr><td class="ref-char">:</td><td class="ref-enc">%3A</td><td class="ref-note">Colon – protocol delimiter</td></tr>
+        <tr><td class="ref-char">;</td><td class="ref-enc">%3B</td><td class="ref-note">Semicolon</td></tr>
+        <tr><td class="ref-char">=</td><td class="ref-enc">%3D</td><td class="ref-note">Equals – key=value delimiter</td></tr>
+        <tr><td class="ref-char">?</td><td class="ref-enc">%3F</td><td class="ref-note">Question mark – query start</td></tr>
+        <tr><td class="ref-char">@</td><td class="ref-enc">%40</td><td class="ref-note">At sign</td></tr>
+        <tr><td class="ref-char">[</td><td class="ref-enc">%5B</td><td class="ref-note">Open bracket</td></tr>
+        <tr><td class="ref-char">]</td><td class="ref-enc">%5D</td><td class="ref-note">Close bracket</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<footer>
+  DevNestio URL Encoder / Decoder · <a href="https://devnestio.pages.dev/" style="color:var(--accent)">More Tools</a>
+</footer>
+
+<script>
+let currentMode = 'component';
+
+// ─── Encode/Decode (component mode) ──────────────────────────────────────
+function encodeText(text, mode) {
+  if (mode === 'component') return encodeURIComponent(text);
+  return encodeURI(text);
+}
+
+function decodeText(text, mode) {
+  try {
+    if (mode === 'component') return decodeURIComponent(text);
+    return decodeURI(text);
+  } catch { return text; }
+}
+
+function encodeInput() {
+  const raw = document.getElementById('inputTa').value;
+  document.getElementById('encodedTa').value = encodeText(raw, currentMode);
+}
+
+function decodeInput() {
+  const enc = document.getElementById('encodedTa').value;
+  document.getElementById('inputTa').value = decodeText(enc, currentMode);
+}
+
+function swapPanels() {
+  const a = document.getElementById('inputTa');
+  const b = document.getElementById('encodedTa');
+  [a.value, b.value] = [b.value, a.value];
+}
+
+function clearPanels() {
+  document.getElementById('inputTa').value = '';
+  document.getElementById('encodedTa').value = '';
+}
+
+function copyPanel(which) {
+  const id = which === 'input' ? 'inputTa' : 'encodedTa';
+  const btnId = which === 'input' ? 'copyInput' : 'copyEncoded';
+  const val = document.getElementById(id).value;
+  if (!val) return;
+  navigator.clipboard.writeText(val).then(() => {
+    const btn = document.getElementById(btnId) || event.target;
+    const orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 1500);
+  });
+}
+
+// ─── URL Breakdown ────────────────────────────────────────────────────────
+function parseURL() {
+  const raw = document.getElementById('urlInput').value.trim();
+  const PARTS = ['protocol','host','hostname','port','pathname','search','hash','origin'];
+  if (!raw) {
+    PARTS.forEach(k => {
+      const el = document.getElementById('bd-' + k);
+      el.textContent = '—';
+      el.className = 'bd-val empty';
+    });
+    document.getElementById('queryParamsCard').style.display = 'none';
+    return;
+  }
+  let url;
+  try { url = new URL(raw); } catch {
+    PARTS.forEach(k => {
+      const el = document.getElementById('bd-' + k);
+      el.textContent = k === 'protocol' ? '(invalid URL)' : '—';
+      el.className = k === 'protocol' ? 'bd-val' : 'bd-val empty';
+    });
+    document.getElementById('queryParamsCard').style.display = 'none';
+    return;
+  }
+  PARTS.forEach(k => {
+    const val = url[k] || '';
+    const el = document.getElementById('bd-' + k);
+    el.textContent = val || '—';
+    el.className = val ? 'bd-val' : 'bd-val empty';
+  });
+  // Query params
+  const params = [...url.searchParams.entries()];
+  const card = document.getElementById('queryParamsCard');
+  const list = document.getElementById('queryParamsList');
+  if (params.length > 0) {
+    list.innerHTML = params.map(([k, v]) =>
+      `<div class="breakdown-row"><span class="bd-key">${escHtml(k)}</span><span class="bd-val">${escHtml(v)}</span></div>`
+    ).join('');
+    card.style.display = '';
+  } else {
+    card.style.display = 'none';
+  }
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function loadExampleURL() {
+  document.getElementById('urlInput').value = 'https://example.com:8080/api/v1/search?q=hello+world&lang=en&page=2#results';
+  parseURL();
+}
+
+function clearURL() {
+  document.getElementById('urlInput').value = '';
+  parseURL();
+}
+
+// ─── Query String Builder ─────────────────────────────────────────────────
+function addQSRow() {
+  const row = document.createElement('div');
+  row.className = 'qs-row';
+  row.innerHTML = `
+    <input type="text" class="qs-input" placeholder="key" oninput="buildQS()" spellcheck="false" />
+    <span class="qs-sep">=</span>
+    <input type="text" class="qs-input" placeholder="value" oninput="buildQS()" spellcheck="false" />
+    <button class="qs-del" onclick="removeQSRow(this)">✕</button>
+  `;
+  document.getElementById('qsRows').appendChild(row);
+}
+
+function removeQSRow(btn) {
+  const rows = document.querySelectorAll('#qsRows .qs-row');
+  if (rows.length > 1) { btn.closest('.qs-row').remove(); buildQS(); }
+}
+
+function buildQS() {
+  const rows = document.querySelectorAll('#qsRows .qs-row');
+  const params = [];
+  rows.forEach(row => {
+    const [k, v] = [...row.querySelectorAll('.qs-input')].map(i => i.value.trim());
+    if (k) params.push(encodeURIComponent(k) + '=' + encodeURIComponent(v));
+  });
+  document.getElementById('qsOutput').textContent = params.length ? '?' + params.join('&') : '—';
+}
+
+function copyQS() {
+  const text = document.getElementById('qsOutput').textContent;
+  if (text === '—') return;
+  navigator.clipboard.writeText(text);
+}
+
+function clearQS() {
+  document.querySelectorAll('#qsRows .qs-row').forEach((r, i) => {
+    if (i === 0) r.querySelectorAll('.qs-input').forEach(inp => inp.value = '');
+    else r.remove();
+  });
+  document.getElementById('qsOutput').textContent = '—';
+}
+
+// ─── Mode switching ───────────────────────────────────────────────────────
+function setMode(mode) {
+  currentMode = mode;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.mode === mode));
+  document.getElementById('encodePanel').style.display = ['component','uri'].includes(mode) ? '' : 'none';
+  document.getElementById('breakdownPanel').style.display = mode === 'breakdown' ? '' : 'none';
+  document.getElementById('queryPanel').style.display = mode === 'query' ? '' : 'none';
+  if (mode === 'component') {
+    document.getElementById('inputLabel').textContent = 'Original';
+    document.getElementById('outputLabel').textContent = 'encodeURIComponent';
+  } else if (mode === 'uri') {
+    document.getElementById('inputLabel').textContent = 'Original';
+    document.getElementById('outputLabel').textContent = 'encodeURI';
+  }
+  clearPanels();
+}
+</script>
+</body>
+</html>

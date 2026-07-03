@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Text Diff Viewer – Side-by-Side & Inline Diff | DevNestio</title>
+  <meta name="description" content="Compare two texts with side-by-side or inline diff. Highlights additions and deletions. Word-level and line-level diffing. Free browser tool." />
+  <link rel="canonical" href="https://devnestio.pages.dev/text-diff/" />
+  <meta property="og:title" content="Text Diff Viewer – Side-by-Side & Inline Diff" />
+  <meta property="og:description" content="Compare two texts with side-by-side or inline diff. Highlights additions and deletions." />
+  <meta property="og:url" content="https://devnestio.pages.dev/text-diff/" />
+  <meta property="og:type" content="website" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1117; --surface: #1a1d27; --surface2: #22263a; --border: #2e3248;
+      --text: #e2e8f0; --muted: #8892a4;
+      --add: #4ade80; --add-bg: #4ade8014; --add-hl: #4ade8030;
+      --del: #f87171; --del-bg: #f8717114; --del-hl: #f8717130;
+      --eq-bg: transparent;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem; }
+    header h1 { font-size: 1.3rem; font-weight: 700; color: #f59e0b; }
+    .controls { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; }
+    .ctrl-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); border-radius: 6px; padding: .35rem .8rem; font-size: .82rem; cursor: pointer; transition: all .15s; }
+    .ctrl-btn:hover, .ctrl-btn.active { background: #f59e0b22; border-color: #f59e0b; color: #f59e0b; }
+    .ctrl-btn.action { color: var(--text); }
+    .ctrl-btn.action:hover { background: var(--surface2); border-color: var(--border); color: var(--text); }
+    .inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); }
+    .input-pane { background: var(--surface); }
+    .input-pane label { display: block; font-size: .8rem; font-weight: 600; color: var(--muted); padding: .6rem 1rem .4rem; border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: .05em; }
+    textarea { width: 100%; height: 200px; background: var(--surface); border: none; color: var(--text); font-family: 'Fira Code', 'Cascadia Code', monospace; font-size: .88rem; padding: .75rem 1rem; resize: vertical; outline: none; line-height: 1.6; }
+    textarea::placeholder { color: var(--muted); }
+    .diff-container { flex: 1; overflow: auto; }
+    .diff-header { display: flex; align-items: center; justify-content: space-between; padding: .6rem 1rem; background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .diff-stats { font-size: .82rem; color: var(--muted); display: flex; gap: 1rem; }
+    .stat-add { color: var(--add); font-weight: 600; }
+    .stat-del { color: var(--del); font-weight: 600; }
+    /* Side-by-side */
+    .side-grid { display: grid; grid-template-columns: 1fr 1fr; min-width: 0; }
+    .side-pane { overflow-x: auto; }
+    .side-pane-header { font-size: .75rem; font-weight: 600; color: var(--muted); padding: .4rem 1rem; background: var(--surface2); border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: .05em; }
+    .side-pane-header.left { color: var(--del); }
+    .side-pane-header.right { color: var(--add); border-left: 1px solid var(--border); }
+    .side-pane.right { border-left: 1px solid var(--border); }
+    .diff-line { display: flex; min-height: 1.6rem; font-family: 'Fira Code', monospace; font-size: .85rem; line-height: 1.6; }
+    .diff-line.add { background: var(--add-bg); }
+    .diff-line.del { background: var(--del-bg); }
+    .diff-line.empty { background: var(--surface2); }
+    .line-no { width: 44px; flex-shrink: 0; text-align: right; padding: 0 .5rem; color: #3a4060; font-size: .75rem; user-select: none; border-right: 1px solid var(--border); background: var(--surface); line-height: 1.6rem; }
+    .line-mark { width: 20px; flex-shrink: 0; text-align: center; line-height: 1.6rem; font-size: .85rem; }
+    .line-mark.add { color: var(--add); }
+    .line-mark.del { color: var(--del); }
+    .line-content { flex: 1; padding: 0 .75rem; white-space: pre-wrap; word-break: break-all; line-height: 1.6rem; }
+    /* Word-level highlights */
+    .hl-add { background: var(--add-hl); border-radius: 2px; }
+    .hl-del { background: var(--del-hl); border-radius: 2px; }
+    /* Inline */
+    .inline-line { display: flex; min-height: 1.6rem; font-family: 'Fira Code', monospace; font-size: .85rem; }
+    .inline-line.add { background: var(--add-bg); }
+    .inline-line.del { background: var(--del-bg); }
+    .inline-line.eq { background: var(--eq-bg); }
+    /* Empty state */
+    .empty-state { text-align: center; padding: 3rem; color: var(--muted); font-size: .95rem; }
+    .identical { text-align: center; padding: 2.5rem; color: var(--add); font-size: 1rem; font-weight: 600; }
+    footer { text-align: center; padding: 1.5rem; color: var(--muted); font-size: .8rem; border-top: 1px solid var(--border); }
+    @media (max-width: 700px) {
+      .inputs { grid-template-columns: 1fr; }
+      .side-grid { grid-template-columns: 1fr; }
+      .side-pane.right { border-left: none; border-top: 1px solid var(--border); }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>⚡ Text Diff Viewer</h1>
+  <div class="controls">
+    <button class="ctrl-btn active" id="btnSide" onclick="setMode('side')">Side by Side</button>
+    <button class="ctrl-btn" id="btnInline" onclick="setMode('inline')">Inline</button>
+    <button class="ctrl-btn active" id="btnWord" onclick="toggleWord()">Word Diff</button>
+    <button class="ctrl-btn action" onclick="clearAll()">Clear</button>
+    <button class="ctrl-btn action" onclick="swap()">⇄ Swap</button>
+  </div>
+</header>
+
+<div class="inputs">
+  <div class="input-pane">
+    <label>Original</label>
+    <textarea id="left" placeholder="Paste original text here…" oninput="diff()"></textarea>
+  </div>
+  <div class="input-pane">
+    <label>Modified</label>
+    <textarea id="right" placeholder="Paste modified text here…" oninput="diff()"></textarea>
+  </div>
+</div>
+
+<div class="diff-header">
+  <div class="diff-stats" id="diffStats">—</div>
+</div>
+
+<div class="diff-container" id="diffContainer"></div>
+
+<footer>
+  DevNestio Text Diff Viewer · <a href="https://devnestio.pages.dev/" style="color:#f59e0b">More Tools</a>
+</footer>
+
+<script>
+let mode = 'side';
+let wordDiff = true;
+
+function setMode(m) {
+  mode = m;
+  document.getElementById('btnSide').classList.toggle('active', m === 'side');
+  document.getElementById('btnInline').classList.toggle('active', m === 'inline');
+  diff();
+}
+
+function toggleWord() {
+  wordDiff = !wordDiff;
+  document.getElementById('btnWord').classList.toggle('active', wordDiff);
+  diff();
+}
+
+function clearAll() {
+  document.getElementById('left').value = '';
+  document.getElementById('right').value = '';
+  diff();
+}
+
+function swap() {
+  const l = document.getElementById('left').value;
+  const r = document.getElementById('right').value;
+  document.getElementById('left').value = r;
+  document.getElementById('right').value = l;
+  diff();
+}
+
+// LCS-based diff on arrays — returns array of {type:'eq'|'ins'|'del', left, right}
+function myersDiff(a, b) {
+  const n = a.length, m = b.length;
+  // DP table for LCS lengths
+  const dp = [];
+  for (let i = 0; i <= n; i++) dp.push(new Array(m + 1).fill(0));
+  for (let i = 1; i <= n; i++) {
+    for (let j = 1; j <= m; j++) {
+      if (a[i-1] === b[j-1]) dp[i][j] = dp[i-1][j-1] + 1;
+      else dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
+    }
+  }
+  // Backtrack
+  const ops = [];
+  let i = n, j = m;
+  while (i > 0 || j > 0) {
+    if (i > 0 && j > 0 && a[i-1] === b[j-1]) {
+      ops.unshift({ type: 'eq', left: a[i-1], right: b[j-1] });
+      i--; j--;
+    } else if (j > 0 && (i === 0 || dp[i][j-1] >= dp[i-1][j])) {
+      ops.unshift({ type: 'ins', left: null, right: b[j-1] });
+      j--;
+    } else {
+      ops.unshift({ type: 'del', left: a[i-1], right: null });
+      i--;
+    }
+  }
+  return ops;
+}
+
+// Word-level diff between two strings — returns HTML for left and right
+function wordLevelDiff(leftLine, rightLine) {
+  const lw = leftLine.split(/(\s+)/);
+  const rw = rightLine.split(/(\s+)/);
+  const ops = myersDiff(lw, rw);
+  let lHtml = '', rHtml = '';
+  ops.forEach(op => {
+    if (op.type === 'eq') {
+      lHtml += esc(op.left);
+      rHtml += esc(op.right);
+    } else if (op.type === 'del') {
+      lHtml += `<span class="hl-del">${esc(op.left)}</span>`;
+    } else {
+      rHtml += `<span class="hl-add">${esc(op.right)}</span>`;
+    }
+  });
+  return { lHtml, rHtml };
+}
+
+function esc(s) {
+  if (s == null) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function diff() {
+  const left = document.getElementById('left').value;
+  const right = document.getElementById('right').value;
+  const container = document.getElementById('diffContainer');
+  const stats = document.getElementById('diffStats');
+
+  if (!left && !right) {
+    container.innerHTML = '<div class="empty-state">Paste text in both panels above to compare.</div>';
+    stats.innerHTML = '—';
+    return;
+  }
+
+  const leftLines = left.split('\n');
+  const rightLines = right.split('\n');
+  const ops = myersDiff(leftLines, rightLines);
+
+  let addCount = 0, delCount = 0;
+  ops.forEach(op => { if (op.type === 'ins') addCount++; else if (op.type === 'del') delCount++; });
+
+  if (addCount === 0 && delCount === 0) {
+    container.innerHTML = '<div class="identical">✓ Files are identical</div>';
+    stats.innerHTML = '<span>No differences found</span>';
+    return;
+  }
+
+  stats.innerHTML = `<span class="stat-add">+${addCount} added</span><span class="stat-del">−${delCount} deleted</span><span>${leftLines.length} → ${rightLines.length} lines</span>`;
+
+  if (mode === 'side') {
+    renderSide(ops, container);
+  } else {
+    renderInline(ops, container);
+  }
+}
+
+function renderSide(ops, container) {
+  let lLines = [], rLines = [];
+  ops.forEach(op => {
+    if (op.type === 'eq') { lLines.push({type:'eq',text:op.left}); rLines.push({type:'eq',text:op.right}); }
+    else if (op.type === 'del') { lLines.push({type:'del',text:op.left}); rLines.push({type:'empty',text:''}); }
+    else { lLines.push({type:'empty',text:''}); rLines.push({type:'ins',text:op.right}); }
+  });
+
+  // Pair consecutive del/ins for word diff
+  const paired = [];
+  for (let i = 0; i < ops.length; i++) {
+    paired.push(ops[i]);
+  }
+
+  // Re-pair: for word diff, find adjacent del+ins pairs
+  const leftHtmlLines = [], rightHtmlLines = [];
+  let li = 0, ri = 0;
+  for (let i = 0; i < ops.length; i++) {
+    const op = ops[i];
+    if (op.type === 'del' && i + 1 < ops.length && ops[i+1].type === 'ins' && wordDiff) {
+      const next = ops[i+1];
+      const { lHtml, rHtml } = wordLevelDiff(op.left, next.right);
+      leftHtmlLines.push({type:'del', html: lHtml, no: ++li});
+      rightHtmlLines.push({type:'ins', html: rHtml, no: ++ri});
+      i++;
+    } else if (op.type === 'eq') {
+      leftHtmlLines.push({type:'eq', html: esc(op.left), no: ++li});
+      rightHtmlLines.push({type:'eq', html: esc(op.right), no: ++ri});
+    } else if (op.type === 'del') {
+      leftHtmlLines.push({type:'del', html: esc(op.left), no: ++li});
+      rightHtmlLines.push({type:'empty', html: '', no: null});
+    } else {
+      leftHtmlLines.push({type:'empty', html: '', no: null});
+      rightHtmlLines.push({type:'ins', html: esc(op.right), no: ++ri});
+    }
+  }
+
+  const buildPane = (lines, mark) => lines.map(l => {
+    const cls = l.type === 'ins' ? 'add' : l.type === 'del' ? 'del' : l.type === 'empty' ? 'empty' : '';
+    const markChar = l.type === 'ins' ? '+' : l.type === 'del' ? '−' : ' ';
+    const markCls = l.type === 'ins' ? 'add' : l.type === 'del' ? 'del' : '';
+    return `<div class="diff-line${cls ? ' '+cls : ''}">
+      <span class="line-no">${l.no ?? ''}</span>
+      <span class="line-mark${markCls ? ' '+markCls : ''}">${cls && cls !== 'empty' ? markChar : ''}</span>
+      <span class="line-content">${l.html}</span>
+    </div>`;
+  }).join('');
+
+  container.innerHTML = `<div class="side-grid">
+    <div class="side-pane left">
+      <div class="side-pane-header left">Original</div>
+      ${buildPane(leftHtmlLines)}
+    </div>
+    <div class="side-pane right">
+      <div class="side-pane-header right">Modified</div>
+      ${buildPane(rightHtmlLines)}
+    </div>
+  </div>`;
+}
+
+function renderInline(ops, container) {
+  let lineNo = { l: 0, r: 0 };
+  let html = '';
+  ops.forEach(op => {
+    if (op.type === 'eq') {
+      lineNo.l++; lineNo.r++;
+      html += `<div class="inline-line eq">
+        <span class="line-no">${lineNo.l}</span>
+        <span class="line-no">${lineNo.r}</span>
+        <span class="line-mark"> </span>
+        <span class="line-content">${esc(op.left)}</span>
+      </div>`;
+    } else if (op.type === 'del') {
+      lineNo.l++;
+      html += `<div class="inline-line del">
+        <span class="line-no">${lineNo.l}</span>
+        <span class="line-no"></span>
+        <span class="line-mark del">−</span>
+        <span class="line-content">${esc(op.left)}</span>
+      </div>`;
+    } else {
+      lineNo.r++;
+      html += `<div class="inline-line add">
+        <span class="line-no"></span>
+        <span class="line-no">${lineNo.r}</span>
+        <span class="line-mark add">+</span>
+        <span class="line-content">${esc(op.right)}</span>
+      </div>`;
+    }
+  });
+  container.innerHTML = `<div style="font-family:monospace">${html}</div>`;
+}
+
+diff();
+</script>
+</body>
+</html>

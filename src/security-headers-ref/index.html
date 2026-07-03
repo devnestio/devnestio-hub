@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HTTP Security Headers Reference – devnestio</title>
+  <meta name="description" content="Complete reference for HTTP security response headers. Covers HSTS, Content-Security-Policy, X-Frame-Options, X-Content-Type-Options, Permissions-Policy, Referrer-Policy, and Cross-Origin headers with recommended values, risk levels, and copy-ready nginx/Express/Apache snippets." />
+  <link rel="canonical" href="https://devnestio.pages.dev/security-headers-ref/" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    header { background: #1a1d2e; border-bottom: 1px solid #2d3748; padding: 12px 20px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    header a { color: #7c85f3; text-decoration: none; font-size: 14px; }
+    header h1 { font-size: 18px; font-weight: 700; color: #fff; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+    .controls { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+    .search-box { flex: 1; min-width: 200px; background: #1a1d2e; border: 1px solid #2d3748; border-radius: 8px; padding: 9px 14px; color: #e2e8f0; font-size: 14px; outline: none; }
+    .search-box:focus { border-color: #7c85f3; }
+    .filter-btn { background: #1a1d2e; border: 1px solid #2d3748; border-radius: 6px; padding: 7px 12px; color: #a0aec0; font-size: 12px; cursor: pointer; }
+    .filter-btn.active { border-color: #7c85f3; color: #7c85f3; background: rgba(124,133,243,.1); }
+    .stats { font-size: 12px; color: #718096; margin-left: auto; }
+    .card { background: #1a1d2e; border: 1px solid #2d3748; border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
+    .card-name { font-size: 16px; font-weight: 700; color: #fff; font-family: 'Courier New', monospace; }
+    .badge-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+    .badge { font-size: 11px; padding: 3px 8px; border-radius: 20px; white-space: nowrap; }
+    .badge-critical { background: rgba(239,68,68,.15); color: #f87171; border: 1px solid rgba(239,68,68,.3); }
+    .badge-high     { background: rgba(251,146,60,.12); color: #fb923c; border: 1px solid rgba(251,146,60,.25); }
+    .badge-medium   { background: rgba(250,204,21,.1);  color: #fbbf24; border: 1px solid rgba(250,204,21,.2); }
+    .badge-low      { background: rgba(74,222,128,.1);  color: #4ade80; border: 1px solid rgba(74,222,128,.2); }
+    .badge-cat      { background: rgba(124,133,243,.12); color: #7c85f3; border: 1px solid rgba(124,133,243,.25); }
+    .card-desc { font-size: 14px; color: #a0aec0; line-height: 1.65; margin-bottom: 12px; }
+    .card-attacks { font-size: 12px; color: #718096; margin-bottom: 12px; }
+    .card-attacks strong { color: #e2e8f0; }
+    .rec-block { background: #0f1117; border: 1px solid #2d3748; border-left: 3px solid #7c85f3; border-radius: 0 6px 6px 0; padding: 10px 12px; margin-bottom: 10px; }
+    .rec-label { font-size: 10px; color: #7c85f3; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+    .rec-value { font-family: 'Courier New', monospace; font-size: 13px; color: #7ee787; word-break: break-all; }
+    .code-block { background: #0a0d1a; border: 1px solid #1e2435; border-radius: 6px; padding: 10px 12px; font-family: 'Courier New', monospace; font-size: 12px; color: #c3dafe; white-space: pre; overflow-x: auto; position: relative; }
+    .tabs { display: flex; gap: 4px; margin-bottom: 8px; }
+    .tab { background: #0f1117; border: 1px solid #2d3748; border-radius: 5px; padding: 4px 10px; font-size: 11px; color: #718096; cursor: pointer; }
+    .tab.active { border-color: #7c85f3; color: #7c85f3; background: rgba(124,133,243,.08); }
+    .copy-btn { position: absolute; top: 6px; right: 6px; background: #2d3748; border: none; border-radius: 4px; padding: 3px 8px; font-size: 11px; color: #a0aec0; cursor: pointer; }
+    .copy-btn:hover { background: #3d4a5c; }
+    .copy-btn.copied { background: #276749; color: #68d391; }
+    .notes-list { margin-top: 10px; padding-left: 16px; }
+    .notes-list li { font-size: 12px; color: #718096; line-height: 1.6; margin-bottom: 2px; }
+    .notes-list li strong { color: #a0aec0; }
+    .no-results { text-align: center; color: #718096; padding: 60px 0; }
+    details { margin-top: 10px; }
+    summary { font-size: 12px; color: #7c85f3; cursor: pointer; user-select: none; }
+    summary:hover { color: #a0aec0; }
+  </style>
+</head>
+<body>
+<header>
+  <a href="https://devnestio.pages.dev/">← devnestio</a>
+  <h1>HTTP Security Headers Reference</h1>
+</header>
+<div class="container">
+  <div class="controls">
+    <input class="search-box" id="search" placeholder="Search headers…" autocomplete="off" />
+    <button class="filter-btn active" data-f="All">All</button>
+    <button class="filter-btn" data-f="Critical">Critical</button>
+    <button class="filter-btn" data-f="High">High</button>
+    <button class="filter-btn" data-f="Medium">Medium</button>
+    <button class="filter-btn" data-f="Low">Low</button>
+    <span class="stats" id="stats"></span>
+  </div>
+  <div id="cards"></div>
+  <div class="no-results" id="noResults" style="display:none">No headers match your search.</div>
+</div>
+<script>
+const HEADERS = [
+  {
+    name: 'Strict-Transport-Security',
+    abbr: 'HSTS',
+    risk: 'Critical',
+    cat: 'Transport',
+    desc: 'Tells browsers to only connect to your site over HTTPS for a specified duration. Once received, the browser refuses HTTP connections for the site and all subdomains (with includeSubDomains). Prevents SSL-stripping attacks and protocol downgrade attacks.',
+    attacks: ['SSL stripping', 'Protocol downgrade', 'Man-in-the-middle (MitM)'],
+    recommended: 'max-age=31536000; includeSubDomains; preload',
+    notes: [
+      'Start with max-age=300, increase to 31536000 after confirming HTTPS is stable.',
+      '"preload" requires registration at hstspreload.org — browsers bundle your domain.',
+      '"includeSubDomains" applies to all subdomains; ensure they all serve HTTPS.',
+      'Only sent over HTTPS — ignored over HTTP connections.',
+    ],
+    snippets: {
+      express: `app.use((req, res, next) => {\n  res.setHeader('Strict-Transport-Security',\n    'max-age=31536000; includeSubDomains; preload');\n  next();\n});`,
+      nginx: `add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;`,
+      apache: `Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"`,
+    }
+  },
+  {
+    name: 'Content-Security-Policy',
+    abbr: 'CSP',
+    risk: 'Critical',
+    cat: 'Content',
+    desc: 'Defines which content sources are trusted for scripts, styles, images, frames, and other resources. Prevents Cross-Site Scripting (XSS) and data injection attacks by controlling what the browser is allowed to load.',
+    attacks: ['Cross-Site Scripting (XSS)', 'Data injection', 'Clickjacking (via frame-ancestors)', 'MIME sniffing'],
+    recommended: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; frame-ancestors 'none'",
+    notes: [
+      "Use 'nonce-{random}' or hashes instead of 'unsafe-inline' for scripts.",
+      "Use Content-Security-Policy-Report-Only to test without enforcing.",
+      '"frame-ancestors" replaces X-Frame-Options in modern browsers.',
+      'Start strict and loosen based on report-uri / report-to violations.',
+    ],
+    snippets: {
+      express: `app.use((req, res, next) => {\n  res.setHeader('Content-Security-Policy',\n    "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; frame-ancestors 'none'");\n  next();\n});`,
+      nginx: `add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; frame-ancestors 'none'" always;`,
+      apache: `Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; frame-ancestors 'none'"`,
+    }
+  },
+  {
+    name: 'X-Frame-Options',
+    abbr: 'XFO',
+    risk: 'High',
+    cat: 'Content',
+    desc: 'Controls whether a browser should allow a page to be displayed in a <frame>, <iframe>, <embed>, or <object>. Prevents clickjacking attacks. Superseded by CSP frame-ancestors but still needed for older browser support.',
+    attacks: ['Clickjacking', 'UI redressing'],
+    recommended: 'DENY',
+    notes: [
+      '"DENY" prevents all framing.',
+      '"SAMEORIGIN" allows framing only from the same origin.',
+      '"ALLOW-FROM uri" is deprecated and not supported by Chrome/Firefox.',
+      'Use CSP frame-ancestors for modern browsers (with XFO as fallback).',
+    ],
+    snippets: {
+      express: `app.use((req, res, next) => {\n  res.setHeader('X-Frame-Options', 'DENY');\n  next();\n});`,
+      nginx: `add_header X-Frame-Options "DENY" always;`,
+      apache: `Header always set X-Frame-Options "DENY"`,
+    }
+  },
+  {
+    name: 'X-Content-Type-Options',
+    abbr: 'XCTO',
+    risk: 'High',
+    cat: 'Content',
+    desc: 'Prevents browsers from MIME-sniffing a response away from the declared Content-Type. Without this header, a browser may interpret a text file as JavaScript if it appears to contain script. Only accepted value is "nosniff".',
+    attacks: ['MIME confusion attacks', 'Drive-by downloads', 'XSS via MIME sniffing'],
+    recommended: 'nosniff',
+    notes: [
+      '"nosniff" is the only valid value.',
+      'Ensures scripts and stylesheets are only loaded if they have correct MIME type.',
+      'Required for all resources, not just HTML pages.',
+      'Easy to add — no known compatibility issues.',
+    ],
+    snippets: {
+      express: `app.use((req, res, next) => {\n  res.setHeader('X-Content-Type-Options', 'nosniff');\n  next();\n});`,
+      nginx: `add_header X-Content-Type-Options "nosniff" always;`,
+      apache: `Header always set X-Content-Type-Options "nosniff"`,
+    }
+  },
+  {
+    name: 'Referrer-Policy',
+    abbr: 'RP',
+    risk: 'Medium',
+    cat: 'Privacy',
+    desc: 'Controls how much referrer information (from the Referer header) is included with requests. Prevents leaking URL parameters, session tokens, or paths to third parties when users navigate away from your site.',
+    attacks: ['Information leakage', 'Session token leakage in URLs'],
+    recommended: 'strict-origin-when-cross-origin',
+    notes: [
+      '"no-referrer" sends no referrer at all — safest for privacy.',
+      '"strict-origin-when-cross-origin" sends full URL for same-origin, only origin for cross-origin.',
+      '"no-referrer-when-downgrade" leaks referrer for HTTP→HTTPS (avoid).',
+      'Combine with HTTPS to prevent referrer from revealing sensitive URL parameters.',
+    ],
+    snippets: {
+      express: `app.use((req, res, next) => {\n  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');\n  next();\n});`,
+      nginx: `add_header Referrer-Policy "strict-origin-when-cross-origin" always;`,
+      apache: `Header always set Referrer-Policy "strict-origin-when-cross-origin"`,
+    }
+  },
+  {
+    name: 'Permissions-Policy',
+    abbr: 'PP',
+    risk: 'Medium',
+    cat: 'Browser Features',
+    desc: 'Restricts which browser features and APIs can be used in the document and embedded iframes. Replaces the deprecated Feature-Policy header. Controls access to camera, microphone, geolocation, payment, accelerometer, and dozens more APIs.',
+    attacks: ['Abuse of device APIs', 'Unauthorized resource access'],
+    recommended: 'camera=(), microphone=(), geolocation=(), payment=()',
+    notes: [
+      'Use empty parentheses "()" to completely disable a feature.',
+      '"self" allows the feature only on the page itself (not iframes).',
+      'Use "Permissions-Policy-Report-Only" to audit without blocking.',
+      'Replaces the deprecated "Feature-Policy" header.',
+    ],
+    snippets: {
+      express: `app.use((req, res, next) => {\n  res.setHeader('Permissions-Policy',\n    'camera=(), microphone=(), geolocation=(), payment=()');\n  next();\n});`,
+      nginx: `add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()" always;`,
+      apache: `Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"`,
+    }
+  },
+  {
+    name: 'Cross-Origin-Embedder-Policy',
+    abbr: 'COEP',
+    risk: 'Medium',
+    cat: 'Cross-Origin',
+    desc: 'Requires all cross-origin resources to explicitly opt in to being loaded (via CORS or CORP headers). Required alongside COOP to enable powerful cross-origin isolation features like SharedArrayBuffer and high-resolution timers.',
+    attacks: ['Spectre-style side-channel attacks', 'Cross-origin data leakage'],
+    recommended: 'require-corp',
+    notes: [
+      '"require-corp" blocks cross-origin resources that do not set CORP or CORS.',
+      '"credentialless" is a relaxed alternative: loads resources without credentials.',
+      'Must be paired with COOP: same-origin to enable cross-origin isolation.',
+      'Required for SharedArrayBuffer and performance.measureUserAgentSpecificMemory().',
+    ],
+    snippets: {
+      express: `app.use((req, res, next) => {\n  res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');\n  next();\n});`,
+      nginx: `add_header Cross-Origin-Embedder-Policy "require-corp" always;`,
+      apache: `Header always set Cross-Origin-Embedder-Policy "require-corp"`,
+    }
+  },
+  {
+    name: 'Cross-Origin-Opener-Policy',
+    abbr: 'COOP',
+    risk: 'Medium',
+    cat: 'Cross-Origin',
+    desc: 'Controls how documents opened from your site are connected in the browsing context group. Prevents cross-origin documents from accessing your window object, blocking XS-Leaks and Spectre-style attacks.',
+    attacks: ['XS-Leaks', 'Cross-window hijacking', 'Spectre-style side-channel'],
+    recommended: 'same-origin',
+    notes: [
+      '"same-origin" provides the strongest isolation.',
+      '"same-origin-allow-popups" allows window.open() to work across origins.',
+      'Required with COEP for cross-origin isolation (SharedArrayBuffer, etc.).',
+      '"unsafe-none" (default) applies no restrictions.',
+    ],
+    snippets: {
+      express: `app.use((req, res, next) => {\n  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');\n  next();\n});`,
+      nginx: `add_header Cross-Origin-Opener-Policy "same-origin" always;`,
+      apache: `Header always set Cross-Origin-Opener-Policy "same-origin"`,
+    }
+  },
+  {
+    name: 'Cross-Origin-Resource-Policy',
+    abbr: 'CORP',
+    risk: 'Medium',
+    cat: 'Cross-Origin',
+    desc: 'Prevents other origins from loading your resources (images, scripts, etc.) in their pages. Defends against Spectre-based attacks that can read cross-origin resources and side-channel attacks that observe timing.',
+    attacks: ['Cross-origin resource leakage', 'Spectre side-channel'],
+    recommended: 'same-origin',
+    notes: [
+      '"same-origin" blocks all cross-origin loads of this resource.',
+      '"same-site" allows subdomains to load the resource.',
+      '"cross-origin" explicitly allows cross-origin loads (opt-in).',
+      'Apply to API endpoints and sensitive resources — not to public CDN assets.',
+    ],
+    snippets: {
+      express: `app.use((req, res, next) => {\n  res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');\n  next();\n});`,
+      nginx: `add_header Cross-Origin-Resource-Policy "same-origin" always;`,
+      apache: `Header always set Cross-Origin-Resource-Policy "same-origin"`,
+    }
+  },
+  {
+    name: 'X-XSS-Protection',
+    abbr: 'XSS',
+    risk: 'Low',
+    cat: 'Content',
+    desc: 'Activates the built-in XSS filter in older browsers (IE, old Chrome, old Safari). Largely obsolete now that modern browsers have removed their XSS auditors and CSP is available. Can introduce new vulnerabilities — set to "0" to disable if CSP is in place.',
+    attacks: ['Reflected XSS (in legacy browsers)'],
+    recommended: '0',
+    notes: [
+      'Modern Chrome and Firefox have removed the XSS auditor entirely.',
+      '"1; mode=block" could introduce vulnerabilities by blocking page rendering.',
+      'Prefer CSP over X-XSS-Protection for XSS protection.',
+      'Set to "0" if you have a strong CSP to avoid legacy browser issues.',
+    ],
+    snippets: {
+      express: `app.use((req, res, next) => {\n  res.setHeader('X-XSS-Protection', '0'); // disabled in favor of CSP\n  next();\n});`,
+      nginx: `add_header X-XSS-Protection "0" always; # Use CSP instead`,
+      apache: `Header always set X-XSS-Protection "0" # Use CSP instead`,
+    }
+  },
+  {
+    name: 'Cache-Control',
+    abbr: 'CC',
+    risk: 'Low',
+    cat: 'Privacy',
+    desc: 'For authenticated or sensitive responses, setting Cache-Control prevents shared caches (CDNs, proxy servers) from storing private data. "no-store" is the most aggressive — prevents caching at all levels.',
+    attacks: ['Cache poisoning', 'Sensitive data exposure via shared caches'],
+    recommended: 'no-store, private',
+    notes: [
+      'For public static assets, caching is fine and expected.',
+      '"private" restricts to the user\'s browser only (no CDN/proxy caching).',
+      '"no-store" prevents all storage, including in browser history.',
+      'Apply to: account pages, API responses with personal data, session endpoints.',
+    ],
+    snippets: {
+      express: `// For authenticated routes:\napp.use('/api/secure', (req, res, next) => {\n  res.setHeader('Cache-Control', 'no-store, private');\n  next();\n});`,
+      nginx: `# In location block for authenticated routes:\nadd_header Cache-Control "no-store, private" always;`,
+      apache: `# In Directory or Location block:\nHeader always set Cache-Control "no-store, private"`,
+    }
+  },
+];
+
+const RISK_ORDER = { Critical: 0, High: 1, Medium: 2, Low: 3 };
+const SORTED = [...HEADERS].sort((a, b) => RISK_ORDER[a.risk] - RISK_ORDER[b.risk]);
+
+let activeFilter = 'All';
+let searchVal = '';
+let activeTabs = {};
+
+function copyText(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+  });
+}
+
+function renderCard(h) {
+  const tab = activeTabs[h.name] || 'express';
+  const snippet = h.snippets[tab] || '';
+  return `
+    <div class="card" id="card-${h.name.replace(/[^a-z0-9]/gi,'_')}">
+      <div class="card-header">
+        <div>
+          <span class="card-name">${h.name}</span>
+          ${h.abbr ? ` <span style="font-size:12px;color:#718096;margin-left:6px">(${h.abbr})</span>` : ''}
+        </div>
+        <div class="badge-row">
+          <span class="badge badge-${h.risk.toLowerCase()}">${h.risk}</span>
+          <span class="badge badge-cat">${h.cat}</span>
+        </div>
+      </div>
+      <div class="card-desc">${h.desc}</div>
+      <div class="card-attacks">
+        <strong>Mitigates:</strong> ${h.attacks.join(' · ')}
+      </div>
+      <div class="rec-block">
+        <div class="rec-label">Recommended Value</div>
+        <div class="rec-value">${h.recommended}</div>
+      </div>
+      <div class="tabs" id="tabs-${h.name}">
+        <button class="tab${tab==='express'?' active':''}" data-name="${h.name}" data-t="express">Express</button>
+        <button class="tab${tab==='nginx'?' active':''}" data-name="${h.name}" data-t="nginx">nginx</button>
+        <button class="tab${tab==='apache'?' active':''}" data-name="${h.name}" data-t="apache">Apache</button>
+      </div>
+      <div style="position:relative">
+        <div class="code-block" id="snip-${h.name}">${snippet.replace(/</g,'&lt;')}</div>
+        <button class="copy-btn" onclick="copyText(${JSON.stringify(snippet)}, this)">Copy</button>
+      </div>
+      <details>
+        <summary>Implementation Notes</summary>
+        <ul class="notes-list">
+          ${h.notes.map(n => `<li>${n}</li>`).join('')}
+        </ul>
+      </details>
+    </div>`;
+}
+
+function render() {
+  const q = searchVal.toLowerCase();
+  const filtered = SORTED.filter(h => {
+    const riskOk = activeFilter === 'All' || h.risk === activeFilter;
+    const searchOk = !q || h.name.toLowerCase().includes(q) || h.abbr.toLowerCase().includes(q) || h.desc.toLowerCase().includes(q) || h.cat.toLowerCase().includes(q);
+    return riskOk && searchOk;
+  });
+  document.getElementById('stats').textContent = `${filtered.length} / ${HEADERS.length} headers`;
+  const container = document.getElementById('cards');
+  if (!filtered.length) { container.innerHTML = ''; document.getElementById('noResults').style.display = ''; return; }
+  document.getElementById('noResults').style.display = 'none';
+  container.innerHTML = filtered.map(renderCard).join('');
+  container.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const name = btn.dataset.name;
+      activeTabs[name] = btn.dataset.t;
+      const h = HEADERS.find(x => x.name === name);
+      document.getElementById('snip-' + name).innerHTML = (h.snippets[btn.dataset.t] || '').replace(/</g,'&lt;');
+      btn.closest('.tabs').querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+}
+
+document.getElementById('search').addEventListener('input', e => { searchVal = e.target.value; render(); });
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    activeFilter = btn.dataset.f;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  });
+});
+
+render();
+</script>
+</body>
+</html>

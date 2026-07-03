@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Git Cheat Sheet — devnestio</title>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#0f1117;color:#e2e8f0;min-height:100vh}
+header{padding:24px 32px;border-bottom:1px solid #1e2535}
+h1{font-size:1.5rem;font-weight:700;color:#f8fafc}
+h1 span{color:#f97316}
+.desc{color:#94a3b8;margin-top:4px;font-size:.9rem}
+.controls{display:flex;gap:12px;flex-wrap:wrap;padding:16px 32px;border-bottom:1px solid #1e2535;align-items:center}
+.search-wrap{position:relative;flex:1;min-width:200px}
+.search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#64748b}
+#search{width:100%;background:#1e2535;border:1px solid #334155;color:#e2e8f0;padding:8px 12px 8px 34px;border-radius:6px;font-size:.9rem;outline:none}
+#search:focus{border-color:#f97316}
+.cat-filters{display:flex;gap:8px;flex-wrap:wrap}
+.cat-btn{padding:5px 12px;border-radius:99px;border:1px solid #334155;background:#1e2535;color:#94a3b8;font-size:.8rem;cursor:pointer}
+.cat-btn.active,.cat-btn:hover{background:#ea580c;border-color:#ea580c;color:#fff}
+.content{max-width:1000px;margin:0 auto;padding:24px 32px}
+.section{margin-bottom:28px}
+.section-title{font-size:.95rem;font-weight:700;color:#f97316;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #1e2535}
+.cmd-row{display:grid;grid-template-columns:260px 1fr;gap:0;background:#141924;border:1px solid #1e2535;border-radius:8px;margin-bottom:6px;overflow:hidden}
+.cmd-row:hover{border-color:#334155}
+@media(max-width:640px){.cmd-row{grid-template-columns:1fr}}
+.cmd-cell{padding:10px 14px;border-right:1px solid #1e2535;display:flex;align-items:center}
+.cmd-code{font-family:monospace;font-size:.83rem;color:#fdba74;cursor:pointer;word-break:break-all}
+.cmd-code:hover{color:#fb923c;text-decoration:underline}
+.cmd-desc{padding:10px 14px;font-size:.83rem;color:#94a3b8;line-height:1.5;display:flex;align-items:center}
+.danger{border-left:3px solid #dc2626}
+.no-results{text-align:center;color:#64748b;padding:48px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#f97316;color:#fff;padding:8px 18px;border-radius:6px;font-size:.85rem;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none;z-index:999}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<header>
+  <h1>Git <span>Cheat Sheet</span></h1>
+  <p class="desc">Essential Git commands — setup, branching, merging, rebasing, stashing, and more. Click any command to copy.</p>
+</header>
+<div class="controls">
+  <div class="search-wrap">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="search" placeholder="Search commands…">
+  </div>
+  <div class="cat-filters" id="cats"></div>
+</div>
+<div class="content" id="content"></div>
+<div class="toast" id="toast">Copied!</div>
+<script>
+const CMDS = [
+  // Setup
+  {cat:'Setup',cmd:'git config --global user.name "Name"',desc:'Set global username for commits'},
+  {cat:'Setup',cmd:'git config --global user.email "you@example.com"',desc:'Set global email for commits'},
+  {cat:'Setup',cmd:'git config --global core.editor "code --wait"',desc:'Set VS Code as default editor'},
+  {cat:'Setup',cmd:'git config --list',desc:'Show all git configuration settings'},
+  {cat:'Setup',cmd:'git config --global alias.st status',desc:'Create an alias (e.g., git st = git status)'},
+  // Init & Clone
+  {cat:'Init & Clone',cmd:'git init',desc:'Initialize a new local repository'},
+  {cat:'Init & Clone',cmd:'git init --bare',desc:'Initialize a bare repository (for remotes)'},
+  {cat:'Init & Clone',cmd:'git clone <url>',desc:'Clone a remote repository'},
+  {cat:'Init & Clone',cmd:'git clone <url> <dir>',desc:'Clone into a specific directory'},
+  {cat:'Init & Clone',cmd:'git clone --depth 1 <url>',desc:'Shallow clone — only latest commit (faster)'},
+  // Staging
+  {cat:'Staging',cmd:'git status',desc:'Show working tree status (modified, staged, untracked)'},
+  {cat:'Staging',cmd:'git add <file>',desc:'Stage a specific file'},
+  {cat:'Staging',cmd:'git add .',desc:'Stage all changes in current directory'},
+  {cat:'Staging',cmd:'git add -p',desc:'Interactively stage changes hunk by hunk'},
+  {cat:'Staging',cmd:'git reset HEAD <file>',desc:'Unstage a file (keep changes in working tree)'},
+  {cat:'Staging',cmd:'git diff',desc:'Show unstaged changes'},
+  {cat:'Staging',cmd:'git diff --staged',desc:'Show staged changes (about to be committed)'},
+  // Committing
+  {cat:'Committing',cmd:'git commit -m "message"',desc:'Commit staged changes with a message'},
+  {cat:'Committing',cmd:'git commit -am "message"',desc:'Stage tracked files and commit in one step'},
+  {cat:'Committing',cmd:'git commit --amend',desc:'Modify the last commit (message or content). Only for local commits!',danger:true},
+  {cat:'Committing',cmd:'git commit --amend --no-edit',desc:'Amend last commit without changing message. Only for local commits!',danger:true},
+  {cat:'Committing',cmd:'git log --oneline',desc:'Show commit history (one line each)'},
+  {cat:'Committing',cmd:'git log --oneline --graph --all',desc:'Show branch graph for all branches'},
+  {cat:'Committing',cmd:'git show <commit>',desc:'Show commit diff and metadata'},
+  // Branching
+  {cat:'Branching',cmd:'git branch',desc:'List local branches'},
+  {cat:'Branching',cmd:'git branch -a',desc:'List all branches (local and remote)'},
+  {cat:'Branching',cmd:'git branch <name>',desc:'Create a new branch'},
+  {cat:'Branching',cmd:'git checkout <branch>',desc:'Switch to a branch'},
+  {cat:'Branching',cmd:'git checkout -b <name>',desc:'Create and switch to a new branch'},
+  {cat:'Branching',cmd:'git switch <branch>',desc:'Switch branches (modern syntax)'},
+  {cat:'Branching',cmd:'git switch -c <name>',desc:'Create and switch to a new branch (modern syntax)'},
+  {cat:'Branching',cmd:'git branch -d <name>',desc:'Delete a merged branch'},
+  {cat:'Branching',cmd:'git branch -D <name>',desc:'Force delete a branch (even if not merged)',danger:true},
+  {cat:'Branching',cmd:'git branch -m <old> <new>',desc:'Rename a branch'},
+  // Merging & Rebasing
+  {cat:'Merge & Rebase',cmd:'git merge <branch>',desc:'Merge branch into current branch'},
+  {cat:'Merge & Rebase',cmd:'git merge --no-ff <branch>',desc:'Merge with a merge commit (no fast-forward)'},
+  {cat:'Merge & Rebase',cmd:'git merge --abort',desc:'Abort an in-progress merge'},
+  {cat:'Merge & Rebase',cmd:'git rebase <branch>',desc:'Rebase current branch onto another'},
+  {cat:'Merge & Rebase',cmd:'git rebase -i HEAD~3',desc:'Interactive rebase last 3 commits (squash, edit, etc.)'},
+  {cat:'Merge & Rebase',cmd:'git rebase --abort',desc:'Abort an in-progress rebase'},
+  {cat:'Merge & Rebase',cmd:'git rebase --continue',desc:'Continue after resolving rebase conflicts'},
+  {cat:'Merge & Rebase',cmd:'git cherry-pick <commit>',desc:'Apply a specific commit to current branch'},
+  // Remote
+  {cat:'Remote',cmd:'git remote -v',desc:'Show remote repositories'},
+  {cat:'Remote',cmd:'git remote add origin <url>',desc:'Add a remote named origin'},
+  {cat:'Remote',cmd:'git remote set-url origin <url>',desc:'Change remote URL'},
+  {cat:'Remote',cmd:'git fetch',desc:'Download changes without merging'},
+  {cat:'Remote',cmd:'git fetch --prune',desc:'Fetch and remove deleted remote branches'},
+  {cat:'Remote',cmd:'git pull',desc:'Fetch and merge (git fetch + git merge)'},
+  {cat:'Remote',cmd:'git pull --rebase',desc:'Fetch and rebase instead of merge'},
+  {cat:'Remote',cmd:'git push origin <branch>',desc:'Push branch to remote'},
+  {cat:'Remote',cmd:'git push -u origin <branch>',desc:'Push and set upstream tracking'},
+  {cat:'Remote',cmd:'git push --force-with-lease',desc:'Safer force push (fails if remote has new commits)',danger:true},
+  // Stashing
+  {cat:'Stash',cmd:'git stash',desc:'Stash uncommitted changes'},
+  {cat:'Stash',cmd:'git stash push -m "description"',desc:'Stash with a descriptive name'},
+  {cat:'Stash',cmd:'git stash list',desc:'List all stashes'},
+  {cat:'Stash',cmd:'git stash pop',desc:'Apply most recent stash and remove it'},
+  {cat:'Stash',cmd:'git stash apply stash@{2}',desc:'Apply a specific stash without removing it'},
+  {cat:'Stash',cmd:'git stash drop stash@{0}',desc:'Delete a specific stash'},
+  {cat:'Stash',cmd:'git stash clear',desc:'Delete all stashes',danger:true},
+  // Undoing
+  {cat:'Undoing',cmd:'git checkout -- <file>',desc:'Discard changes to a file in working tree',danger:true},
+  {cat:'Undoing',cmd:'git restore <file>',desc:'Discard changes to a file (modern syntax)',danger:true},
+  {cat:'Undoing',cmd:'git revert <commit>',desc:'Create a new commit that undoes a past commit (safe)'},
+  {cat:'Undoing',cmd:'git reset --soft HEAD~1',desc:'Undo last commit, keep changes staged'},
+  {cat:'Undoing',cmd:'git reset --mixed HEAD~1',desc:'Undo last commit, keep changes unstaged'},
+  {cat:'Undoing',cmd:'git reset --hard HEAD~1',desc:'Undo last commit, discard all changes',danger:true},
+  {cat:'Undoing',cmd:'git clean -fd',desc:'Remove untracked files and directories',danger:true},
+  // Tags
+  {cat:'Tags',cmd:'git tag',desc:'List all tags'},
+  {cat:'Tags',cmd:'git tag v1.0.0',desc:'Create a lightweight tag'},
+  {cat:'Tags',cmd:'git tag -a v1.0.0 -m "Release 1.0.0"',desc:'Create an annotated tag with message'},
+  {cat:'Tags',cmd:'git push origin v1.0.0',desc:'Push a specific tag to remote'},
+  {cat:'Tags',cmd:'git push origin --tags',desc:'Push all tags to remote'},
+  {cat:'Tags',cmd:'git tag -d v1.0.0',desc:'Delete a local tag'},
+];
+
+const CATS=['All',...new Set(CMDS.map(c=>c.cat))];
+let activeCat='All', query='';
+let toastTimer;
+
+function showToast(){
+  const t=document.getElementById('toast');
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),1400);
+}
+function cp(text){navigator.clipboard.writeText(text);showToast();}
+
+function render(){
+  const visible=CMDS.filter(c=>{
+    const mc=activeCat==='All'||c.cat===activeCat;
+    const mq=!query||c.cmd.toLowerCase().includes(query)||c.desc.toLowerCase().includes(query)||c.cat.toLowerCase().includes(query);
+    return mc&&mq;
+  });
+  const el=document.getElementById('content');
+  if(!visible.length){el.innerHTML='<div class="no-results">No results</div>';return;}
+  const byCat={};
+  visible.forEach(c=>{(byCat[c.cat]=byCat[c.cat]||[]).push(c);});
+  el.innerHTML=Object.entries(byCat).map(([cat,items])=>`
+    <div class="section">
+      <div class="section-title">${cat}</div>
+      ${items.map(c=>`
+        <div class="cmd-row${c.danger?' danger':''}">
+          <div class="cmd-cell"><span class="cmd-code" onclick="cp(${JSON.stringify(c.cmd)})" title="Click to copy">${escHtml(c.cmd)}</span></div>
+          <div class="cmd-desc">${c.desc}</div>
+        </div>`).join('')}
+    </div>`).join('');
+}
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+document.getElementById('cats').innerHTML=CATS.map(c=>`
+  <button class="cat-btn${c==='All'?' active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
+function setCat(c){
+  activeCat=c;
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.toggle('active',b.textContent===c));
+  render();
+}
+document.getElementById('search').addEventListener('input',e=>{query=e.target.value.toLowerCase();render();});
+render();
+</script>
+</body>
+</html>

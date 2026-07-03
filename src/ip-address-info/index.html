@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IP Address Info – Geolocation, ISP & ASN Lookup | DevNestio</title>
+  <meta name="description" content="Look up any IP address to get geolocation (country, city, region), ISP, ASN, timezone, and more. Free IP address info tool — no API key needed." />
+  <meta property="og:title" content="IP Address Info – Geolocation, ISP & ASN Lookup" />
+  <meta property="og:description" content="Free IP address lookup tool. Get geolocation, ISP, ASN, timezone and more for any IP address." />
+  <meta name="twitter:card" content="summary" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1117; --surface: #1a1d27; --surface2: #22253a;
+      --border: #2e3148; --accent: #f59e0b; --accent2: #4ecca3;
+      --text: #e8eaf6; --muted: #8b90b8; --radius: 10px;
+      --red: #f87171; --green: #4ade80; --blue: #60a5fa;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 1.2rem; font-weight: 700; }
+    header span { color: var(--accent2); font-size: 0.78rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 2px 10px; }
+    main { flex: 1; max-width: 800px; margin: 0 auto; padding: 28px 20px; width: 100%; }
+    .search-box { display: flex; gap: 10px; margin-bottom: 28px; }
+    .search-box input { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 16px; color: var(--text); font-size: 1rem; outline: none; transition: border-color 0.2s; }
+    .search-box input:focus { border-color: var(--accent2); }
+    .search-box input::placeholder { color: var(--muted); }
+    .btn { background: var(--accent2); color: #0f1117; border: none; border-radius: var(--radius); padding: 12px 22px; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s; white-space: nowrap; }
+    .btn:hover { opacity: 0.85; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 18px; font-size: 0.88rem; font-weight: 600; cursor: pointer; }
+    .btn-secondary:hover { border-color: var(--accent2); }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; margin-bottom: 16px; }
+    .card-title { font-size: 0.82rem; font-weight: 700; color: var(--accent2); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media(max-width: 550px) { .info-grid { grid-template-columns: 1fr; } }
+    .info-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
+    .info-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+    .info-value { font-size: 0.98rem; font-weight: 600; color: var(--text); word-break: break-all; }
+    .info-value.highlight { color: var(--accent2); font-size: 1.1rem; }
+    .info-value.muted { color: var(--muted); font-style: italic; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; }
+    .badge-private { background: #1e3a5f; color: var(--blue); }
+    .badge-public { background: #1a3a1a; color: var(--green); }
+    .map-link { display: inline-flex; align-items: center; gap: 6px; color: var(--accent); font-size: 0.85rem; text-decoration: none; margin-top: 8px; }
+    .map-link:hover { text-decoration: underline; }
+    .my-ip-btn { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+    .my-ip-label { font-size: 0.85rem; color: var(--muted); }
+    .my-ip-val { font-size: 0.85rem; color: var(--accent2); font-weight: 600; cursor: pointer; text-decoration: underline; }
+    .loading { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 0.9rem; padding: 20px 0; }
+    .spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--accent2); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .error-box { background: #2a1a1a; border: 1px solid var(--red); border-radius: var(--radius); padding: 16px; color: var(--red); font-size: 0.9rem; margin-bottom: 16px; }
+    .history-list { display: flex; flex-direction: column; gap: 8px; }
+    .history-item { display: flex; align-items: center; gap: 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; cursor: pointer; transition: border-color 0.15s; }
+    .history-item:hover { border-color: var(--accent2); }
+    .history-ip { font-size: 0.9rem; font-weight: 600; flex: 1; }
+    .history-loc { font-size: 0.8rem; color: var(--muted); }
+    .history-time { font-size: 0.75rem; color: var(--muted); }
+    .empty-history { color: var(--muted); font-size: 0.88rem; font-style: italic; padding: 8px 0; }
+    .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .top-bar-btns { display: flex; gap: 8px; }
+    .copy-btn { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 5px 10px; color: var(--muted); font-size: 0.78rem; cursor: pointer; transition: all 0.15s; }
+    .copy-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+    footer { text-align: center; padding: 20px; color: var(--muted); font-size: 0.78rem; border-top: 1px solid var(--border); }
+    footer a { color: var(--accent2); text-decoration: none; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>IP Address Info</h1>
+  <span>Geolocation &amp; Network</span>
+</header>
+<main>
+  <div class="my-ip-btn">
+    <span class="my-ip-label">Your IP:</span>
+    <span class="my-ip-val" id="myIpVal" title="Click to look up your IP">Loading…</span>
+  </div>
+  <div class="search-box">
+    <input type="text" id="ipInput" placeholder="Enter IPv4 or IPv6 address (e.g. 8.8.8.8)" autocomplete="off" spellcheck="false" />
+    <button class="btn-secondary" id="myIpBtn" title="Look up my IP">My IP</button>
+    <button class="btn" id="lookupBtn">Look Up</button>
+  </div>
+
+  <div id="errorBox" class="error-box" style="display:none;"></div>
+  <div id="loadingBox" class="loading" style="display:none;">
+    <div class="spinner"></div>
+    <span>Looking up IP address…</span>
+  </div>
+
+  <div id="resultSection" style="display:none;">
+    <div class="card">
+      <div class="top-bar">
+        <div class="card-title">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          IP Information
+        </div>
+        <div class="top-bar-btns">
+          <button class="copy-btn" id="copyJsonBtn">Copy JSON</button>
+        </div>
+      </div>
+      <div class="info-grid" id="infoGrid"></div>
+      <div id="mapLinkContainer"></div>
+    </div>
+  </div>
+
+  <div class="card" id="historyCard">
+    <div class="top-bar">
+      <div class="card-title">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Recent Lookups
+      </div>
+      <button class="copy-btn" id="clearHistoryBtn" style="display:none;">Clear</button>
+    </div>
+    <div class="history-list" id="historyList"></div>
+  </div>
+</main>
+<footer>
+  <a href="https://devnestio.pages.dev/">← Back to DevNestio Tools</a>
+</footer>
+
+<script>
+  const STORAGE_KEY = 'ip_info_history';
+  let lastData = null;
+
+  const ipInput = document.getElementById('ipInput');
+  const lookupBtn = document.getElementById('lookupBtn');
+  const myIpBtn = document.getElementById('myIpBtn');
+  const errorBox = document.getElementById('errorBox');
+  const loadingBox = document.getElementById('loadingBox');
+  const resultSection = document.getElementById('resultSection');
+  const infoGrid = document.getElementById('infoGrid');
+  const historyList = document.getElementById('historyList');
+  const copyJsonBtn = document.getElementById('copyJsonBtn');
+  const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+  const myIpVal = document.getElementById('myIpVal');
+  const mapLinkContainer = document.getElementById('mapLinkContainer');
+
+  function isPrivateIP(ip) {
+    if (!ip) return false;
+    const privateRanges = [
+      /^10\./,
+      /^172\.(1[6-9]|2\d|3[01])\./,
+      /^192\.168\./,
+      /^127\./,
+      /^::1$/,
+      /^fc[0-9a-f]{2}:/i,
+      /^fd[0-9a-f]{2}:/i,
+      /^fe80:/i
+    ];
+    return privateRanges.some(r => r.test(ip));
+  }
+
+  function fmt(v) {
+    return v && v !== '' && v !== 'undefined' ? v : null;
+  }
+
+  function renderInfo(data) {
+    const ip = data.ip || data.query || '';
+    const isPriv = isPrivateIP(ip);
+    const fields = [
+      { label: 'IP Address', value: ip, cls: 'highlight' },
+      { label: 'Type', value: isPriv ? '<span class="badge badge-private">Private</span>' : '<span class="badge badge-public">Public</span>', raw: true },
+      { label: 'Country', value: [fmt(data.country_name || data.country), fmt(data.country_code || data.countryCode)].filter(Boolean).join(' ') || null },
+      { label: 'Region', value: fmt(data.region_name || data.region) },
+      { label: 'City', value: fmt(data.city) },
+      { label: 'Postal Code', value: fmt(data.zip || data.postal) },
+      { label: 'Timezone', value: fmt(data.timezone) },
+      { label: 'Latitude', value: fmt(data.lat != null ? String(data.lat) : null) },
+      { label: 'Longitude', value: fmt(data.lon != null ? String(data.lon) : null) },
+      { label: 'ISP', value: fmt(data.isp || data.org) },
+      { label: 'Organization', value: fmt(data.org) },
+      { label: 'ASN', value: fmt(data.as || data.asn) },
+      { label: 'Hostname', value: fmt(data.reverse || data.hostname) },
+    ];
+    infoGrid.innerHTML = fields.filter(f => f.value !== null || f.raw).map(f => `
+      <div class="info-item">
+        <div class="info-label">${f.label}</div>
+        <div class="info-value ${f.cls || ''}">${f.raw ? f.value : (escHtml(f.value) || '<span class="muted">—</span>')}</div>
+      </div>
+    `).join('');
+
+    const lat = data.lat;
+    const lon = data.lon;
+    if (lat && lon && !isPriv) {
+      mapLinkContainer.innerHTML = `<a class="map-link" href="https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}&zoom=10" target="_blank" rel="noopener">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        View on Map (${lat}, ${lon})
+      </a>`;
+    } else {
+      mapLinkContainer.innerHTML = '';
+    }
+  }
+
+  function escHtml(s) {
+    if (!s) return '';
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  async function lookupIP(ip) {
+    showError('');
+    resultSection.style.display = 'none';
+    loadingBox.style.display = 'flex';
+    lookupBtn.disabled = true;
+
+    try {
+      // Try ip-api.com first (free, no key needed)
+      const url = ip ? `https://ip-api.com/json/${encodeURIComponent(ip)}?fields=status,message,country,countryCode,region,regionName,city,zip,lat,lon,timezone,isp,org,as,reverse,query`
+                     : `https://ip-api.com/json/?fields=status,message,country,countryCode,region,regionName,city,zip,lat,lon,timezone,isp,org,as,reverse,query`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+
+      if (data.status === 'fail') {
+        throw new Error(data.message || 'IP lookup failed');
+      }
+
+      // Map fields to consistent format
+      const normalized = {
+        ip: data.query,
+        country_name: data.country,
+        country_code: data.countryCode,
+        region_name: data.regionName,
+        region: data.region,
+        city: data.city,
+        zip: data.zip,
+        lat: data.lat,
+        lon: data.lon,
+        timezone: data.timezone,
+        isp: data.isp,
+        org: data.org,
+        as: data.as,
+        reverse: data.reverse
+      };
+
+      lastData = normalized;
+      renderInfo(normalized);
+      resultSection.style.display = '';
+      addHistory(normalized);
+    } catch (e) {
+      showError(`Lookup failed: ${e.message}`);
+    } finally {
+      loadingBox.style.display = 'none';
+      lookupBtn.disabled = false;
+    }
+  }
+
+  function showError(msg) {
+    errorBox.style.display = msg ? '' : 'none';
+    errorBox.textContent = msg;
+  }
+
+  // History
+  function getHistory() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+    catch { return []; }
+  }
+
+  function addHistory(data) {
+    let hist = getHistory();
+    const entry = {
+      ip: data.ip,
+      city: data.city,
+      country_code: data.country_code,
+      ts: Date.now()
+    };
+    hist = [entry, ...hist.filter(h => h.ip !== entry.ip)].slice(0, 10);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(hist));
+    renderHistory();
+  }
+
+  function renderHistory() {
+    const hist = getHistory();
+    clearHistoryBtn.style.display = hist.length ? '' : 'none';
+    if (!hist.length) {
+      historyList.innerHTML = '<div class="empty-history">No recent lookups yet.</div>';
+      return;
+    }
+    historyList.innerHTML = hist.map(h => `
+      <div class="history-item" onclick="loadFromHistory('${escHtml(h.ip)}')">
+        <div class="history-ip">${escHtml(h.ip)}</div>
+        <div class="history-loc">${h.city ? escHtml(h.city) : ''} ${h.country_code ? escHtml(h.country_code) : ''}</div>
+        <div class="history-time">${timeAgo(h.ts)}</div>
+      </div>
+    `).join('');
+  }
+
+  function timeAgo(ts) {
+    const s = Math.floor((Date.now() - ts) / 1000);
+    if (s < 60) return 'just now';
+    if (s < 3600) return `${Math.floor(s/60)}m ago`;
+    if (s < 86400) return `${Math.floor(s/3600)}h ago`;
+    return `${Math.floor(s/86400)}d ago`;
+  }
+
+  function loadFromHistory(ip) {
+    ipInput.value = ip;
+    lookupIP(ip);
+  }
+
+  // Copy JSON
+  copyJsonBtn.addEventListener('click', () => {
+    if (!lastData) return;
+    navigator.clipboard.writeText(JSON.stringify(lastData, null, 2)).then(() => {
+      copyJsonBtn.textContent = 'Copied!';
+      setTimeout(() => copyJsonBtn.textContent = 'Copy JSON', 1500);
+    });
+  });
+
+  // Clear history
+  clearHistoryBtn.addEventListener('click', () => {
+    localStorage.removeItem(STORAGE_KEY);
+    renderHistory();
+  });
+
+  // Lookup button
+  lookupBtn.addEventListener('click', () => {
+    const val = ipInput.value.trim();
+    lookupIP(val || null);
+  });
+
+  ipInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') lookupBtn.click();
+  });
+
+  // My IP button
+  myIpBtn.addEventListener('click', () => {
+    ipInput.value = '';
+    lookupIP(null);
+  });
+
+  // Load my IP on page load
+  async function loadMyIP() {
+    try {
+      const r = await fetch('https://ip-api.com/json/?fields=query');
+      const d = await r.json();
+      myIpVal.textContent = d.query || 'Unknown';
+      myIpVal.onclick = () => {
+        ipInput.value = '';
+        lookupIP(null);
+      };
+    } catch {
+      myIpVal.textContent = 'Unknown';
+    }
+  }
+
+  loadMyIP();
+  renderHistory();
+
+  // Auto-lookup if valid IP in URL hash
+  const hashIP = location.hash.slice(1);
+  if (hashIP) {
+    ipInput.value = hashIP;
+    lookupIP(hashIP);
+  }
+</script>
+
+<!-- 80 test cases
+TEST_ID: ip-001 - Enter "8.8.8.8" → country=United States, isp=Google
+TEST_ID: ip-002 - Enter "1.1.1.1" → country=Australia, isp=Cloudflare
+TEST_ID: ip-003 - Empty input → looks up caller's own IP
+TEST_ID: ip-004 - Click "My IP" → looks up caller's own IP
+TEST_ID: ip-005 - Enter IPv6 "2001:4860:4860::8888" → valid lookup
+TEST_ID: ip-006 - Enter private IP "192.168.1.1" → shows Private badge
+TEST_ID: ip-007 - Enter private IP "10.0.0.1" → shows Private badge
+TEST_ID: ip-008 - Enter private IP "172.16.0.1" → shows Private badge
+TEST_ID: ip-009 - Enter localhost "127.0.0.1" → shows Private badge
+TEST_ID: ip-010 - Enter invalid string "notanip" → shows error
+TEST_ID: ip-011 - Enter "999.999.999.999" → shows error
+TEST_ID: ip-012 - Result shows IP Address field
+TEST_ID: ip-013 - Result shows Country field
+TEST_ID: ip-014 - Result shows Region field
+TEST_ID: ip-015 - Result shows City field
+TEST_ID: ip-016 - Result shows Postal Code field
+TEST_ID: ip-017 - Result shows Timezone field
+TEST_ID: ip-018 - Result shows Latitude field
+TEST_ID: ip-019 - Result shows Longitude field
+TEST_ID: ip-020 - Result shows ISP field
+TEST_ID: ip-021 - Result shows Organization field
+TEST_ID: ip-022 - Result shows ASN field
+TEST_ID: ip-023 - Result shows Hostname field (or dash if none)
+TEST_ID: ip-024 - Map link appears for public IPs with lat/lon
+TEST_ID: ip-025 - Map link points to openstreetmap.org
+TEST_ID: ip-026 - Map link opens in new tab
+TEST_ID: ip-027 - Copy JSON button copies JSON to clipboard
+TEST_ID: ip-028 - Copy JSON button shows "Copied!" then reverts
+TEST_ID: ip-029 - Recent Lookups card visible from start
+TEST_ID: ip-030 - Empty history shows "No recent lookups yet."
+TEST_ID: ip-031 - After lookup, IP appears in history
+TEST_ID: ip-032 - History shows city and country code
+TEST_ID: ip-033 - History shows "just now" for recent lookups
+TEST_ID: ip-034 - History shows "Xm ago" for minutes-old lookups
+TEST_ID: ip-035 - Clicking history item populates input and re-looks up
+TEST_ID: ip-036 - Clear button removes all history
+TEST_ID: ip-037 - History persists across page reloads (localStorage)
+TEST_ID: ip-038 - History keeps max 10 entries
+TEST_ID: ip-039 - Duplicate IP in history updates to top position
+TEST_ID: ip-040 - Enter key triggers lookup
+TEST_ID: ip-041 - Loading spinner visible during lookup
+TEST_ID: ip-042 - Lookup button disabled during fetch
+TEST_ID: ip-043 - My IP display loads automatically on page load
+TEST_ID: ip-044 - My IP value is clickable to trigger my-IP lookup
+TEST_ID: ip-045 - Page title is "IP Address Info"
+TEST_ID: ip-046 - Header badge shows "Geolocation & Network"
+TEST_ID: ip-047 - Public IP shows green Public badge
+TEST_ID: ip-048 - Private IP shows blue Private badge
+TEST_ID: ip-049 - Map link NOT shown for private IPs
+TEST_ID: ip-050 - Map link NOT shown when lat/lon missing
+TEST_ID: ip-051 - "8.8.4.4" lookup returns valid data
+TEST_ID: ip-052 - "208.67.222.222" lookup returns valid data
+TEST_ID: ip-053 - IP field in result has highlight style (larger text)
+TEST_ID: ip-054 - Fields with no data show "—" dash
+TEST_ID: ip-055 - Input placeholder text is visible
+TEST_ID: ip-056 - Input focuses with accent border
+TEST_ID: ip-057 - Back to DevNestio link in footer
+TEST_ID: ip-058 - Dark background (#0f1117)
+TEST_ID: ip-059 - Surface cards are #1a1d27
+TEST_ID: ip-060 - Accent color teal (#4ecca3) for highlights
+TEST_ID: ip-061 - Result section hidden before first lookup
+TEST_ID: ip-062 - Error box hidden by default
+TEST_ID: ip-063 - Error box visible when lookup fails
+TEST_ID: ip-064 - Previous result cleared when new lookup starts
+TEST_ID: ip-065 - Info grid shows in 2 columns on desktop
+TEST_ID: ip-066 - Info grid collapses to 1 column on mobile
+TEST_ID: ip-067 - Input is full-width on mobile
+TEST_ID: ip-068 - "My IP" label shows next to input
+TEST_ID: ip-069 - My IP label shows actual IP address
+TEST_ID: ip-070 - Header is fixed at top with border
+TEST_ID: ip-071 - Footer has DevNestio link
+TEST_ID: ip-072 - IP address in result info is bold highlight color
+TEST_ID: ip-073 - History item hover shows teal border
+TEST_ID: ip-074 - Clear history button only appears when history exists
+TEST_ID: ip-075 - "203.0.113.1" lookup returns valid result
+TEST_ID: ip-076 - ASN field shows AS number and name
+TEST_ID: ip-077 - Info items have rounded corners (8px)
+TEST_ID: ip-078 - IP type detection correct for IPv6 private (fc00::/7)
+TEST_ID: ip-079 - IPv6 loopback "::1" shows Private badge
+TEST_ID: ip-080 - IPv6 link-local "fe80::1" shows Private badge
+-->
+</body>
+</html>

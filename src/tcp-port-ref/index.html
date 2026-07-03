@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TCP/UDP Port Reference — Well-Known Port Numbers | DevNestio</title>
+  <meta name="description" content="Searchable reference of well-known TCP and UDP port numbers. Filter by port, protocol name, or keyword. Covers ports 0–49151 with service names and descriptions. Browser-only." />
+  <meta property="og:title" content="TCP/UDP Port Reference | DevNestio" />
+  <meta property="og:description" content="Look up any TCP or UDP port number instantly. Search by number, service name, or keyword. 150+ well-known and registered ports." />
+  <meta property="og:url" content="https://devnestio.pages.dev/tcp-port-ref/" />
+  <meta name="twitter:card" content="summary" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    #privacy-banner { background: #1e293b; border-bottom: 1px solid #334155; padding: 8px 16px; font-size: 12px; color: #94a3b8; text-align: center; }
+    header { background: #1e293b; border-bottom: 1px solid #334155; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+    header a { color: #64748b; font-size: 13px; text-decoration: none; margin-left: auto; }
+    header a:hover { color: #94a3b8; }
+    .badge { background: #f59e0b; color: #000; font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+    main { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
+    .search-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+    .search-input { flex: 1; min-width: 200px; padding: 10px 14px; background: #1e293b; border: 1px solid #334155; border-radius: 8px; color: #e2e8f0; font-size: 14px; outline: none; }
+    .search-input:focus { border-color: #f59e0b; }
+    .filter-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+    .filter-tab { padding: 5px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid #334155; background: #0f1117; color: #64748b; }
+    .filter-tab.active { background: #f59e0b; border-color: #f59e0b; color: #000; }
+    .count-label { font-size: 12px; color: #64748b; white-space: nowrap; }
+    table { width: 100%; border-collapse: collapse; }
+    thead { position: sticky; top: 0; z-index: 1; }
+    th { padding: 9px 12px; background: #0f172a; color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; text-align: left; border-bottom: 1px solid #334155; cursor: pointer; user-select: none; }
+    th:hover { color: #f59e0b; }
+    td { padding: 9px 12px; border-bottom: 1px solid #1e293b; font-size: 13px; vertical-align: middle; }
+    tr:hover td { background: #1a2235; }
+    .port-num { font-family: monospace; font-weight: 700; color: #f59e0b; font-size: 14px; }
+    .proto-badge { display: inline-block; padding: 1px 7px; border-radius: 4px; font-size: 10px; font-weight: 700; margin-right: 3px; }
+    .proto-tcp { background: #1e3a5f; color: #38bdf8; }
+    .proto-udp { background: #1a3a1f; color: #4ade80; }
+    .proto-both { background: #3a2a1a; color: #fb923c; }
+    .svc-name { font-weight: 600; color: #e2e8f0; }
+    .svc-desc { color: #94a3b8; font-size: 12px; }
+    .cat-badge { padding: 1px 8px; border-radius: 99px; font-size: 10px; font-weight: 600; background: #1e293b; color: #64748b; border: 1px solid #334155; }
+    .no-results { text-align: center; padding: 32px; color: #475569; font-size: 14px; }
+    #ad-slot { margin: 20px auto; text-align: center; }
+  </style>
+</head>
+<body>
+<div id="privacy-banner">🔒 All processing happens in your browser. No data is sent to any server.</div>
+<header>
+  <span class="badge">FREE</span>
+  <h1>TCP/UDP Port Reference</h1>
+  <a href="https://devnestio.pages.dev">← All Tools</a>
+</header>
+<main>
+  <div class="search-bar">
+    <input class="search-input" type="text" id="search" placeholder="Search port, service, or keyword…" oninput="render()" />
+    <div class="filter-tabs">
+      <button class="filter-tab active" data-proto="all" onclick="setProto('all')">All</button>
+      <button class="filter-tab" data-proto="TCP" onclick="setProto('TCP')">TCP</button>
+      <button class="filter-tab" data-proto="UDP" onclick="setProto('UDP')">UDP</button>
+    </div>
+    <span class="count-label" id="count-label"></span>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th onclick="sortBy('port')">Port ↕</th>
+        <th>Protocol</th>
+        <th onclick="sortBy('name')">Service ↕</th>
+        <th>Description</th>
+        <th>Category</th>
+      </tr>
+    </thead>
+    <tbody id="port-tbody"></tbody>
+  </table>
+  <div id="no-results" class="no-results" style="display:none">No matching ports found.</div>
+  <div id="ad-slot" data-ea-publisher="devnestio" data-ea-type="image"></div>
+</main>
+<script>
+const PORTS = [
+  [0,'TCP/UDP','—','Reserved (should not be used)','System'],
+  [1,'TCP/UDP','tcpmux','TCP Port Service Multiplexer','System'],
+  [7,'TCP/UDP','echo','Echo Protocol','System'],
+  [9,'TCP/UDP','discard','Discard Protocol / Wake-on-LAN (UDP)','System'],
+  [13,'TCP/UDP','daytime','Daytime Protocol','System'],
+  [17,'TCP','qotd','Quote of the Day','System'],
+  [19,'TCP/UDP','chargen','Character Generator Protocol','System'],
+  [20,'TCP','ftp-data','FTP data transfer','File Transfer'],
+  [21,'TCP','ftp','FTP control (command)','File Transfer'],
+  [22,'TCP','ssh','Secure Shell (SSH)','Remote Access'],
+  [23,'TCP','telnet','Telnet — unencrypted text communication','Remote Access'],
+  [25,'TCP','smtp','Simple Mail Transfer Protocol','Email'],
+  [37,'TCP/UDP','time','Time Protocol','System'],
+  [43,'TCP','whois','WHOIS directory service','Network Info'],
+  [49,'TCP/UDP','tacacs','TACACS Login Host Protocol','Security'],
+  [53,'TCP/UDP','dns','Domain Name System','DNS'],
+  [67,'UDP','dhcp-server','DHCP / BOOTP Server','Network'],
+  [68,'UDP','dhcp-client','DHCP / BOOTP Client','Network'],
+  [69,'UDP','tftp','Trivial File Transfer Protocol','File Transfer'],
+  [70,'TCP','gopher','Gopher protocol','Web'],
+  [79,'TCP','finger','Finger Protocol','System'],
+  [80,'TCP','http','Hypertext Transfer Protocol (HTTP)','Web'],
+  [88,'TCP/UDP','kerberos','Kerberos authentication','Security'],
+  [102,'TCP','iso-tsap','ISO TSAP (ISODE)','System'],
+  [110,'TCP','pop3','Post Office Protocol v3 (email)','Email'],
+  [111,'TCP/UDP','sunrpc','ONC RPC / Sun RPC port mapper','RPC'],
+  [113,'TCP','ident','Ident — authentication service','System'],
+  [119,'TCP','nntp','Network News Transfer Protocol','News'],
+  [123,'UDP','ntp','Network Time Protocol','Time'],
+  [135,'TCP/UDP','msrpc','Microsoft RPC end point mapper','Windows'],
+  [137,'TCP/UDP','netbios-ns','NetBIOS Name Service','Windows'],
+  [138,'UDP','netbios-dgm','NetBIOS Datagram Service','Windows'],
+  [139,'TCP','netbios-ssn','NetBIOS Session Service','Windows'],
+  [143,'TCP','imap','Internet Message Access Protocol','Email'],
+  [161,'UDP','snmp','Simple Network Management Protocol','Network'],
+  [162,'UDP','snmptrap','SNMP Trap','Network'],
+  [179,'TCP','bgp','Border Gateway Protocol','Routing'],
+  [194,'TCP','irc','Internet Relay Chat','Messaging'],
+  [389,'TCP/UDP','ldap','Lightweight Directory Access Protocol','Directory'],
+  [443,'TCP','https','HTTP over TLS/SSL (HTTPS)','Web'],
+  [445,'TCP','smb','Server Message Block (SMB) / Microsoft-DS','Windows'],
+  [465,'TCP','smtps','SMTP over TLS/SSL (deprecated)','Email'],
+  [500,'UDP','isakmp','IKE/ISAKMP (IPsec key exchange)','VPN'],
+  [514,'TCP','syslog','Syslog (RFC 3164)','Logging'],
+  [514,'UDP','syslog','Syslog UDP','Logging'],
+  [515,'TCP','lpd','Line Printer Daemon (LPD)','Printing'],
+  [520,'UDP','rip','Routing Information Protocol','Routing'],
+  [554,'TCP/UDP','rtsp','Real Time Streaming Protocol','Streaming'],
+  [587,'TCP','smtp-sub','SMTP mail submission','Email'],
+  [631,'TCP/UDP','ipp','Internet Printing Protocol','Printing'],
+  [636,'TCP','ldaps','LDAP over TLS/SSL','Directory'],
+  [853,'TCP','dns-tls','DNS over TLS (DoT)','DNS'],
+  [873,'TCP','rsync','rsync file synchronization','File Transfer'],
+  [989,'TCP','ftps-data','FTPS data (FTP over TLS)','File Transfer'],
+  [990,'TCP','ftps','FTPS control (FTP over TLS)','File Transfer'],
+  [993,'TCP','imaps','IMAP over TLS/SSL','Email'],
+  [995,'TCP','pop3s','POP3 over TLS/SSL','Email'],
+  [1080,'TCP','socks','SOCKS proxy','Proxy'],
+  [1194,'UDP','openvpn','OpenVPN','VPN'],
+  [1433,'TCP','mssql','Microsoft SQL Server','Database'],
+  [1434,'UDP','mssql-mon','Microsoft SQL Server Monitor','Database'],
+  [1521,'TCP','oracle','Oracle Database','Database'],
+  [1701,'UDP','l2tp','Layer 2 Tunneling Protocol','VPN'],
+  [1723,'TCP','pptp','Point-to-Point Tunneling Protocol','VPN'],
+  [1812,'UDP','radius','RADIUS authentication','Security'],
+  [1813,'UDP','radius-acct','RADIUS accounting','Security'],
+  [1883,'TCP','mqtt','MQTT message broker','IoT'],
+  [2049,'TCP/UDP','nfs','Network File System','File Transfer'],
+  [2181,'TCP','zookeeper','Apache ZooKeeper','Distributed'],
+  [2375,'TCP','docker','Docker daemon (unencrypted)','Containers'],
+  [2376,'TCP','docker-tls','Docker daemon (TLS)','Containers'],
+  [2379,'TCP','etcd-client','etcd client (Kubernetes)','Distributed'],
+  [2380,'TCP','etcd-peer','etcd peer (Kubernetes)','Distributed'],
+  [3000,'TCP','dev-http','Common dev HTTP (e.g. Node/React)','Development'],
+  [3306,'TCP','mysql','MySQL / MariaDB database','Database'],
+  [3389,'TCP','rdp','Remote Desktop Protocol (RDP)','Remote Access'],
+  [4000,'TCP','dev-http','Common dev HTTP (e.g. Gatsby)','Development'],
+  [4369,'TCP','empd','Erlang Port Mapper Daemon (RabbitMQ)','Messaging'],
+  [5000,'TCP','dev-http','Common dev HTTP (e.g. Flask)','Development'],
+  [5432,'TCP','postgresql','PostgreSQL database','Database'],
+  [5601,'TCP','kibana','Kibana web UI','Logging'],
+  [5671,'TCP','amqps','AMQP over TLS (RabbitMQ)','Messaging'],
+  [5672,'TCP','amqp','AMQP (RabbitMQ)','Messaging'],
+  [5900,'TCP','vnc','Virtual Network Computing (VNC)','Remote Access'],
+  [6379,'TCP','redis','Redis in-memory data store','Database'],
+  [6443,'TCP','k8s-api','Kubernetes API server','Containers'],
+  [6881,'TCP/UDP','bittorrent','BitTorrent (default)','P2P'],
+  [7000,'TCP','cassandra','Cassandra inter-node','Database'],
+  [7001,'TCP','cassandra-tls','Cassandra TLS inter-node','Database'],
+  [8080,'TCP','http-alt','HTTP alternate / proxy','Web'],
+  [8443,'TCP','https-alt','HTTPS alternate','Web'],
+  [8883,'TCP','mqtt-tls','MQTT over TLS','IoT'],
+  [9000,'TCP','dev-http','Common dev HTTP (e.g. SonarQube)','Development'],
+  [9090,'TCP','prometheus','Prometheus metrics server','Monitoring'],
+  [9092,'TCP','kafka','Apache Kafka broker','Messaging'],
+  [9200,'TCP','elasticsearch','Elasticsearch REST API','Search'],
+  [9300,'TCP','elasticsearch-t','Elasticsearch transport','Search'],
+  [10250,'TCP','kubelet','Kubernetes Kubelet API','Containers'],
+  [11211,'TCP/UDP','memcached','Memcached caching system','Database'],
+  [15672,'TCP','rabbitmq-mgmt','RabbitMQ management UI','Messaging'],
+  [27017,'TCP','mongodb','MongoDB database','Database'],
+  [27018,'TCP','mongodb-shard','MongoDB shard','Database'],
+  [27019,'TCP','mongodb-config','MongoDB config server','Database'],
+  [50070,'TCP','hadoop-hdfs','Hadoop HDFS NameNode Web UI','Big Data'],
+  [51820,'UDP','wireguard','WireGuard VPN','VPN'],
+];
+
+let sortField = 'port', sortAsc = true, protoFilter = 'all';
+
+function setProto(p) {
+  protoFilter = p;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.toggle('active', t.dataset.proto === p));
+  render();
+}
+
+function sortBy(field) {
+  if (sortField === field) sortAsc = !sortAsc;
+  else { sortField = field; sortAsc = true; }
+  render();
+}
+
+function getProtoLabel(p) {
+  if (p === 'TCP') return '<span class="proto-badge proto-tcp">TCP</span>';
+  if (p === 'UDP') return '<span class="proto-badge proto-udp">UDP</span>';
+  return '<span class="proto-badge proto-both">TCP</span><span class="proto-badge proto-both">UDP</span>';
+}
+
+function render() {
+  const q = document.getElementById('search').value.toLowerCase().trim();
+  let rows = PORTS.filter(([port, proto, name, desc, cat]) => {
+    if (protoFilter !== 'all') {
+      if (!proto.includes(protoFilter)) return false;
+    }
+    if (!q) return true;
+    return String(port) === q || String(port).startsWith(q) ||
+      name.toLowerCase().includes(q) || desc.toLowerCase().includes(q) ||
+      cat.toLowerCase().includes(q) || proto.toLowerCase().includes(q);
+  });
+
+  rows.sort((a, b) => {
+    let va = sortField === 'port' ? a[0] : a[2];
+    let vb = sortField === 'port' ? b[0] : b[2];
+    if (va < vb) return sortAsc ? -1 : 1;
+    if (va > vb) return sortAsc ? 1 : -1;
+    return 0;
+  });
+
+  document.getElementById('count-label').textContent = `${rows.length} of ${PORTS.length} ports`;
+  document.getElementById('no-results').style.display = rows.length ? 'none' : '';
+  document.getElementById('port-tbody').innerHTML = rows.map(([port, proto, name, desc, cat]) =>
+    `<tr>
+      <td><span class="port-num">${port}</span></td>
+      <td>${getProtoLabel(proto)}</td>
+      <td><span class="svc-name">${name}</span></td>
+      <td><span class="svc-desc">${desc}</span></td>
+      <td><span class="cat-badge">${cat}</span></td>
+    </tr>`
+  ).join('');
+}
+
+render();
+</script>
+</body>
+</html>

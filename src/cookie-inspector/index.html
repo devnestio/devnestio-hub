@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HTTP Cookie Inspector – Parse Set-Cookie Header | DevNestio</title>
+  <meta name="description" content="Parse and inspect HTTP Set-Cookie headers. Extract name, value, expires, domain, path, Secure, HttpOnly, SameSite flags. Browser-only, no server." />
+  <meta property="og:title" content="HTTP Cookie Inspector – Parse Set-Cookie Header | DevNestio" />
+  <meta property="og:description" content="Parse and inspect HTTP Set-Cookie headers instantly. See all cookie attributes highlighted. Browser-only." />
+  <meta property="og:url" content="https://devnestio.pages.dev/cookie-inspector/" />
+  <meta name="twitter:card" content="summary" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    #privacy-banner { background: #1e293b; border-bottom: 1px solid #334155; padding: 8px 16px; font-size: 12px; color: #94a3b8; text-align: center; }
+    header { background: #1e293b; border-bottom: 1px solid #334155; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+    header a { color: #64748b; font-size: 13px; text-decoration: none; margin-left: auto; }
+    header a:hover { color: #94a3b8; }
+    .badge { background: #0891b2; color: #fff; font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+    main { max-width: 860px; margin: 0 auto; padding: 24px 16px; }
+    .panel { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+    .panel h2 { font-size: 13px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
+    textarea { width: 100%; padding: 10px 12px; background: #0f1117; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 13px; font-family: 'JetBrains Mono', monospace; outline: none; resize: vertical; }
+    textarea:focus { border-color: #0891b2; }
+    .btn { padding: 8px 18px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: background 0.15s; }
+    .btn-primary { background: #0891b2; color: #fff; }
+    .btn-primary:hover { background: #0e7490; }
+    .btn-secondary { background: #334155; color: #e2e8f0; }
+    .btn-secondary:hover { background: #475569; }
+    .btn-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .presets { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .preset { padding: 4px 10px; border-radius: 5px; font-size: 11px; cursor: pointer; background: #1e3a5f; color: #93c5fd; border: 1px solid #1d4ed8; white-space: nowrap; }
+    .preset:hover { background: #1d4ed8; color: #fff; }
+    .attr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
+    .attr-card { background: #0f1117; border: 1px solid #334155; border-radius: 8px; padding: 12px; }
+    .attr-card.present { border-color: #0891b2; }
+    .attr-card.absent { opacity: 0.4; }
+    .attr-card.security-flag { border-color: #16a34a; }
+    .attr-card.warning { border-color: #d97706; }
+    .attr-label { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .attr-value { font-size: 14px; font-weight: 600; color: #f1f5f9; word-break: break-all; }
+    .attr-value.mono { font-family: monospace; }
+    .attr-desc { font-size: 11px; color: #64748b; margin-top: 4px; line-height: 1.4; }
+    .flag { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+    .flag.yes { background: #14532d; color: #86efac; }
+    .flag.no { background: #1e293b; color: #475569; }
+    .flag.warn { background: #451a03; color: #fcd34d; }
+    .security-score { display: flex; align-items: center; gap: 12px; padding: 14px; background: #0f1117; border-radius: 8px; border: 1px solid #334155; margin-top: 12px; }
+    .score-circle { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; flex-shrink: 0; }
+    .score-good { background: #14532d; color: #86efac; }
+    .score-ok { background: #451a03; color: #fcd34d; }
+    .score-bad { background: #450a0a; color: #fca5a5; }
+    .score-info h3 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .score-info p { font-size: 12px; color: #94a3b8; line-height: 1.5; }
+    .raw-box { background: #0f1117; border: 1px solid #334155; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 12px; line-height: 1.7; word-break: break-all; }
+    .raw-name { color: #f87171; font-weight: 700; }
+    .raw-val { color: #4ade80; }
+    .raw-attr { color: #60a5fa; }
+    .raw-flag { color: #c084fc; }
+    #ad-slot { margin: 20px auto; text-align: center; }
+  </style>
+</head>
+<body>
+
+<div id="privacy-banner">🔒 All processing happens in your browser. No data is sent to any server.</div>
+
+<header>
+  <span class="badge">FREE</span>
+  <h1>HTTP Cookie Inspector</h1>
+  <a href="https://devnestio.pages.dev">← All Tools</a>
+</header>
+
+<main>
+  <div class="panel">
+    <h2>Input</h2>
+    <div class="presets">
+      <span class="preset" onclick="loadPreset('session')">Session cookie</span>
+      <span class="preset" onclick="loadPreset('persistent')">Persistent</span>
+      <span class="preset" onclick="loadPreset('secure')">Secure + HttpOnly</span>
+      <span class="preset" onclick="loadPreset('samesite')">SameSite=Strict</span>
+      <span class="preset" onclick="loadPreset('minimal')">Minimal</span>
+    </div>
+    <textarea id="cookie-input" rows="4" placeholder="Paste a Set-Cookie header value here…
+Example: sessionId=abc123; Path=/; HttpOnly; Secure; SameSite=Strict"></textarea>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="parseCookie()">Parse Cookie</button>
+      <button class="btn btn-secondary" onclick="clearAll()">Clear</button>
+    </div>
+  </div>
+
+  <div class="panel" id="result-panel" style="display:none">
+    <h2>Parsed Attributes</h2>
+    <div class="attr-grid" id="attr-grid"></div>
+    <div class="security-score" id="security-score" style="margin-top:16px"></div>
+  </div>
+
+  <div class="panel" id="raw-panel" style="display:none">
+    <h2>Highlighted Raw Header</h2>
+    <div class="raw-box" id="raw-display"></div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="copyCookie()">Copy Raw</button>
+    </div>
+  </div>
+
+  <div id="ad-slot" data-ea-publisher="devnestio" data-ea-type="image"></div>
+</main>
+
+<script>
+const PRESETS = {
+  session: 'sessionId=abc123xyz; Path=/; HttpOnly; SameSite=Lax',
+  persistent: 'userId=42; Path=/; Domain=example.com; Expires=Thu, 01 Jan 2026 00:00:00 GMT; Secure; HttpOnly',
+  secure: 'authToken=s3cr3t; Path=/api; HttpOnly; Secure; SameSite=Strict; Max-Age=86400',
+  samesite: 'csrfToken=xyzabc; Path=/; SameSite=Strict',
+  minimal: 'name=value'
+};
+
+function loadPreset(key) {
+  document.getElementById('cookie-input').value = PRESETS[key];
+  parseCookie();
+}
+
+function parseCookieString(raw) {
+  const parts = raw.split(';').map(p => p.trim()).filter(Boolean);
+  if (!parts.length) return null;
+
+  const [namePart, ...attrParts] = parts;
+  const eqIdx = namePart.indexOf('=');
+  const name = eqIdx >= 0 ? namePart.slice(0, eqIdx).trim() : namePart.trim();
+  const value = eqIdx >= 0 ? namePart.slice(eqIdx + 1).trim() : '';
+
+  const attrs = {};
+  for (const part of attrParts) {
+    const [k, ...rest] = part.split('=');
+    const key = k.trim().toLowerCase();
+    const val = rest.join('=').trim();
+    attrs[key] = val || true;
+  }
+
+  return { name, value, attrs };
+}
+
+function parseCookie() {
+  const raw = document.getElementById('cookie-input').value.trim();
+  if (!raw) return;
+
+  const parsed = parseCookieString(raw);
+  if (!parsed) return;
+
+  const { name, value, attrs } = parsed;
+
+  const expires = attrs['expires'];
+  const maxAge = attrs['max-age'];
+  const domain = attrs['domain'];
+  const path = attrs['path'];
+  const secure = attrs['secure'] !== undefined;
+  const httpOnly = attrs['httponly'] !== undefined;
+  const sameSite = attrs['samesite'];
+
+  let expDisplay = '—';
+  let expDesc = 'Session cookie (deleted when browser closes)';
+  if (maxAge !== undefined && maxAge !== true) {
+    const secs = parseInt(maxAge, 10);
+    expDisplay = `Max-Age: ${maxAge}s`;
+    if (!isNaN(secs)) expDesc = formatDuration(secs) + ' from now';
+  } else if (expires) {
+    expDisplay = expires;
+    try {
+      const d = new Date(expires);
+      expDesc = d > new Date() ? `Expires ${timeUntil(d)}` : '⚠️ Already expired!';
+    } catch(e) { expDesc = 'Cannot parse date'; }
+  }
+
+  const sameSiteVal = sameSite ? String(sameSite) : null;
+
+  // Security score
+  let score = 0;
+  const issues = [];
+  if (secure) score += 25; else issues.push('Missing Secure flag (cookie sent over HTTP)');
+  if (httpOnly) score += 25; else issues.push('Missing HttpOnly (accessible via JS — XSS risk)');
+  if (sameSiteVal && sameSiteVal.toLowerCase() !== 'none') score += 25;
+  else if (sameSiteVal && sameSiteVal.toLowerCase() === 'none') {
+    issues.push('SameSite=None requires Secure flag');
+  } else {
+    issues.push('Missing SameSite (CSRF risk)');
+  }
+  if (expDisplay !== '—') score += 25;
+
+  renderAttrs({ name, value, expDisplay, expDesc, domain, path, secure, httpOnly, sameSiteVal, maxAge });
+  renderScore(score, issues);
+  renderRaw(raw, { name, value, attrs });
+
+  document.getElementById('result-panel').style.display = 'block';
+  document.getElementById('raw-panel').style.display = 'block';
+}
+
+function renderAttrs({ name, value, expDisplay, expDesc, domain, path, secure, httpOnly, sameSiteVal, maxAge }) {
+  const grid = document.getElementById('attr-grid');
+  grid.innerHTML = '';
+
+  const cards = [
+    { label: 'Name', value: name, cls: 'present', desc: 'Cookie name (case-sensitive)', mono: true },
+    { label: 'Value', value: value || '(empty)', cls: value ? 'present' : 'warning', desc: 'Cookie value', mono: true },
+    { label: 'Expires / Max-Age', value: expDisplay, cls: expDisplay !== '—' ? 'present' : 'absent', desc: expDesc },
+    { label: 'Domain', value: domain || '(current host)', cls: domain ? 'present' : 'absent', desc: domain ? `Sent to ${domain} and subdomains` : 'Defaults to the host that set it (no subdomains)' },
+    { label: 'Path', value: path || '/', cls: 'present', desc: `Cookie sent for requests matching this path` },
+    { label: 'Secure', value: secure, isFlag: true, cls: secure ? 'security-flag' : 'warning', desc: secure ? 'Only sent over HTTPS' : 'Sent over HTTP and HTTPS (risk)' },
+    { label: 'HttpOnly', value: httpOnly, isFlag: true, cls: httpOnly ? 'security-flag' : 'warning', desc: httpOnly ? 'Not accessible via document.cookie (XSS protection)' : 'Accessible via JS — XSS can steal it' },
+    { label: 'SameSite', value: sameSiteVal || '(not set)', cls: sameSiteVal ? (sameSiteVal.toLowerCase() === 'strict' ? 'security-flag' : 'present') : 'warning', desc: getSameSiteDesc(sameSiteVal) },
+  ];
+
+  for (const c of cards) {
+    const div = document.createElement('div');
+    div.className = 'attr-card ' + c.cls;
+    let valueHtml;
+    if (c.isFlag) {
+      valueHtml = `<span class="flag ${c.value ? 'yes' : 'no'}">${c.value ? '✓ Yes' : '✗ No'}</span>`;
+    } else {
+      valueHtml = `<span class="attr-value ${c.mono ? 'mono' : ''}">${escHtml(String(c.value))}</span>`;
+    }
+    div.innerHTML = `<div class="attr-label">${c.label}</div>${valueHtml}<div class="attr-desc">${escHtml(c.desc)}</div>`;
+    grid.appendChild(div);
+  }
+}
+
+function renderScore(score, issues) {
+  const el = document.getElementById('security-score');
+  const cls = score >= 75 ? 'score-good' : score >= 50 ? 'score-ok' : 'score-bad';
+  const label = score >= 75 ? 'Good' : score >= 50 ? 'Fair' : 'Weak';
+  const issueText = issues.length ? '<br>⚠️ ' + issues.join('<br>⚠️ ') : 'No security issues detected.';
+  el.innerHTML = `<div class="score-circle ${cls}">${score}</div><div class="score-info"><h3>Security: ${label}</h3><p>${issueText}</p></div>`;
+}
+
+function renderRaw(raw, { name, value, attrs }) {
+  let html = `<span class="raw-name">${escHtml(name)}</span>=<span class="raw-val">${escHtml(value)}</span>`;
+  for (const [k, v] of Object.entries(attrs)) {
+    const isFlag = v === true;
+    if (isFlag) html += `; <span class="raw-flag">${escHtml(k)}</span>`;
+    else html += `; <span class="raw-attr">${escHtml(k)}</span>=<span class="raw-val">${escHtml(String(v))}</span>`;
+  }
+  document.getElementById('raw-display').innerHTML = html;
+}
+
+function getSameSiteDesc(v) {
+  if (!v) return 'Not set — browser defaults vary (usually Lax). CSRF risk.';
+  switch(v.toLowerCase()) {
+    case 'strict': return 'Never sent on cross-site requests. Strongest CSRF protection.';
+    case 'lax': return 'Sent on top-level navigations. Balances security and usability.';
+    case 'none': return 'Sent on all cross-site requests. Requires Secure flag. Use only for cross-site embeds.';
+    default: return `Unknown value: ${v}`;
+  }
+}
+
+function formatDuration(secs) {
+  if (secs < 60) return secs + 's';
+  if (secs < 3600) return Math.round(secs/60) + ' min';
+  if (secs < 86400) return Math.round(secs/3600) + ' hr';
+  return Math.round(secs/86400) + ' days';
+}
+
+function timeUntil(d) {
+  const diff = Math.round((d - new Date()) / 1000);
+  return 'in ' + formatDuration(diff);
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function copyCookie() {
+  navigator.clipboard.writeText(document.getElementById('cookie-input').value);
+}
+
+function clearAll() {
+  document.getElementById('cookie-input').value = '';
+  document.getElementById('result-panel').style.display = 'none';
+  document.getElementById('raw-panel').style.display = 'none';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSS Text Shadow Generator — devnestio</title>
+  <meta name="description" content="Build CSS text-shadow declarations visually. Add multiple layers, adjust offset, blur, color, and opacity. Live preview with copy-ready CSS output." />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    header { background: #1a1d2e; border-bottom: 1px solid #2d3748; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+    header a { color: #7c85f3; text-decoration: none; font-size: 14px; }
+    header h1 { font-size: 18px; font-weight: 700; color: #fff; }
+    .container { max-width: 980px; margin: 0 auto; padding: 24px 16px; display: grid; grid-template-columns: 340px 1fr; gap: 24px; }
+    @media (max-width: 700px) { .container { grid-template-columns: 1fr; } }
+    .panel { background: #1a1d2e; border: 1px solid #2d3748; border-radius: 10px; padding: 20px; }
+    .panel h2 { font-size: 14px; font-weight: 600; color: #a0aec0; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 16px; }
+    .preview-text { font-size: 52px; font-weight: 800; text-align: center; padding: 40px 20px; min-height: 160px; display: flex; align-items: center; justify-content: center; word-break: break-all; line-height: 1.2; border-radius: 8px; background: #0f1117; transition: text-shadow .2s; }
+    .preview-controls { display: flex; gap: 8px; margin-top: 12px; }
+    .preview-controls input[type=text] { flex: 1; background: #0f1117; border: 1px solid #2d3748; border-radius: 6px; padding: 7px 10px; color: #e2e8f0; font-size: 14px; }
+    .bg-row { display: flex; gap: 8px; margin-top: 8px; align-items: center; }
+    .bg-row label { font-size: 12px; color: #718096; }
+    .bg-swatch { width: 28px; height: 28px; border-radius: 4px; border: 1px solid #2d3748; cursor: pointer; }
+    .bg-swatch.active { border-color: #7c85f3; }
+    .layers-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .btn { background: #7c85f3; color: #fff; border: none; border-radius: 6px; padding: 7px 14px; font-size: 13px; cursor: pointer; font-weight: 600; }
+    .btn:hover { background: #6b74e0; }
+    .btn-sm { padding: 4px 10px; font-size: 12px; border-radius: 4px; }
+    .btn-danger { background: #e53e3e; }
+    .btn-danger:hover { background: #c53030; }
+    .btn-secondary { background: #2d3748; }
+    .btn-secondary:hover { background: #3d4a5c; }
+    .layer-card { background: #0f1117; border: 1px solid #2d3748; border-radius: 8px; padding: 12px; margin-bottom: 10px; }
+    .layer-top { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .layer-num { font-size: 11px; font-weight: 700; color: #7c85f3; width: 22px; }
+    .layer-name { font-size: 13px; font-weight: 600; flex: 1; }
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .field { margin-bottom: 4px; }
+    .field label { display: block; font-size: 11px; color: #718096; margin-bottom: 3px; }
+    .field input[type=range] { width: 100%; accent-color: #7c85f3; }
+    .field .val { font-size: 11px; color: #a0aec0; float: right; }
+    .color-row { display: flex; gap: 8px; align-items: center; }
+    .color-row input[type=color] { width: 36px; height: 28px; border: 1px solid #2d3748; border-radius: 4px; background: none; cursor: pointer; padding: 2px; }
+    .color-row input[type=number] { width: 56px; background: #1a1d2e; border: 1px solid #2d3748; border-radius: 4px; padding: 4px 6px; color: #e2e8f0; font-size: 12px; }
+    .output-box { background: #0f1117; border: 1px solid #2d3748; border-radius: 8px; padding: 14px; font-family: 'Courier New', monospace; font-size: 13px; color: #7ee787; white-space: pre-wrap; word-break: break-all; min-height: 60px; margin-top: 0; }
+    .copy-row { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+    .copied { background: #276749 !important; }
+  </style>
+</head>
+<body>
+<header>
+  <a href="/">← devnestio</a>
+  <h1>CSS Text Shadow Generator</h1>
+</header>
+<div class="container">
+  <div style="display:flex;flex-direction:column;gap:16px;">
+    <div class="panel">
+      <h2>Layers</h2>
+      <div class="layers-header">
+        <span id="layer-count" style="font-size:12px;color:#718096;">1 shadow</span>
+        <button class="btn btn-sm" onclick="addLayer()">+ Add Layer</button>
+      </div>
+      <div id="layers-list"></div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:16px;">
+    <div class="panel">
+      <h2>Preview</h2>
+      <div class="preview-text" id="preview-text">Hello</div>
+      <div class="preview-controls">
+        <input type="text" id="preview-input" value="Hello" oninput="updatePreviewText(this.value)" placeholder="Preview text…" />
+      </div>
+      <div class="bg-row">
+        <label>Background:</label>
+        <div class="bg-swatch active" style="background:#0f1117" onclick="setBg('#0f1117',this)" title="Dark"></div>
+        <div class="bg-swatch" style="background:#fff" onclick="setBg('#fff',this)" title="White"></div>
+        <div class="bg-swatch" style="background:#1a1d2e" onclick="setBg('#1a1d2e',this)" title="Navy"></div>
+        <div class="bg-swatch" style="background:#2d3748" onclick="setBg('#2d3748',this)" title="Slate"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Generated CSS</h2>
+      <div class="output-box" id="output-box"></div>
+      <div class="copy-row">
+        <button class="btn btn-secondary btn-sm" onclick="copyCSS()">Copy CSS</button>
+        <button class="btn btn-secondary btn-sm" onclick="resetAll()">Reset</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let layers = [
+  { enabled: true, x: 2, y: 2, blur: 4, color: '#000000', opacity: 60 }
+];
+
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return {r,g,b};
+}
+
+function shadowValue(layer) {
+  const {r,g,b} = hexToRgb(layer.color);
+  const a = (layer.opacity/100).toFixed(2);
+  return `${layer.x}px ${layer.y}px ${layer.blur}px rgba(${r},${g},${b},${a})`;
+}
+
+function updateCSS() {
+  const active = layers.filter(l => l.enabled);
+  const val = active.length
+    ? active.map(shadowValue).join(',\n  ')
+    : 'none';
+  const css = `text-shadow: ${val};`;
+  document.getElementById('output-box').textContent = css;
+  document.getElementById('preview-text').style.textShadow =
+    active.length ? active.map(shadowValue).join(', ') : 'none';
+  document.getElementById('layer-count').textContent =
+    `${layers.length} shadow${layers.length !== 1 ? 's' : ''}`;
+}
+
+function renderLayers() {
+  const el = document.getElementById('layers-list');
+  el.innerHTML = '';
+  layers.forEach((layer, i) => {
+    const card = document.createElement('div');
+    card.className = 'layer-card';
+    card.innerHTML = `
+      <div class="layer-top">
+        <span class="layer-num">#${i+1}</span>
+        <input type="checkbox" ${layer.enabled ? 'checked' : ''} onchange="toggleLayer(${i},this.checked)" style="accent-color:#7c85f3">
+        <span class="layer-name">Shadow ${i+1}</span>
+        ${layers.length > 1 ? `<button class="btn btn-danger btn-sm" onclick="removeLayer(${i})">✕</button>` : ''}
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>X Offset <span class="val" id="xv${i}">${layer.x}px</span></label>
+          <input type="range" min="-50" max="50" value="${layer.x}" oninput="updateLayer(${i},'x',+this.value);document.getElementById('xv${i}').textContent=this.value+'px'">
+        </div>
+        <div class="field">
+          <label>Y Offset <span class="val" id="yv${i}">${layer.y}px</span></label>
+          <input type="range" min="-50" max="50" value="${layer.y}" oninput="updateLayer(${i},'y',+this.value);document.getElementById('yv${i}').textContent=this.value+'px'">
+        </div>
+        <div class="field">
+          <label>Blur <span class="val" id="bv${i}">${layer.blur}px</span></label>
+          <input type="range" min="0" max="100" value="${layer.blur}" oninput="updateLayer(${i},'blur',+this.value);document.getElementById('bv${i}').textContent=this.value+'px'">
+        </div>
+        <div class="field">
+          <label>Opacity <span class="val" id="ov${i}">${layer.opacity}%</span></label>
+          <input type="range" min="0" max="100" value="${layer.opacity}" oninput="updateLayer(${i},'opacity',+this.value);document.getElementById('ov${i}').textContent=this.value+'%'">
+        </div>
+      </div>
+      <div class="field" style="margin-top:6px">
+        <label>Color</label>
+        <div class="color-row">
+          <input type="color" value="${layer.color}" oninput="updateLayer(${i},'color',this.value)">
+          <span style="font-size:12px;color:#718096">${layer.color.toUpperCase()}</span>
+        </div>
+      </div>`;
+    el.appendChild(card);
+  });
+  updateCSS();
+}
+
+function updateLayer(i, prop, val) {
+  layers[i][prop] = val;
+  updateCSS();
+}
+function toggleLayer(i, val) { layers[i].enabled = val; updateCSS(); }
+function addLayer() {
+  layers.push({ enabled: true, x: 0, y: 4, blur: 8, color: '#7c85f3', opacity: 80 });
+  renderLayers();
+}
+function removeLayer(i) {
+  layers.splice(i, 1);
+  renderLayers();
+}
+function updatePreviewText(v) {
+  document.getElementById('preview-text').textContent = v || 'Preview';
+}
+function setBg(color, el) {
+  document.getElementById('preview-text').style.background = color;
+  document.querySelectorAll('.bg-swatch').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+}
+function copyCSS() {
+  const text = document.getElementById('output-box').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.copy-row .btn-secondary');
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy CSS'; btn.classList.remove('copied'); }, 1500);
+  });
+}
+function resetAll() {
+  layers = [{ enabled: true, x: 2, y: 2, blur: 4, color: '#000000', opacity: 60 }];
+  renderLayers();
+}
+
+renderLayers();
+</script>
+</body>
+</html>

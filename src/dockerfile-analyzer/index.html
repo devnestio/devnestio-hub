@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dockerfile Analyzer & Linter – devnestio</title>
+  <meta name="description" content="Analyze and lint your Dockerfile online. Detect best practice violations, security issues, layer optimization opportunities, and common mistakes. Browser-only, no upload." />
+  <meta property="og:title" content="Dockerfile Analyzer & Linter – devnestio" />
+  <meta property="og:description" content="Paste your Dockerfile and get instant best-practice analysis: security issues, layer optimization, image tagging, and more." />
+  <meta property="og:url" content="https://devnestio.pages.dev/dockerfile-analyzer/" />
+  <meta name="twitter:card" content="summary" />
+  <link rel="canonical" href="https://devnestio.pages.dev/dockerfile-analyzer/" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+</head>
+<body>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+  header { background: #1e293b; border-bottom: 1px solid #334155; padding: 14px 24px; display: flex; align-items: center; gap: 12px; }
+  header a { color: #64748b; font-size: 13px; text-decoration: none; }
+  header a:hover { color: #94a3b8; }
+  header h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+  .badge { background: #7c3aed; color: #fff; font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 600; margin-left: 8px; }
+  main { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+  .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 720px) { .layout { grid-template-columns: 1fr; } }
+  .panel { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 16px; }
+  .panel-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .panel-hdr h2 { font-size: 12px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em; }
+  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .btn { padding: 7px 16px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: background .15s; }
+  .btn-primary { background: #7c3aed; color: #fff; }
+  .btn-primary:hover { background: #6d28d9; }
+  .btn-secondary { background: #334155; color: #e2e8f0; }
+  .btn-secondary:hover { background: #475569; }
+  .btn-sm { padding: 5px 12px; font-size: 12px; }
+  textarea { width: 100%; padding: 10px 12px; background: #0f1117; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 12px; font-family: 'Courier New', monospace; outline: none; resize: vertical; min-height: 460px; line-height: 1.7; }
+  textarea:focus { border-color: #7c3aed; }
+  .results { overflow-y: auto; max-height: 500px; }
+  .summary { display: flex; gap: 16px; flex-wrap: wrap; background: #0f1117; border-radius: 8px; padding: 12px 16px; margin-bottom: 12px; }
+  .sum-item { font-size: 13px; }
+  .sum-item .num { font-size: 22px; font-weight: 700; display: block; }
+  .c-err { color: #f87171; }
+  .c-warn { color: #fbbf24; }
+  .c-info { color: #38bdf8; }
+  .c-ok { color: #4ade80; }
+  .issue-list { display: flex; flex-direction: column; gap: 8px; }
+  .issue { background: #0f1117; border-radius: 7px; padding: 10px 12px; border-left: 3px solid; }
+  .issue.error { border-color: #f87171; }
+  .issue.warning { border-color: #fbbf24; }
+  .issue.info { border-color: #38bdf8; }
+  .issue.ok { border-color: #4ade80; }
+  .issue-title { font-size: 12px; font-weight: 600; }
+  .issue.error .issue-title { color: #f87171; }
+  .issue.warning .issue-title { color: #fbbf24; }
+  .issue.info .issue-title { color: #38bdf8; }
+  .issue.ok .issue-title { color: #4ade80; }
+  .issue-line { font-size: 11px; color: #64748b; font-family: monospace; margin-top: 2px; }
+  .issue-msg { font-size: 12px; color: #94a3b8; margin-top: 4px; }
+  .issue-fix { font-size: 11px; color: #7c3aed; margin-top: 4px; font-family: monospace; }
+  .sample-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .sample-btn { background: #0f1117; border: 1px solid #334155; border-radius: 6px; padding: 5px 12px; font-size: 12px; color: #94a3b8; cursor: pointer; }
+  .sample-btn:hover { border-color: #7c3aed; color: #a78bfa; }
+  .empty-state { text-align: center; padding: 60px 20px; color: #475569; }
+</style>
+
+<header>
+  <a href="/">← devnestio</a>
+  <h1>Dockerfile Analyzer <span class="badge">LINT</span></h1>
+</header>
+
+<main>
+  <div class="toolbar">
+    <button class="btn btn-primary" onclick="runAnalysis()">Analyze</button>
+    <button class="btn btn-secondary btn-sm" onclick="clearAll()">Clear</button>
+    <button class="btn btn-secondary btn-sm" onclick="copyInput()">Copy</button>
+  </div>
+  <div class="sample-btns">
+    <button class="sample-btn" onclick="loadSample('good')">Good Dockerfile</button>
+    <button class="sample-btn" onclick="loadSample('bad')">Many issues</button>
+    <button class="sample-btn" onclick="loadSample('multistage')">Multi-stage</button>
+  </div>
+  <div class="layout">
+    <div class="panel">
+      <div class="panel-hdr">
+        <h2>Dockerfile</h2>
+        <span id="line-count" style="font-size:11px;color:#64748b">0 lines</span>
+      </div>
+      <textarea id="input" placeholder="Paste your Dockerfile here…" oninput="updateLineCount()" spellcheck="false"></textarea>
+    </div>
+    <div class="panel">
+      <div class="panel-hdr">
+        <h2>Analysis</h2>
+        <span id="status-chip" style="font-size:11px;padding:2px 8px;border-radius:99px;background:#1e293b;color:#64748b">—</span>
+      </div>
+      <div id="results">
+        <div class="empty-state">
+          <p>Paste your Dockerfile and click Analyze</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+// ── Core analysis logic (also used in test.mjs) ───────────────────────────────
+
+function parseDockerfileInstructions(src) {
+  const lines = src.split('\n');
+  const instructions = [];
+  let i = 0;
+  while (i < lines.length) {
+    const raw = lines[i];
+    const trimmed = raw.trim();
+    if (!trimmed || trimmed.startsWith('#')) { i++; continue; }
+    const m = trimmed.match(/^([A-Z]+)\s*(.*)/);
+    if (!m) { i++; continue; }
+    let value = m[2];
+    while (value.endsWith('\\') && i + 1 < lines.length) {
+      value = value.slice(0, -1).trim();
+      i++;
+      value += ' ' + lines[i].trim();
+    }
+    instructions.push({ instruction: m[1], value: value.trim(), line: i + 1 });
+    i++;
+  }
+  return instructions;
+}
+
+function getBaseImages(instructions) {
+  return instructions.filter(i => i.instruction === 'FROM').map(i => i.value);
+}
+
+function isLatestTag(image) {
+  const parts = image.split(' ')[0]; // remove AS alias
+  if (parts === 'scratch') return false;
+  const tag = parts.includes(':') ? parts.split(':').pop() : 'latest';
+  return tag === 'latest';
+}
+
+function isPinnedDigest(image) {
+  const parts = image.split(' ')[0];
+  return parts.includes('@sha256:');
+}
+
+function hasLatestTagImage(instructions) {
+  return getBaseImages(instructions).some(img => isLatestTag(img));
+}
+
+function isMultiStage(instructions) {
+  const froms = instructions.filter(i => i.instruction === 'FROM');
+  return froms.length > 1;
+}
+
+function getRunInstructions(instructions) {
+  return instructions.filter(i => i.instruction === 'RUN');
+}
+
+function hasAptGetUpdateWithoutInstall(instructions) {
+  const runs = getRunInstructions(instructions);
+  for (const r of runs) {
+    if (r.value.includes('apt-get update') && !r.value.includes('apt-get install')) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function hasAptGetInstallWithoutNoRecommends(instructions) {
+  const runs = getRunInstructions(instructions);
+  return runs.some(r =>
+    r.value.includes('apt-get install') && !r.value.includes('--no-install-recommends')
+  );
+}
+
+function hasAptCacheNotCleaned(instructions) {
+  const runs = getRunInstructions(instructions);
+  return runs.some(r =>
+    r.value.includes('apt-get install') &&
+    !r.value.includes('rm -rf /var/lib/apt/lists')
+  );
+}
+
+function hasAddInsteadOfCopy(instructions) {
+  return instructions.some(i => i.instruction === 'ADD' && !i.value.startsWith('http'));
+}
+
+function hasSudoUsage(instructions) {
+  const runs = getRunInstructions(instructions);
+  return runs.some(r => /\bsudo\b/.test(r.value));
+}
+
+function hasRootUser(instructions) {
+  const users = instructions.filter(i => i.instruction === 'USER');
+  if (users.length === 0) return true; // no USER = root
+  const lastUser = users[users.length - 1].value.trim().toLowerCase();
+  return lastUser === 'root' || lastUser === '0';
+}
+
+function hasSensitiveEnvVar(instructions) {
+  const envs = instructions.filter(i => i.instruction === 'ENV' || i.instruction === 'ARG');
+  const sensitiveKeys = /password|secret|token|key|api_key|private/i;
+  return envs.some(e => sensitiveKeys.test(e.value));
+}
+
+function hasExposeWithoutDocumentation(instructions) {
+  // Check if EXPOSE is missing entirely when there are ports being bound
+  const exposes = instructions.filter(i => i.instruction === 'EXPOSE');
+  const hasPorts = instructions.some(i =>
+    i.instruction === 'RUN' && /\d{4,5}/.test(i.value) &&
+    (i.value.includes('listen') || i.value.includes('port') || i.value.includes('bind'))
+  );
+  return hasPorts && exposes.length === 0;
+}
+
+function countLayers(instructions) {
+  return instructions.filter(i => ['RUN', 'COPY', 'ADD'].includes(i.instruction)).length;
+}
+
+function hasConsecutiveRunLayers(instructions) {
+  let prev = null;
+  for (const ins of instructions) {
+    if (ins.instruction === 'RUN' && prev === 'RUN') return true;
+    if (!['#', 'LABEL', 'COMMENT'].includes(ins.instruction)) prev = ins.instruction;
+  }
+  return false;
+}
+
+function getCopyInstructions(instructions) {
+  return instructions.filter(i => i.instruction === 'COPY');
+}
+
+function analyzeDockerfile(src) {
+  const errors = [], warnings = [], info = [];
+
+  if (!src.trim()) {
+    errors.push({ line: 0, msg: 'Empty Dockerfile', fix: null });
+    return { errors, warnings, info, layerCount: 0 };
+  }
+
+  const instructions = parseDockerfileInstructions(src);
+
+  if (!instructions.some(i => i.instruction === 'FROM')) {
+    errors.push({ line: 0, msg: 'Missing FROM instruction', fix: 'Add a FROM instruction as the first line' });
+  }
+
+  if (hasLatestTagImage(instructions)) {
+    warnings.push({ line: null, msg: 'Base image uses :latest tag — pinning to a specific version prevents unexpected updates', fix: 'Use FROM node:20-alpine instead of FROM node:latest' });
+  }
+
+  if (hasAptGetUpdateWithoutInstall(instructions)) {
+    warnings.push({ line: null, msg: 'apt-get update without apt-get install in same RUN layer — creates stale package cache', fix: 'Combine: RUN apt-get update && apt-get install -y ...' });
+  }
+
+  if (hasAptGetInstallWithoutNoRecommends(instructions)) {
+    warnings.push({ line: null, msg: 'apt-get install without --no-install-recommends — installs unnecessary packages', fix: 'Use: apt-get install -y --no-install-recommends <packages>' });
+  }
+
+  if (hasAptCacheNotCleaned(instructions)) {
+    warnings.push({ line: null, msg: 'apt cache not cleaned after install — increases image size', fix: 'Add: && rm -rf /var/lib/apt/lists/*' });
+  }
+
+  if (hasAddInsteadOfCopy(instructions)) {
+    warnings.push({ line: null, msg: 'ADD used for local files — prefer COPY for simple file copies (ADD is for URLs and tar extraction)', fix: 'Replace ADD with COPY for local file copies' });
+  }
+
+  if (hasSudoUsage(instructions)) {
+    errors.push({ line: null, msg: 'sudo is used — containers should not rely on sudo', fix: 'Use USER instruction to switch user, or run as root then switch with USER' });
+  }
+
+  if (hasRootUser(instructions)) {
+    warnings.push({ line: null, msg: 'Container runs as root — this is a security risk', fix: 'Add: RUN groupadd -r app && useradd -r -g app app\nUSER app' });
+  }
+
+  if (hasSensitiveEnvVar(instructions)) {
+    errors.push({ line: null, msg: 'Sensitive value found in ENV/ARG (password, secret, key, token) — secrets should not be baked into image', fix: 'Use Docker secrets or pass as runtime env vars with -e' });
+  }
+
+  if (hasConsecutiveRunLayers(instructions)) {
+    warnings.push({ line: null, msg: 'Consecutive RUN instructions detected — chain them with && to reduce layer count', fix: 'RUN cmd1 && \\\n    cmd2 && \\\n    cmd3' });
+  }
+
+  const layerCount = countLayers(instructions);
+  info.push({ line: null, msg: `Total image layers (RUN/COPY/ADD): ${layerCount}` });
+
+  if (layerCount > 15) {
+    warnings.push({ line: null, msg: `High layer count (${layerCount}) — consider consolidating RUN/COPY instructions` });
+  }
+
+  if (isMultiStage(instructions)) {
+    info.push({ line: null, msg: 'Multi-stage build detected — good practice for smaller production images' });
+  }
+
+  const froms = instructions.filter(i => i.instruction === 'FROM');
+  const images = froms.map(f => f.value.split(' ')[0]);
+  if (images.some(img => img.startsWith('ubuntu:') || img.startsWith('debian:') || img === 'ubuntu' || img === 'debian')) {
+    info.push({ line: null, msg: 'Consider using Alpine-based images (e.g., node:20-alpine) for smaller image sizes' });
+  }
+
+  if (instructions.some(i => i.instruction === 'HEALTHCHECK')) {
+    info.push({ line: null, msg: 'HEALTHCHECK instruction found — good for container orchestration' });
+  }
+
+  if (!instructions.some(i => i.instruction === 'WORKDIR')) {
+    warnings.push({ line: null, msg: 'No WORKDIR instruction — using absolute paths or relying on default / is error-prone', fix: 'Add: WORKDIR /app' });
+  }
+
+  return { errors, warnings, info, layerCount, instructions };
+}
+
+// ── Samples ───────────────────────────────────────────────────────────────────
+
+const SAMPLES = {
+  good: `FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+RUN npm run build
+
+FROM node:20-alpine
+WORKDIR /app
+RUN addgroup -S app && adduser -S app -G app
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+EXPOSE 3000
+HEALTHCHECK --interval=30s CMD wget -qO- http://localhost:3000/health || exit 1
+USER app
+CMD ["node", "dist/index.js"]
+`,
+  bad: `FROM ubuntu:latest
+RUN apt-get update
+RUN apt-get install -y curl wget git
+ADD ./app /app
+RUN sudo chmod +x /app/start.sh
+ENV DB_PASSWORD=supersecret
+RUN mkdir /data
+RUN chown -R root /data
+CMD ["/app/start.sh"]
+`,
+  multistage: `FROM golang:1.21 AS builder
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 go build -o /app ./cmd/server
+
+FROM gcr.io/distroless/static-debian12
+COPY --from=builder /app /app
+EXPOSE 8080
+USER nonroot:nonroot
+ENTRYPOINT ["/app"]
+`,
+};
+
+// ── UI ─────────────────────────────────────────────────────────────────────────
+
+function loadSample(key) {
+  document.getElementById('input').value = SAMPLES[key];
+  updateLineCount();
+  runAnalysis();
+}
+
+function updateLineCount() {
+  const v = document.getElementById('input').value;
+  document.getElementById('line-count').textContent = `${v.split('\n').length} lines`;
+}
+
+function clearAll() {
+  document.getElementById('input').value = '';
+  document.getElementById('results').innerHTML = '<div class="empty-state"><p>Paste your Dockerfile and click Analyze</p></div>';
+  document.getElementById('status-chip').textContent = '—';
+  updateLineCount();
+}
+
+function copyInput() {
+  navigator.clipboard.writeText(document.getElementById('input').value);
+}
+
+function runAnalysis() {
+  const src = document.getElementById('input').value;
+  const { errors, warnings, info, layerCount } = analyzeDockerfile(src);
+
+  const chip = document.getElementById('status-chip');
+  if (errors.length === 0 && warnings.length === 0) {
+    chip.textContent = 'Clean';
+    chip.style.background = '#14532d';
+    chip.style.color = '#4ade80';
+  } else if (errors.length > 0) {
+    chip.textContent = `${errors.length} error${errors.length > 1 ? 's' : ''}`;
+    chip.style.background = '#450a0a';
+    chip.style.color = '#f87171';
+  } else {
+    chip.textContent = `${warnings.length} warning${warnings.length > 1 ? 's' : ''}`;
+    chip.style.background = '#431407';
+    chip.style.color = '#fbbf24';
+  }
+
+  const summary = `
+    <div class="summary">
+      <div class="sum-item"><span class="num c-err">${errors.length}</span>Errors</div>
+      <div class="sum-item"><span class="num c-warn">${warnings.length}</span>Warnings</div>
+      <div class="sum-item"><span class="num c-info">${info.length}</span>Info</div>
+      <div class="sum-item"><span class="num" style="color:#e2e8f0">${layerCount}</span>Layers</div>
+    </div>
+  `;
+
+  function issueHtml(cls, title, item) {
+    const fixHtml = item.fix ? `<div class="issue-fix">${item.fix.replace(/\n/g, '<br>')}</div>` : '';
+    return `<div class="issue ${cls}"><div class="issue-title">${title}</div><div class="issue-msg">${item.msg}</div>${fixHtml}</div>`;
+  }
+
+  const items = [
+    ...errors.map(e => issueHtml('error', 'ERROR', e)),
+    ...warnings.map(w => issueHtml('warning', 'WARNING', w)),
+    ...info.map(i => issueHtml('info', 'INFO', i)),
+  ];
+
+  if (errors.length === 0 && warnings.length === 0) {
+    items.push('<div class="issue ok"><div class="issue-title">CLEAN</div><div class="issue-msg">No issues found — Dockerfile looks great!</div></div>');
+  }
+
+  document.getElementById('results').innerHTML = summary + `<div class="results"><div class="issue-list">${items.join('')}</div></div>`;
+}
+
+updateLineCount();
+</script>
+</body>
+</html>

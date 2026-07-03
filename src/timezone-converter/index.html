@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Timezone Converter — Convert Time Between World Timezones | DevNestio</title>
+  <meta name="description" content="Convert time between any world timezones using the browser's Intl API. Add multiple zones, see UTC offsets, and convert any date and time instantly. No server needed." />
+  <meta property="og:title" content="Timezone Converter | DevNestio" />
+  <meta property="og:description" content="Convert time between world timezones instantly. Pick date and time, add multiple zones, see offsets and local times. All local in your browser." />
+  <meta property="og:url" content="https://devnestio.pages.dev/timezone-converter/" />
+  <meta name="twitter:card" content="summary" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    #privacy-banner { background: #1e293b; border-bottom: 1px solid #334155; padding: 8px 16px; font-size: 12px; color: #94a3b8; text-align: center; }
+    header { background: #1e293b; border-bottom: 1px solid #334155; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+    header a { color: #64748b; font-size: 13px; text-decoration: none; margin-left: auto; }
+    header a:hover { color: #94a3b8; }
+    .badge { background: #f59e0b; color: #000; font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+    main { max-width: 820px; margin: 0 auto; padding: 24px 16px; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 18px; margin-bottom: 16px; }
+    .card-title { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 14px; }
+    .source-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+    .field { display: flex; flex-direction: column; gap: 4px; }
+    label { font-size: 12px; color: #94a3b8; font-weight: 600; }
+    input[type=datetime-local], select { padding: 9px 12px; background: #0f1117; border: 1px solid #334155; border-radius: 7px; color: #e2e8f0; font-size: 14px; outline: none; }
+    input[type=datetime-local]:focus, select:focus { border-color: #f59e0b; }
+    select { min-width: 220px; }
+    .now-btn { padding: 9px 16px; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid #334155; background: transparent; color: #64748b; white-space: nowrap; }
+    .now-btn:hover { border-color: #f59e0b; color: #f59e0b; }
+    .tz-table { width: 100%; border-collapse: collapse; }
+    .tz-table th { padding: 8px 12px; background: #0f172a; color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; text-align: left; border-bottom: 1px solid #334155; }
+    .tz-table td { padding: 10px 12px; border-bottom: 1px solid #1e293b; font-size: 14px; vertical-align: middle; }
+    .tz-table tr:last-child td { border-bottom: none; }
+    .tz-name { font-weight: 600; color: #e2e8f0; }
+    .tz-offset { font-family: monospace; font-size: 12px; color: #f59e0b; }
+    .tz-time { font-family: 'Menlo','Courier New',monospace; font-size: 15px; color: #f1f5f9; }
+    .tz-date { font-size: 11px; color: #64748b; margin-top: 2px; }
+    .remove-btn { padding: 3px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; border: 1px solid #334155; background: transparent; color: #475569; }
+    .remove-btn:hover { border-color: #ef4444; color: #ef4444; }
+    .add-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .add-select { flex: 1; min-width: 220px; }
+    .add-btn { padding: 8px 18px; border-radius: 7px; font-size: 12px; font-weight: 700; cursor: pointer; border: none; background: #f59e0b; color: #000; white-space: nowrap; }
+    .add-btn:hover { background: #fbbf24; }
+    .utc-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .utc-val { font-family: monospace; font-size: 14px; color: #f59e0b; background: #0f1117; border: 1px solid #334155; border-radius: 6px; padding: 6px 12px; flex: 1; word-break: break-all; }
+    .copy-btn { padding: 4px 12px; border-radius: 5px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid #334155; background: transparent; color: #64748b; }
+    .copy-btn:hover { border-color: #f59e0b; color: #f59e0b; }
+    #ad-slot { margin: 20px auto; text-align: center; }
+  </style>
+</head>
+<body>
+<div id="privacy-banner">🔒 All processing happens in your browser. No data is sent to any server.</div>
+<header>
+  <span class="badge">FREE</span>
+  <h1>Timezone Converter</h1>
+  <a href="https://devnestio.pages.dev">← All Tools</a>
+</header>
+<main>
+
+  <div class="card">
+    <div class="card-title">Source Time</div>
+    <div class="source-row">
+      <div class="field">
+        <label>Date & Time</label>
+        <input type="datetime-local" id="dt-input" oninput="update()" />
+      </div>
+      <div class="field">
+        <label>Source Timezone</label>
+        <select id="src-tz" onchange="update()"></select>
+      </div>
+      <button class="now-btn" onclick="setNow()">Now</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Conversions</div>
+    <table class="tz-table">
+      <thead>
+        <tr><th>Timezone</th><th>UTC Offset</th><th>Local Time</th><th></th></tr>
+      </thead>
+      <tbody id="tz-tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Add Timezone</div>
+    <div class="add-row">
+      <select class="add-select" id="add-select"></select>
+      <button class="add-btn" onclick="addTz()">+ Add</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">UTC / ISO 8601</div>
+    <div class="utc-row">
+      <div class="utc-val" id="utc-val">—</div>
+      <button class="copy-btn" onclick="copyUTC()">Copy ISO</button>
+    </div>
+  </div>
+
+  <div id="ad-slot" data-ea-publisher="devnestio" data-ea-type="image"></div>
+</main>
+<script>
+const COMMON_TZ = [
+  'UTC',
+  'America/New_York','America/Chicago','America/Denver','America/Los_Angeles',
+  'America/Anchorage','America/Honolulu','America/Sao_Paulo','America/Argentina/Buenos_Aires',
+  'America/Toronto','America/Vancouver','America/Mexico_City','America/Bogota',
+  'Europe/London','Europe/Paris','Europe/Berlin','Europe/Rome','Europe/Madrid',
+  'Europe/Amsterdam','Europe/Stockholm','Europe/Zurich','Europe/Moscow',
+  'Europe/Istanbul','Europe/Athens','Europe/Warsaw','Europe/Kyiv',
+  'Africa/Cairo','Africa/Johannesburg','Africa/Lagos','Africa/Nairobi',
+  'Asia/Dubai','Asia/Riyadh','Asia/Kolkata','Asia/Dhaka','Asia/Kathmandu',
+  'Asia/Colombo','Asia/Karachi','Asia/Bangkok','Asia/Jakarta','Asia/Singapore',
+  'Asia/Kuala_Lumpur','Asia/Shanghai','Asia/Hong_Kong','Asia/Taipei',
+  'Asia/Tokyo','Asia/Seoul','Asia/Manila',
+  'Australia/Sydney','Australia/Melbourne','Australia/Brisbane','Australia/Perth',
+  'Pacific/Auckland','Pacific/Fiji','Pacific/Honolulu',
+];
+
+// Detect all available IANA timezones via Intl
+let ALL_TZ = [];
+try {
+  ALL_TZ = Intl.supportedValuesOf('timeZone');
+} catch(e) {
+  ALL_TZ = COMMON_TZ;
+}
+if (!ALL_TZ.length) ALL_TZ = COMMON_TZ;
+
+function getOffset(tz, date) {
+  try {
+    const parts = new Intl.DateTimeFormat('en', {
+      timeZone: tz, timeZoneName: 'shortOffset', hour: 'numeric'
+    }).formatToParts(date);
+    const off = parts.find(p => p.type === 'timeZoneName');
+    return off ? off.value : tz;
+  } catch { return ''; }
+}
+
+function formatInTZ(tz, date) {
+  try {
+    const timeFmt = new Intl.DateTimeFormat('en-US', {
+      timeZone: tz, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+    });
+    const dateFmt = new Intl.DateTimeFormat('en-US', {
+      timeZone: tz, weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
+    });
+    return { time: timeFmt.format(date), date: dateFmt.format(date) };
+  } catch { return { time: '—', date: '—' }; }
+}
+
+let activeTZ = [
+  'UTC',
+  Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/New_York',
+  'Europe/London', 'Asia/Tokyo',
+].filter((v,i,a) => a.indexOf(v) === i);
+
+function populateSelects() {
+  const opts = ALL_TZ.map(tz => `<option value="${tz}">${tz.replace(/_/g,' ')}</option>`).join('');
+  document.getElementById('src-tz').innerHTML = opts;
+  document.getElementById('add-select').innerHTML = opts;
+  const local = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  ['src-tz','add-select'].forEach(id => {
+    const el = document.getElementById(id);
+    for (const opt of el.options) if (opt.value === local) { opt.selected = true; break; }
+  });
+}
+
+function setNow() {
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const local = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  document.getElementById('dt-input').value = local;
+  update();
+}
+
+function getSourceDate() {
+  const dtVal = document.getElementById('dt-input').value;
+  const srcTz = document.getElementById('src-tz').value;
+  if (!dtVal) return null;
+  // Parse the naive datetime in the source timezone
+  const [datePart, timePart] = dtVal.split('T');
+  const [y,mo,d] = datePart.split('-').map(Number);
+  const [h,mi] = timePart.split(':').map(Number);
+
+  // Use Intl to find the UTC offset of the source timezone at approximately this time
+  const approx = new Date(y, mo-1, d, h, mi);
+  // Get offset in minutes by comparing formatted time
+  const fmtOffset = new Intl.DateTimeFormat('en', {
+    timeZone: srcTz,
+    year:'numeric', month:'2-digit', day:'2-digit',
+    hour:'2-digit', minute:'2-digit', second:'2-digit', hour12: false
+  }).format(approx);
+  return approx; // We'll re-interpret using the src timezone offset trick
+}
+
+function getDateUTC(dtVal, srcTz) {
+  if (!dtVal) return null;
+  const [datePart, timePart] = dtVal.split('T');
+  const [y,mo,d] = datePart.split('-').map(Number);
+  const [h,mi] = timePart.split(':').map(Number);
+  // Create an anchor: format a known UTC time through the source TZ to find the offset
+  const anchor = new Date(Date.UTC(y, mo-1, d, h, mi));
+  // Get what the source TZ shows for this UTC time
+  const shown = new Intl.DateTimeFormat('en-CA', {
+    timeZone: srcTz, year:'numeric', month:'2-digit', day:'2-digit',
+    hour:'2-digit', minute:'2-digit', hour12: false
+  }).format(anchor).replace(',','');
+  const [shownDate, shownTime] = shown.split(' ');
+  const [sy,sm,sd] = shownDate.split('-').map(Number);
+  const [sh,smi] = shownTime.split(':').map(Number);
+  const diffMs = (new Date(y,mo-1,d,h,mi) - new Date(sy,sm-1,sd,sh,smi));
+  return new Date(anchor.getTime() + diffMs);
+}
+
+function update() {
+  const dtVal = document.getElementById('dt-input').value;
+  const srcTz = document.getElementById('src-tz').value;
+  if (!dtVal) return;
+
+  const utcDate = getDateUTC(dtVal, srcTz);
+  if (!utcDate || isNaN(utcDate)) return;
+
+  document.getElementById('utc-val').textContent = utcDate.toISOString();
+
+  const tbody = document.getElementById('tz-tbody');
+  tbody.innerHTML = activeTZ.map((tz, idx) => {
+    const off = getOffset(tz, utcDate);
+    const { time, date } = formatInTZ(tz, utcDate);
+    return `<tr>
+      <td><div class="tz-name">${tz.replace(/_/g,' ')}</div></td>
+      <td><span class="tz-offset">${off}</span></td>
+      <td><div class="tz-time">${time}</div><div class="tz-date">${date}</div></td>
+      <td><button class="remove-btn" onclick="removeTz(${idx})">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function addTz() {
+  const tz = document.getElementById('add-select').value;
+  if (!activeTZ.includes(tz)) { activeTZ.push(tz); update(); }
+}
+
+function removeTz(idx) {
+  activeTZ.splice(idx, 1);
+  update();
+}
+
+function copyUTC() {
+  const t = document.getElementById('utc-val').textContent;
+  if (t && t !== '—') navigator.clipboard.writeText(t);
+}
+
+// Init
+populateSelects();
+setNow();
+</script>
+</body>
+</html>

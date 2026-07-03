@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Protobuf (.proto) Formatter & Validator – devnestio</title>
+  <meta name="description" content="Format, validate, and syntax-highlight Protocol Buffer (.proto) files online. Check field numbers, types, message structure, and enum definitions instantly." />
+  <link rel="canonical" href="https://devnestio.pages.dev/protobuf-formatter/" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+</head>
+<body>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+  header { background: #1a1d2e; border-bottom: 1px solid #2d3748; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+  header a { color: #7c85f3; text-decoration: none; font-size: 14px; }
+  header h1 { font-size: 18px; font-weight: 700; color: #fff; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 24px 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 800px) { .container { grid-template-columns: 1fr; } }
+  .panel { background: #1a1d2e; border: 1px solid #2d3748; border-radius: 10px; padding: 16px; }
+  .panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .panel-title { font-size: 11px; font-weight: 700; color: #a0aec0; text-transform: uppercase; letter-spacing: .07em; }
+  textarea { width: 100%; background: #0a0d1a; border: 1px solid #2d3748; border-radius: 6px; padding: 12px; color: #e2e8f0; font-size: 13px; font-family: 'Courier New', monospace; outline: none; resize: vertical; line-height: 1.7; min-height: 400px; }
+  textarea:focus { border-color: #7c85f3; }
+  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .btn { background: #2d3748; border: 1px solid #3d4a5c; border-radius: 6px; padding: 6px 14px; font-size: 13px; color: #e2e8f0; cursor: pointer; transition: background .15s; }
+  .btn:hover { background: #3d4a5c; }
+  .btn-primary { background: #7c85f3; border-color: #7c85f3; }
+  .btn-primary:hover { background: #8f97f5; }
+  .btn-sm { padding: 4px 10px; font-size: 11px; }
+  .output-code { background: #0a0d1a; border: 1px solid #2d3748; border-radius: 6px; padding: 14px; font-family: 'Courier New', monospace; font-size: 12px; white-space: pre; overflow: auto; min-height: 400px; line-height: 1.7; position: relative; }
+  .token-keyword { color: #ff79c6; }
+  .token-type { color: #8be9fd; }
+  .token-number { color: #bd93f9; }
+  .token-string { color: #f1fa8c; }
+  .token-comment { color: #6272a4; font-style: italic; }
+  .token-name { color: #50fa7b; }
+  .token-field-num { color: #ffb86c; }
+  .issues { margin-top: 16px; }
+  .issue { display: flex; gap: 8px; align-items: flex-start; padding: 8px 10px; border-radius: 6px; margin-bottom: 6px; font-size: 12px; }
+  .issue-error { background: rgba(239,68,68,.12); border: 1px solid rgba(239,68,68,.3); color: #fca5a5; }
+  .issue-warn { background: rgba(234,179,8,.1); border: 1px solid rgba(234,179,8,.25); color: #fcd34d; }
+  .issue-ok { background: rgba(52,211,153,.1); border: 1px solid rgba(52,211,153,.25); color: #6ee7b7; }
+  .badge { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 700; flex-shrink: 0; }
+  .badge-error { background: #7f1d1d; color: #fca5a5; }
+  .badge-warn { background: #713f12; color: #fcd34d; }
+  .badge-ok { background: #064e3b; color: #6ee7b7; }
+  .stats { display: flex; gap: 12px; flex-wrap: wrap; padding: 10px 0; border-top: 1px solid #2d3748; margin-top: 10px; }
+  .stat { font-size: 12px; color: #a0aec0; }
+  .stat strong { color: #e2e8f0; }
+  .structure-tree { background: #0a0d1a; border: 1px solid #2d3748; border-radius: 6px; padding: 12px; font-size: 12px; font-family: monospace; }
+  .tree-item { padding: 2px 0; }
+  .tree-msg { color: #50fa7b; }
+  .tree-enum { color: #ffb86c; }
+  .tree-field { color: #8be9fd; padding-left: 20px; }
+  .tree-service { color: #ff79c6; }
+  .tree-rpc { color: #bd93f9; padding-left: 20px; }
+  .copy-btn { position: absolute; top: 10px; right: 10px; background: #2d3748; border: none; border-radius: 4px; padding: 4px 10px; font-size: 11px; color: #a0aec0; cursor: pointer; }
+  .copy-btn:hover { background: #3d4a5c; }
+  .copy-btn.copied { background: #276749; color: #68d391; }
+  .empty-hint { color: #4a5568; font-style: italic; font-size: 13px; text-align: center; padding: 40px 20px; }
+  .full-row { grid-column: 1 / -1; }
+</style>
+
+<header>
+  <a href="https://devnestio.pages.dev/">← devnestio</a>
+  <h1>Protobuf (.proto) Formatter & Validator</h1>
+</header>
+
+<div class="container">
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-title">Input .proto source</div>
+    </div>
+    <div class="toolbar">
+      <button class="btn btn-primary" onclick="run()">Format & Validate</button>
+      <button class="btn" onclick="loadSample()">Load Sample</button>
+      <button class="btn" onclick="clearAll()">Clear</button>
+    </div>
+    <textarea id="input" placeholder="Paste your .proto file content here...
+
+syntax = &quot;proto3&quot;;
+
+message User {
+  string name = 1;
+  int32 age = 2;
+}"></textarea>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-title">Formatted Output</div>
+    </div>
+    <div style="position:relative">
+      <button class="copy-btn" id="copyBtn" onclick="copyOutput()">Copy</button>
+      <div class="output-code" id="output"><span class="empty-hint">Formatted proto will appear here</span></div>
+    </div>
+    <div id="stats" class="stats" style="display:none"></div>
+  </div>
+
+  <div class="panel full-row" id="issuesPanel" style="display:none">
+    <div class="panel-title" style="margin-bottom:12px">Validation Results</div>
+    <div id="issues"></div>
+  </div>
+
+  <div class="panel full-row" id="treePanel" style="display:none">
+    <div class="panel-title" style="margin-bottom:10px">Structure Overview</div>
+    <div class="structure-tree" id="tree"></div>
+  </div>
+</div>
+
+<script>
+const SAMPLE = `syntax = "proto3";
+
+package example.v1;
+
+option go_package = "github.com/example/proto/v1";
+
+import "google/protobuf/timestamp.proto";
+
+// User represents a registered user in the system.
+message User {
+  string id = 1;
+  string email = 2;
+  string display_name = 3;
+  int32 age = 4;
+  bool is_active = 5;
+  google.protobuf.Timestamp created_at = 6;
+  repeated string tags = 7;
+  UserRole role = 8;
+  Address address = 9;
+}
+
+// UserRole defines the access level of a user.
+enum UserRole {
+  USER_ROLE_UNSPECIFIED = 0;
+  USER_ROLE_VIEWER = 1;
+  USER_ROLE_EDITOR = 2;
+  USER_ROLE_ADMIN = 3;
+}
+
+message Address {
+  string street = 1;
+  string city = 2;
+  string country = 3;
+  string postal_code = 4;
+}
+
+// UserService provides CRUD operations on users.
+service UserService {
+  rpc GetUser(GetUserRequest) returns (GetUserResponse);
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse);
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
+}
+
+message GetUserRequest { string id = 1; }
+message GetUserResponse { User user = 1; }
+message ListUsersRequest { int32 page_size = 1; string page_token = 2; }
+message ListUsersResponse { repeated User users = 1; string next_page_token = 2; }
+message CreateUserRequest { User user = 1; }
+message CreateUserResponse { User user = 1; }
+message DeleteUserRequest { string id = 1; }
+message DeleteUserResponse { bool success = 1; }
+`;
+
+const PROTO_TYPES = new Set([
+  'double','float','int32','int64','uint32','uint64','sint32','sint64',
+  'fixed32','fixed64','sfixed32','sfixed64','bool','string','bytes',
+]);
+const PROTO_KEYWORDS = new Set([
+  'syntax','package','import','option','message','enum','service','rpc',
+  'returns','repeated','optional','required','oneof','map','reserved',
+  'extensions','weak','public','stream',
+]);
+
+function tokenizeLine(line) {
+  let html = '';
+  let i = 0;
+  const str = line;
+
+  while (i < str.length) {
+    // Comment
+    if (str[i] === '/' && str[i+1] === '/') {
+      html += `<span class="token-comment">${esc(str.slice(i))}</span>`;
+      break;
+    }
+    // String literal
+    if (str[i] === '"') {
+      let j = i + 1;
+      while (j < str.length && str[j] !== '"') j++;
+      html += `<span class="token-string">${esc(str.slice(i, j+1))}</span>`;
+      i = j + 1;
+      continue;
+    }
+    // Number
+    if (/\d/.test(str[i]) && (i === 0 || /[\s=,(]/.test(str[i-1]))) {
+      let j = i;
+      while (j < str.length && /[\d.]/.test(str[j])) j++;
+      html += `<span class="token-number">${esc(str.slice(i,j))}</span>`;
+      i = j;
+      continue;
+    }
+    // Word
+    if (/[a-zA-Z_]/.test(str[i])) {
+      let j = i;
+      while (j < str.length && /[\w.]/.test(str[j])) j++;
+      const word = str.slice(i, j);
+      if (PROTO_KEYWORDS.has(word)) {
+        html += `<span class="token-keyword">${esc(word)}</span>`;
+      } else if (PROTO_TYPES.has(word)) {
+        html += `<span class="token-type">${esc(word)}</span>`;
+      } else {
+        html += `<span class="token-name">${esc(word)}</span>`;
+      }
+      i = j;
+      continue;
+    }
+    // Equals followed by number (field number)
+    if (str[i] === '=') {
+      html += esc('=');
+      i++;
+      // skip whitespace
+      while (i < str.length && str[i] === ' ') { html += ' '; i++; }
+      if (/\d/.test(str[i])) {
+        let j = i;
+        while (j < str.length && /\d/.test(str[j])) j++;
+        html += `<span class="token-field-num">${esc(str.slice(i,j))}</span>`;
+        i = j;
+      }
+      continue;
+    }
+    html += esc(str[i]);
+    i++;
+  }
+  return html;
+}
+
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function formatProto(src) {
+  const lines = src.split('\n');
+  const out = [];
+  let indent = 0;
+  const INDENT = '  ';
+
+  for (let rawLine of lines) {
+    const line = rawLine.trim();
+    if (line === '') { out.push(''); continue; }
+
+    // Decrease indent before closing brace
+    if (line === '}' || line === '};') {
+      indent = Math.max(0, indent - 1);
+      out.push(INDENT.repeat(indent) + line);
+      continue;
+    }
+
+    out.push(INDENT.repeat(indent) + line);
+
+    // Increase indent after opening brace
+    if (line.endsWith('{')) indent++;
+  }
+
+  return out.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+}
+
+function validate(src) {
+  const issues = [];
+  const lines = src.split('\n');
+
+  // Check syntax declaration
+  if (!src.includes('syntax = "proto3"') && !src.includes("syntax = 'proto3'") &&
+      !src.includes('syntax = "proto2"') && !src.includes("syntax = 'proto2'")) {
+    issues.push({ type: 'warn', msg: 'No syntax declaration found (syntax = "proto3"; or "proto2";)' });
+  }
+
+  // Track field numbers per message
+  const msgStack = [];
+  const fieldNums = {};
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line || line.startsWith('//')) continue;
+
+    const msgMatch = line.match(/^message\s+(\w+)\s*\{/);
+    if (msgMatch) { msgStack.push(msgMatch[1]); fieldNums[msgMatch[1]] = new Set(); }
+
+    const enumMatch = line.match(/^enum\s+(\w+)\s*\{/);
+    if (enumMatch) { msgStack.push('__enum__' + enumMatch[1]); }
+
+    if (line === '}' || line === '};') { msgStack.pop(); }
+
+    // Field definition: type name = number;
+    const fieldMatch = line.match(/^(?:repeated\s+|optional\s+|required\s+)?[\w.]+\s+\w+\s*=\s*(\d+)\s*[;{]/);
+    if (fieldMatch && msgStack.length > 0) {
+      const ctx = msgStack[msgStack.length - 1];
+      if (!ctx.startsWith('__enum__')) {
+        const num = parseInt(fieldMatch[1], 10);
+        if (num <= 0) {
+          issues.push({ type: 'error', msg: `Line ${i+1}: Field number must be positive (got ${num})` });
+        } else if (num >= 19000 && num <= 19999) {
+          issues.push({ type: 'warn', msg: `Line ${i+1}: Field numbers 19000-19999 are reserved for protobuf implementation` });
+        }
+        if (fieldNums[ctx] && fieldNums[ctx].has(num)) {
+          issues.push({ type: 'error', msg: `Line ${i+1}: Duplicate field number ${num} in message "${ctx}"` });
+        }
+        if (fieldNums[ctx]) fieldNums[ctx].add(num);
+      }
+    }
+
+    // Enum must have zero value
+    const enumValMatch = line.match(/^\w+\s*=\s*(\d+)\s*;/);
+    if (enumValMatch && msgStack.length > 0 && msgStack[msgStack.length-1].startsWith('__enum__')) {
+      // first value should be 0 in proto3
+    }
+
+    // Check for import statements without semicolon
+    if (line.startsWith('import') && !line.endsWith(';')) {
+      issues.push({ type: 'warn', msg: `Line ${i+1}: Import statement may be missing semicolon` });
+    }
+
+    // Check snake_case for field names
+    const fieldNameMatch = line.match(/^(?:repeated\s+|optional\s+|required\s+)?[\w.]+\s+([a-zA-Z_]\w*)\s*=/);
+    if (fieldNameMatch && !line.startsWith('//') && !line.match(/^\s*(message|enum|service|rpc|option|syntax|package|import)/)) {
+      const name = fieldNameMatch[1];
+      if (/[A-Z]/.test(name)) {
+        issues.push({ type: 'warn', msg: `Line ${i+1}: Field name "${name}" should use snake_case (proto convention)` });
+      }
+    }
+  }
+
+  if (issues.filter(i => i.type === 'error').length === 0) {
+    issues.push({ type: 'ok', msg: 'No errors found' });
+  }
+
+  return issues;
+}
+
+function extractStructure(src) {
+  const items = [];
+  const lines = src.split('\n');
+  const stack = [];
+
+  for (const line of lines) {
+    const t = line.trim();
+    if (t.startsWith('//')) continue;
+
+    const msgM = t.match(/^message\s+(\w+)/);
+    const enumM = t.match(/^enum\s+(\w+)/);
+    const svcM = t.match(/^service\s+(\w+)/);
+    const rpcM = t.match(/^rpc\s+(\w+)\s*\(([^)]+)\)\s*returns\s*\(([^)]+)\)/);
+    const fieldM = t.match(/^(?:repeated\s+|optional\s+|required\s+)?([\w.]+)\s+(\w+)\s*=\s*(\d+)/);
+
+    if (msgM) { items.push({ kind:'message', name: msgM[1], depth: stack.length }); stack.push('message'); }
+    else if (enumM) { items.push({ kind:'enum', name: enumM[1], depth: stack.length }); stack.push('enum'); }
+    else if (svcM) { items.push({ kind:'service', name: svcM[1], depth: stack.length }); stack.push('service'); }
+    else if (rpcM && stack[stack.length-1]==='service') {
+      items.push({ kind:'rpc', name: rpcM[1], req: rpcM[2].trim(), res: rpcM[3].trim(), depth: stack.length });
+    } else if (fieldM && stack.length > 0 && stack[stack.length-1]==='message') {
+      const isRep = t.startsWith('repeated');
+      items.push({ kind:'field', type: (isRep?'repeated ':'')+fieldM[1], name: fieldM[2], num: fieldM[3], depth: stack.length });
+    }
+    if (t === '}' || t === '};') stack.pop();
+  }
+  return items;
+}
+
+function run() {
+  const src = document.getElementById('input').value.trim();
+  if (!src) return;
+
+  const formatted = formatProto(src);
+  const tokenized = formatted.split('\n').map(tokenizeLine).join('\n');
+  document.getElementById('output').innerHTML = tokenized;
+
+  const issues = validate(src);
+  const issueHtml = issues.map(iss => {
+    const cls = iss.type === 'error' ? 'issue-error' : iss.type === 'warn' ? 'issue-warn' : 'issue-ok';
+    const bcls = iss.type === 'error' ? 'badge-error' : iss.type === 'warn' ? 'badge-warn' : 'badge-ok';
+    const label = iss.type.toUpperCase();
+    return `<div class="issue ${cls}"><span class="badge ${bcls}">${label}</span><span>${esc(iss.msg)}</span></div>`;
+  }).join('');
+  document.getElementById('issues').innerHTML = issueHtml;
+  document.getElementById('issuesPanel').style.display = '';
+
+  const struct = extractStructure(src);
+  const msgCount = struct.filter(i => i.kind==='message').length;
+  const enumCount = struct.filter(i => i.kind==='enum').length;
+  const svcCount = struct.filter(i => i.kind==='service').length;
+  const fieldCount = struct.filter(i => i.kind==='field').length;
+
+  const statsEl = document.getElementById('stats');
+  statsEl.innerHTML = `
+    <div class="stat">Messages: <strong>${msgCount}</strong></div>
+    <div class="stat">Enums: <strong>${enumCount}</strong></div>
+    <div class="stat">Services: <strong>${svcCount}</strong></div>
+    <div class="stat">Fields: <strong>${fieldCount}</strong></div>
+    <div class="stat">Lines: <strong>${formatted.split('\n').length}</strong></div>
+  `;
+  statsEl.style.display = 'flex';
+
+  const treeHtml = struct.map(item => {
+    const pad = '  '.repeat(item.depth > 0 ? item.depth - 1 : 0);
+    if (item.kind === 'message') return `<div class="tree-item tree-msg">${pad}▸ message ${item.name}</div>`;
+    if (item.kind === 'enum') return `<div class="tree-item tree-enum">${pad}▸ enum ${item.name}</div>`;
+    if (item.kind === 'service') return `<div class="tree-item tree-service">${pad}▸ service ${item.name}</div>`;
+    if (item.kind === 'rpc') return `<div class="tree-item tree-rpc">${pad}  ⟶ rpc ${item.name}(${item.req}) → ${item.res}</div>`;
+    if (item.kind === 'field') return `<div class="tree-item tree-field">${pad}  ${item.num}. ${item.type} ${item.name}</div>`;
+    return '';
+  }).join('');
+  document.getElementById('tree').innerHTML = treeHtml || '<span style="color:#4a5568">No messages found</span>';
+  document.getElementById('treePanel').style.display = '';
+
+  window._formattedOutput = formatted;
+}
+
+function copyOutput() {
+  const text = window._formattedOutput || document.getElementById('output').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function loadSample() {
+  document.getElementById('input').value = SAMPLE;
+  run();
+}
+
+function clearAll() {
+  document.getElementById('input').value = '';
+  document.getElementById('output').innerHTML = '<span class="empty-hint">Formatted proto will appear here</span>';
+  document.getElementById('stats').style.display = 'none';
+  document.getElementById('issuesPanel').style.display = 'none';
+  document.getElementById('treePanel').style.display = 'none';
+  window._formattedOutput = '';
+}
+</script>
+</body>
+</html>

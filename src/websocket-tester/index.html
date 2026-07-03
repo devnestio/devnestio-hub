@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebSocket Tester — devnestio</title>
+  <meta name="description" content="Test WebSocket connections in your browser. Connect to ws:// or wss:// endpoints, send text or JSON messages, view incoming/outgoing frames with timestamps. No install required.">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --surface: #161b22; --surface2: #21262d;
+      --border: #30363d; --text: #c9d1d9; --muted: #8b949e;
+      --accent: #58a6ff; --green: #3fb950; --red: #f85149; --yellow: #d29922;
+    }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 24px; }
+    header nav a { color: var(--accent); text-decoration: none; font-size: 0.9em; }
+    header h1 { font-size: 1.6rem; margin: 8px 0 4px; }
+    header p { color: var(--muted); font-size: 0.95em; }
+    main { flex: 1; padding: 24px; max-width: 960px; width: 100%; margin: 0 auto; }
+    footer { background: var(--surface); border-top: 1px solid var(--border); padding: 16px 24px; text-align: center; color: var(--muted); font-size: 0.875rem; }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    .btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9em; transition: background .15s; }
+    .btn:hover { background: var(--border); }
+    .btn-primary { background: var(--accent); color: #0d1117; border-color: var(--accent); font-weight: 600; }
+    .btn-primary:hover { background: #79b8ff; }
+    .btn-green { background: var(--green); color: #0d1117; border-color: var(--green); font-weight: 600; }
+    .btn-green:hover { background: #56d364; }
+    .btn-red { background: var(--red); color: #fff; border-color: var(--red); font-weight: 600; }
+    .btn-red:hover { background: #ff6b6b; }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    /* Connection bar */
+    .connect-bar { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; margin-bottom: 20px; }
+    .connect-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .url-input { flex: 1; min-width: 240px; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 9px 12px; border-radius: 6px; font-size: 0.95em; font-family: 'SF Mono', monospace; }
+    .url-input:focus { outline: none; border-color: var(--accent); }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--muted); flex-shrink: 0; transition: background .3s; }
+    .status-dot.connected { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .status-dot.connecting { background: var(--yellow); }
+    .status-dot.error { background: var(--red); }
+    .status-label { font-size: 0.88em; color: var(--muted); }
+
+    /* Options */
+    .options-row { display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap; align-items: center; font-size: 0.88em; color: var(--muted); }
+    .options-row label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+    .options-row input[type=text] { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 4px 8px; border-radius: 4px; font-size: 0.9em; width: 200px; }
+    .options-row input[type=text]:focus { outline: none; border-color: var(--accent); }
+
+    /* Log */
+    .log-container { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 16px; }
+    .log-header { padding: 10px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 0.9em; font-weight: 600; }
+    .log-body { height: 380px; overflow-y: auto; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.82em; }
+    .log-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--muted); font-family: inherit; font-size: 0.95em; }
+    .frame { padding: 8px 16px; border-bottom: 1px solid #1c2028; display: flex; gap: 12px; align-items: flex-start; }
+    .frame:last-child { border-bottom: none; }
+    .frame:hover { background: var(--surface2); }
+    .frame-time { color: var(--muted); font-size: 0.82em; white-space: nowrap; padding-top: 1px; min-width: 90px; }
+    .frame-dir { font-weight: 700; font-size: 0.8em; padding: 1px 5px; border-radius: 3px; margin-top: 1px; white-space: nowrap; }
+    .dir-sent { background: rgba(88,166,255,.15); color: var(--accent); }
+    .dir-recv { background: rgba(63,185,80,.15); color: var(--green); }
+    .dir-sys { background: rgba(139,148,158,.15); color: var(--muted); }
+    .dir-err { background: rgba(248,81,73,.15); color: var(--red); }
+    .frame-content { flex: 1; white-space: pre-wrap; word-break: break-all; line-height: 1.5; }
+    .frame-copy { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.85em; padding: 2px 4px; border-radius: 3px; opacity: 0; transition: opacity .15s; }
+    .frame:hover .frame-copy { opacity: 1; }
+    .frame-copy:hover { color: var(--accent); background: var(--surface2); }
+
+    /* Send */
+    .send-section { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; }
+    .send-section h3 { font-size: 0.9em; font-weight: 600; margin-bottom: 10px; color: var(--muted); }
+    .send-textarea { width: 100%; min-height: 90px; background: var(--surface2); border: 1px solid var(--border); color: var(--text); font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.85em; padding: 10px 12px; border-radius: 6px; resize: vertical; }
+    .send-textarea:focus { outline: none; border-color: var(--accent); }
+    .send-row { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; align-items: center; }
+    .msg-type { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 7px 10px; border-radius: 6px; font-size: 0.88em; }
+    .counter { margin-left: auto; font-size: 0.82em; color: var(--muted); }
+    .quick-btn { padding: 5px 10px; border-radius: 4px; border: 1px solid var(--border); background: transparent; color: var(--muted); font-size: 0.78em; cursor: pointer; transition: all .15s; }
+    .quick-btn:hover { border-color: var(--accent); color: var(--accent); }
+  </style>
+</head>
+<body>
+<header>
+  <nav><a href="/">← devnestio</a></nav>
+  <h1>WebSocket Tester</h1>
+  <p>Connect to ws:// or wss:// endpoints, send messages, and inspect frames in real time.</p>
+</header>
+<main>
+
+  <!-- Connection -->
+  <div class="connect-bar">
+    <div class="connect-row">
+      <div class="status-dot" id="status-dot"></div>
+      <input class="url-input" id="url-input" type="text" placeholder="wss://echo.websocket.org" value="wss://echo.websocket.org">
+      <button class="btn btn-green" id="connect-btn" onclick="connect()">Connect</button>
+      <button class="btn btn-red" id="disconnect-btn" onclick="disconnect()" disabled>Disconnect</button>
+    </div>
+    <div class="options-row">
+      <span class="status-label" id="status-label">Disconnected</span>
+      <label><input type="checkbox" id="auto-scroll" checked> Auto-scroll</label>
+      <label><input type="checkbox" id="auto-reconnect"> Auto-reconnect</label>
+      <label>Subprotocol: <input type="text" id="subprotocol" placeholder="e.g. chat, graphql-ws"></label>
+    </div>
+  </div>
+
+  <!-- Log -->
+  <div class="log-container">
+    <div class="log-header">
+      <span>📋 Message Log <span id="frame-count" style="color:var(--muted);font-weight:400;font-size:0.85em;"></span></span>
+      <div style="display:flex;gap:8px;">
+        <button class="btn" style="padding:4px 10px;font-size:0.8em;" onclick="copyAll()">Copy All</button>
+        <button class="btn" style="padding:4px 10px;font-size:0.8em;" onclick="clearLog()">Clear</button>
+      </div>
+    </div>
+    <div class="log-body" id="log-body">
+      <div class="log-empty" id="log-empty">Connect to a WebSocket endpoint to see messages.</div>
+    </div>
+  </div>
+
+  <!-- Send -->
+  <div class="send-section">
+    <h3>Send Message</h3>
+    <div style="margin-bottom:8px;display:flex;gap:6px;flex-wrap:wrap;">
+      <button class="quick-btn" onclick="setMessage('ping')">ping</button>
+      <button class="quick-btn" onclick="setMessage('{\"action\":\"subscribe\",\"channel\":\"updates\"}')">subscribe</button>
+      <button class="quick-btn" onclick="setMessage('{\"type\":\"heartbeat\"}')">heartbeat</button>
+      <button class="quick-btn" onclick="formatJSON()">Format JSON</button>
+    </div>
+    <textarea class="send-textarea" id="send-input" placeholder='Type a message or paste JSON…' onkeydown="handleKeydown(event)"></textarea>
+    <div class="send-row">
+      <select class="msg-type" id="msg-type">
+        <option value="text">Text</option>
+        <option value="json">JSON (auto-format)</option>
+      </select>
+      <button class="btn btn-primary" id="send-btn" onclick="sendMessage()" disabled>Send ↵</button>
+      <span class="counter" id="char-count">0 chars</span>
+    </div>
+    <p style="font-size:0.78em;color:var(--muted);margin-top:8px;">Tip: <kbd style="background:var(--surface2);padding:1px 5px;border-radius:3px;border:1px solid var(--border)">Ctrl+Enter</kbd> to send</p>
+  </div>
+</main>
+<footer>
+  <p>Made with ☕ · <a href="https://devnestio.pages.dev">devnestio</a></p>
+  <p style="margin-top:8px;font-size:0.85em;">If this saved you time, <a href="https://buymeacoffee.com/devnestio" target="_blank" rel="noopener">buy me a coffee ☕</a></p>
+</footer>
+<script>
+let ws = null;
+let frameCount = 0;
+let reconnectTimer = null;
+let sentCount = 0;
+let recvCount = 0;
+
+const logBody = document.getElementById('log-body');
+const sendInput = document.getElementById('send-input');
+const statusDot = document.getElementById('status-dot');
+const statusLabel = document.getElementById('status-label');
+const connectBtn = document.getElementById('connect-btn');
+const disconnectBtn = document.getElementById('disconnect-btn');
+const sendBtn = document.getElementById('send-btn');
+
+sendInput.addEventListener('input', () => {
+  document.getElementById('char-count').textContent = sendInput.value.length + ' chars';
+});
+
+function setStatus(state, text) {
+  statusDot.className = 'status-dot ' + state;
+  statusLabel.textContent = text;
+}
+
+function connect() {
+  const url = document.getElementById('url-input').value.trim();
+  if (!url) { alert('Enter a WebSocket URL.'); return; }
+  if (!url.startsWith('ws://') && !url.startsWith('wss://')) { alert('URL must start with ws:// or wss://'); return; }
+
+  const proto = document.getElementById('subprotocol').value.trim();
+  setStatus('connecting', 'Connecting…');
+  addFrame('sys', `Connecting to ${url}…`);
+
+  try {
+    ws = proto ? new WebSocket(url, proto.split(',').map(s=>s.trim())) : new WebSocket(url);
+  } catch(e) {
+    setStatus('error', 'Error: ' + e.message);
+    addFrame('err', 'Error: ' + e.message);
+    return;
+  }
+
+  ws.onopen = () => {
+    setStatus('connected', `Connected · ${url}`);
+    addFrame('sys', `✓ Connected to ${url}`);
+    connectBtn.disabled = true;
+    disconnectBtn.disabled = false;
+    sendBtn.disabled = false;
+  };
+  ws.onclose = (e) => {
+    setStatus('', `Disconnected (code ${e.code})`);
+    addFrame('sys', `✗ Closed — code ${e.code}, reason: ${e.reason || 'none'}`);
+    connectBtn.disabled = false;
+    disconnectBtn.disabled = true;
+    sendBtn.disabled = true;
+    ws = null;
+    if (document.getElementById('auto-reconnect').checked) {
+      addFrame('sys', 'Auto-reconnecting in 3s…');
+      reconnectTimer = setTimeout(connect, 3000);
+    }
+  };
+  ws.onerror = () => {
+    setStatus('error', 'Connection error');
+    addFrame('err', 'WebSocket error — check the URL and CORS/firewall settings.');
+  };
+  ws.onmessage = (e) => {
+    recvCount++;
+    const data = typeof e.data === 'string' ? e.data : `[Binary: ${e.data.byteLength} bytes]`;
+    addFrame('recv', data);
+  };
+}
+
+function disconnect() {
+  clearTimeout(reconnectTimer);
+  if (ws) { ws.close(1000, 'User disconnect'); ws = null; }
+  sendBtn.disabled = true;
+  connectBtn.disabled = false;
+  disconnectBtn.disabled = true;
+  setStatus('', 'Disconnected');
+}
+
+function sendMessage() {
+  if (!ws || ws.readyState !== WebSocket.OPEN) { alert('Not connected.'); return; }
+  let msg = sendInput.value;
+  if (!msg.trim()) return;
+  const type = document.getElementById('msg-type').value;
+  if (type === 'json') {
+    try { msg = JSON.stringify(JSON.parse(msg), null, 2); } catch(e) { alert('Invalid JSON: ' + e.message); return; }
+  }
+  ws.send(msg);
+  sentCount++;
+  addFrame('sent', msg);
+  sendInput.value = '';
+  document.getElementById('char-count').textContent = '0 chars';
+}
+
+function handleKeydown(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); sendMessage(); }
+}
+
+function addFrame(dir, content) {
+  const empty = document.getElementById('log-empty');
+  if (empty) empty.remove();
+
+  frameCount++;
+  document.getElementById('frame-count').textContent = `(${frameCount})`;
+
+  const now = new Date();
+  const ts = now.toTimeString().slice(0,8) + '.' + String(now.getMilliseconds()).padStart(3,'0');
+
+  const dirLabels = { sent: '↑ SENT', recv: '↓ RECV', sys: 'SYS', err: 'ERR' };
+  const dirClass = { sent: 'dir-sent', recv: 'dir-recv', sys: 'dir-sys', err: 'dir-err' };
+
+  const div = document.createElement('div');
+  div.className = 'frame';
+  div.innerHTML = `
+    <span class="frame-time">${ts}</span>
+    <span class="frame-dir ${dirClass[dir]}">${dirLabels[dir]}</span>
+    <span class="frame-content">${escHtml(content)}</span>
+    <button class="frame-copy" onclick="copyFrame(this)" title="Copy">⎘</button>
+  `;
+  div.querySelector('.frame-copy').dataset.content = content;
+  logBody.appendChild(div);
+
+  if (document.getElementById('auto-scroll').checked) {
+    logBody.scrollTop = logBody.scrollHeight;
+  }
+}
+
+function copyFrame(btn) {
+  navigator.clipboard.writeText(btn.dataset.content).then(() => {
+    const orig = btn.textContent; btn.textContent = '✓'; setTimeout(() => btn.textContent = orig, 1000);
+  });
+}
+
+function copyAll() {
+  const frames = logBody.querySelectorAll('.frame');
+  const text = Array.from(frames).map(f => {
+    const time = f.querySelector('.frame-time').textContent;
+    const dir = f.querySelector('.frame-dir').textContent;
+    const content = f.querySelector('.frame-content').textContent;
+    return `[${time}] ${dir} ${content}`;
+  }).join('\n');
+  navigator.clipboard.writeText(text).then(() => alert('Log copied to clipboard!'));
+}
+
+function clearLog() {
+  logBody.innerHTML = '<div class="log-empty" id="log-empty">Log cleared.</div>';
+  frameCount = 0;
+  document.getElementById('frame-count').textContent = '';
+}
+
+function setMessage(msg) {
+  sendInput.value = msg;
+  document.getElementById('char-count').textContent = msg.length + ' chars';
+  sendInput.focus();
+}
+
+function formatJSON() {
+  const v = sendInput.value.trim();
+  if (!v) return;
+  try {
+    sendInput.value = JSON.stringify(JSON.parse(v), null, 2);
+  } catch(e) { alert('Invalid JSON: ' + e.message); }
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+</body>
+</html>

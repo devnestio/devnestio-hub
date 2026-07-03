@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Git Commit Message Helper — devnestio</title>
+  <meta name="description" content="Build conventional commit messages with type, scope, breaking change flag, and body. Validates length, enforces Conventional Commits spec. Copy-ready git commit command." />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    header { background: #1a1d2e; border-bottom: 1px solid #2d3748; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+    header a { color: #7c85f3; text-decoration: none; font-size: 14px; }
+    header h1 { font-size: 18px; font-weight: 700; color: #fff; }
+    .container { max-width: 800px; margin: 0 auto; padding: 24px 16px; display: flex; flex-direction: column; gap: 20px; }
+    .panel { background: #1a1d2e; border: 1px solid #2d3748; border-radius: 10px; padding: 20px; }
+    .panel h2 { font-size: 13px; font-weight: 600; color: #a0aec0; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 16px; }
+    .type-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; margin-bottom: 4px; }
+    .type-btn { background: #0f1117; border: 1px solid #2d3748; border-radius: 8px; padding: 10px 12px; cursor: pointer; text-align: left; }
+    .type-btn:hover { border-color: #4a5568; }
+    .type-btn.active { border-color: #7c85f3; background: #1a1d2e; }
+    .type-btn .type-name { font-family: 'Courier New', monospace; font-size: 13px; font-weight: 700; }
+    .type-btn .type-desc { font-size: 11px; color: #718096; margin-top: 2px; }
+    .feat .type-name { color: #68d391; }
+    .fix .type-name { color: #fc8181; }
+    .docs .type-name { color: #7c85f3; }
+    .style .type-name { color: #fbd38d; }
+    .refactor .type-name { color: #b794f4; }
+    .perf .type-name { color: #63b3ed; }
+    .test .type-name { color: #f6ad55; }
+    .chore .type-name { color: #a0aec0; }
+    .ci .type-name { color: #9ae6b4; }
+    .build .type-name { color: #e2e8f0; }
+    .revert .type-name { color: #f6ad55; }
+    .field { margin-bottom: 14px; }
+    .field label { display: flex; justify-content: space-between; font-size: 12px; color: #a0aec0; margin-bottom: 5px; }
+    .field label .hint { color: #4a5568; font-weight: normal; }
+    .field input, .field textarea { width: 100%; background: #0f1117; border: 1px solid #2d3748; border-radius: 6px; padding: 9px 12px; color: #e2e8f0; font-size: 14px; font-family: system-ui, sans-serif; resize: vertical; }
+    .field input:focus, .field textarea:focus { outline: none; border-color: #7c85f3; }
+    .field input.error, .field textarea.error { border-color: #e53e3e; }
+    .char-count { font-size: 11px; float: right; }
+    .char-count.warn { color: #f6ad55; }
+    .char-count.error { color: #fc8181; }
+    .breaking-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+    .breaking-row label { font-size: 13px; color: #e2e8f0; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .breaking-row input[type=checkbox] { accent-color: #e53e3e; width: 16px; height: 16px; }
+    .breaking-badge { background: #742a2a; color: #fc8181; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+    .preview-box { background: #0f1117; border: 1px solid #2d3748; border-radius: 8px; padding: 14px; font-family: 'Courier New', monospace; font-size: 14px; color: #7ee787; white-space: pre-wrap; word-break: break-all; min-height: 60px; }
+    .cmd-box { background: #0f1117; border: 1px solid #2d3748; border-radius: 8px; padding: 14px; font-family: 'Courier New', monospace; font-size: 13px; color: #fbd38d; white-space: pre-wrap; word-break: break-all; margin-top: 10px; }
+    .btn-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .btn { background: #7c85f3; color: #fff; border: none; border-radius: 6px; padding: 8px 16px; font-size: 13px; cursor: pointer; font-weight: 600; }
+    .btn:hover { background: #6b74e0; }
+    .btn-secondary { background: #2d3748; }
+    .btn-secondary:hover { background: #3d4a5c; }
+    .copied { background: #276749 !important; }
+    .validation { font-size: 12px; margin-top: 8px; }
+    .valid-item { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+    .valid-item .icon { width: 14px; }
+    .ok { color: #68d391; }
+    .err { color: #fc8181; }
+  </style>
+</head>
+<body>
+<header>
+  <a href="/">← devnestio</a>
+  <h1>Git Commit Message Helper</h1>
+</header>
+<div class="container">
+  <div class="panel">
+    <h2>Type</h2>
+    <div class="type-grid" id="type-grid"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Details</h2>
+    <div class="field">
+      <label>
+        Scope <span class="hint">(optional — component, file, or module)</span>
+      </label>
+      <input type="text" id="scope" placeholder="e.g. auth, api, button" oninput="render()" maxlength="50" />
+    </div>
+    <div class="field">
+      <label>
+        Subject <span id="subject-count" class="char-count">0/72</span>
+      </label>
+      <input type="text" id="subject" placeholder="Short description in imperative mood (e.g. add login endpoint)" oninput="render()" maxlength="150" />
+    </div>
+    <div class="breaking-row">
+      <label>
+        <input type="checkbox" id="breaking" onchange="render()" />
+        Breaking Change
+        <span class="breaking-badge">BREAKING CHANGE</span>
+      </label>
+    </div>
+    <div class="field">
+      <label>Body <span class="hint">(optional — wrap at 72 chars)</span></label>
+      <textarea id="body" rows="4" placeholder="Longer description, motivation, what changed and why…" oninput="render()"></textarea>
+    </div>
+    <div class="field">
+      <label>Footer <span class="hint">(optional — e.g. Closes #123, Co-authored-by: …)</span></label>
+      <textarea id="footer" rows="2" placeholder="Closes #123&#10;Fixes #456" oninput="render()"></textarea>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Preview</h2>
+    <div class="preview-box" id="preview-box"></div>
+    <div class="cmd-box" id="cmd-box"></div>
+
+    <div class="validation" id="validation"></div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="copyMsg()">Copy Message</button>
+      <button class="btn btn-secondary" onclick="copyCmd()">Copy git commit</button>
+      <button class="btn btn-secondary" onclick="resetAll()">Reset</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const TYPES = [
+  { id: 'feat', name: 'feat', desc: 'New feature' },
+  { id: 'fix', name: 'fix', desc: 'Bug fix' },
+  { id: 'docs', name: 'docs', desc: 'Documentation' },
+  { id: 'style', name: 'style', desc: 'Formatting' },
+  { id: 'refactor', name: 'refactor', desc: 'Code restructure' },
+  { id: 'perf', name: 'perf', desc: 'Performance' },
+  { id: 'test', name: 'test', desc: 'Add/fix tests' },
+  { id: 'chore', name: 'chore', desc: 'Build / tools' },
+  { id: 'ci', name: 'ci', desc: 'CI/CD changes' },
+  { id: 'build', name: 'build', desc: 'Build system' },
+  { id: 'revert', name: 'revert', desc: 'Revert commit' },
+];
+
+let selectedType = 'feat';
+
+function buildTypeGrid() {
+  const el = document.getElementById('type-grid');
+  TYPES.forEach(t => {
+    const btn = document.createElement('div');
+    btn.className = `type-btn ${t.id}${t.id === selectedType ? ' active' : ''}`;
+    btn.innerHTML = `<div class="type-name">${t.name}${t.id === 'feat' || t.id === 'fix' ? '' : ''}</div><div class="type-desc">${t.desc}</div>`;
+    btn.onclick = () => {
+      selectedType = t.id;
+      document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      render();
+    };
+    el.appendChild(btn);
+  });
+}
+
+function buildCommitMsg() {
+  const scope = document.getElementById('scope').value.trim();
+  const subject = document.getElementById('subject').value.trim();
+  const breaking = document.getElementById('breaking').checked;
+  const body = document.getElementById('body').value.trim();
+  const footer = document.getElementById('footer').value.trim();
+
+  let header = selectedType;
+  if (scope) header += `(${scope})`;
+  if (breaking) header += '!';
+  header += `: ${subject}`;
+
+  let parts = [header];
+  if (body) parts.push('', body);
+  if (breaking && !footer.toLowerCase().includes('breaking change')) {
+    const bc = 'BREAKING CHANGE: ' + (subject || 'see description');
+    parts.push('', footer ? footer + '\n' + bc : bc);
+  } else if (footer) {
+    parts.push('', footer);
+  }
+  return parts.join('\n');
+}
+
+function render() {
+  const subject = document.getElementById('subject').value.trim();
+  const scope = document.getElementById('scope').value.trim();
+  const breaking = document.getElementById('breaking').checked;
+
+  // Subject char count
+  const headerLen = buildHeader(scope, subject, breaking).length;
+  const countEl = document.getElementById('subject-count');
+  countEl.textContent = `${headerLen}/72`;
+  countEl.className = 'char-count' + (headerLen > 72 ? ' error' : headerLen > 60 ? ' warn' : '');
+
+  const msg = buildCommitMsg();
+  document.getElementById('preview-box').textContent = msg || '(fill in subject to generate)';
+
+  const escaped = msg.replace(/'/g, "'\\''");
+  document.getElementById('cmd-box').textContent = subject
+    ? `git commit -m '${escaped}'`
+    : '(enter a subject line)';
+
+  // Validation
+  const validEl = document.getElementById('validation');
+  const checks = [
+    { label: 'Type selected', ok: !!selectedType },
+    { label: `Subject ≤72 chars (${headerLen})`, ok: headerLen <= 72 && headerLen > 0 },
+    { label: 'Subject not empty', ok: subject.length > 0 },
+    { label: 'Subject lowercase or sentence case', ok: !subject || !/^[A-Z]{2,}/.test(subject) },
+    { label: 'Subject does not end with period', ok: !subject || !subject.endsWith('.') },
+    { label: 'Imperative mood (starts with verb)', ok: !subject || /^[a-z]/.test(subject) },
+  ];
+  validEl.innerHTML = checks.map(c =>
+    `<div class="valid-item ${c.ok ? 'ok' : 'err'}"><span class="icon">${c.ok ? '✓' : '✗'}</span>${c.label}</div>`
+  ).join('');
+}
+
+function buildHeader(scope, subject, breaking) {
+  let h = selectedType;
+  if (scope) h += `(${scope})`;
+  if (breaking) h += '!';
+  h += `: ${subject}`;
+  return h;
+}
+
+function copyMsg() {
+  const msg = buildCommitMsg();
+  if (!msg.trim()) return;
+  navigator.clipboard.writeText(msg).then(() => {
+    const btn = document.querySelectorAll('.btn-secondary')[0];
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy Message'; btn.classList.remove('copied'); }, 1500);
+  });
+}
+
+function copyCmd() {
+  const msg = buildCommitMsg();
+  if (!msg.trim()) return;
+  const escaped = msg.replace(/'/g, "'\\''");
+  navigator.clipboard.writeText(`git commit -m '${escaped}'`).then(() => {
+    const btn = document.querySelectorAll('.btn-secondary')[1];
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy git commit'; btn.classList.remove('copied'); }, 1500);
+  });
+}
+
+function resetAll() {
+  selectedType = 'feat';
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.type-btn.feat').classList.add('active');
+  ['scope','subject','body','footer'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('breaking').checked = false;
+  render();
+}
+
+buildTypeGrid();
+render();
+</script>
+</body>
+</html>

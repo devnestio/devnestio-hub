@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Type Scale Generator — devnestio</title>
+  <meta name="description" content="Generate typographic scales for CSS. Choose a ratio (Minor Third, Major Third, Perfect Fourth, Golden Ratio…), base size, and unit. Live preview with copy-ready CSS custom properties." />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    header { background: #1a1d2e; border-bottom: 1px solid #2d3748; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+    header a { color: #7c85f3; text-decoration: none; font-size: 14px; }
+    header h1 { font-size: 18px; font-weight: 700; color: #fff; }
+    .container { max-width: 900px; margin: 0 auto; padding: 24px 16px; display: grid; grid-template-columns: 280px 1fr; gap: 24px; }
+    @media (max-width: 680px) { .container { grid-template-columns: 1fr; } }
+    .panel { background: #1a1d2e; border: 1px solid #2d3748; border-radius: 10px; padding: 20px; }
+    .panel h2 { font-size: 13px; font-weight: 600; color: #a0aec0; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 16px; }
+    .field { margin-bottom: 14px; }
+    .field label { display: flex; justify-content: space-between; font-size: 12px; color: #a0aec0; margin-bottom: 5px; }
+    .field label span { color: #7c85f3; font-weight: 700; }
+    .field input[type=range] { width: 100%; accent-color: #7c85f3; }
+    .field input[type=number], .field select { width: 100%; background: #0f1117; border: 1px solid #2d3748; border-radius: 6px; padding: 8px 10px; color: #e2e8f0; font-size: 13px; }
+    .ratio-presets { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 14px; }
+    .ratio-btn { background: #0f1117; border: 1px solid #2d3748; border-radius: 6px; padding: 7px 8px; font-size: 11px; color: #a0aec0; cursor: pointer; text-align: center; }
+    .ratio-btn:hover { border-color: #7c85f3; color: #7c85f3; }
+    .ratio-btn.active { background: #7c85f3; border-color: #7c85f3; color: #fff; }
+    .ratio-btn .ratio-name { font-weight: 700; font-size: 12px; }
+    .ratio-btn .ratio-val { color: inherit; opacity: .7; font-size: 10px; }
+    .unit-tabs { display: flex; gap: 4px; margin-bottom: 14px; }
+    .unit-tab { flex: 1; text-align: center; background: #0f1117; border: 1px solid #2d3748; border-radius: 6px; padding: 6px; font-size: 12px; cursor: pointer; color: #718096; }
+    .unit-tab.active { background: #7c85f3; border-color: #7c85f3; color: #fff; }
+    .step-row { display: flex; align-items: center; gap: 6px; padding: 10px 0; border-bottom: 1px solid #1a1d2e; }
+    .step-row:last-child { border-bottom: none; }
+    .step-label { font-size: 11px; font-family: 'Courier New', monospace; color: #7c85f3; width: 60px; flex-shrink: 0; }
+    .step-bar-wrap { flex: 1; height: 24px; display: flex; align-items: center; }
+    .step-bar { height: 100%; border-radius: 3px; background: linear-gradient(to right, #7c85f3, #a855f7); min-width: 2px; }
+    .step-size { font-family: 'Courier New', monospace; font-size: 12px; color: #e2e8f0; width: 70px; text-align: right; flex-shrink: 0; }
+    .step-preview { font-size: 12px; color: #718096; width: 80px; text-align: right; flex-shrink: 0; overflow: hidden; white-space: nowrap; }
+    .output-box { background: #0f1117; border: 1px solid #2d3748; border-radius: 8px; padding: 14px; font-family: 'Courier New', monospace; font-size: 12px; color: #7ee787; white-space: pre; overflow-x: auto; }
+    .btn-row { display: flex; gap: 8px; margin-top: 10px; }
+    .btn { background: #7c85f3; color: #fff; border: none; border-radius: 6px; padding: 7px 14px; font-size: 13px; cursor: pointer; font-weight: 600; }
+    .btn-secondary { background: #2d3748; }
+    .btn-secondary:hover { background: #3d4a5c; }
+    .btn-sm { padding: 5px 10px; font-size: 12px; border-radius: 4px; }
+    .copied { background: #276749 !important; }
+    .format-tabs { display: flex; gap: 4px; margin-bottom: 10px; }
+    .format-tab { background: #0f1117; border: 1px solid #2d3748; border-radius: 6px; padding: 5px 10px; font-size: 11px; cursor: pointer; color: #718096; }
+    .format-tab.active { background: #2d3748; color: #e2e8f0; border-color: #4a5568; }
+  </style>
+</head>
+<body>
+<header>
+  <a href="/">← devnestio</a>
+  <h1>Type Scale Generator</h1>
+</header>
+<div class="container">
+  <div style="display:flex;flex-direction:column;gap:16px;">
+    <div class="panel">
+      <h2>Settings</h2>
+      <div class="field">
+        <label>Base size <span id="base-val">16px</span></label>
+        <input type="range" id="base-range" min="10" max="24" value="16" step="1" oninput="setBase(+this.value)">
+      </div>
+      <div class="field">
+        <label>Steps above base <span id="up-val">6</span></label>
+        <input type="range" id="up-range" min="1" max="10" value="6" oninput="document.getElementById('up-val').textContent=this.value;render()">
+      </div>
+      <div class="field">
+        <label>Steps below base <span id="down-val">2</span></label>
+        <input type="range" id="down-range" min="0" max="4" value="2" oninput="document.getElementById('down-val').textContent=this.value;render()">
+      </div>
+      <div style="font-size:12px;color:#a0aec0;margin-bottom:8px;">Unit</div>
+      <div class="unit-tabs">
+        <div class="unit-tab active" onclick="setUnit('px',this)">px</div>
+        <div class="unit-tab" onclick="setUnit('rem',this)">rem</div>
+        <div class="unit-tab" onclick="setUnit('em',this)">em</div>
+      </div>
+      <div style="font-size:12px;color:#a0aec0;margin-bottom:8px;">Ratio</div>
+      <div class="ratio-presets" id="ratio-presets"></div>
+      <div class="field">
+        <label>Custom ratio</label>
+        <input type="number" id="custom-ratio" min="1.01" max="3" step="0.001" value="1.333" oninput="setCustomRatio(+this.value)">
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:16px;">
+    <div class="panel">
+      <h2>Scale Preview</h2>
+      <div id="scale-list"></div>
+    </div>
+    <div class="panel">
+      <h2>CSS Output</h2>
+      <div class="format-tabs">
+        <div class="format-tab active" onclick="setFormat('custom-props',this)">CSS Variables</div>
+        <div class="format-tab" onclick="setFormat('tailwind',this)">Tailwind config</div>
+        <div class="format-tab" onclick="setFormat('scss',this)">SCSS map</div>
+      </div>
+      <div class="output-box" id="output-box"></div>
+      <div class="btn-row">
+        <button class="btn btn-secondary btn-sm" onclick="copyCSS()">Copy</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const RATIOS = [
+  { name: 'Minor Second', val: 1.067 },
+  { name: 'Major Second', val: 1.125 },
+  { name: 'Minor Third', val: 1.2 },
+  { name: 'Major Third', val: 1.25 },
+  { name: 'Perfect Fourth', val: 1.333 },
+  { name: 'Augmented Fourth', val: 1.414 },
+  { name: 'Perfect Fifth', val: 1.5 },
+  { name: 'Golden Ratio', val: 1.618 },
+];
+
+let baseSize = 16;
+let ratio = 1.333;
+let unit = 'px';
+let format = 'custom-props';
+const STEP_NAMES = ['xs','sm','base','lg','xl','2xl','3xl','4xl','5xl','6xl','7xl','8xl','9xl'];
+
+function buildRatioPresets() {
+  const el = document.getElementById('ratio-presets');
+  RATIOS.forEach(r => {
+    const btn = document.createElement('div');
+    btn.className = 'ratio-btn' + (r.val === ratio ? ' active' : '');
+    btn.innerHTML = `<div class="ratio-name">${r.name}</div><div class="ratio-val">${r.val}</div>`;
+    btn.onclick = () => {
+      ratio = r.val;
+      document.getElementById('custom-ratio').value = r.val;
+      document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      render();
+    };
+    el.appendChild(btn);
+  });
+}
+
+function setBase(v) {
+  baseSize = v;
+  document.getElementById('base-val').textContent = v + 'px';
+  document.getElementById('base-range').value = v;
+  render();
+}
+
+function setUnit(u, el) {
+  unit = u;
+  document.querySelectorAll('.unit-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+function setCustomRatio(v) {
+  if (v >= 1.01 && v <= 3) {
+    ratio = v;
+    document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('active'));
+    render();
+  }
+}
+
+function setFormat(f, el) {
+  format = f;
+  document.querySelectorAll('.format-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+function getSteps() {
+  const up = +document.getElementById('up-range').value;
+  const down = +document.getElementById('down-range').value;
+  const steps = [];
+  for (let i = -down; i <= up; i++) {
+    const px = baseSize * Math.pow(ratio, i);
+    const displayVal = unit === 'px' ? px.toFixed(2) + 'px'
+      : unit === 'rem' ? (px / 16).toFixed(4) + 'rem'
+      : (px / baseSize).toFixed(4) + 'em';
+    const nameIdx = i + down;
+    steps.push({ step: i, px, displayVal, name: STEP_NAMES[nameIdx] || `step-${i}` });
+  }
+  return steps;
+}
+
+function render() {
+  const steps = getSteps();
+  const maxPx = Math.max(...steps.map(s => s.px));
+
+  // Scale list
+  const list = document.getElementById('scale-list');
+  list.innerHTML = '';
+  [...steps].reverse().forEach(s => {
+    const row = document.createElement('div');
+    row.className = 'step-row';
+    const barWidth = Math.max(2, (s.px / maxPx) * 100);
+    const previewSize = Math.min(24, Math.max(10, s.px));
+    row.innerHTML = `
+      <span class="step-label">${s.step >= 0 ? '+' : ''}${s.step}</span>
+      <div class="step-bar-wrap"><div class="step-bar" style="width:${barWidth}%"></div></div>
+      <span class="step-size">${s.displayVal}</span>
+      <span class="step-preview" style="font-size:${previewSize}px">Aa</span>`;
+    list.appendChild(row);
+  });
+
+  // CSS output
+  let css = '';
+  if (format === 'custom-props') {
+    css = ':root {\n' + steps.map(s => `  --text-${s.name}: ${s.displayVal};`).join('\n') + '\n}';
+  } else if (format === 'tailwind') {
+    css = 'module.exports = {\n  theme: {\n    fontSize: {\n' +
+      steps.map(s => `      '${s.name}': '${s.displayVal}',`).join('\n') +
+      '\n    }\n  }\n}';
+  } else if (format === 'scss') {
+    css = '$type-scale: (\n' + steps.map(s => `  '${s.name}': ${s.displayVal},`).join('\n') + '\n);';
+  }
+  document.getElementById('output-box').textContent = css;
+}
+
+function copyCSS() {
+  navigator.clipboard.writeText(document.getElementById('output-box').textContent).then(() => {
+    const btn = document.querySelector('.btn-secondary');
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+  });
+}
+
+buildRatioPresets();
+render();
+</script>
+</body>
+</html>

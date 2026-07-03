@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bitwise Calculator — AND, OR, XOR, NOT, Shifts | DevNestio</title>
+  <meta name="description" content="Perform bitwise operations (AND, OR, XOR, NOT, shift left/right, rotate) on integers. Visual 32-bit binary representation with clickable bits. Hex, octal, and decimal output." />
+  <meta property="og:title" content="Bitwise Calculator | DevNestio" />
+  <meta property="og:description" content="AND, OR, XOR, NOT, SHL, SHR, ROTR, ROTL operations with live 32-bit bit viewer. Click bits to toggle. Results in hex, octal, binary, and decimal." />
+  <meta property="og:url" content="https://devnestio.pages.dev/bitwise-calc/" />
+  <meta name="twitter:card" content="summary" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    #privacy-banner { background: #1e293b; border-bottom: 1px solid #334155; padding: 8px 16px; font-size: 12px; color: #94a3b8; text-align: center; }
+    header { background: #1e293b; border-bottom: 1px solid #334155; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+    header a { color: #64748b; font-size: 13px; text-decoration: none; margin-left: auto; }
+    header a:hover { color: #94a3b8; }
+    .badge { background: #f59e0b; color: #000; font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+    main { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 18px; margin-bottom: 16px; }
+    .card-title { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 12px; }
+    .inputs-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 600px) { .inputs-row { grid-template-columns: 1fr; } }
+    .inp-group label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 5px; font-weight: 600; }
+    .inp-group input { width: 100%; padding: 9px 12px; background: #0f1117; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 16px; font-family: 'JetBrains Mono', monospace; outline: none; }
+    .inp-group input:focus { border-color: #f59e0b; }
+    .inp-group input.invalid { border-color: #ef4444; }
+    .base-tabs { display: flex; gap: 4px; margin-top: 8px; }
+    .base-tab { padding: 3px 9px; border-radius: 5px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid #334155; background: #0f1117; color: #64748b; }
+    .base-tab.active { background: #f59e0b; border-color: #f59e0b; color: #000; }
+    .ops-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 8px; }
+    .op-btn { padding: 10px 6px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; border: 1px solid #334155; background: #0f1117; color: #94a3b8; text-align: center; transition: all 0.15s; }
+    .op-btn:hover { border-color: #f59e0b; color: #f59e0b; background: rgba(245,158,11,0.08); }
+    .op-btn.active { background: #f59e0b; border-color: #f59e0b; color: #000; }
+    .op-sub { font-size: 10px; font-weight: 400; margin-top: 2px; opacity: 0.7; }
+    .shift-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+    .shift-row label { font-size: 12px; color: #94a3b8; white-space: nowrap; }
+    .shift-row input { width: 60px; padding: 5px 8px; background: #0f1117; border: 1px solid #334155; border-radius: 5px; color: #e2e8f0; font-size: 13px; font-family: monospace; outline: none; text-align: center; }
+    .shift-row input:focus { border-color: #f59e0b; }
+    .result-grid { display: grid; grid-template-columns: 70px 1fr auto; gap: 8px 14px; align-items: center; }
+    .result-label { font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase; }
+    .result-val { font-family: 'JetBrains Mono', monospace; font-size: 15px; color: #f1f5f9; word-break: break-all; }
+    .result-copy { padding: 3px 9px; border-radius: 5px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid #334155; background: transparent; color: #64748b; }
+    .result-copy:hover { border-color: #f59e0b; color: #f59e0b; }
+    .bit-section { margin-top: 4px; }
+    .bit-label { font-size: 11px; color: #64748b; margin-bottom: 6px; }
+    .bit-grid { display: flex; flex-wrap: wrap; gap: 3px; }
+    .bit-group { display: flex; gap: 2px; }
+    .bit { width: 22px; height: 26px; border-radius: 4px; font-size: 11px; font-weight: 700; font-family: monospace; cursor: pointer; border: 1px solid #334155; display: flex; align-items: center; justify-content: center; transition: all 0.1s; user-select: none; }
+    .bit.on { background: #f59e0b; border-color: #f59e0b; color: #000; }
+    .bit.off { background: #0f1117; color: #475569; }
+    .bit:hover { border-color: #f59e0b; }
+    .bit-indices { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 2px; }
+    .bit-idx-group { display: flex; gap: 2px; }
+    .bit-idx { width: 22px; font-size: 9px; color: #334155; text-align: center; }
+    .mode-row { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; }
+    .mode-btn { padding: 3px 10px; border-radius: 5px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid #334155; background: #0f1117; color: #64748b; }
+    .mode-btn.active { background: #f59e0b; border-color: #f59e0b; color: #000; }
+    #ad-slot { margin: 20px auto; text-align: center; }
+  </style>
+</head>
+<body>
+<div id="privacy-banner">🔒 All processing happens in your browser. No data is sent to any server.</div>
+<header>
+  <span class="badge">FREE</span>
+  <h1>Bitwise Calculator</h1>
+  <a href="https://devnestio.pages.dev">← All Tools</a>
+</header>
+<main>
+
+  <!-- Inputs -->
+  <div class="card">
+    <div class="card-title">Inputs</div>
+    <div class="inputs-row">
+      <div class="inp-group">
+        <label>Operand A</label>
+        <input id="inp-a" type="text" value="0xFF" oninput="recalc()" />
+        <div class="base-tabs" id="base-tabs-a">
+          <button class="base-tab active" data-base="auto" onclick="setBase('a','auto')">Auto</button>
+          <button class="base-tab" data-base="10" onclick="setBase('a','10')">Dec</button>
+          <button class="base-tab" data-base="16" onclick="setBase('a','16')">Hex</button>
+          <button class="base-tab" data-base="2" onclick="setBase('a','2')">Bin</button>
+          <button class="base-tab" data-base="8" onclick="setBase('a','8')">Oct</button>
+        </div>
+      </div>
+      <div class="inp-group">
+        <label>Operand B</label>
+        <input id="inp-b" type="text" value="0x0F" oninput="recalc()" />
+        <div class="base-tabs" id="base-tabs-b">
+          <button class="base-tab active" data-base="auto" onclick="setBase('b','auto')">Auto</button>
+          <button class="base-tab" data-base="10" onclick="setBase('b','10')">Dec</button>
+          <button class="base-tab" data-base="16" onclick="setBase('b','16')">Hex</button>
+          <button class="base-tab" data-base="2" onclick="setBase('b','2')">Bin</button>
+          <button class="base-tab" data-base="8" onclick="setBase('b','8')">Oct</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Operations -->
+  <div class="card">
+    <div class="card-title">Operation</div>
+    <div class="ops-grid" id="ops-grid">
+      <button class="op-btn active" data-op="AND" onclick="setOp('AND')">AND<div class="op-sub">A &amp; B</div></button>
+      <button class="op-btn" data-op="OR" onclick="setOp('OR')">OR<div class="op-sub">A | B</div></button>
+      <button class="op-btn" data-op="XOR" onclick="setOp('XOR')">XOR<div class="op-sub">A ^ B</div></button>
+      <button class="op-btn" data-op="NOT_A" onclick="setOp('NOT_A')">NOT A<div class="op-sub">~A</div></button>
+      <button class="op-btn" data-op="NOT_B" onclick="setOp('NOT_B')">NOT B<div class="op-sub">~B</div></button>
+      <button class="op-btn" data-op="NAND" onclick="setOp('NAND')">NAND<div class="op-sub">~(A&amp;B)</div></button>
+      <button class="op-btn" data-op="NOR" onclick="setOp('NOR')">NOR<div class="op-sub">~(A|B)</div></button>
+      <button class="op-btn" data-op="XNOR" onclick="setOp('XNOR')">XNOR<div class="op-sub">~(A^B)</div></button>
+      <button class="op-btn" data-op="SHL" onclick="setOp('SHL')">SHL<div class="op-sub">A &lt;&lt; n</div></button>
+      <button class="op-btn" data-op="SHR" onclick="setOp('SHR')">SHR<div class="op-sub">A &gt;&gt; n</div></button>
+      <button class="op-btn" data-op="SHRA" onclick="setOp('SHRA')">SHRA<div class="op-sub">A &gt;&gt;&gt; n</div></button>
+      <button class="op-btn" data-op="ROTL" onclick="setOp('ROTL')">ROTL<div class="op-sub">rotate ←</div></button>
+      <button class="op-btn" data-op="ROTR" onclick="setOp('ROTR')">ROTR<div class="op-sub">rotate →</div></button>
+    </div>
+    <div class="shift-row" id="shift-row" style="display:none">
+      <label>Shift amount (n):</label>
+      <input id="shift-n" type="number" min="0" max="31" value="1" oninput="recalc()" />
+      <span style="font-size:12px;color:#64748b">0–31 bits</span>
+    </div>
+  </div>
+
+  <!-- Result -->
+  <div class="card">
+    <div class="card-title">Result</div>
+    <div class="result-grid" id="result-grid">
+      <span class="result-label">HEX</span>
+      <span class="result-val" id="r-hex">—</span>
+      <button class="result-copy" onclick="copyResult('hex')">Copy</button>
+      <span class="result-label">DEC</span>
+      <span class="result-val" id="r-dec">—</span>
+      <button class="result-copy" onclick="copyResult('dec')">Copy</button>
+      <span class="result-label">BIN</span>
+      <span class="result-val" id="r-bin">—</span>
+      <button class="result-copy" onclick="copyResult('bin')">Copy</button>
+      <span class="result-label">OCT</span>
+      <span class="result-val" id="r-oct">—</span>
+      <button class="result-copy" onclick="copyResult('oct')">Copy</button>
+    </div>
+  </div>
+
+  <!-- Bit viewer -->
+  <div class="card">
+    <div class="card-title">32-bit Viewer</div>
+    <div class="mode-row">
+      <span style="font-size:12px;color:#64748b">Click bits to toggle A</span>
+      <button class="mode-btn active" id="view-a-btn" onclick="setBitView('a')">View A</button>
+      <button class="mode-btn" id="view-r-btn" onclick="setBitView('r')">View Result</button>
+    </div>
+    <div class="bit-section">
+      <div class="bit-indices" id="bit-indices"></div>
+      <div class="bit-grid" id="bit-grid"></div>
+    </div>
+  </div>
+
+  <div id="ad-slot" data-ea-publisher="devnestio" data-ea-type="image"></div>
+</main>
+<script>
+let currentOp = 'AND';
+let baseA = 'auto';
+let baseB = 'auto';
+let valA = 0, valB = 0, valR = 0;
+let bitView = 'a';
+
+const MASK32 = 0xFFFFFFFF;
+
+function parseNum(str, base) {
+  str = str.trim();
+  if (!str) return NaN;
+  if (base === 'auto') {
+    if (/^0x/i.test(str)) return parseInt(str, 16);
+    if (/^0b/i.test(str)) return parseInt(str.slice(2), 2);
+    if (/^0o/i.test(str)) return parseInt(str.slice(2), 8);
+    if (/^-?\d+$/.test(str)) return parseInt(str, 10);
+    return NaN;
+  }
+  return parseInt(str, parseInt(base));
+}
+
+function compute(a, b, op) {
+  a = a | 0;
+  b = b | 0;
+  const n = (parseInt(document.getElementById('shift-n').value) || 0) & 31;
+  switch(op) {
+    case 'AND':   return (a & b) >>> 0;
+    case 'OR':    return (a | b) >>> 0;
+    case 'XOR':   return (a ^ b) >>> 0;
+    case 'NOT_A': return (~a) >>> 0;
+    case 'NOT_B': return (~b) >>> 0;
+    case 'NAND':  return (~(a & b)) >>> 0;
+    case 'NOR':   return (~(a | b)) >>> 0;
+    case 'XNOR':  return (~(a ^ b)) >>> 0;
+    case 'SHL':   return (a << n) >>> 0;
+    case 'SHR':   return (a >>> n) >>> 0;
+    case 'SHRA':  return (a >> n) >>> 0;
+    case 'ROTL':  { const s = n & 31; return ((a << s) | (a >>> (32 - s))) >>> 0; }
+    case 'ROTR':  { const s = n & 31; return ((a >>> s) | (a << (32 - s))) >>> 0; }
+    default: return 0;
+  }
+}
+
+function recalc() {
+  const rawA = document.getElementById('inp-a').value;
+  const rawB = document.getElementById('inp-b').value;
+  const a = parseNum(rawA, baseA);
+  const b = parseNum(rawB, baseB);
+
+  const inpA = document.getElementById('inp-a');
+  const inpB = document.getElementById('inp-b');
+  inpA.className = isNaN(a) ? 'invalid' : '';
+  inpB.className = isNaN(b) ? 'invalid' : '';
+
+  if (isNaN(a) || isNaN(b)) {
+    document.getElementById('r-hex').textContent = '—';
+    document.getElementById('r-dec').textContent = '—';
+    document.getElementById('r-bin').textContent = '—';
+    document.getElementById('r-oct').textContent = '—';
+    return;
+  }
+
+  valA = a >>> 0;
+  valB = b >>> 0;
+  valR = compute(valA, valB, currentOp);
+
+  document.getElementById('r-hex').textContent = '0x' + valR.toString(16).toUpperCase().padStart(8, '0');
+  document.getElementById('r-dec').textContent = String(valR >>> 0);
+  document.getElementById('r-bin').textContent = valR.toString(2).padStart(32, '0').match(/.{4}/g).join(' ');
+  document.getElementById('r-oct').textContent = '0o' + valR.toString(8);
+
+  renderBits(bitView === 'a' ? valA : valR);
+}
+
+function renderBits(val) {
+  val = val >>> 0;
+  const grid = document.getElementById('bit-grid');
+  const idx = document.getElementById('bit-indices');
+  grid.innerHTML = '';
+  idx.innerHTML = '';
+
+  for (let g = 0; g < 4; g++) {
+    const idxGrp = document.createElement('div');
+    idxGrp.className = 'bit-idx-group';
+    const bitGrp = document.createElement('div');
+    bitGrp.className = 'bit-group';
+
+    for (let b = 0; b < 8; b++) {
+      const bit = 31 - (g * 8 + b);
+      const on = (val >>> bit) & 1;
+
+      const idxEl = document.createElement('div');
+      idxEl.className = 'bit-idx';
+      idxEl.textContent = bit;
+      idxGrp.appendChild(idxEl);
+
+      const bitEl = document.createElement('div');
+      bitEl.className = 'bit ' + (on ? 'on' : 'off');
+      bitEl.textContent = on ? '1' : '0';
+      bitEl.title = `Bit ${bit}`;
+      if (bitView === 'a') {
+        bitEl.onclick = () => toggleBit(bit);
+      }
+      bitGrp.appendChild(bitEl);
+    }
+    idx.appendChild(idxGrp);
+    grid.appendChild(bitGrp);
+  }
+}
+
+function toggleBit(bit) {
+  valA ^= (1 << bit);
+  const hex = '0x' + valA.toString(16).toUpperCase();
+  document.getElementById('inp-a').value = hex;
+  recalc();
+}
+
+function setOp(op) {
+  currentOp = op;
+  document.querySelectorAll('.op-btn').forEach(b => b.classList.toggle('active', b.dataset.op === op));
+  const needsShift = ['SHL','SHR','SHRA','ROTL','ROTR'].includes(op);
+  document.getElementById('shift-row').style.display = needsShift ? 'flex' : 'none';
+  recalc();
+}
+
+function setBase(ab, base) {
+  if (ab === 'a') baseA = base;
+  else baseB = base;
+  const container = document.getElementById('base-tabs-' + ab);
+  container.querySelectorAll('.base-tab').forEach(b => b.classList.toggle('active', b.dataset.base === base));
+  recalc();
+}
+
+function setBitView(v) {
+  bitView = v;
+  document.getElementById('view-a-btn').classList.toggle('active', v === 'a');
+  document.getElementById('view-r-btn').classList.toggle('active', v === 'r');
+  renderBits(v === 'a' ? valA : valR);
+}
+
+const results = {};
+function copyResult(type) {
+  const map = { hex: 'r-hex', dec: 'r-dec', bin: 'r-bin', oct: 'r-oct' };
+  const val = document.getElementById(map[type]).textContent;
+  if (val !== '—') navigator.clipboard.writeText(val);
+}
+
+recalc();
+</script>
+</body>
+</html>

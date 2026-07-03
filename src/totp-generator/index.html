@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TOTP Generator – 2FA Code Generator (RFC 6238) | DevNestio</title>
+  <meta name="description" content="Generate TOTP (Time-based One-Time Password) codes from a secret key. RFC 6238 compliant, 30-second window, SHA-1/SHA-256, browser-only." />
+  <meta property="og:title" content="TOTP Generator – 2FA Code Generator (RFC 6238) | DevNestio" />
+  <meta property="og:description" content="Generate and verify TOTP 2FA codes from a secret key. RFC 6238 compliant. No server, Web Crypto API." />
+  <meta property="og:url" content="https://devnestio.pages.dev/totp-generator/" />
+  <meta name="twitter:card" content="summary" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    #privacy-banner { background: #1e293b; border-bottom: 1px solid #334155; padding: 8px 16px; font-size: 12px; color: #94a3b8; text-align: center; }
+    header { background: #1e293b; border-bottom: 1px solid #334155; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+    header a { color: #64748b; font-size: 13px; text-decoration: none; margin-left: auto; }
+    header a:hover { color: #94a3b8; }
+    .badge { background: #7c3aed; color: #fff; font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+    main { max-width: 600px; margin: 0 auto; padding: 24px 16px; }
+    .panel { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+    .panel h2 { font-size: 13px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 14px; }
+    label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 4px; margin-top: 12px; }
+    label:first-of-type { margin-top: 0; }
+    input[type="text"], select { width: 100%; padding: 9px 12px; background: #0f1117; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 13px; outline: none; font-family: monospace; }
+    input:focus, select:focus { border-color: #7c3aed; }
+    .btn { padding: 9px 18px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; }
+    .btn-primary { background: #7c3aed; color: #fff; }
+    .btn-primary:hover { background: #6d28d9; }
+    .btn-secondary { background: #334155; color: #e2e8f0; }
+    .btn-secondary:hover { background: #475569; }
+    .btn-row { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+    .code-display { text-align: center; padding: 24px 16px; background: #0f1117; border-radius: 10px; border: 1px solid #334155; margin-top: 12px; }
+    .code-digits { font-size: 52px; font-weight: 900; font-family: 'JetBrains Mono', monospace; letter-spacing: 12px; color: #a78bfa; line-height: 1; }
+    .code-digits.expiring { color: #f87171; animation: pulse 1s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.7} }
+    .code-label { font-size: 12px; color: #64748b; margin-top: 8px; }
+    .progress-wrap { margin-top: 14px; background: #334155; border-radius: 99px; height: 6px; overflow: hidden; }
+    .progress-bar { height: 100%; border-radius: 99px; background: #7c3aed; transition: width 1s linear, background 0.3s; }
+    .progress-bar.expiring { background: #f87171; }
+    .time-remaining { font-size: 13px; color: #94a3b8; text-align: center; margin-top: 6px; }
+    .copy-btn { margin-top: 12px; width: 100%; }
+    .status { margin-top: 10px; padding: 8px 12px; border-radius: 6px; font-size: 13px; }
+    .status.ok { background: #14532d; color: #86efac; }
+    .status.err { background: #450a0a; color: #fca5a5; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+    .info-item { background: #0f1117; border-radius: 6px; padding: 10px 12px; }
+    .info-label { font-size: 11px; color: #64748b; }
+    .info-value { font-size: 14px; font-weight: 700; color: #e2e8f0; margin-top: 2px; font-family: monospace; }
+    #ad-slot { margin: 20px auto; text-align: center; }
+  </style>
+</head>
+<body>
+
+<div id="privacy-banner">🔒 All processing happens in your browser. The secret key never leaves your device.</div>
+
+<header>
+  <span class="badge">FREE</span>
+  <h1>TOTP Generator</h1>
+  <a href="https://devnestio.pages.dev">← All Tools</a>
+</header>
+
+<main>
+  <div class="panel">
+    <h2>Configuration</h2>
+    <label>Secret Key (Base32)</label>
+    <div style="display:flex;gap:8px">
+      <input type="text" id="secret" value="JBSWY3DPEHPK3PXP" placeholder="Base32 secret (e.g. from QR code)" style="flex:1" />
+      <button class="btn btn-secondary" onclick="generateSecret()" style="white-space:nowrap;font-size:12px">Generate</button>
+    </div>
+
+    <label>Algorithm</label>
+    <select id="algorithm">
+      <option value="SHA-1">SHA-1 (most common)</option>
+      <option value="SHA-256">SHA-256</option>
+      <option value="SHA-512">SHA-512</option>
+    </select>
+
+    <label>Digits</label>
+    <select id="digits">
+      <option value="6" selected>6 digits</option>
+      <option value="8">8 digits</option>
+    </select>
+
+    <label>Period</label>
+    <select id="period">
+      <option value="30" selected>30 seconds</option>
+      <option value="60">60 seconds</option>
+    </select>
+  </div>
+
+  <div class="panel">
+    <h2>Current Code</h2>
+    <div class="code-display">
+      <div class="code-digits" id="code-display">------</div>
+      <div class="code-label">Time-based one-time password (TOTP)</div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+    <div class="time-remaining" id="time-remaining">—</div>
+    <button class="btn btn-primary copy-btn" onclick="copyCode()">Copy Code</button>
+    <div id="status" class="status" style="display:none"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Key Info</h2>
+    <div class="info-grid">
+      <div class="info-item">
+        <div class="info-label">Algorithm</div>
+        <div class="info-value" id="info-alg">HMAC-SHA1</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Counter (T)</div>
+        <div class="info-value" id="info-counter">—</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Secret (hex)</div>
+        <div class="info-value" id="info-hex" style="word-break:break-all;font-size:11px">—</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Secret length</div>
+        <div class="info-value" id="info-len">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="ad-slot" data-ea-publisher="devnestio" data-ea-type="image"></div>
+</main>
+
+<script>
+// Base32 decode
+const BASE32_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+
+function base32Decode(s) {
+  s = s.toUpperCase().replace(/=+$/, '').replace(/[^A-Z2-7]/g, '');
+  let bits = 0, value = 0;
+  const output = [];
+  for (const c of s) {
+    const idx = BASE32_CHARS.indexOf(c);
+    if (idx < 0) continue;
+    value = (value << 5) | idx;
+    bits += 5;
+    if (bits >= 8) {
+      output.push((value >>> (bits - 8)) & 0xff);
+      bits -= 8;
+    }
+  }
+  return new Uint8Array(output);
+}
+
+function base32Encode(bytes) {
+  let bits = 0, value = 0, out = '';
+  for (const b of bytes) {
+    value = (value << 8) | b;
+    bits += 8;
+    while (bits >= 5) {
+      out += BASE32_CHARS[(value >>> (bits - 5)) & 31];
+      bits -= 5;
+    }
+  }
+  if (bits > 0) out += BASE32_CHARS[(value << (5 - bits)) & 31];
+  return out;
+}
+
+// TOTP
+async function generateTOTP(secret, algorithm, digits, period) {
+  const keyBytes = base32Decode(secret);
+  if (keyBytes.length === 0) throw new Error('Invalid Base32 secret');
+
+  const counter = Math.floor(Date.now() / 1000 / period);
+  const counterBuf = new Uint8Array(8);
+  let tmp = counter;
+  for (let i = 7; i >= 0; i--) {
+    counterBuf[i] = tmp & 0xff;
+    tmp = Math.floor(tmp / 256);
+  }
+
+  const key = await crypto.subtle.importKey(
+    'raw', keyBytes,
+    { name: 'HMAC', hash: algorithm },
+    false, ['sign']
+  );
+  const sig = await crypto.subtle.sign('HMAC', key, counterBuf);
+  const hash = new Uint8Array(sig);
+
+  const offset = hash[hash.length - 1] & 0x0f;
+  const code = (
+    ((hash[offset] & 0x7f) << 24) |
+    (hash[offset + 1] << 16) |
+    (hash[offset + 2] << 8) |
+    hash[offset + 3]
+  ) % Math.pow(10, digits);
+
+  return { code: String(code).padStart(digits, '0'), counter };
+}
+
+function generateSecret() {
+  const bytes = new Uint8Array(20);
+  crypto.getRandomValues(bytes);
+  document.getElementById('secret').value = base32Encode(bytes);
+  update();
+}
+
+let timer = null;
+
+async function update() {
+  const secret = document.getElementById('secret').value.trim();
+  const algorithm = document.getElementById('algorithm').value;
+  const digits = parseInt(document.getElementById('digits').value, 10);
+  const period = parseInt(document.getElementById('period').value, 10);
+
+  const now = Math.floor(Date.now() / 1000);
+  const remaining = period - (now % period);
+  const progress = (remaining / period) * 100;
+  const expiring = remaining <= 5;
+
+  try {
+    const { code, counter } = await generateTOTP(secret, algorithm, digits, period);
+
+    const display = document.getElementById('code-display');
+    display.textContent = code;
+    display.className = 'code-digits' + (expiring ? ' expiring' : '');
+
+    const bar = document.getElementById('progress-bar');
+    bar.style.width = progress + '%';
+    bar.className = 'progress-bar' + (expiring ? ' expiring' : '');
+
+    document.getElementById('time-remaining').textContent = `Refreshes in ${remaining}s`;
+    document.getElementById('info-counter').textContent = counter;
+
+    const keyBytes = base32Decode(secret);
+    const hexStr = Array.from(keyBytes).map(b => b.toString(16).padStart(2,'0')).join('');
+    document.getElementById('info-hex').textContent = hexStr;
+    document.getElementById('info-len').textContent = keyBytes.length + ' bytes (' + (keyBytes.length * 8) + ' bits)';
+    document.getElementById('info-alg').textContent = 'HMAC-' + algorithm.replace('-', '');
+
+    const status = document.getElementById('status');
+    status.style.display = 'none';
+  } catch(e) {
+    document.getElementById('code-display').textContent = '------';
+    const status = document.getElementById('status');
+    status.style.display = '';
+    status.className = 'status err';
+    status.textContent = '❌ ' + e.message;
+  }
+}
+
+function copyCode() {
+  const code = document.getElementById('code-display').textContent;
+  if (code && code !== '------') {
+    navigator.clipboard.writeText(code).then(() => {
+      const status = document.getElementById('status');
+      status.style.display = '';
+      status.className = 'status ok';
+      status.textContent = '📋 Code copied!';
+    });
+  }
+}
+
+// Start ticking
+function tick() {
+  update();
+  clearInterval(timer);
+  timer = setInterval(update, 1000);
+}
+
+['secret','algorithm','digits','period'].forEach(id => {
+  document.getElementById(id).addEventListener('input', tick);
+  document.getElementById(id).addEventListener('change', tick);
+});
+
+tick();
+</script>
+</body>
+</html>

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unicode Symbol Table — devnestio</title>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#0f1117;color:#e2e8f0;min-height:100vh}
+header{padding:24px 32px;border-bottom:1px solid #1e2535}
+h1{font-size:1.5rem;font-weight:700;color:#f8fafc}
+h1 span{color:#f59e0b}
+.desc{color:#94a3b8;margin-top:4px;font-size:.9rem}
+.controls{display:flex;gap:12px;flex-wrap:wrap;padding:16px 32px;border-bottom:1px solid #1e2535;align-items:center}
+.search-wrap{position:relative;flex:1;min-width:200px}
+.search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#64748b}
+#search{width:100%;background:#1e2535;border:1px solid #334155;color:#e2e8f0;padding:8px 12px 8px 34px;border-radius:6px;font-size:.9rem;outline:none}
+#search:focus{border-color:#f59e0b}
+.cat-filters{display:flex;gap:8px;flex-wrap:wrap}
+.cat-btn{padding:5px 12px;border-radius:99px;border:1px solid #334155;background:#1e2535;color:#94a3b8;font-size:.8rem;cursor:pointer}
+.cat-btn.active,.cat-btn:hover{background:#d97706;border-color:#d97706;color:#fff}
+.content{max-width:1000px;margin:0 auto;padding:24px 32px}
+.section{margin-bottom:28px}
+.section-title{font-size:.95rem;font-weight:700;color:#f59e0b;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #1e2535}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:4px}
+.sym{background:#141924;border:1px solid #1e2535;border-radius:6px;padding:8px 4px;text-align:center;cursor:pointer;transition:background .12s}
+.sym:hover{background:#1e2535;border-color:#334155}
+.sym-char{font-size:1.4rem;line-height:1.2;display:block;user-select:none}
+.sym-code{font-size:.6rem;color:#64748b;font-family:monospace;margin-top:2px;display:block}
+.detail{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1e2535;border:1px solid #334155;border-radius:10px;padding:14px 20px;display:flex;align-items:center;gap:16px;box-shadow:0 8px 32px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .2s;z-index:100;max-width:90vw}
+.detail.show{opacity:1;pointer-events:auto}
+.detail-char{font-size:2.4rem;line-height:1}
+.detail-info{font-size:.82rem;color:#94a3b8;line-height:1.6}
+.detail-name{font-size:.9rem;font-weight:600;color:#f8fafc;margin-bottom:2px}
+.copy-row{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.copy-chip{font-family:monospace;font-size:.78rem;background:#0f1117;border:1px solid #334155;border-radius:4px;padding:4px 8px;cursor:pointer;color:#7dd3fc}
+.copy-chip:hover{border-color:#7dd3fc}
+.no-results{text-align:center;color:#64748b;padding:48px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Unicode <span>Symbol Table</span></h1>
+  <p class="desc">Browse and copy Unicode symbols, arrows, math operators, emoji, and special characters</p>
+</header>
+<div class="controls">
+  <div class="search-wrap">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="search" placeholder="Search symbols or names…">
+  </div>
+  <div class="cat-filters" id="cats"></div>
+</div>
+<div class="content" id="content"></div>
+<div class="detail" id="detail">
+  <div class="detail-char" id="det-char"></div>
+  <div>
+    <div class="detail-name" id="det-name"></div>
+    <div class="detail-info" id="det-info"></div>
+    <div class="copy-row" id="det-copies"></div>
+  </div>
+</div>
+<script>
+const SYMBOLS = [
+  // Arrows
+  {cat:'Arrows',ch:'←',name:'Leftwards Arrow',u:'U+2190'},
+  {cat:'Arrows',ch:'→',name:'Rightwards Arrow',u:'U+2192'},
+  {cat:'Arrows',ch:'↑',name:'Upwards Arrow',u:'U+2191'},
+  {cat:'Arrows',ch:'↓',name:'Downwards Arrow',u:'U+2193'},
+  {cat:'Arrows',ch:'↔',name:'Left Right Arrow',u:'U+2194'},
+  {cat:'Arrows',ch:'↕',name:'Up Down Arrow',u:'U+2195'},
+  {cat:'Arrows',ch:'↖',name:'NW Arrow',u:'U+2196'},
+  {cat:'Arrows',ch:'↗',name:'NE Arrow',u:'U+2197'},
+  {cat:'Arrows',ch:'↘',name:'SE Arrow',u:'U+2198'},
+  {cat:'Arrows',ch:'↙',name:'SW Arrow',u:'U+2199'},
+  {cat:'Arrows',ch:'⇐',name:'Leftwards Double Arrow',u:'U+21D0'},
+  {cat:'Arrows',ch:'⇒',name:'Rightwards Double Arrow',u:'U+21D2'},
+  {cat:'Arrows',ch:'⇑',name:'Upwards Double Arrow',u:'U+21D1'},
+  {cat:'Arrows',ch:'⇓',name:'Downwards Double Arrow',u:'U+21D3'},
+  {cat:'Arrows',ch:'⇔',name:'Left Right Double Arrow',u:'U+21D4'},
+  {cat:'Arrows',ch:'➜',name:'Heavy Rightwards Arrow',u:'U+279C'},
+  {cat:'Arrows',ch:'➡',name:'Black Rightwards Arrow',u:'U+27A1'},
+  {cat:'Arrows',ch:'⟵',name:'Long Leftwards Arrow',u:'U+27F5'},
+  {cat:'Arrows',ch:'⟶',name:'Long Rightwards Arrow',u:'U+27F6'},
+  {cat:'Arrows',ch:'⟺',name:'Long Left Right Double Arrow',u:'U+27FA'},
+  // Math
+  {cat:'Math',ch:'±',name:'Plus-Minus Sign',u:'U+00B1'},
+  {cat:'Math',ch:'×',name:'Multiplication Sign',u:'U+00D7'},
+  {cat:'Math',ch:'÷',name:'Division Sign',u:'U+00F7'},
+  {cat:'Math',ch:'≈',name:'Almost Equal To',u:'U+2248'},
+  {cat:'Math',ch:'≠',name:'Not Equal To',u:'U+2260'},
+  {cat:'Math',ch:'≤',name:'Less-Than or Equal To',u:'U+2264'},
+  {cat:'Math',ch:'≥',name:'Greater-Than or Equal To',u:'U+2265'},
+  {cat:'Math',ch:'∞',name:'Infinity',u:'U+221E'},
+  {cat:'Math',ch:'√',name:'Square Root',u:'U+221A'},
+  {cat:'Math',ch:'∑',name:'N-Ary Summation',u:'U+2211'},
+  {cat:'Math',ch:'∏',name:'N-Ary Product',u:'U+220F'},
+  {cat:'Math',ch:'∫',name:'Integral',u:'U+222B'},
+  {cat:'Math',ch:'∂',name:'Partial Differential',u:'U+2202'},
+  {cat:'Math',ch:'∆',name:'Increment (Delta)',u:'U+2206'},
+  {cat:'Math',ch:'∇',name:'Nabla',u:'U+2207'},
+  {cat:'Math',ch:'∈',name:'Element Of',u:'U+2208'},
+  {cat:'Math',ch:'∉',name:'Not an Element Of',u:'U+2209'},
+  {cat:'Math',ch:'∅',name:'Empty Set',u:'U+2205'},
+  {cat:'Math',ch:'∩',name:'Intersection',u:'U+2229'},
+  {cat:'Math',ch:'∪',name:'Union',u:'U+222A'},
+  {cat:'Math',ch:'⊂',name:'Subset Of',u:'U+2282'},
+  {cat:'Math',ch:'⊃',name:'Superset Of',u:'U+2283'},
+  {cat:'Math',ch:'⊕',name:'Circled Plus',u:'U+2295'},
+  {cat:'Math',ch:'⊗',name:'Circled Times',u:'U+2297'},
+  {cat:'Math',ch:'π',name:'Greek Small Pi',u:'U+03C0'},
+  {cat:'Math',ch:'θ',name:'Greek Small Theta',u:'U+03B8'},
+  {cat:'Math',ch:'λ',name:'Greek Small Lambda',u:'U+03BB'},
+  {cat:'Math',ch:'μ',name:'Greek Small Mu',u:'U+03BC'},
+  {cat:'Math',ch:'σ',name:'Greek Small Sigma',u:'U+03C3'},
+  {cat:'Math',ch:'α',name:'Greek Small Alpha',u:'U+03B1'},
+  // Punctuation
+  {cat:'Punctuation',ch:'—',name:'Em Dash',u:'U+2014'},
+  {cat:'Punctuation',ch:'–',name:'En Dash',u:'U+2013'},
+  {cat:'Punctuation',ch:'…',name:'Horizontal Ellipsis',u:'U+2026'},
+  {cat:'Punctuation',ch:'"',name:'Left Double Quotation Mark',u:'U+201C'},
+  {cat:'Punctuation',ch:'"',name:'Right Double Quotation Mark',u:'U+201D'},
+  {cat:'Punctuation',ch:'‘',name:'Left Single Quotation Mark',u:'U+2018'},
+  {cat:'Punctuation',ch:'’',name:'Right Single Quotation Mark',u:'U+2019'},
+  {cat:'Punctuation',ch:'«',name:'Left-Pointing Double Angle Quotation Mark',u:'U+00AB'},
+  {cat:'Punctuation',ch:'»',name:'Right-Pointing Double Angle Quotation Mark',u:'U+00BB'},
+  {cat:'Punctuation',ch:'·',name:'Middle Dot',u:'U+00B7'},
+  {cat:'Punctuation',ch:'•',name:'Bullet',u:'U+2022'},
+  {cat:'Punctuation',ch:'◦',name:'White Bullet',u:'U+25E6'},
+  {cat:'Punctuation',ch:'‣',name:'Triangular Bullet',u:'U+2023'},
+  {cat:'Punctuation',ch:'™',name:'Trade Mark Sign',u:'U+2122'},
+  {cat:'Punctuation',ch:'©',name:'Copyright Sign',u:'U+00A9'},
+  {cat:'Punctuation',ch:'®',name:'Registered Sign',u:'U+00AE'},
+  {cat:'Punctuation',ch:'°',name:'Degree Sign',u:'U+00B0'},
+  {cat:'Punctuation',ch:'§',name:'Section Sign',u:'U+00A7'},
+  {cat:'Punctuation',ch:'¶',name:'Pilcrow Sign',u:'U+00B6'},
+  {cat:'Punctuation',ch:'†',name:'Dagger',u:'U+2020'},
+  // Shapes
+  {cat:'Shapes',ch:'■',name:'Black Square',u:'U+25A0'},
+  {cat:'Shapes',ch:'□',name:'White Square',u:'U+25A1'},
+  {cat:'Shapes',ch:'▪',name:'Black Small Square',u:'U+25AA'},
+  {cat:'Shapes',ch:'▫',name:'White Small Square',u:'U+25AB'},
+  {cat:'Shapes',ch:'●',name:'Black Circle',u:'U+25CF'},
+  {cat:'Shapes',ch:'○',name:'White Circle',u:'U+25CB'},
+  {cat:'Shapes',ch:'◉',name:'Fisheye',u:'U+25C9'},
+  {cat:'Shapes',ch:'◆',name:'Black Diamond',u:'U+25C6'},
+  {cat:'Shapes',ch:'◇',name:'White Diamond',u:'U+25C7'},
+  {cat:'Shapes',ch:'▲',name:'Black Up-Pointing Triangle',u:'U+25B2'},
+  {cat:'Shapes',ch:'△',name:'White Up-Pointing Triangle',u:'U+25B3'},
+  {cat:'Shapes',ch:'▼',name:'Black Down-Pointing Triangle',u:'U+25BC'},
+  {cat:'Shapes',ch:'▽',name:'White Down-Pointing Triangle',u:'U+25BD'},
+  {cat:'Shapes',ch:'◀',name:'Black Left-Pointing Triangle',u:'U+25C0'},
+  {cat:'Shapes',ch:'▶',name:'Black Right-Pointing Triangle',u:'U+25B6'},
+  {cat:'Shapes',ch:'★',name:'Black Star',u:'U+2605'},
+  {cat:'Shapes',ch:'☆',name:'White Star',u:'U+2606'},
+  {cat:'Shapes',ch:'♥',name:'Black Heart Suit',u:'U+2665'},
+  {cat:'Shapes',ch:'♦',name:'Black Diamond Suit',u:'U+2666'},
+  {cat:'Shapes',ch:'♣',name:'Black Club Suit',u:'U+2663'},
+  {cat:'Shapes',ch:'♠',name:'Black Spade Suit',u:'U+2660'},
+  // Tech
+  {cat:'Tech & Code',ch:'←',name:'Leftwards Arrow (Return)',u:'U+2190'},
+  {cat:'Tech & Code',ch:'⌘',name:'Place of Interest Sign (Cmd)',u:'U+2318'},
+  {cat:'Tech & Code',ch:'⌥',name:'Option Key',u:'U+2325'},
+  {cat:'Tech & Code',ch:'⇧',name:'Upwards White Arrow (Shift)',u:'U+21E7'},
+  {cat:'Tech & Code',ch:'⌫',name:'Erase to the Left (Backspace)',u:'U+232B'},
+  {cat:'Tech & Code',ch:'⌦',name:'Erase to the Right (Delete)',u:'U+2326'},
+  {cat:'Tech & Code',ch:'⏎',name:'Return Symbol',u:'U+23CE'},
+  {cat:'Tech & Code',ch:'⎋',name:'Escape',u:'U+238B'},
+  {cat:'Tech & Code',ch:'⇥',name:'Rightwards Arrow to Bar (Tab)',u:'U+21E5'},
+  {cat:'Tech & Code',ch:'⇤',name:'Leftwards Arrow to Bar (Backtab)',u:'U+21E4'},
+  {cat:'Tech & Code',ch:'↩',name:'Leftwards Arrow with Hook (Enter)',u:'U+21A9'},
+  {cat:'Tech & Code',ch:'∞',name:'Infinity',u:'U+221E'},
+  {cat:'Tech & Code',ch:'⚙',name:'Gear',u:'U+2699'},
+  {cat:'Tech & Code',ch:'⚠',name:'Warning Sign',u:'U+26A0'},
+  {cat:'Tech & Code',ch:'✓',name:'Check Mark',u:'U+2713'},
+  {cat:'Tech & Code',ch:'✗',name:'Ballot X',u:'U+2717'},
+  {cat:'Tech & Code',ch:'✕',name:'Multiplication X',u:'U+2715'},
+  {cat:'Tech & Code',ch:'✔',name:'Heavy Check Mark',u:'U+2714'},
+  {cat:'Tech & Code',ch:'✘',name:'Heavy Ballot X',u:'U+2718'},
+  {cat:'Tech & Code',ch:'⊙',name:'Circled Dot Operator',u:'U+2299'},
+  // Currency
+  {cat:'Currency',ch:'$',name:'Dollar Sign',u:'U+0024'},
+  {cat:'Currency',ch:'€',name:'Euro Sign',u:'U+20AC'},
+  {cat:'Currency',ch:'£',name:'Pound Sign',u:'U+00A3'},
+  {cat:'Currency',ch:'¥',name:'Yen Sign',u:'U+00A5'},
+  {cat:'Currency',ch:'₩',name:'Won Sign',u:'U+20A9'},
+  {cat:'Currency',ch:'₿',name:'Bitcoin Sign',u:'U+20BF'},
+  {cat:'Currency',ch:'¢',name:'Cent Sign',u:'U+00A2'},
+  {cat:'Currency',ch:'₹',name:'Indian Rupee Sign',u:'U+20B9'},
+  {cat:'Currency',ch:'₽',name:'Ruble Sign',u:'U+20BD'},
+  {cat:'Currency',ch:'₺',name:'Turkish Lira Sign',u:'U+20BA'},
+];
+
+const CATS=['All',...new Set(SYMBOLS.map(s=>s.cat))];
+let activeCat='All', query='';
+let detailTimer;
+
+function cp(text){
+  navigator.clipboard.writeText(text);
+}
+
+function showDetail(sym){
+  document.getElementById('det-char').textContent=sym.ch;
+  document.getElementById('det-name').textContent=sym.name;
+  const codepoint=sym.ch.codePointAt(0).toString(16).toUpperCase().padStart(4,'0');
+  document.getElementById('det-info').innerHTML=`${sym.u} · HTML: &amp;#x${codepoint}; · JS: \\u{${codepoint}}`;
+  document.getElementById('det-copies').innerHTML=
+    `<span class="copy-chip" onclick="cp('${sym.ch.replace(/'/g,"\\'")}')" title="Copy character">${sym.ch} char</span>`+
+    `<span class="copy-chip" onclick="cp('${sym.u}')" title="Copy codepoint">${sym.u}</span>`+
+    `<span class="copy-chip" onclick="cp('&#x${codepoint};')" title="Copy HTML entity">&amp;#x${codepoint};</span>`;
+  const d=document.getElementById('detail');
+  d.classList.add('show');
+  clearTimeout(detailTimer);
+  detailTimer=setTimeout(()=>d.classList.remove('show'),3000);
+}
+
+function render(){
+  const visible=SYMBOLS.filter(s=>{
+    const mc=activeCat==='All'||s.cat===activeCat;
+    const mq=!query||s.ch.includes(query)||s.name.toLowerCase().includes(query)||s.u.toLowerCase().includes(query)||s.cat.toLowerCase().includes(query);
+    return mc&&mq;
+  });
+  const el=document.getElementById('content');
+  if(!visible.length){el.innerHTML='<div class="no-results">No results</div>';return;}
+  const byCat={};
+  visible.forEach(s=>{(byCat[s.cat]=byCat[s.cat]||[]).push(s);});
+  el.innerHTML=Object.entries(byCat).map(([cat,items])=>`
+    <div class="section">
+      <div class="section-title">${cat} <span style="font-size:.78rem;font-weight:400;color:#64748b">(${items.length})</span></div>
+      <div class="grid">
+        ${items.map((s,i)=>`
+          <div class="sym" onclick="showDetail(SYMBOLS[${SYMBOLS.indexOf(s)}])" title="${s.name}">
+            <span class="sym-char">${s.ch}</span>
+            <span class="sym-code">${s.u}</span>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+document.getElementById('cats').innerHTML=CATS.map(c=>`
+  <button class="cat-btn${c==='All'?' active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
+function setCat(c){
+  activeCat=c;
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.toggle('active',b.textContent===c));
+  render();
+}
+document.getElementById('search').addEventListener('input',e=>{query=e.target.value.toLowerCase();render();});
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.sym')&&!e.target.closest('.detail')){
+    document.getElementById('detail').classList.remove('show');
+  }
+});
+render();
+</script>
+</body>
+</html>

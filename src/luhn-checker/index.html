@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Luhn Algorithm Checker — Validate Card & Barcode Numbers | DevNestio</title>
+  <meta name="description" content="Validate numbers using the Luhn algorithm (mod 10). Check credit cards, IMEI codes, and barcodes. Generate valid Luhn numbers. Step-by-step breakdown. Browser-only." />
+  <meta property="og:title" content="Luhn Algorithm Checker | DevNestio" />
+  <meta property="og:description" content="Validate and generate numbers with the Luhn (mod 10) checksum algorithm. Instant result with step-by-step digit processing. Browser-only." />
+  <meta property="og:url" content="https://devnestio.pages.dev/luhn-checker/" />
+  <meta name="twitter:card" content="summary" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    #privacy-banner { background: #1e293b; border-bottom: 1px solid #334155; padding: 8px 16px; font-size: 12px; color: #94a3b8; text-align: center; }
+    header { background: #1e293b; border-bottom: 1px solid #334155; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+    header a { color: #64748b; font-size: 13px; text-decoration: none; margin-left: auto; }
+    header a:hover { color: #94a3b8; }
+    .badge { background: #f59e0b; color: #000; font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+    main { max-width: 760px; margin: 0 auto; padding: 24px 16px; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 18px; margin-bottom: 16px; }
+    .card-title { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 14px; }
+    label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 5px; font-weight: 600; }
+    input[type=text] { width: 100%; padding: 12px 16px; background: #0f1117; border: 1px solid #334155; border-radius: 8px; color: #e2e8f0; font-size: 20px; font-family: 'Menlo','Courier New',monospace; outline: none; letter-spacing: 0.06em; }
+    input[type=text]:focus { border-color: #f59e0b; }
+    .result-banner { padding: 16px 18px; border-radius: 8px; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 12px; margin-top: 14px; }
+    .result-banner.valid   { background: #052e16; border: 1px solid #16a34a; color: #4ade80; }
+    .result-banner.invalid { background: #2d0707; border: 1px solid #dc2626; color: #f87171; }
+    .result-banner.empty   { background: #0f1117; border: 1px solid #334155; color: #475569; }
+    .steps-wrap { overflow-x: auto; }
+    table { border-collapse: collapse; font-size: 13px; font-family: monospace; min-width: 100%; }
+    th { padding: 6px 10px; background: #0f172a; color: #64748b; text-align: center; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid #334155; }
+    td { padding: 6px 10px; text-align: center; border-bottom: 1px solid #1e293b; }
+    td.pos  { color: #94a3b8; }
+    td.orig { color: #e2e8f0; }
+    td.dbl  { color: #f59e0b; }
+    td.sub  { color: #38bdf8; }
+    td.sum  { color: #4ade80; }
+    td.total-row { font-weight: 700; background: #0f172a; }
+    .gen-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .gen-input { flex: 1; min-width: 160px; }
+    .gen-btn { padding: 10px 20px; border-radius: 7px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; background: #f59e0b; color: #000; white-space: nowrap; }
+    .gen-btn:hover { background: #fbbf24; }
+    .gen-result { background: #0f1117; border: 1px solid #334155; border-radius: 8px; padding: 12px 16px; font-family: monospace; font-size: 20px; color: #f59e0b; letter-spacing: 0.08em; display: flex; justify-content: space-between; align-items: center; }
+    .copy-btn { padding: 3px 12px; border-radius: 5px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid #334155; background: transparent; color: #64748b; }
+    .copy-btn:hover { border-color: #f59e0b; color: #f59e0b; }
+    .examples { display: flex; flex-wrap: wrap; gap: 6px; }
+    .ex-chip { padding: 4px 10px; border-radius: 6px; font-size: 12px; font-family: monospace; cursor: pointer; border: 1px solid #334155; background: #0f1117; color: #94a3b8; }
+    .ex-chip:hover { border-color: #f59e0b; color: #f59e0b; }
+    .card-type { font-size: 11px; color: #64748b; margin-top: 4px; }
+    #ad-slot { margin: 20px auto; text-align: center; }
+  </style>
+</head>
+<body>
+<div id="privacy-banner">🔒 All processing happens in your browser. No data is sent to any server.</div>
+<header>
+  <span class="badge">FREE</span>
+  <h1>Luhn Algorithm Checker</h1>
+  <a href="https://devnestio.pages.dev">← All Tools</a>
+</header>
+<main>
+
+  <div class="card">
+    <div class="card-title">Validate a Number</div>
+    <label>Enter digits (spaces and dashes ignored)</label>
+    <input type="text" id="num-input" placeholder="4111 1111 1111 1111" oninput="validate()" maxlength="40" />
+    <div id="result-banner" class="result-banner empty">Enter a number above to validate</div>
+    <div id="card-type" class="card-type"></div>
+  </div>
+
+  <div class="card" id="steps-card" style="display:none">
+    <div class="card-title">Step-by-Step Luhn Calculation</div>
+    <div class="steps-wrap">
+      <table id="steps-table">
+        <thead>
+          <tr>
+            <th>Position</th><th>Digit</th><th>Action</th><th>Value</th>
+          </tr>
+        </thead>
+        <tbody id="steps-body"></tbody>
+        <tfoot id="steps-foot"></tfoot>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Generate a Valid Luhn Number</div>
+    <div class="gen-row">
+      <input type="text" class="gen-input" id="gen-prefix" placeholder="Prefix (e.g. 4111111111111)" maxlength="18" />
+      <button class="gen-btn" onclick="generate()">Generate Check Digit</button>
+    </div>
+    <div id="gen-result" class="gen-result" style="display:none;margin-top:12px">
+      <span id="gen-output">—</span>
+      <button class="copy-btn" onclick="copyGen()">Copy</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Examples</div>
+    <div class="examples" id="examples"></div>
+  </div>
+
+  <div id="ad-slot" data-ea-publisher="devnestio" data-ea-type="image"></div>
+</main>
+<script>
+function luhn(digits) {
+  // digits: array of ints, right-to-left: index 0 = check digit (rightmost)
+  let sum = 0;
+  for (let i = 0; i < digits.length; i++) {
+    let d = digits[i];
+    if (i % 2 === 1) { // double every second from right (position 2,4,6…)
+      d *= 2;
+      if (d > 9) d -= 9;
+    }
+    sum += d;
+  }
+  return sum;
+}
+
+function luhnValid(numStr) {
+  const digits = numStr.replace(/[\s\-]/g, '').split('').map(Number);
+  if (digits.length < 2 || digits.some(isNaN)) return null;
+  return luhn(digits.reverse()) % 10 === 0;
+}
+
+function luhnSteps(numStr) {
+  const cleaned = numStr.replace(/[\s\-]/g, '');
+  const digits = cleaned.split('').map(Number);
+  const n = digits.length;
+  const steps = [];
+  let total = 0;
+
+  for (let i = 0; i < n; i++) {
+    const posFromRight = n - i; // 1-indexed from right
+    const isDouble = posFromRight % 2 === 0; // double every 2nd from right (excl. check digit)
+    const orig = digits[i];
+    let val = orig;
+    let action = 'keep';
+    if (isDouble) {
+      val = orig * 2;
+      action = `×2`;
+      if (val > 9) { val -= 9; action = `×2−9`; }
+    }
+    steps.push({ pos: posFromRight, orig, isDouble, action, val });
+    total += val;
+  }
+  return { steps, total, valid: total % 10 === 0 };
+}
+
+function luhnCheckDigit(prefix) {
+  const digits = prefix.replace(/[\s\-]/g, '').split('').map(Number);
+  if (digits.some(isNaN)) return null;
+  // Append a 0 check digit, compute what digit makes sum % 10 === 0
+  const full = [...digits, 0];
+  const rev = full.reverse();
+  const sumWithout = luhn(rev);
+  const remainder = sumWithout % 10;
+  return remainder === 0 ? 0 : 10 - remainder;
+}
+
+function detectCardType(num) {
+  const n = num.replace(/[\s\-]/g, '');
+  if (/^4/.test(n)) return 'Visa';
+  if (/^5[1-5]/.test(n) || /^2(2[2-9][1-9]|[3-6]\d{2}|7[01]\d|720)/.test(n)) return 'Mastercard';
+  if (/^3[47]/.test(n)) return 'American Express';
+  if (/^6(?:011|5)/.test(n)) return 'Discover';
+  if (/^35/.test(n)) return 'JCB';
+  if (/^3(?:0[0-5]|[68])/.test(n)) return 'Diners Club';
+  return '';
+}
+
+function validate() {
+  const raw = document.getElementById('num-input').value;
+  const cleaned = raw.replace(/[\s\-]/g, '');
+  const banner = document.getElementById('result-banner');
+  const stepsCard = document.getElementById('steps-card');
+  const typeEl = document.getElementById('card-type');
+
+  if (!cleaned) {
+    banner.className = 'result-banner empty';
+    banner.textContent = 'Enter a number above to validate';
+    stepsCard.style.display = 'none';
+    typeEl.textContent = '';
+    return;
+  }
+  if (!/^\d+$/.test(cleaned) || cleaned.length < 2) {
+    banner.className = 'result-banner invalid';
+    banner.textContent = '✗ Enter at least 2 digits (0–9 only)';
+    stepsCard.style.display = 'none';
+    typeEl.textContent = '';
+    return;
+  }
+
+  const res = luhnSteps(cleaned);
+  banner.className = 'result-banner ' + (res.valid ? 'valid' : 'invalid');
+  banner.textContent = res.valid ? '✓ Valid (Luhn check passes)' : '✗ Invalid (Luhn check fails)';
+
+  const ct = detectCardType(cleaned);
+  typeEl.textContent = ct ? `Detected: ${ct}` : '';
+
+  // Steps table
+  const tbody = document.getElementById('steps-body');
+  tbody.innerHTML = res.steps.map(s =>
+    `<tr><td class="pos">${s.pos}</td><td class="orig">${s.orig}</td><td>${s.isDouble ? `<span style="color:#f59e0b">${s.action}</span>` : '—'}</td><td class="${s.isDouble ? 'dbl' : 'orig'}">${s.val}</td></tr>`
+  ).join('');
+  document.getElementById('steps-foot').innerHTML =
+    `<tr><td colspan="3" class="total-row" style="text-align:right;color:#64748b">Sum</td><td class="total-row sum">${res.total}</td></tr>
+     <tr><td colspan="3" class="total-row" style="text-align:right;color:#64748b">Sum mod 10</td><td class="total-row ${res.valid?'sum':''}"> ${res.total % 10}</td></tr>`;
+  stepsCard.style.display = '';
+}
+
+function generate() {
+  const prefix = document.getElementById('gen-prefix').value;
+  const check = luhnCheckDigit(prefix);
+  const genRes = document.getElementById('gen-result');
+  const genOut = document.getElementById('gen-output');
+  if (check === null) { genOut.textContent = 'Invalid prefix'; genRes.style.display = ''; return; }
+  const cleaned = prefix.replace(/[\s\-]/g, '');
+  genOut.textContent = cleaned + check;
+  genRes.style.display = '';
+}
+
+function copyGen() {
+  const t = document.getElementById('gen-output').textContent;
+  if (t) navigator.clipboard.writeText(t);
+}
+
+const EXAMPLES = [
+  { num:'4111 1111 1111 1111', label:'Visa test' },
+  { num:'5500 0000 0000 0004', label:'Mastercard test' },
+  { num:'3714 496353 98431',   label:'Amex test' },
+  { num:'6011 1111 1111 1117', label:'Discover test' },
+  { num:'4111 1111 1111 1112', label:'Invalid Visa' },
+  { num:'490154203237518',     label:'IMEI example' },
+];
+document.getElementById('examples').innerHTML = EXAMPLES.map(e =>
+  `<span class="ex-chip" onclick="document.getElementById('num-input').value='${e.num}';validate()" title="${e.label}">${e.num}</span>`
+).join('');
+</script>
+</body>
+</html>

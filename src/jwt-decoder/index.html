@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JWT Decoder – Decode & Inspect JSON Web Tokens | DevNestio</title>
+  <meta name="description" content="Decode and inspect JWT tokens instantly. View header, payload, and signature. Expiry check, claim descriptions, and pretty-printed JSON." />
+  <link rel="canonical" href="https://devnestio.pages.dev/jwt-decoder/" />
+  <meta property="og:title" content="JWT Decoder – Decode & Inspect JSON Web Tokens" />
+  <meta property="og:description" content="Decode JWT tokens instantly. View header, payload, signature. Expiry check and claim descriptions." />
+  <meta property="og:url" content="https://devnestio.pages.dev/jwt-decoder/" />
+  <meta property="og:type" content="website" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1117; --surface: #1a1d27; --surface2: #22263a; --border: #2e3248;
+      --text: #e2e8f0; --muted: #8892a4;
+      --accent: #fb923c; --green: #4ade80; --red: #f87171; --blue: #60a5fa; --yellow: #fbbf24;
+      --header-color: #60a5fa; --payload-color: #c084fc; --sig-color: #fb923c;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1.1rem 1.5rem; }
+    header h1 { font-size: 1.35rem; font-weight: 700; color: var(--accent); }
+    header p { font-size: .85rem; color: var(--muted); margin-top: .2rem; }
+    .main { max-width: 900px; margin: 0 auto; padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; }
+
+    /* Token input */
+    .token-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.1rem; }
+    .section-label { font-size: .78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: .45rem; }
+    textarea#tokenInput { width: 100%; min-height: 100px; background: var(--surface2); border: 1px solid var(--border); color: var(--text); font-family: 'Fira Code', monospace; font-size: .82rem; border-radius: 8px; padding: .65rem .85rem; resize: vertical; outline: none; line-height: 1.5; transition: border-color .2s; word-break: break-all; }
+    textarea#tokenInput:focus { border-color: var(--accent); }
+    .token-actions { display: flex; gap: .5rem; margin-top: .6rem; flex-wrap: wrap; }
+    .btn { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); border-radius: 6px; padding: .35rem .8rem; font-size: .8rem; cursor: pointer; transition: all .15s; }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 600; }
+    .btn.primary:hover { opacity: .85; }
+
+    /* Colored token display */
+    .token-visual { background: var(--surface2); border-radius: 8px; padding: .65rem .85rem; font-family: 'Fira Code', monospace; font-size: .82rem; line-height: 1.6; word-break: break-all; margin-top: .6rem; }
+    .part-header { color: var(--header-color); }
+    .part-payload { color: var(--payload-color); }
+    .part-sig { color: var(--sig-color); }
+    .part-dot { color: var(--muted); }
+
+    /* Expiry banner */
+    .expiry-banner { border-radius: 8px; padding: .6rem 1rem; font-size: .85rem; font-weight: 600; display: none; align-items: center; gap: .5rem; }
+    .expiry-banner.valid { background: #4ade8022; color: var(--green); border: 1px solid var(--green); display: flex; }
+    .expiry-banner.expired { background: #f8717122; color: var(--red); border: 1px solid var(--red); display: flex; }
+    .expiry-banner.noexp { background: #fbbf2422; color: var(--yellow); border: 1px solid var(--yellow); display: flex; }
+
+    /* Decoded panels */
+    .decoded-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 640px) { .decoded-grid { grid-template-columns: 1fr; } }
+    .decoded-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .decoded-card-header { padding: .6rem 1rem; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .decoded-card-header.hdr { color: var(--header-color); }
+    .decoded-card-header.pld { color: var(--payload-color); }
+    .decoded-card-header.sig { color: var(--sig-color); }
+    pre.json-view { padding: .85rem 1rem; font-family: 'Fira Code', monospace; font-size: .8rem; line-height: 1.7; overflow-x: auto; background: var(--surface2); }
+    .json-key { color: var(--blue); }
+    .json-str { color: var(--green); }
+    .json-num { color: var(--yellow); }
+    .json-bool { color: var(--accent); }
+    .json-null { color: var(--muted); }
+
+    /* Claims table */
+    .claims-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .claims-table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+    .claims-table th { padding: .5rem .85rem; text-align: left; color: var(--muted); font-weight: 600; background: var(--surface2); border-bottom: 1px solid var(--border); }
+    .claims-table td { padding: .5rem .85rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .claims-table tr:last-child td { border-bottom: none; }
+    .claim-name { font-family: monospace; color: var(--accent); font-size: .82rem; }
+    .claim-val { font-family: monospace; color: var(--text); font-size: .82rem; word-break: break-all; }
+    .claim-desc { color: var(--muted); font-size: .78rem; }
+    .time-val { color: var(--yellow); }
+    .expired-val { color: var(--red); }
+    .valid-val { color: var(--green); }
+
+    /* Error */
+    .error-card { background: #f8717122; border: 1px solid var(--red); border-radius: 10px; padding: 1rem 1.1rem; color: var(--red); font-size: .88rem; display: none; }
+    .empty-state { text-align: center; padding: 3rem; color: var(--muted); font-size: .9rem; }
+
+    /* Sig card */
+    .sig-value { font-family: monospace; font-size: .75rem; color: var(--sig-color); word-break: break-all; padding: .85rem 1rem; background: var(--surface2); }
+
+    /* Info */
+    .info-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.1rem; }
+    .info-card h2 { font-size: .78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: .65rem; }
+    .info-row { display: flex; gap: .5rem; font-size: .8rem; padding: .3rem 0; border-bottom: 1px solid var(--border); }
+    .info-row:last-child { border-bottom: none; }
+    .info-claim { font-family: monospace; color: var(--accent); width: 80px; flex-shrink: 0; }
+    .info-desc { color: var(--muted); }
+
+    footer { text-align: center; padding: 1.5rem; color: var(--muted); font-size: .8rem; border-top: 1px solid var(--border); margin-top: .5rem; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>🔑 JWT Decoder</h1>
+  <p>Decode &amp; inspect JSON Web Tokens — header · payload · expiry · claims</p>
+</header>
+
+<div class="main">
+  <div class="token-card">
+    <div class="section-label">JWT Token</div>
+    <textarea id="tokenInput" placeholder="Paste your JWT token here…" spellcheck="false" oninput="decode()"></textarea>
+    <div class="token-visual" id="tokenVisual" style="display:none"></div>
+    <div class="token-actions">
+      <button class="btn" onclick="loadExample()">Load Example</button>
+      <button class="btn" onclick="clearToken()">Clear</button>
+      <button class="btn" onclick="copyToken()">Copy Token</button>
+    </div>
+  </div>
+
+  <div class="expiry-banner" id="expiryBanner"></div>
+  <div class="error-card" id="errorCard"></div>
+
+  <div id="decodedOutput" style="display:none">
+    <!-- Header + Payload -->
+    <div class="decoded-grid">
+      <div class="decoded-card">
+        <div class="decoded-card-header hdr">
+          <span>Header</span>
+          <button class="btn" onclick="copySection('header')" style="font-size:.7rem;padding:.2rem .5rem">Copy</button>
+        </div>
+        <pre class="json-view" id="headerView"></pre>
+      </div>
+      <div class="decoded-card">
+        <div class="decoded-card-header pld">
+          <span>Payload</span>
+          <button class="btn" onclick="copySection('payload')" style="font-size:.7rem;padding:.2rem .5rem">Copy</button>
+        </div>
+        <pre class="json-view" id="payloadView"></pre>
+      </div>
+    </div>
+
+    <!-- Claims table -->
+    <div class="claims-card" id="claimsCard">
+      <div class="decoded-card-header pld" style="padding:.6rem 1rem">Payload Claims</div>
+      <table class="claims-table" id="claimsTable"></table>
+    </div>
+
+    <!-- Signature -->
+    <div class="decoded-card">
+      <div class="decoded-card-header sig">Signature (raw)</div>
+      <div class="sig-value" id="sigView"></div>
+    </div>
+  </div>
+
+  <!-- JWT claim reference -->
+  <div class="info-card">
+    <h2>Standard JWT Claims (RFC 7519)</h2>
+    <div class="info-row"><span class="info-claim">iss</span><span class="info-desc">Issuer — who issued the token</span></div>
+    <div class="info-row"><span class="info-claim">sub</span><span class="info-desc">Subject — who the token refers to</span></div>
+    <div class="info-row"><span class="info-claim">aud</span><span class="info-desc">Audience — who the token is intended for</span></div>
+    <div class="info-row"><span class="info-claim">exp</span><span class="info-desc">Expiration time (Unix timestamp)</span></div>
+    <div class="info-row"><span class="info-claim">nbf</span><span class="info-desc">Not before (Unix timestamp)</span></div>
+    <div class="info-row"><span class="info-claim">iat</span><span class="info-desc">Issued at (Unix timestamp)</span></div>
+    <div class="info-row"><span class="info-claim">jti</span><span class="info-desc">JWT ID — unique identifier</span></div>
+    <div class="info-row"><span class="info-claim">alg</span><span class="info-desc">Algorithm (header) — e.g. HS256, RS256</span></div>
+    <div class="info-row"><span class="info-claim">typ</span><span class="info-desc">Type (header) — usually "JWT"</span></div>
+  </div>
+</div>
+
+<footer>
+  DevNestio JWT Decoder · <a href="https://devnestio.pages.dev/" style="color:var(--accent)">More Tools</a>
+</footer>
+
+<script>
+const EXAMPLE_JWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjk5OTk5OTk5OTksImVtYWlsIjoiam9obkBleGFtcGxlLmNvbSIsInJvbGUiOiJhZG1pbiJ9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
+
+const TIME_CLAIMS = new Set(['exp', 'nbf', 'iat']);
+const CLAIM_DESCS = {
+  iss: 'Issuer', sub: 'Subject', aud: 'Audience',
+  exp: 'Expiration Time', nbf: 'Not Before', iat: 'Issued At',
+  jti: 'JWT ID', name: 'Full Name', email: 'Email', role: 'Role',
+  given_name: 'Given Name', family_name: 'Family Name',
+  nickname: 'Nickname', picture: 'Profile Picture URL',
+  locale: 'Locale', updated_at: 'Last Updated',
+  email_verified: 'Email Verified', phone_number: 'Phone Number',
+  address: 'Address', birthdate: 'Birthdate',
+  zoneinfo: 'Time Zone', nonce: 'Nonce (OIDC)',
+  at_hash: 'Access Token Hash', c_hash: 'Code Hash',
+  azp: 'Authorized Party', acr: 'Authentication Context',
+  amr: 'Authentication Methods', auth_time: 'Authentication Time',
+  scope: 'Scopes', scp: 'Scopes (alt)', uid: 'User ID',
+  user_id: 'User ID', sid: 'Session ID',
+};
+
+let currentHeader = null, currentPayload = null, currentSig = '';
+
+function b64urlDecode(str) {
+  let s = str.replace(/-/g, '+').replace(/_/g, '/');
+  while (s.length % 4) s += '=';
+  return atob(s);
+}
+
+function parseJWT(token) {
+  const parts = token.trim().split('.');
+  if (parts.length !== 3) throw new Error(`Expected 3 parts (header.payload.signature), got ${parts.length}`);
+  let header, payload;
+  try { header = JSON.parse(b64urlDecode(parts[0])); } catch(e) { throw new Error('Invalid header: ' + e.message); }
+  try { payload = JSON.parse(b64urlDecode(parts[1])); } catch(e) { throw new Error('Invalid payload: ' + e.message); }
+  return { header, payload, signature: parts[2], parts };
+}
+
+function colorizeJson(obj) {
+  const json = JSON.stringify(obj, null, 2);
+  return json.replace(/("(?:[^"\\]|\\.)*")\s*:/g, '<span class="json-key">$1</span>:')
+    .replace(/:\s*("(?:[^"\\]|\\.)*")/g, ': <span class="json-str">$1</span>')
+    .replace(/:\s*(-?\d+\.?\d*(?:[eE][+-]?\d+)?)/g, ': <span class="json-num">$1</span>')
+    .replace(/:\s*(true|false)/g, ': <span class="json-bool">$1</span>')
+    .replace(/:\s*(null)/g, ': <span class="json-null">$1</span>');
+}
+
+function formatTime(ts) {
+  try {
+    const d = new Date(ts * 1000);
+    return d.toISOString().replace('T', ' ').replace('.000Z', ' UTC');
+  } catch { return String(ts); }
+}
+
+function decode() {
+  const token = document.getElementById('tokenInput').value.trim();
+  const errCard = document.getElementById('errorCard');
+  const outDiv = document.getElementById('decodedOutput');
+  const expiryBanner = document.getElementById('expiryBanner');
+  const tokenVisual = document.getElementById('tokenVisual');
+
+  errCard.style.display = 'none';
+  expiryBanner.className = 'expiry-banner';
+  expiryBanner.style.display = 'none';
+  tokenVisual.style.display = 'none';
+  outDiv.style.display = 'none';
+  currentHeader = null; currentPayload = null; currentSig = '';
+
+  if (!token) return;
+
+  let parsed;
+  try {
+    parsed = parseJWT(token);
+  } catch(e) {
+    errCard.textContent = '✗ ' + e.message;
+    errCard.style.display = 'block';
+    return;
+  }
+
+  const { header, payload, signature, parts } = parsed;
+  currentHeader = header; currentPayload = payload; currentSig = signature;
+
+  // Colored token visual
+  tokenVisual.innerHTML =
+    `<span class="part-header">${parts[0]}</span><span class="part-dot">.</span>` +
+    `<span class="part-payload">${parts[1]}</span><span class="part-dot">.</span>` +
+    `<span class="part-sig">${parts[2]}</span>`;
+  tokenVisual.style.display = 'block';
+
+  // Header + Payload JSON
+  document.getElementById('headerView').innerHTML = colorizeJson(header);
+  document.getElementById('payloadView').innerHTML = colorizeJson(payload);
+  document.getElementById('sigView').textContent = signature;
+
+  // Expiry check
+  const now = Math.floor(Date.now() / 1000);
+  if (payload.exp !== undefined) {
+    const expired = now > payload.exp;
+    expiryBanner.className = 'expiry-banner ' + (expired ? 'expired' : 'valid');
+    expiryBanner.innerHTML = expired
+      ? `✗ Token EXPIRED — ${formatTime(payload.exp)} (${Math.round((now - payload.exp)/60)} min ago)`
+      : `✓ Token valid — expires ${formatTime(payload.exp)} (in ${Math.round((payload.exp - now)/60)} min)`;
+    expiryBanner.style.display = 'flex';
+  } else {
+    expiryBanner.className = 'expiry-banner noexp';
+    expiryBanner.textContent = '⚠ No expiration (exp) claim — token does not expire';
+    expiryBanner.style.display = 'flex';
+  }
+
+  // Claims table
+  const rows = Object.entries(payload).map(([k, v]) => {
+    const desc = CLAIM_DESCS[k] || '—';
+    let displayVal = JSON.stringify(v);
+    let extra = '';
+    if (TIME_CLAIMS.has(k) && typeof v === 'number') {
+      const ts = formatTime(v);
+      const isExp = k === 'exp';
+      const cls = isExp && now > v ? 'expired-val' : 'valid-val';
+      displayVal = `<span class="${cls}">${v}</span>`;
+      extra = `<br/><span class="time-val">${ts}</span>`;
+    }
+    return `<tr>
+      <td><span class="claim-name">${k}</span></td>
+      <td><span class="claim-val">${displayVal}${extra}</span></td>
+      <td><span class="claim-desc">${desc}</span></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('claimsTable').innerHTML =
+    '<thead><tr><th>Claim</th><th>Value</th><th>Description</th></tr></thead><tbody>' + rows + '</tbody>';
+
+  outDiv.style.display = 'block';
+}
+
+function copySection(section) {
+  const obj = section === 'header' ? currentHeader : currentPayload;
+  if (!obj) return;
+  navigator.clipboard.writeText(JSON.stringify(obj, null, 2));
+}
+
+function copyToken() {
+  const val = document.getElementById('tokenInput').value.trim();
+  if (val) navigator.clipboard.writeText(val);
+}
+
+function clearToken() {
+  document.getElementById('tokenInput').value = '';
+  decode();
+}
+
+function loadExample() {
+  document.getElementById('tokenInput').value = EXAMPLE_JWT;
+  decode();
+}
+
+// Load example on start
+loadExample();
+</script>
+</body>
+</html>

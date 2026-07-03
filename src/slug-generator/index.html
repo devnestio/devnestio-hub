@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>URL Slug Generator | DevNestio</title>
+  <meta name="description" content="Convert text to URL-friendly slugs. Choose from kebab-case, snake_case, camelCase, PascalCase, or dot.case. Transliterates special characters. Browser-only." />
+  <meta property="og:title" content="URL Slug Generator | DevNestio" />
+  <meta property="og:description" content="Transform any text into clean URL slugs or identifiers. Supports kebab-case, snake_case, camelCase, PascalCase, and dot.case. Handles accents and special chars." />
+  <meta property="og:url" content="https://devnestio.pages.dev/slug-generator/" />
+  <meta name="twitter:card" content="summary" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    #privacy-banner { background: #1e293b; border-bottom: 1px solid #334155; padding: 8px 16px; font-size: 12px; color: #94a3b8; text-align: center; }
+    header { background: #1e293b; border-bottom: 1px solid #334155; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+    header a { color: #64748b; font-size: 13px; text-decoration: none; margin-left: auto; }
+    header a:hover { color: #94a3b8; }
+    .badge { background: #0891b2; color: #fff; font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+    main { max-width: 800px; margin: 0 auto; padding: 24px 16px; }
+    .panel { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+    .panel h2 { font-size: 13px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 14px; }
+    label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 5px; }
+    input[type="text"], textarea { width: 100%; padding: 10px 12px; background: #0f1117; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 15px; font-family: inherit; outline: none; }
+    input[type="text"]:focus, textarea:focus { border-color: #0891b2; }
+    textarea { font-family: 'JetBrains Mono', monospace; font-size: 13px; resize: vertical; min-height: 100px; }
+    .opts { display: flex; gap: 16px; flex-wrap: wrap; margin: 14px 0; }
+    .opt { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #94a3b8; }
+    .opt input[type="checkbox"] { accent-color: #0891b2; cursor: pointer; width: 14px; height: 14px; }
+    select.opt-sel { padding: 5px 8px; background: #0f1117; border: 1px solid #334155; border-radius: 5px; color: #e2e8f0; font-size: 12px; outline: none; }
+    select.opt-sel:focus { border-color: #0891b2; }
+    /* Output rows */
+    .output-grid { display: flex; flex-direction: column; gap: 10px; }
+    .output-row { display: flex; align-items: center; gap: 10px; background: #0f1117; border: 1px solid #334155; border-radius: 8px; padding: 10px 14px; }
+    .output-label { font-size: 11px; font-weight: 700; color: #64748b; min-width: 110px; text-transform: uppercase; letter-spacing: 0.06em; font-family: monospace; }
+    .output-val { flex: 1; font-size: 14px; font-family: 'JetBrains Mono', monospace; color: #e2e8f0; word-break: break-all; }
+    .output-val.empty { color: #334155; }
+    .copy-btn { padding: 4px 10px; border-radius: 5px; font-size: 11px; font-weight: 600; cursor: pointer; border: none; background: #334155; color: #94a3b8; white-space: nowrap; }
+    .copy-btn:hover { background: #475569; color: #e2e8f0; }
+    .copy-btn.copied { background: #052e16; color: #4ade80; }
+    .char-map { background: #0f1117; border: 1px solid #334155; border-radius: 8px; padding: 12px 14px; margin-top: 10px; }
+    .char-map-title { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+    .char-map-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+    .char-pair { font-size: 11px; font-family: monospace; background: #1e293b; border-radius: 4px; padding: 2px 6px; color: #94a3b8; }
+    .char-pair .arrow { color: #0891b2; }
+    #ad-slot { margin: 20px auto; text-align: center; }
+  </style>
+</head>
+<body>
+<div id="privacy-banner">🔒 All processing happens in your browser. No data is sent to any server.</div>
+<header>
+  <span class="badge">FREE</span>
+  <h1>URL Slug Generator</h1>
+  <a href="https://devnestio.pages.dev">← All Tools</a>
+</header>
+<main>
+  <div class="panel">
+    <h2>Input</h2>
+    <label for="input-text">Text to convert</label>
+    <input type="text" id="input-text" placeholder="e.g. Hello World! This is a Test." autocomplete="off" spellcheck="false" />
+
+    <div class="opts">
+      <div class="opt">
+        <label>Max length:</label>
+        <select class="opt-sel" id="opt-maxlen">
+          <option value="0">No limit</option>
+          <option value="50">50</option>
+          <option value="70" selected>70</option>
+          <option value="100">100</option>
+        </select>
+      </div>
+      <div class="opt">
+        <input type="checkbox" id="opt-lower" checked />
+        <label for="opt-lower">Lowercase</label>
+      </div>
+      <div class="opt">
+        <input type="checkbox" id="opt-trim-dashes" checked />
+        <label for="opt-trim-dashes">Trim separators</label>
+      </div>
+      <div class="opt">
+        <input type="checkbox" id="opt-collapse" checked />
+        <label for="opt-collapse">Collapse spaces</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Output Formats</h2>
+    <div class="output-grid" id="output-grid">
+      <!-- injected by JS -->
+    </div>
+
+    <div class="char-map">
+      <div class="char-map-title">Accent / Special Character Map</div>
+      <div class="char-map-grid" id="char-map-grid"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Batch Convert (one input per line)</h2>
+    <textarea id="batch-input" placeholder="Hello World&#10;My Blog Post&#10;Product Name 2024"></textarea>
+    <div style="margin-top:10px;display:flex;gap:8px">
+      <select class="opt-sel" id="batch-format">
+        <option value="kebab">kebab-case</option>
+        <option value="snake">snake_case</option>
+        <option value="camel">camelCase</option>
+        <option value="pascal">PascalCase</option>
+        <option value="dot">dot.case</option>
+      </select>
+      <button style="padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:#0891b2;color:#fff" onclick="batchConvert()">Convert All</button>
+    </div>
+    <textarea id="batch-output" style="margin-top:10px" readonly placeholder="Batch output will appear here…"></textarea>
+  </div>
+
+  <div id="ad-slot" data-ea-publisher="devnestio" data-ea-type="image"></div>
+</main>
+<script>
+// Accent transliteration table
+const CHAR_MAP = {
+  'à':'a','á':'a','â':'a','ã':'a','ä':'a','å':'a','æ':'ae',
+  'ç':'c','è':'e','é':'e','ê':'e','ë':'e',
+  'ì':'i','í':'i','î':'i','ï':'i',
+  'ð':'d','ñ':'n','ò':'o','ó':'o','ô':'o','õ':'o','ö':'o','ø':'o',
+  'ù':'u','ú':'u','û':'u','ü':'u','ý':'y','þ':'th','ß':'ss',
+  'œ':'oe','æ':'ae','€':'euro','©':'c','®':'r','™':'tm',
+  '&':'and','+':'plus','@':'at','#':'hash','%':'pct',
+  '′':'','″':'','×':'x','÷':'div','°':'deg',
+};
+
+function transliterate(text) {
+  return text.split('').map(c => CHAR_MAP[c.toLowerCase()] !== undefined ? CHAR_MAP[c.toLowerCase()] : c).join('');
+}
+
+function getWords(text) {
+  const lower = document.getElementById('opt-lower').checked;
+  let s = transliterate(text);
+  s = s.normalize('NFD').replace(/[̀-ͯ]/g, '');  // strip remaining diacritics
+  s = s.replace(/[^\w\s-]/g, ' ');  // non-word chars to space
+  if (document.getElementById('opt-collapse').checked) s = s.replace(/\s+/g, ' ').trim();
+  const words = s.trim().split(/[\s_\-]+/).filter(Boolean);
+  return lower ? words.map(w => w.toLowerCase()) : words;
+}
+
+function applyMaxLen(s, sep) {
+  const max = parseInt(document.getElementById('opt-maxlen').value);
+  if (!max || s.length <= max) return s;
+  let cut = s.slice(0, max);
+  // don't cut in the middle of a segment
+  const lastSep = cut.lastIndexOf(sep);
+  if (sep && lastSep > max * 0.5) cut = cut.slice(0, lastSep);
+  if (document.getElementById('opt-trim-dashes').checked) cut = cut.replace(new RegExp(`^[${sep}]+|[${sep}]+$`, 'g'), '');
+  return cut;
+}
+
+const FORMATS = [
+  {
+    id: 'kebab', label: 'kebab-case', sep: '-',
+    fn: words => words.join('-').toLowerCase()
+  },
+  {
+    id: 'snake', label: 'snake_case', sep: '_',
+    fn: words => words.join('_').toLowerCase()
+  },
+  {
+    id: 'camel', label: 'camelCase', sep: '',
+    fn: words => words.map((w,i) => i === 0 ? w.toLowerCase() : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join('')
+  },
+  {
+    id: 'pascal', label: 'PascalCase', sep: '',
+    fn: words => words.map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join('')
+  },
+  {
+    id: 'dot', label: 'dot.case', sep: '.',
+    fn: words => words.join('.').toLowerCase()
+  },
+  {
+    id: 'upper_snake', label: 'UPPER_SNAKE', sep: '_',
+    fn: words => words.join('_').toUpperCase()
+  },
+  {
+    id: 'title', label: 'Title Case', sep: ' ',
+    fn: words => words.map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
+  },
+  {
+    id: 'path', label: 'path/case', sep: '/',
+    fn: words => words.join('/').toLowerCase()
+  },
+];
+
+function buildGrid() {
+  const grid = document.getElementById('output-grid');
+  grid.innerHTML = '';
+  FORMATS.forEach(fmt => {
+    const row = document.createElement('div');
+    row.className = 'output-row';
+    row.id = 'row-' + fmt.id;
+    row.innerHTML = `<div class="output-label">${fmt.label}</div>
+      <div class="output-val empty" id="val-${fmt.id}">—</div>
+      <button class="copy-btn" id="copy-${fmt.id}" onclick="copyFormat('${fmt.id}')">Copy</button>`;
+    grid.appendChild(row);
+  });
+}
+
+function convertText(text) {
+  if (!text.trim()) {
+    FORMATS.forEach(fmt => {
+      document.getElementById('val-' + fmt.id).textContent = '—';
+      document.getElementById('val-' + fmt.id).className = 'output-val empty';
+    });
+    return;
+  }
+  const words = getWords(text);
+  FORMATS.forEach(fmt => {
+    let result = fmt.fn(words);
+    result = applyMaxLen(result, fmt.sep);
+    const el = document.getElementById('val-' + fmt.id);
+    el.textContent = result || '—';
+    el.className = result ? 'output-val' : 'output-val empty';
+  });
+}
+
+function copyFormat(id) {
+  const val = document.getElementById('val-' + id).textContent;
+  if (!val || val === '—') return;
+  navigator.clipboard.writeText(val).then(() => {
+    const btn = document.getElementById('copy-' + id);
+    btn.textContent = 'Copied!';
+    btn.className = 'copy-btn copied';
+    setTimeout(() => { btn.textContent = 'Copy'; btn.className = 'copy-btn'; }, 1500);
+  });
+}
+
+function batchConvert() {
+  const lines = document.getElementById('batch-input').value.split('\n');
+  const fmtId = document.getElementById('batch-format').value;
+  const fmt = FORMATS.find(f => f.id === fmtId);
+  if (!fmt) return;
+  const results = lines.map(line => {
+    if (!line.trim()) return '';
+    const words = getWords(line);
+    let r = fmt.fn(words);
+    return applyMaxLen(r, fmt.sep);
+  });
+  document.getElementById('batch-output').value = results.join('\n');
+}
+
+function buildCharMap() {
+  const grid = document.getElementById('char-map-grid');
+  const entries = Object.entries(CHAR_MAP).slice(0, 30);
+  grid.innerHTML = entries.map(([k, v]) =>
+    `<span class="char-pair">${k} <span class="arrow">→</span> ${v}</span>`
+  ).join('');
+}
+
+let debounce;
+document.getElementById('input-text').addEventListener('input', () => {
+  clearTimeout(debounce);
+  debounce = setTimeout(() => convertText(document.getElementById('input-text').value), 150);
+});
+['opt-lower','opt-trim-dashes','opt-collapse','opt-maxlen'].forEach(id => {
+  document.getElementById(id).addEventListener('change', () => convertText(document.getElementById('input-text').value));
+});
+
+buildGrid();
+buildCharMap();
+// Default sample
+document.getElementById('input-text').value = 'Hello World! This is a Test 2024';
+convertText('Hello World! This is a Test 2024');
+</script>
+</body>
+</html>

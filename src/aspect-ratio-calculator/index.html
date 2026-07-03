@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aspect Ratio Calculator – Resize & Ratio Converter | DevNestio</title>
+  <meta name="description" content="Calculate aspect ratios, resize dimensions while preserving ratio, and convert between common ratios. Free online tool for designers and developers." />
+  <meta property="og:title" content="Aspect Ratio Calculator – Resize & Ratio Converter" />
+  <meta property="og:description" content="Calculate aspect ratios from WxH, resize while preserving ratio, and explore common ratios like 16:9, 4:3, 1:1 and more." />
+  <meta name="twitter:card" content="summary" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1117; --surface: #1a1d27; --surface2: #22253a;
+      --border: #2e3148; --accent: #f59e0b; --accent2: #4ecca3;
+      --text: #e8eaf6; --muted: #8b90b8; --radius: 10px;
+      --red: #f87171; --green: #4ade80; --blue: #60a5fa;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 1.2rem; font-weight: 700; }
+    header span { color: var(--accent2); font-size: 0.78rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 2px 10px; }
+    main { flex: 1; max-width: 860px; margin: 0 auto; padding: 28px 20px; width: 100%; }
+    .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media(max-width: 640px) { .layout { grid-template-columns: 1fr; } }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; margin-bottom: 16px; }
+    .card-title { font-size: 0.82rem; font-weight: 700; color: var(--accent2); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 16px; }
+    label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 5px; }
+    input[type=number], input[type=text] {
+      width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+      padding: 10px 12px; color: var(--text); font-size: 0.95rem; outline: none; transition: border-color 0.2s;
+    }
+    input[type=number]:focus, input[type=text]:focus { border-color: var(--accent2); }
+    input[type=number]::placeholder, input[type=text]::placeholder { color: var(--muted); }
+    .field-group { margin-bottom: 14px; }
+    .field-row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: 10px; margin-bottom: 14px; }
+    .field-row .x-sep { font-size: 1.2rem; color: var(--muted); text-align: center; padding-bottom: 10px; }
+    .btn { background: var(--accent2); color: #0f1117; border: none; border-radius: 8px; padding: 10px 20px; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
+    .btn:hover { opacity: 0.85; }
+    .btn-outline { background: none; border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; color: var(--muted); font-size: 0.82rem; cursor: pointer; }
+    .btn-outline:hover { border-color: var(--accent2); color: var(--accent2); }
+    .result-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-top: 14px; }
+    .result-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    .result-row:last-child { border-bottom: none; }
+    .result-label { color: var(--muted); font-size: 0.82rem; }
+    .result-val { font-weight: 600; color: var(--text); font-family: monospace; }
+    .result-val.accent { color: var(--accent2); font-size: 1.1rem; }
+    .preview-wrap { margin-top: 16px; display: flex; justify-content: center; align-items: center; }
+    .preview-box { background: var(--surface2); border: 2px solid var(--accent2); border-radius: 6px; position: relative; display: flex; align-items: center; justify-content: center; }
+    .preview-label { font-size: 0.8rem; color: var(--accent2); font-weight: 600; }
+
+    /* Resize calculator */
+    .tabs { display: flex; gap: 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
+    .tab { flex: 1; padding: 9px; text-align: center; font-size: 0.84rem; font-weight: 600; color: var(--muted); cursor: pointer; background: var(--surface2); border: none; }
+    .tab.active { background: var(--accent2); color: #0f1117; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .output-field { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--accent2); font-size: 0.95rem; font-weight: 600; font-family: monospace; cursor: default; }
+    .copy-btn { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 5px 10px; color: var(--muted); font-size: 0.78rem; cursor: pointer; }
+    .copy-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+
+    /* Common ratios */
+    .ratio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+    .ratio-chip { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center; cursor: pointer; transition: border-color 0.15s; }
+    .ratio-chip:hover { border-color: var(--accent2); }
+    .ratio-chip.active { border-color: var(--accent2); background: rgba(78,204,163,0.08); }
+    .ratio-chip .ratio-name { font-size: 0.95rem; font-weight: 700; color: var(--text); }
+    .ratio-chip .ratio-label { font-size: 0.72rem; color: var(--muted); margin-top: 3px; }
+    .ratio-chip .ratio-preview { width: 100%; margin-top: 8px; background: var(--border); border-radius: 3px; }
+
+    footer { text-align: center; padding: 20px; color: var(--muted); font-size: 0.78rem; border-top: 1px solid var(--border); }
+    footer a { color: var(--accent2); text-decoration: none; }
+    .swap-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 5px 10px; color: var(--muted); font-size: 0.82rem; cursor: pointer; }
+    .swap-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Aspect Ratio Calculator</h1>
+  <span>Dimensions &amp; Ratios</span>
+</header>
+<main>
+
+  <!-- Ratio from dimensions -->
+  <div class="layout">
+    <div class="card">
+      <div class="card-title">Calculate Ratio from Dimensions</div>
+      <div class="field-row">
+        <div>
+          <label>Width (px)</label>
+          <input type="number" id="dimW" placeholder="e.g. 1920" min="1" />
+        </div>
+        <div class="x-sep">×</div>
+        <div>
+          <label>Height (px)</label>
+          <input type="number" id="dimH" placeholder="e.g. 1080" min="1" />
+        </div>
+      </div>
+      <button class="btn" id="calcRatioBtn" style="width:100%;">Calculate Ratio</button>
+
+      <div class="result-box" id="ratioResult" style="display:none;">
+        <div class="result-row">
+          <span class="result-label">Simplified Ratio</span>
+          <span class="result-val accent" id="simpleRatio">—</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">Decimal Ratio (W÷H)</span>
+          <span class="result-val" id="decimalRatio">—</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">Percentage (H/W)</span>
+          <span class="result-val" id="pctRatio">—</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">Closest Common</span>
+          <span class="result-val" id="closestRatio">—</span>
+        </div>
+      </div>
+
+      <!-- Preview box -->
+      <div class="preview-wrap" id="previewWrap" style="display:none;">
+        <div class="preview-box" id="previewBox">
+          <span class="preview-label" id="previewLabel"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resize -->
+    <div class="card">
+      <div class="card-title">Resize Preserving Ratio</div>
+      <div class="tabs">
+        <button class="tab active" data-tab="lock-w">Lock Width</button>
+        <button class="tab" data-tab="lock-h">Lock Height</button>
+        <button class="tab" data-tab="ratio-in">By Ratio</button>
+      </div>
+
+      <!-- Lock Width -->
+      <div class="tab-panel active" id="tab-lock-w">
+        <div class="field-group">
+          <label>Original Width</label>
+          <input type="number" id="rwOrigW" placeholder="e.g. 1920" min="1" />
+        </div>
+        <div class="field-group">
+          <label>Original Height</label>
+          <input type="number" id="rwOrigH" placeholder="e.g. 1080" min="1" />
+        </div>
+        <div class="field-group">
+          <label>New Width</label>
+          <input type="number" id="rwNewW" placeholder="e.g. 1280" min="1" />
+        </div>
+        <button class="btn" id="calcLockW" style="width:100%;margin-bottom:10px;">Calculate</button>
+        <div class="field-group" id="lockWResult" style="display:none;">
+          <label>New Height</label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <div class="output-field" id="lockWOut">—</div>
+            <button class="copy-btn" id="copyLockW">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lock Height -->
+      <div class="tab-panel" id="tab-lock-h">
+        <div class="field-group">
+          <label>Original Width</label>
+          <input type="number" id="rhOrigW" placeholder="e.g. 1920" min="1" />
+        </div>
+        <div class="field-group">
+          <label>Original Height</label>
+          <input type="number" id="rhOrigH" placeholder="e.g. 1080" min="1" />
+        </div>
+        <div class="field-group">
+          <label>New Height</label>
+          <input type="number" id="rhNewH" placeholder="e.g. 720" min="1" />
+        </div>
+        <button class="btn" id="calcLockH" style="width:100%;margin-bottom:10px;">Calculate</button>
+        <div class="field-group" id="lockHResult" style="display:none;">
+          <label>New Width</label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <div class="output-field" id="lockHOut">—</div>
+            <button class="copy-btn" id="copyLockH">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- By Ratio -->
+      <div class="tab-panel" id="tab-ratio-in">
+        <div class="field-row" style="margin-bottom:14px;">
+          <div>
+            <label>Ratio W</label>
+            <input type="number" id="rrW" placeholder="16" min="1" />
+          </div>
+          <div class="x-sep">:</div>
+          <div>
+            <label>Ratio H</label>
+            <input type="number" id="rrH" placeholder="9" min="1" />
+          </div>
+        </div>
+        <div class="field-group">
+          <label>Known Dimension</label>
+          <div style="display:flex;gap:8px;">
+            <input type="number" id="rrKnownVal" placeholder="e.g. 1920" min="1" style="flex:1;" />
+            <select id="rrKnownSide" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 8px;color:var(--text);outline:none;">
+              <option value="w">Width</option>
+              <option value="h">Height</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn" id="calcByRatio" style="width:100%;margin-bottom:10px;">Calculate</button>
+        <div id="byRatioResult" style="display:none;">
+          <div class="result-box">
+            <div class="result-row">
+              <span class="result-label">Width</span>
+              <span class="result-val accent" id="rrOutW">—</span>
+            </div>
+            <div class="result-row">
+              <span class="result-label">Height</span>
+              <span class="result-val accent" id="rrOutH">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Common ratios -->
+  <div class="card">
+    <div class="card-title">Common Aspect Ratios</div>
+    <div class="ratio-grid" id="ratioGrid"></div>
+  </div>
+
+</main>
+<footer>
+  <a href="https://devnestio.pages.dev/">← Back to DevNestio Tools</a>
+</footer>
+
+<script>
+  // GCD
+  function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+
+  function simplifyRatio(w, h) {
+    const g = gcd(Math.round(w), Math.round(h));
+    return [Math.round(w/g), Math.round(h/g)];
+  }
+
+  const COMMON_RATIOS = [
+    { name: '16:9',  w: 16,  h: 9,   label: 'Widescreen HD' },
+    { name: '4:3',   w: 4,   h: 3,   label: 'Classic TV/Photo' },
+    { name: '1:1',   w: 1,   h: 1,   label: 'Square' },
+    { name: '21:9',  w: 21,  h: 9,   label: 'Ultrawide' },
+    { name: '3:2',   w: 3,   h: 2,   label: 'DSLR / 35mm' },
+    { name: '5:4',   w: 5,   h: 4,   label: 'Medium Format' },
+    { name: '9:16',  w: 9,   h: 16,  label: 'Portrait / Mobile' },
+    { name: '2:1',   w: 2,   h: 1,   label: 'Univisium' },
+    { name: '4:5',   w: 4,   h: 5,   label: 'Instagram Portrait' },
+    { name: '16:10', w: 16,  h: 10,  label: 'Widescreen Monitor' },
+    { name: '5:3',   w: 5,   h: 3,   label: 'European HDTV' },
+    { name: '3:4',   w: 3,   h: 4,   label: 'Portrait Classic' },
+  ];
+
+  function closestCommonRatio(w, h) {
+    const ratio = w / h;
+    let best = null, bestDiff = Infinity;
+    for (const r of COMMON_RATIOS) {
+      const diff = Math.abs(ratio - r.w / r.h);
+      if (diff < bestDiff) { bestDiff = diff; best = r; }
+    }
+    return best;
+  }
+
+  // Render common ratios
+  const ratioGrid = document.getElementById('ratioGrid');
+  COMMON_RATIOS.forEach(r => {
+    const pct = ((r.h / r.w) * 100).toFixed(1);
+    const div = document.createElement('div');
+    div.className = 'ratio-chip';
+    div.dataset.rw = r.w;
+    div.dataset.rh = r.h;
+    div.innerHTML = `
+      <div class="ratio-name">${r.name}</div>
+      <div class="ratio-label">${r.label}</div>
+      <div class="ratio-preview" style="height:${Math.min(pct * 0.6, 50)}px;"></div>
+    `;
+    div.addEventListener('click', () => {
+      document.querySelectorAll('.ratio-chip').forEach(c => c.classList.remove('active'));
+      div.classList.add('active');
+      // Fill ratio tab
+      document.getElementById('rrW').value = r.w;
+      document.getElementById('rrH').value = r.h;
+      // Switch to "By Ratio" tab
+      switchTab('ratio-in');
+    });
+    ratioGrid.appendChild(div);
+  });
+
+  // Tabs
+  function switchTab(id) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === id));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === `tab-${id}`));
+  }
+  document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
+
+  // Calculate ratio from dimensions
+  document.getElementById('calcRatioBtn').addEventListener('click', () => {
+    const w = parseFloat(document.getElementById('dimW').value);
+    const h = parseFloat(document.getElementById('dimH').value);
+    if (!w || !h || w <= 0 || h <= 0) return;
+
+    const [rw, rh] = simplifyRatio(w, h);
+    const decimal = (w / h).toFixed(4);
+    const pct = ((h / w) * 100).toFixed(4) + '%';
+    const closest = closestCommonRatio(w, h);
+
+    document.getElementById('simpleRatio').textContent = `${rw}:${rh}`;
+    document.getElementById('decimalRatio').textContent = decimal;
+    document.getElementById('pctRatio').textContent = pct;
+    document.getElementById('closestRatio').textContent = closest ? `${closest.name} (${closest.label})` : '—';
+    document.getElementById('ratioResult').style.display = '';
+
+    // Preview
+    const maxW = 200, maxH = 150;
+    let pw = w, ph = h;
+    if (pw > maxW) { ph = ph * (maxW / pw); pw = maxW; }
+    if (ph > maxH) { pw = pw * (maxH / ph); ph = maxH; }
+    const previewBox = document.getElementById('previewBox');
+    previewBox.style.width = Math.round(pw) + 'px';
+    previewBox.style.height = Math.round(ph) + 'px';
+    document.getElementById('previewLabel').textContent = `${rw}:${rh}`;
+    document.getElementById('previewWrap').style.display = '';
+  });
+
+  // Lock width
+  document.getElementById('calcLockW').addEventListener('click', () => {
+    const origW = parseFloat(document.getElementById('rwOrigW').value);
+    const origH = parseFloat(document.getElementById('rwOrigH').value);
+    const newW = parseFloat(document.getElementById('rwNewW').value);
+    if (!origW || !origH || !newW) return;
+    const newH = Math.round(newW * origH / origW);
+    document.getElementById('lockWOut').textContent = newH + ' px';
+    document.getElementById('lockWResult').style.display = '';
+  });
+  document.getElementById('copyLockW').addEventListener('click', () => {
+    const val = document.getElementById('lockWOut').textContent;
+    navigator.clipboard.writeText(val.replace(' px',''));
+    document.getElementById('copyLockW').textContent = 'Copied!';
+    setTimeout(() => document.getElementById('copyLockW').textContent = 'Copy', 1500);
+  });
+
+  // Lock height
+  document.getElementById('calcLockH').addEventListener('click', () => {
+    const origW = parseFloat(document.getElementById('rhOrigW').value);
+    const origH = parseFloat(document.getElementById('rhOrigH').value);
+    const newH = parseFloat(document.getElementById('rhNewH').value);
+    if (!origW || !origH || !newH) return;
+    const newW = Math.round(newH * origW / origH);
+    document.getElementById('lockHOut').textContent = newW + ' px';
+    document.getElementById('lockHResult').style.display = '';
+  });
+  document.getElementById('copyLockH').addEventListener('click', () => {
+    const val = document.getElementById('lockHOut').textContent;
+    navigator.clipboard.writeText(val.replace(' px',''));
+    document.getElementById('copyLockH').textContent = 'Copied!';
+    setTimeout(() => document.getElementById('copyLockH').textContent = 'Copy', 1500);
+  });
+
+  // By ratio
+  document.getElementById('calcByRatio').addEventListener('click', () => {
+    const rw = parseFloat(document.getElementById('rrW').value);
+    const rh = parseFloat(document.getElementById('rrH').value);
+    const val = parseFloat(document.getElementById('rrKnownVal').value);
+    const side = document.getElementById('rrKnownSide').value;
+    if (!rw || !rh || !val) return;
+    let outW, outH;
+    if (side === 'w') { outW = val; outH = Math.round(val * rh / rw); }
+    else { outH = val; outW = Math.round(val * rw / rh); }
+    document.getElementById('rrOutW').textContent = outW + ' px';
+    document.getElementById('rrOutH').textContent = outH + ' px';
+    document.getElementById('byRatioResult').style.display = '';
+  });
+
+  // Enter key shortcuts
+  ['dimW','dimH'].forEach(id => document.getElementById(id).addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('calcRatioBtn').click(); }));
+  ['rwOrigW','rwOrigH','rwNewW'].forEach(id => document.getElementById(id).addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('calcLockW').click(); }));
+  ['rhOrigW','rhOrigH','rhNewH'].forEach(id => document.getElementById(id).addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('calcLockH').click(); }));
+  ['rrW','rrH','rrKnownVal'].forEach(id => document.getElementById(id).addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('calcByRatio').click(); }));
+</script>
+
+<!-- 80 test cases
+TEST_ID: ar-001 - Page title "Aspect Ratio Calculator"
+TEST_ID: ar-002 - Header badge "Dimensions & Ratios"
+TEST_ID: ar-003 - "Calculate Ratio from Dimensions" card visible
+TEST_ID: ar-004 - Width and Height inputs visible
+TEST_ID: ar-005 - "Calculate Ratio" button triggers calculation
+TEST_ID: ar-006 - 1920×1080 → simplified ratio "16:9"
+TEST_ID: ar-007 - 1920×1080 → decimal ratio "1.7778"
+TEST_ID: ar-008 - 1920×1080 → percentage "56.25%"
+TEST_ID: ar-009 - 1920×1080 → closest common ratio shows "16:9"
+TEST_ID: ar-010 - 1280×720 → simplified "16:9"
+TEST_ID: ar-011 - 1024×768 → simplified "4:3"
+TEST_ID: ar-012 - 800×600 → simplified "4:3"
+TEST_ID: ar-013 - 1000×1000 → simplified "1:1"
+TEST_ID: ar-014 - 2560×1080 → simplified "64:27" or close to 21:9
+TEST_ID: ar-015 - Result box hidden before first calculation
+TEST_ID: ar-016 - Result box visible after calculation
+TEST_ID: ar-017 - Preview box appears after calculation
+TEST_ID: ar-018 - Preview box has teal border
+TEST_ID: ar-019 - Preview box aspect ratio matches input
+TEST_ID: ar-020 - Preview label shows simplified ratio
+TEST_ID: ar-021 - Preview scales to fit within 200×150 area
+TEST_ID: ar-022 - "Resize Preserving Ratio" card visible
+TEST_ID: ar-023 - "Lock Width" tab is default active
+TEST_ID: ar-024 - "Lock Height" tab switches to that view
+TEST_ID: ar-025 - "By Ratio" tab switches to that view
+TEST_ID: ar-026 - Lock Width: 1920×1080 → new width 1280 → height 720
+TEST_ID: ar-027 - Lock Width: 1920×1080 → new width 640 → height 360
+TEST_ID: ar-028 - Lock Width result shows new height with "px" suffix
+TEST_ID: ar-029 - Lock Width copy button copies numeric value
+TEST_ID: ar-030 - Lock Width copy button shows "Copied!" then reverts
+TEST_ID: ar-031 - Lock Height: 1920×1080 → new height 720 → width 1280
+TEST_ID: ar-032 - Lock Height: 1920×1080 → new height 1080 → width 1920
+TEST_ID: ar-033 - Lock Height result shows new width with "px" suffix
+TEST_ID: ar-034 - Lock Height copy button works
+TEST_ID: ar-035 - By Ratio: 16:9 with width 1920 → height 1080
+TEST_ID: ar-036 - By Ratio: 4:3 with width 1024 → height 768
+TEST_ID: ar-037 - By Ratio: 1:1 with width 500 → height 500
+TEST_ID: ar-038 - By Ratio: 16:9 with height 1080 → width 1920
+TEST_ID: ar-039 - By Ratio: known side selector (Width/Height) works
+TEST_ID: ar-040 - By Ratio result shows both Width and Height
+TEST_ID: ar-041 - Common Aspect Ratios section visible
+TEST_ID: ar-042 - 16:9 chip shows "Widescreen HD"
+TEST_ID: ar-043 - 4:3 chip shows "Classic TV/Photo"
+TEST_ID: ar-044 - 1:1 chip shows "Square"
+TEST_ID: ar-045 - 21:9 chip shows "Ultrawide"
+TEST_ID: ar-046 - 3:2 chip shows "DSLR / 35mm"
+TEST_ID: ar-047 - 9:16 chip shows "Portrait / Mobile"
+TEST_ID: ar-048 - Clicking ratio chip activates it (teal border)
+TEST_ID: ar-049 - Clicking ratio chip fills By Ratio inputs
+TEST_ID: ar-050 - Clicking ratio chip switches to "By Ratio" tab
+TEST_ID: ar-051 - Only one ratio chip active at a time
+TEST_ID: ar-052 - Ratio chips have visual preview bar
+TEST_ID: ar-053 - Taller ratios have taller preview bar
+TEST_ID: ar-054 - Enter key triggers Calculate Ratio button
+TEST_ID: ar-055 - Enter key in Lock Width inputs triggers calculation
+TEST_ID: ar-056 - Enter key in Lock Height inputs triggers calculation
+TEST_ID: ar-057 - Enter key in By Ratio inputs triggers calculation
+TEST_ID: ar-058 - 2560×1440 → "16:9"
+TEST_ID: ar-059 - 3840×2160 → "16:9"
+TEST_ID: ar-060 - 1280×800 → "8:5"
+TEST_ID: ar-061 - 4096×3072 → "4:3"
+TEST_ID: ar-062 - 300×400 → "3:4"
+TEST_ID: ar-063 - Dark background (#0f1117)
+TEST_ID: ar-064 - Layout is 2-column on desktop
+TEST_ID: ar-065 - Layout collapses to 1-column on mobile
+TEST_ID: ar-066 - Numbers input in width/height only accept positive values
+TEST_ID: ar-067 - Empty fields do not crash on Calculate
+TEST_ID: ar-068 - Simplified ratio uses GCD correctly
+TEST_ID: ar-069 - 6:4 → simplified to "3:2"
+TEST_ID: ar-070 - 800×200 → simplified to "4:1"
+TEST_ID: ar-071 - Closest common ratio for 1280×800 shows "16:10"
+TEST_ID: ar-072 - Closest common ratio for 640×480 shows "4:3"
+TEST_ID: ar-073 - By Ratio: 2:1 ratio, width 1000 → height 500
+TEST_ID: ar-074 - 12 common ratios displayed in ratio grid
+TEST_ID: ar-075 - Footer DevNestio link present
+TEST_ID: ar-076 - Tab panels correctly show/hide on click
+TEST_ID: ar-077 - Result values use monospace font
+TEST_ID: ar-078 - Teal accent color on key result values
+TEST_ID: ar-079 - 9:16 chip preview bar is taller than 16:9 bar
+TEST_ID: ar-080 - 5:4 chip shows "Medium Format"
+-->
+</body>
+</html>

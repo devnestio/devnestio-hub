@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Email Header Analyzer – devnestio</title>
+  <meta name="description" content="Analyze email headers online. Parse From, To, Subject, Date, Message-ID, SPF, DKIM, DMARC authentication results, and routing Received hops. Browser-only, no data sent to server." />
+  <meta property="og:title" content="Email Header Analyzer – devnestio" />
+  <meta property="og:description" content="Paste raw email headers to decode authentication results (SPF/DKIM/DMARC), trace routing hops, and inspect all header fields instantly." />
+  <meta property="og:url" content="https://devnestio.pages.dev/email-header-analyzer/" />
+  <meta name="twitter:card" content="summary" />
+  <link rel="canonical" href="https://devnestio.pages.dev/email-header-analyzer/" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+</head>
+<body>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+  header { background: #1e293b; border-bottom: 1px solid #334155; padding: 14px 24px; display: flex; align-items: center; gap: 12px; }
+  header a { color: #64748b; font-size: 13px; text-decoration: none; }
+  header a:hover { color: #94a3b8; }
+  header h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+  .badge { background: #0891b2; color: #fff; font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 600; margin-left: 8px; }
+  main { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+  .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 720px) { .layout { grid-template-columns: 1fr; } }
+  .panel { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 16px; }
+  .panel-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .panel-hdr h2 { font-size: 12px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em; }
+  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .btn { padding: 7px 16px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: background .15s; }
+  .btn-primary { background: #0891b2; color: #fff; }
+  .btn-primary:hover { background: #0e7490; }
+  .btn-secondary { background: #334155; color: #e2e8f0; }
+  .btn-secondary:hover { background: #475569; }
+  .btn-sm { padding: 5px 12px; font-size: 12px; }
+  textarea { width: 100%; padding: 10px 12px; background: #0f1117; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 11px; font-family: 'Courier New', monospace; outline: none; resize: vertical; min-height: 460px; line-height: 1.7; }
+  textarea:focus { border-color: #0891b2; }
+  .results { overflow-y: auto; max-height: 520px; }
+  .section { margin-bottom: 14px; }
+  .section-title { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid #334155; }
+  .field-row { display: flex; gap: 8px; padding: 6px 0; border-bottom: 1px solid #1e293b; align-items: flex-start; }
+  .field-name { font-size: 11px; font-weight: 600; color: #64748b; min-width: 110px; padding-top: 1px; font-family: monospace; }
+  .field-val { font-size: 12px; color: #e2e8f0; word-break: break-all; flex: 1; }
+  .auth-grid { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+  .auth-chip { display: flex; align-items: center; gap: 6px; background: #0f1117; border: 1px solid #334155; border-radius: 8px; padding: 8px 14px; }
+  .auth-label { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; }
+  .auth-result { font-size: 13px; font-weight: 700; }
+  .auth-pass { color: #4ade80; }
+  .auth-fail { color: #f87171; }
+  .auth-none { color: #94a3b8; }
+  .auth-neutral { color: #fbbf24; }
+  .hop { background: #0f1117; border: 1px solid #334155; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; }
+  .hop-num { font-size: 10px; font-weight: 700; color: #0891b2; margin-bottom: 4px; }
+  .hop-from { font-size: 11px; color: #e2e8f0; font-family: monospace; }
+  .hop-by { font-size: 11px; color: #94a3b8; font-family: monospace; }
+  .hop-date { font-size: 10px; color: #64748b; margin-top: 4px; }
+  .all-headers { font-size: 10px; font-family: monospace; color: #64748b; white-space: pre-wrap; word-break: break-all; background: #0f1117; border-radius: 6px; padding: 10px; max-height: 200px; overflow-y: auto; }
+  .empty-state { text-align: center; padding: 60px 20px; color: #475569; }
+  .sample-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .sample-btn { background: #0f1117; border: 1px solid #334155; border-radius: 6px; padding: 5px 12px; font-size: 12px; color: #94a3b8; cursor: pointer; }
+  .sample-btn:hover { border-color: #0891b2; color: #38bdf8; }
+  .tab-bar { display: flex; gap: 4px; background: #0a0d1a; border: 1px solid #334155; border-radius: 8px; padding: 3px; margin-bottom: 12px; }
+  .tab { background: none; border: none; border-radius: 5px; padding: 5px 14px; font-size: 12px; color: #64748b; cursor: pointer; transition: all .15s; }
+  .tab.active { background: #0891b2; color: #fff; }
+</style>
+
+<header>
+  <a href="/">← devnestio</a>
+  <h1>Email Header Analyzer <span class="badge">RFC 5322</span></h1>
+</header>
+
+<main>
+  <div class="toolbar">
+    <button class="btn btn-primary" onclick="runAnalysis()">Analyze</button>
+    <button class="btn btn-secondary btn-sm" onclick="clearAll()">Clear</button>
+    <button class="btn btn-secondary btn-sm" onclick="copyInput()">Copy</button>
+  </div>
+  <div class="sample-btns">
+    <button class="sample-btn" onclick="loadSample('legit')">Legitimate email</button>
+    <button class="sample-btn" onclick="loadSample('suspicious')">Suspicious</button>
+  </div>
+  <div class="layout">
+    <div class="panel">
+      <div class="panel-hdr">
+        <h2>Raw Email Headers</h2>
+        <span id="header-count" style="font-size:11px;color:#64748b">0 headers</span>
+      </div>
+      <textarea id="input" placeholder="Paste raw email headers here…&#10;&#10;From: sender@example.com&#10;To: recipient@example.com&#10;Subject: Hello&#10;..." oninput="updateHeaderCount()" spellcheck="false"></textarea>
+    </div>
+    <div class="panel">
+      <div class="panel-hdr">
+        <h2>Analysis</h2>
+      </div>
+      <div class="tab-bar">
+        <button class="tab active" onclick="showTab('summary')">Summary</button>
+        <button class="tab" onclick="showTab('routing')">Routing</button>
+        <button class="tab" onclick="showTab('all')">All Headers</button>
+      </div>
+      <div id="results">
+        <div class="empty-state"><p>Paste email headers and click Analyze</p></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+// ── Core parsing logic (also used in test.mjs) ────────────────────────────────
+
+function parseEmailHeaders(raw) {
+  const headers = [];
+  const lines = raw.split('\n');
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    if (!line.trim()) { i++; continue; }
+    const m = line.match(/^([A-Za-z0-9_-]+)\s*:\s*(.*)/);
+    if (m) {
+      let value = m[2];
+      while (i + 1 < lines.length && /^\s+/.test(lines[i + 1])) {
+        i++;
+        value += ' ' + lines[i].trim();
+      }
+      headers.push({ name: m[1].toLowerCase(), rawName: m[1], value: value.trim() });
+    }
+    i++;
+  }
+  return headers;
+}
+
+function getHeader(headers, name) {
+  const h = headers.find(h => h.name === name.toLowerCase());
+  return h ? h.value : null;
+}
+
+function getAllHeaders(headers, name) {
+  return headers.filter(h => h.name === name.toLowerCase()).map(h => h.value);
+}
+
+function extractEmail(value) {
+  if (!value) return null;
+  const m = value.match(/<([^>]+)>/);
+  if (m) return m[1].trim();
+  const plain = value.match(/[\w.+-]+@[\w.-]+\.[a-zA-Z]{2,}/);
+  return plain ? plain[0] : null;
+}
+
+function extractDomain(email) {
+  if (!email) return null;
+  const parts = email.split('@');
+  return parts.length === 2 ? parts[1].toLowerCase() : null;
+}
+
+function parseReceivedHeader(value) {
+  const fromMatch = value.match(/from\s+([^\s(;]+)/i);
+  const byMatch = value.match(/by\s+([^\s(;]+)/i);
+  const dateMatch = value.match(/;\s*(.+)$/);
+  const ipMatch = value.match(/\[(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\]/);
+  return {
+    from: fromMatch ? fromMatch[1] : null,
+    by: byMatch ? byMatch[1] : null,
+    date: dateMatch ? dateMatch[1].trim() : null,
+    ip: ipMatch ? ipMatch[1] : null,
+  };
+}
+
+function parseAuthResults(value) {
+  if (!value) return { spf: null, dkim: null, dmarc: null };
+  const spfMatch = value.match(/spf=([a-zA-Z]+)/i);
+  const dkimMatch = value.match(/dkim=([a-zA-Z]+)/i);
+  const dmarcMatch = value.match(/dmarc=([a-zA-Z]+)/i);
+  return {
+    spf: spfMatch ? spfMatch[1].toLowerCase() : null,
+    dkim: dkimMatch ? dkimMatch[1].toLowerCase() : null,
+    dmarc: dmarcMatch ? dmarcMatch[1].toLowerCase() : null,
+  };
+}
+
+function getSpfResult(headers) {
+  const authResults = getAllHeaders(headers, 'authentication-results');
+  for (const ar of authResults) {
+    const m = ar.match(/spf=([a-zA-Z]+)/i);
+    if (m) return m[1].toLowerCase();
+  }
+  const received = getAllHeaders(headers, 'received-spf');
+  if (received.length) {
+    const m = received[0].match(/^([a-zA-Z]+)/);
+    return m ? m[1].toLowerCase() : null;
+  }
+  return null;
+}
+
+function getDkimResult(headers) {
+  const authResults = getAllHeaders(headers, 'authentication-results');
+  for (const ar of authResults) {
+    const m = ar.match(/dkim=([a-zA-Z]+)/i);
+    if (m) return m[1].toLowerCase();
+  }
+  return null;
+}
+
+function getDmarcResult(headers) {
+  const authResults = getAllHeaders(headers, 'authentication-results');
+  for (const ar of authResults) {
+    const m = ar.match(/dmarc=([a-zA-Z]+)/i);
+    if (m) return m[1].toLowerCase();
+  }
+  return null;
+}
+
+function isSpam(headers) {
+  const spamScore = getHeader(headers, 'x-spam-score');
+  const spamFlag = getHeader(headers, 'x-spam-flag');
+  if (spamFlag && spamFlag.toUpperCase() === 'YES') return true;
+  if (spamScore && parseFloat(spamScore) > 5) return true;
+  return false;
+}
+
+function getRoutingHops(headers) {
+  return getAllHeaders(headers, 'received').map((v, idx) => ({
+    num: idx + 1,
+    ...parseReceivedHeader(v),
+  }));
+}
+
+function analyzeEmailHeaders(raw) {
+  const headers = parseEmailHeaders(raw);
+
+  const from = getHeader(headers, 'from');
+  const to = getHeader(headers, 'to');
+  const subject = getHeader(headers, 'subject');
+  const date = getHeader(headers, 'date');
+  const messageId = getHeader(headers, 'message-id');
+  const replyTo = getHeader(headers, 'reply-to');
+  const returnPath = getHeader(headers, 'return-path');
+
+  const fromEmail = extractEmail(from);
+  const replyToEmail = extractEmail(replyTo);
+  const returnPathEmail = extractEmail(returnPath);
+
+  const fromDomain = extractDomain(fromEmail);
+  const replyToDomain = extractDomain(replyToEmail);
+  const returnPathDomain = extractDomain(returnPathEmail);
+
+  const spf = getSpfResult(headers);
+  const dkim = getDkimResult(headers);
+  const dmarc = getDmarcResult(headers);
+
+  const warnings = [];
+  if (replyToEmail && fromDomain && replyToDomain && replyToDomain !== fromDomain) {
+    warnings.push(`Reply-To domain (${replyToDomain}) differs from From domain (${fromDomain}) — possible phishing`);
+  }
+  if (returnPathDomain && fromDomain && returnPathDomain !== fromDomain) {
+    warnings.push(`Return-Path domain (${returnPathDomain}) differs from From domain (${fromDomain})`);
+  }
+  if (spf === 'fail' || spf === 'softfail') {
+    warnings.push(`SPF check ${spf} — sender IP is not authorized`);
+  }
+  if (dkim === 'fail') {
+    warnings.push('DKIM signature verification failed');
+  }
+  if (dmarc === 'fail') {
+    warnings.push('DMARC policy check failed');
+  }
+  if (isSpam(headers)) {
+    warnings.push('Email flagged as spam by spam filter');
+  }
+
+  const hops = getRoutingHops(headers);
+
+  return {
+    headers,
+    summary: { from, to, subject, date, messageId, replyTo, returnPath },
+    auth: { spf, dkim, dmarc },
+    warnings,
+    hops,
+    fromEmail,
+    fromDomain,
+  };
+}
+
+// ── Samples ───────────────────────────────────────────────────────────────────
+
+const SAMPLES = {
+  legit: `Delivered-To: alice@example.com
+Received: by 2002:a05:6902:1521:0:0:0:0 with SMTP id; Thu, 1 Jun 2023 10:00:01 -0700 (PDT)
+Received: from mail.sender.com (mail.sender.com [203.0.113.5])
+        by mx.example.com with ESMTPS id x12si1234567pfv.123.2023.06.01.10.00.00
+        for <alice@example.com>; Thu, 01 Jun 2023 10:00:00 -0700
+Authentication-Results: mx.example.com;
+       dkim=pass header.i=@sender.com header.s=20230601 header.b=AbCdEfGh;
+       spf=pass (google.com: domain of bob@sender.com designates 203.0.113.5 as permitted sender) smtp.mailfrom=bob@sender.com;
+       dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=sender.com
+Received-SPF: pass (mx.example.com: domain of bob@sender.com designates 203.0.113.5 as permitted sender) client-ip=203.0.113.5
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sender.com; s=20230601; h=from:to:subject:date:message-id; bh=AAAA=; b=BBBB=
+From: Bob Smith <bob@sender.com>
+To: alice@example.com
+Subject: Hello from Bob!
+Date: Thu, 1 Jun 2023 10:00:00 -0700
+Message-ID: <20230601100000.123456.1@sender.com>
+X-Mailer: Microsoft Outlook 16.0
+`,
+  suspicious: `Received: from unknown-host (unknown [198.51.100.99])
+        by mx.example.com with SMTP; Mon, 5 Jun 2023 09:00:00 +0000
+Authentication-Results: mx.example.com;
+       dkim=fail reason="signature verification failed";
+       spf=softfail (domain of noreply@bank-real.com does not designate 198.51.100.99 as permitted sender);
+       dmarc=fail action=none header.from=bank-real.com
+From: "Your Bank" <noreply@bank-real.com>
+Reply-To: support@totallynotphishing.ru
+To: victim@example.com
+Subject: URGENT: Verify your account now!
+Date: Mon, 5 Jun 2023 09:00:00 +0000
+Message-ID: <1234@unknown-host>
+X-Spam-Flag: YES
+X-Spam-Score: 8.5
+`,
+};
+
+// ── UI ─────────────────────────────────────────────────────────────────────────
+
+let currentResult = null;
+let currentTab = 'summary';
+
+function loadSample(key) {
+  document.getElementById('input').value = SAMPLES[key];
+  updateHeaderCount();
+  runAnalysis();
+}
+
+function updateHeaderCount() {
+  const v = document.getElementById('input').value;
+  const lines = v.split('\n').filter(l => /^[A-Za-z0-9_-]+\s*:/.test(l));
+  document.getElementById('header-count').textContent = `${lines.length} headers`;
+}
+
+function clearAll() {
+  document.getElementById('input').value = '';
+  document.getElementById('results').innerHTML = '<div class="empty-state"><p>Paste email headers and click Analyze</p></div>';
+  currentResult = null;
+  updateHeaderCount();
+}
+
+function copyInput() {
+  navigator.clipboard.writeText(document.getElementById('input').value);
+}
+
+function showTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.textContent.toLowerCase() === tab));
+  if (currentResult) renderResults();
+}
+
+function authClass(result) {
+  if (!result) return 'auth-none';
+  if (result === 'pass') return 'auth-pass';
+  if (result === 'fail' || result === 'hardfail') return 'auth-fail';
+  if (result === 'softfail') return 'auth-neutral';
+  return 'auth-none';
+}
+
+function renderResults() {
+  const r = currentResult;
+  const el = document.getElementById('results');
+
+  if (currentTab === 'summary') {
+    const { summary, auth, warnings, fromDomain } = r;
+    const authHtml = `
+      <div class="section">
+        <div class="section-title">Authentication</div>
+        <div class="auth-grid">
+          <div class="auth-chip"><span class="auth-label">SPF</span><span class="auth-result ${authClass(auth.spf)}">${auth.spf || 'none'}</span></div>
+          <div class="auth-chip"><span class="auth-label">DKIM</span><span class="auth-result ${authClass(auth.dkim)}">${auth.dkim || 'none'}</span></div>
+          <div class="auth-chip"><span class="auth-label">DMARC</span><span class="auth-result ${authClass(auth.dmarc)}">${auth.dmarc || 'none'}</span></div>
+        </div>
+        ${warnings.length ? warnings.map(w => `<div style="background:#450a0a;border:1px solid #7f1d1d;border-radius:7px;padding:8px 12px;font-size:12px;color:#fca5a5;margin-top:8px;">⚠ ${w}</div>`).join('') : ''}
+      </div>
+    `;
+    const fields = [
+      ['From', summary.from], ['To', summary.to], ['Subject', summary.subject],
+      ['Date', summary.date], ['Message-ID', summary.messageId],
+      ['Reply-To', summary.replyTo], ['Return-Path', summary.returnPath],
+    ].filter(([, v]) => v);
+    const fieldsHtml = `<div class="section"><div class="section-title">Key Fields</div>${fields.map(([n, v]) => `<div class="field-row"><div class="field-name">${n}</div><div class="field-val">${v}</div></div>`).join('')}</div>`;
+    el.innerHTML = `<div class="results">${authHtml}${fieldsHtml}</div>`;
+
+  } else if (currentTab === 'routing') {
+    const hops = r.hops;
+    if (!hops.length) {
+      el.innerHTML = '<div class="results" style="padding:20px;color:#64748b;font-size:13px;">No Received headers found.</div>';
+      return;
+    }
+    const hopsHtml = hops.map(h => `
+      <div class="hop">
+        <div class="hop-num">HOP ${h.num}</div>
+        ${h.from ? `<div class="hop-from">from ${h.from}${h.ip ? ` [${h.ip}]` : ''}</div>` : ''}
+        ${h.by ? `<div class="hop-by">by ${h.by}</div>` : ''}
+        ${h.date ? `<div class="hop-date">${h.date}</div>` : ''}
+      </div>
+    `).join('');
+    el.innerHTML = `<div class="results"><div class="section"><div class="section-title">Routing Path (${hops.length} hops)</div>${hopsHtml}</div></div>`;
+
+  } else {
+    const allHtml = r.headers.map(h => `<strong>${h.rawName}:</strong> ${h.value}`).join('\n');
+    el.innerHTML = `<div class="results"><div class="section"><div class="section-title">All Headers (${r.headers.length})</div><div class="all-headers">${allHtml}</div></div></div>`;
+  }
+}
+
+function runAnalysis() {
+  const raw = document.getElementById('input').value;
+  if (!raw.trim()) {
+    document.getElementById('results').innerHTML = '<div class="empty-state"><p>Paste email headers and click Analyze</p></div>';
+    return;
+  }
+  currentResult = analyzeEmailHeaders(raw);
+  renderResults();
+}
+
+updateHeaderCount();
+</script>
+</body>
+</html>

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Semantic Version Calculator – semver Bump & Compare | DevNestio</title>
+  <meta name="description" content="Parse, bump, compare, and validate semantic versions (semver). Supports pre-release tags and build metadata. Check version range compatibility. Browser-only." />
+  <meta property="og:title" content="Semantic Version Calculator | DevNestio" />
+  <meta property="og:description" content="Bump major/minor/patch/pre-release semver versions, compare two versions, validate semver strings, and check range compatibility. Browser-only." />
+  <meta property="og:url" content="https://devnestio.pages.dev/semver-calc/" />
+  <meta name="twitter:card" content="summary" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    #privacy-banner { background: #1e293b; border-bottom: 1px solid #334155; padding: 8px 16px; font-size: 12px; color: #94a3b8; text-align: center; }
+    header { background: #1e293b; border-bottom: 1px solid #334155; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+    header a { color: #64748b; font-size: 13px; text-decoration: none; margin-left: auto; }
+    header a:hover { color: #94a3b8; }
+    .badge { background: #16a34a; color: #fff; font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+    main { max-width: 860px; margin: 0 auto; padding: 24px 16px; display: flex; flex-direction: column; gap: 16px; }
+    .panel { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 20px; }
+    .panel h2 { font-size: 13px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 14px; }
+    label { font-size: 12px; color: #94a3b8; display: block; margin-bottom: 5px; }
+    input[type="text"] { width: 100%; padding: 9px 12px; background: #0f1117; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 15px; font-family: 'JetBrains Mono', monospace; outline: none; }
+    input[type="text"]:focus { border-color: #16a34a; }
+    input[type="text"].invalid { border-color: #f87171; }
+    input[type="text"].valid { border-color: #4ade80; }
+    .btn { padding: 7px 16px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; }
+    .btn-primary { background: #16a34a; color: #fff; }
+    .btn-primary:hover { background: #15803d; }
+    .btn-secondary { background: #334155; color: #e2e8f0; }
+    .btn-secondary:hover { background: #475569; }
+    .bump-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-top: 14px; }
+    .bump-card { background: #0f1117; border: 1px solid #334155; border-radius: 8px; padding: 12px 14px; cursor: pointer; transition: border-color 0.15s; }
+    .bump-card:hover { border-color: #16a34a; }
+    .bump-type { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; }
+    .bump-result { font-size: 18px; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: #4ade80; margin-top: 4px; }
+    .bump-result.empty { color: #334155; }
+    .bump-desc { font-size: 11px; color: #475569; margin-top: 3px; }
+    /* Compare section */
+    .compare-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center; margin-top: 10px; }
+    .compare-op { text-align: center; font-size: 24px; font-weight: 800; font-family: monospace; color: #64748b; }
+    .compare-op.gt { color: #4ade80; }
+    .compare-op.lt { color: #f87171; }
+    .compare-op.eq { color: #38bdf8; }
+    /* Parse section */
+    .parse-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; margin-top: 10px; }
+    .parse-item { background: #0f1117; border-radius: 6px; padding: 8px 12px; }
+    .parse-key { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+    .parse-val { font-size: 16px; font-weight: 700; font-family: monospace; color: #e2e8f0; margin-top: 2px; }
+    .parse-val.missing { color: #334155; }
+    /* Range check */
+    .range-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: flex-start; margin-top: 10px; }
+    .range-result { font-size: 14px; font-weight: 700; padding: 8px 14px; border-radius: 7px; text-align: center; margin-top: 10px; }
+    .range-result.match { background: #052e16; color: #4ade80; }
+    .range-result.no-match { background: #450a0a; color: #f87171; }
+    .range-result.empty { background: #0f1117; color: #475569; border: 1px solid #334155; }
+    /* History */
+    .history { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .hist-chip { background: #0f1117; border: 1px solid #334155; border-radius: 99px; padding: 3px 10px; font-size: 12px; font-family: monospace; cursor: pointer; color: #94a3b8; }
+    .hist-chip:hover { border-color: #16a34a; color: #4ade80; }
+    #ad-slot { margin: 20px auto; text-align: center; }
+  </style>
+</head>
+<body>
+<div id="privacy-banner">🔒 All processing happens in your browser. No data is sent to any server.</div>
+<header>
+  <span class="badge">FREE</span>
+  <h1>Semantic Version Calculator</h1>
+  <a href="https://devnestio.pages.dev">← All Tools</a>
+</header>
+<main>
+  <!-- Parse & Bump -->
+  <div class="panel">
+    <h2>Parse & Bump</h2>
+    <label for="main-ver">Version string</label>
+    <input type="text" id="main-ver" placeholder="e.g. 1.2.3-beta.1+build.456" autocomplete="off" spellcheck="false" />
+
+    <div class="parse-grid" id="parse-grid"></div>
+
+    <div class="bump-grid" id="bump-grid"></div>
+  </div>
+
+  <!-- Compare -->
+  <div class="panel">
+    <h2>Compare Two Versions</h2>
+    <div class="compare-row">
+      <div>
+        <label>Version A</label>
+        <input type="text" id="cmp-a" placeholder="1.2.3" autocomplete="off" />
+      </div>
+      <div class="compare-op" id="cmp-op">?</div>
+      <div>
+        <label>Version B</label>
+        <input type="text" id="cmp-b" placeholder="1.3.0" autocomplete="off" />
+      </div>
+    </div>
+    <div id="cmp-result" style="font-size:13px;color:#64748b;margin-top:10px;text-align:center">Enter two versions to compare</div>
+  </div>
+
+  <!-- Range Check -->
+  <div class="panel">
+    <h2>Range / Constraint Check</h2>
+    <div class="range-row">
+      <div>
+        <label>Version</label>
+        <input type="text" id="range-ver" placeholder="1.5.0" autocomplete="off" />
+      </div>
+      <div style="padding-top:22px;color:#64748b;font-size:20px;text-align:center">∈</div>
+      <div>
+        <label>Range (e.g. &gt;=1.0.0 &lt;2.0.0, ^1.5, ~1.5.0)</label>
+        <input type="text" id="range-expr" placeholder=">=1.0.0 <2.0.0" autocomplete="off" />
+      </div>
+    </div>
+    <div class="range-result empty" id="range-result">Enter a version and range</div>
+  </div>
+
+  <!-- History -->
+  <div class="panel" id="history-panel" style="display:none">
+    <h2>Recent Versions</h2>
+    <div class="history" id="history-chips"></div>
+  </div>
+
+  <div id="ad-slot" data-ea-publisher="devnestio" data-ea-type="image"></div>
+</main>
+<script>
+// ── semver parser ─────────────────────────────────────────────
+const SEMVER_RE = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
+
+function parseSemver(v) {
+  v = v.trim().replace(/^v/, '');
+  const m = SEMVER_RE.exec(v);
+  if (!m) return null;
+  return {
+    major: parseInt(m[1]),
+    minor: parseInt(m[2]),
+    patch: parseInt(m[3]),
+    prerelease: m[4] || null,
+    build: m[5] || null,
+    raw: v
+  };
+}
+
+function fmtVersion(o) {
+  let s = `${o.major}.${o.minor}.${o.patch}`;
+  if (o.prerelease) s += '-' + o.prerelease;
+  if (o.build) s += '+' + o.build;
+  return s;
+}
+
+// Compare prerelease identifiers per semver spec
+function comparePre(a, b) {
+  if (!a && !b) return 0;
+  if (!a) return 1;   // no pre > pre-release
+  if (!b) return -1;
+  const aParts = a.split('.'), bParts = b.split('.');
+  for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
+    const ai = aParts[i], bi = bParts[i];
+    if (ai === undefined) return -1;
+    if (bi === undefined) return 1;
+    const aNum = /^\d+$/.test(ai), bNum = /^\d+$/.test(bi);
+    if (aNum && bNum) {
+      const diff = parseInt(ai) - parseInt(bi);
+      if (diff) return diff;
+    } else if (aNum) {
+      return -1;
+    } else if (bNum) {
+      return 1;
+    } else {
+      if (ai < bi) return -1;
+      if (ai > bi) return 1;
+    }
+  }
+  return 0;
+}
+
+function compareSemver(a, b) {
+  const pa = parseSemver(a), pb = parseSemver(b);
+  if (!pa || !pb) return null;
+  if (pa.major !== pb.major) return pa.major > pb.major ? 1 : -1;
+  if (pa.minor !== pb.minor) return pa.minor > pb.minor ? 1 : -1;
+  if (pa.patch !== pb.patch) return pa.patch > pb.patch ? 1 : -1;
+  return comparePre(pa.prerelease, pb.prerelease);
+}
+
+// ── Bump logic ────────────────────────────────────────────────
+function bumpMajor(p) { return { major: p.major + 1, minor: 0, patch: 0, prerelease: null, build: null }; }
+function bumpMinor(p) { return { major: p.major, minor: p.minor + 1, patch: 0, prerelease: null, build: null }; }
+function bumpPatch(p) { return { major: p.major, minor: p.minor, patch: p.patch + 1, prerelease: null, build: null }; }
+function bumpPreMajor(p) { return { major: p.major + 1, minor: 0, patch: 0, prerelease: 'alpha.0', build: null }; }
+function bumpPreMinor(p) { return { major: p.major, minor: p.minor + 1, patch: 0, prerelease: 'alpha.0', build: null }; }
+function bumpPrePatch(p) { return { major: p.major, minor: p.minor, patch: p.patch + 1, prerelease: 'alpha.0', build: null }; }
+function bumpPrerelease(p) {
+  if (!p.prerelease) return { ...p, prerelease: '0', build: null };
+  const parts = p.prerelease.split('.');
+  const last = parts[parts.length - 1];
+  if (/^\d+$/.test(last)) parts[parts.length - 1] = String(parseInt(last) + 1);
+  else parts.push('0');
+  return { ...p, prerelease: parts.join('.'), build: null };
+}
+
+const BUMPS = [
+  { id: 'major',    label: 'major',    fn: bumpMajor,     desc: 'Breaking change — resets minor & patch' },
+  { id: 'minor',    label: 'minor',    fn: bumpMinor,     desc: 'New feature — resets patch' },
+  { id: 'patch',    label: 'patch',    fn: bumpPatch,     desc: 'Bug fix — increments patch' },
+  { id: 'premajor', label: 'premajor', fn: bumpPreMajor,  desc: 'Next major with alpha.0 pre-release' },
+  { id: 'preminor', label: 'preminor', fn: bumpPreMinor,  desc: 'Next minor with alpha.0 pre-release' },
+  { id: 'prepatch', label: 'prepatch', fn: bumpPrePatch,  desc: 'Next patch with alpha.0 pre-release' },
+  { id: 'prerelease', label: 'pre',    fn: bumpPrerelease, desc: 'Increment pre-release identifier' },
+];
+
+function buildBumpGrid(parsed) {
+  const grid = document.getElementById('bump-grid');
+  grid.innerHTML = '';
+  BUMPS.forEach(b => {
+    const result = parsed ? fmtVersion(b.fn(parsed)) : null;
+    const card = document.createElement('div');
+    card.className = 'bump-card';
+    card.id = 'bump-' + b.id;
+    card.innerHTML = `<div class="bump-type">${b.label}</div>
+      <div class="bump-result${result ? '' : ' empty'}" id="bval-${b.id}">${result || '—'}</div>
+      <div class="bump-desc">${b.desc}</div>`;
+    if (result) card.onclick = () => setVersion(result);
+    grid.appendChild(card);
+  });
+}
+
+function buildParseGrid(parsed) {
+  const grid = document.getElementById('parse-grid');
+  if (!parsed) { grid.innerHTML = ''; return; }
+  const fields = [
+    { key: 'major', val: parsed.major },
+    { key: 'minor', val: parsed.minor },
+    { key: 'patch', val: parsed.patch },
+    { key: 'pre', val: parsed.prerelease || '—' },
+    { key: 'build', val: parsed.build || '—' },
+  ];
+  grid.innerHTML = fields.map(f =>
+    `<div class="parse-item">
+      <div class="parse-key">${f.key}</div>
+      <div class="parse-val${f.val === '—' ? ' missing' : ''}">${escHtml(String(f.val))}</div>
+    </div>`
+  ).join('');
+}
+
+function setVersion(v) {
+  document.getElementById('main-ver').value = v;
+  processMain();
+  addToHistory(v);
+}
+
+function processMain() {
+  const inp = document.getElementById('main-ver');
+  const v = inp.value.trim();
+  if (!v) {
+    inp.className = '';
+    buildParseGrid(null);
+    buildBumpGrid(null);
+    return;
+  }
+  const parsed = parseSemver(v);
+  if (parsed) {
+    inp.className = 'valid';
+    buildParseGrid(parsed);
+    buildBumpGrid(parsed);
+  } else {
+    inp.className = 'invalid';
+    buildParseGrid(null);
+    buildBumpGrid(null);
+  }
+}
+
+// ── Compare ───────────────────────────────────────────────────
+function processCompare() {
+  const a = document.getElementById('cmp-a').value.trim();
+  const b = document.getElementById('cmp-b').value.trim();
+  const opEl = document.getElementById('cmp-op');
+  const res = document.getElementById('cmp-result');
+  if (!a || !b) { opEl.textContent = '?'; opEl.className = 'compare-op'; res.textContent = 'Enter two versions to compare'; return; }
+  const cmp = compareSemver(a, b);
+  if (cmp === null) { opEl.textContent = '?'; opEl.className = 'compare-op'; res.textContent = 'One or both versions are invalid'; return; }
+  if (cmp > 0) {
+    opEl.textContent = '>'; opEl.className = 'compare-op gt';
+    res.textContent = `${a} is greater than ${b}`;
+  } else if (cmp < 0) {
+    opEl.textContent = '<'; opEl.className = 'compare-op lt';
+    res.textContent = `${a} is less than ${b}`;
+  } else {
+    opEl.textContent = '='; opEl.className = 'compare-op eq';
+    res.textContent = `${a} equals ${b} (ignoring build metadata)`;
+  }
+}
+
+// ── Range Check ───────────────────────────────────────────────
+function parseRange(expr) {
+  // Split by whitespace or comma; each token is a comparator
+  return expr.trim().split(/[\s,]+/).filter(Boolean).map(tok => {
+    // Expand shortcuts: ^, ~
+    tok = tok.trim();
+    if (tok.startsWith('^')) {
+      const p = parseSemver(tok.slice(1));
+      if (!p) return null;
+      if (p.major !== 0) return [`>=${fmtVersion({...p,prerelease:null,build:null})}`, `<${p.major+1}.0.0`];
+      if (p.minor !== 0) return [`>=${fmtVersion({...p,prerelease:null,build:null})}`, `<0.${p.minor+1}.0`];
+      return [`>=${fmtVersion({...p,prerelease:null,build:null})}`, `<0.0.${p.patch+1}`];
+    }
+    if (tok.startsWith('~')) {
+      const p = parseSemver(tok.slice(1));
+      if (!p) return null;
+      return [`>=${fmtVersion({...p,prerelease:null,build:null})}`, `<${p.major}.${p.minor+1}.0`];
+    }
+    return [tok];
+  }).flat().filter(Boolean);
+}
+
+function satisfiesComparator(ver, comp) {
+  const m = comp.match(/^(>=|<=|!=|>|<|=|==)?(.+)$/);
+  if (!m) return false;
+  const op = m[1] || '=';
+  const cmpVer = m[2].trim();
+  const cmp = compareSemver(ver, cmpVer);
+  if (cmp === null) return false;
+  switch(op) {
+    case '>':  return cmp > 0;
+    case '>=': return cmp >= 0;
+    case '<':  return cmp < 0;
+    case '<=': return cmp <= 0;
+    case '!=': return cmp !== 0;
+    case '=': case '==': default: return cmp === 0;
+  }
+}
+
+function satisfiesRange(ver, expr) {
+  if (!parseSemver(ver)) return null;
+  const comparators = parseRange(expr);
+  if (!comparators.length) return null;
+  return comparators.every(c => satisfiesComparator(ver, c));
+}
+
+function processRange() {
+  const ver = document.getElementById('range-ver').value.trim();
+  const expr = document.getElementById('range-expr').value.trim();
+  const el = document.getElementById('range-result');
+  if (!ver || !expr) { el.className = 'range-result empty'; el.textContent = 'Enter a version and range'; return; }
+  const result = satisfiesRange(ver, expr);
+  if (result === null) { el.className = 'range-result empty'; el.textContent = 'Invalid version or range expression'; return; }
+  if (result) { el.className = 'range-result match'; el.textContent = `✅ ${ver} satisfies ${expr}`; }
+  else { el.className = 'range-result no-match'; el.textContent = `❌ ${ver} does not satisfy ${expr}`; }
+}
+
+// ── History ───────────────────────────────────────────────────
+const history = [];
+function addToHistory(v) {
+  if (!history.includes(v)) history.unshift(v);
+  if (history.length > 10) history.pop();
+  const panel = document.getElementById('history-panel');
+  const chips = document.getElementById('history-chips');
+  panel.style.display = history.length ? '' : 'none';
+  chips.innerHTML = history.map(h =>
+    `<span class="hist-chip" onclick="setVersion('${escAttr(h)}')">${escHtml(h)}</span>`
+  ).join('');
+}
+
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+document.getElementById('main-ver').addEventListener('input', processMain);
+document.getElementById('cmp-a').addEventListener('input', processCompare);
+document.getElementById('cmp-b').addEventListener('input', processCompare);
+document.getElementById('range-ver').addEventListener('input', processRange);
+document.getElementById('range-expr').addEventListener('input', processRange);
+
+// Initialize
+buildBumpGrid(null);
+setVersion('1.2.3');
+</script>
+</body>
+</html>

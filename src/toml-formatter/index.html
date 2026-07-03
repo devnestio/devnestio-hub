@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TOML Formatter &amp; Validator – devnestio</title>
+<meta name="description" content="Format, validate, and convert TOML configuration files online. TOML→JSON and JSON→TOML conversion. Works with Cargo.toml, pyproject.toml, Hugo config. Browser-only.">
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="website">
+<meta property="og:title" content="TOML Formatter &amp; Validator – devnestio">
+<meta property="og:description" content="Format, validate, and convert TOML config files. TOML↔JSON conversion. Works with Cargo.toml, pyproject.toml, Hugo config. Runs in the browser.">
+<meta property="og:url" content="https://devnestio.pages.dev/toml-formatter/">
+<meta property="og:locale" content="en_US">
+<link rel="canonical" href="https://devnestio.pages.dev/toml-formatter/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="TOML Formatter &amp; Validator – devnestio">
+<meta name="twitter:description" content="Format, validate, and convert TOML config files online. Browser-only, no server.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "TOML Formatter & Validator",
+  "description": "Format, validate, and convert TOML configuration files online. TOML→JSON and JSON→TOML conversion.",
+  "url": "https://devnestio.pages.dev/toml-formatter/",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+  "author": {"@type": "Organization", "name": "devnestio", "url": "https://devnestio.pages.dev"}
+}
+</script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  background: #0f1117;
+  color: #e2e8f0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+header {
+  background: #1e293b;
+  border-bottom: 1px solid #334155;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+.back-link {
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: .85rem;
+  white-space: nowrap;
+}
+.back-link:hover { color: #0891b2; }
+.header-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+.header-title span { color: #0891b2; }
+.header-desc {
+  color: #94a3b8;
+  font-size: .82rem;
+  margin-left: auto;
+}
+.toolbar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 10px 24px;
+  border-bottom: 1px solid #334155;
+  align-items: center;
+  background: #1e293b;
+  flex-shrink: 0;
+}
+.btn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid #334155;
+  background: #334155;
+  color: #e2e8f0;
+  font-size: .82rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background .15s, border-color .15s;
+}
+.btn:hover { background: #475569; }
+.btn-primary { background: #0891b2; border-color: #0891b2; color: #fff; }
+.btn-primary:hover { background: #0e7490; border-color: #0e7490; }
+.btn-danger { background: #334155; border-color: #dc2626; color: #f87171; }
+.btn-danger:hover { background: #450a0a; }
+.separator { width: 1px; height: 24px; background: #334155; }
+.samples-label { color: #64748b; font-size: .8rem; }
+.status-bar {
+  padding: 5px 24px;
+  font-size: .78rem;
+  font-weight: 500;
+  flex-shrink: 0;
+  min-height: 26px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #0f1117;
+  border-bottom: 1px solid #1e293b;
+}
+.status-ok { color: #22c55e; }
+.status-err { color: #ef4444; }
+.status-warn { color: #f59e0b; }
+.main-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  flex: 1;
+  min-height: 0;
+}
+@media (max-width: 720px) {
+  .main-layout { grid-template-columns: 1fr; }
+  .header-desc { display: none; }
+}
+.panel {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #334155;
+  min-height: 0;
+}
+.panel:last-child { border-right: none; }
+.panel-label {
+  padding: 7px 16px;
+  font-size: .72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: #64748b;
+  background: #1e293b;
+  border-bottom: 1px solid #334155;
+  flex-shrink: 0;
+}
+textarea {
+  flex: 1;
+  background: #141924;
+  color: #e2e8f0;
+  border: none;
+  resize: none;
+  padding: 16px;
+  font-family: 'Courier New', monospace;
+  font-size: .83rem;
+  line-height: 1.65;
+  outline: none;
+  min-height: 420px;
+}
+textarea::placeholder { color: #334155; }
+.output-panel { display: flex; flex-direction: column; min-height: 0; }
+.output-tabs {
+  display: flex;
+  background: #1e293b;
+  border-bottom: 1px solid #334155;
+  flex-shrink: 0;
+}
+.tab {
+  padding: 7px 16px;
+  font-size: .78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: #64748b;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color .15s;
+  user-select: none;
+}
+.tab:hover { color: #94a3b8; }
+.tab.active { color: #0891b2; border-bottom-color: #0891b2; }
+.output-content {
+  flex: 1;
+  background: #0f1117;
+  padding: 16px;
+  font-family: 'Courier New', monospace;
+  font-size: .83rem;
+  line-height: 1.65;
+  overflow: auto;
+  white-space: pre;
+  min-height: 420px;
+}
+.output-content.errors-view {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.err-line {
+  color: #ef4444;
+  margin-bottom: 6px;
+  padding: 6px 10px;
+  background: #1c0a0a;
+  border-left: 3px solid #ef4444;
+  border-radius: 0 4px 4px 0;
+}
+.err-msg { color: #fca5a5; }
+.no-errors { color: #22c55e; }
+/* TOML syntax highlighting */
+.t-comment { color: #64748b; }
+.t-table { color: #f59e0b; font-weight: 600; }
+.t-key { color: #7dd3fc; }
+.t-eq { color: #94a3b8; }
+.t-str { color: #4ade80; }
+.t-num { color: #fb923c; }
+.t-bool { color: #c084fc; }
+.t-date { color: #38bdf8; }
+/* JSON syntax highlighting */
+.j-key { color: #7dd3fc; }
+.j-str { color: #4ade80; }
+.j-num { color: #fb923c; }
+.j-bool { color: #c084fc; }
+.j-null { color: #94a3b8; }
+</style>
+</head>
+<body>
+<header>
+  <a class="back-link" href="/">← devnestio</a>
+  <div>
+    <div class="header-title">TOML <span>Formatter</span> &amp; Validator</div>
+  </div>
+  <div class="header-desc">Format · Validate · TOML↔JSON · Browser-only</div>
+</header>
+
+<div class="toolbar">
+  <button class="btn btn-primary" onclick="runFormat()">Format / Validate</button>
+  <button class="btn" onclick="runToJSON()">TOML → JSON</button>
+  <button class="btn" onclick="runFromJSON()">JSON → TOML</button>
+  <button class="btn" onclick="copyOutput()">Copy Output</button>
+  <button class="btn btn-danger" onclick="clearAll()">Clear</button>
+  <div class="separator"></div>
+  <span class="samples-label">Samples:</span>
+  <button class="btn" onclick="loadSample('basic')">Basic</button>
+  <button class="btn" onclick="loadSample('cargo')">Cargo.toml</button>
+  <button class="btn" onclick="loadSample('pyproject')">pyproject.toml</button>
+</div>
+
+<div class="status-bar" id="statusBar"></div>
+
+<div class="main-layout">
+  <div class="panel">
+    <div class="panel-label">Input — TOML or JSON</div>
+    <textarea id="inputArea" spellcheck="false" placeholder="Paste TOML (or JSON for JSON→TOML conversion) here…"></textarea>
+  </div>
+  <div class="panel output-panel">
+    <div class="output-tabs">
+      <div class="tab active" onclick="switchTab('formatted')" id="tab-formatted">Formatted</div>
+      <div class="tab" onclick="switchTab('json')" id="tab-json">JSON</div>
+      <div class="tab" onclick="switchTab('errors')" id="tab-errors">Errors</div>
+    </div>
+    <div class="output-content" id="outputArea"></div>
+  </div>
+</div>
+
+<script>
+// =============================================================================
+// TOML PARSER
+// =============================================================================
+// Exported surface (also used by test harness):
+//   parseTOML(src)  -> plain JS object  (throws TOMLError on syntax errors)
+//   formatTOML(src) -> formatted string (throws TOMLError)
+//   tomlToJSON(src) -> JSON string      (throws TOMLError)
+//   jsonToTOML(src) -> TOML string      (throws Error)
+
+class TOMLError extends Error {
+  constructor(msg, line) {
+    super(msg);
+    this.line = line;
+  }
+}
+
+function parseTOML(src) {
+  const lines = src.split(/\r?\n/);
+  const root = {};
+  let current = root;        // current table context
+  let currentPath = [];      // path segments of the current table
+  let arrayTableCounters = {};  // path -> array used for [[array-of-tables]]
+  // Track all defined table headers to detect duplicates
+  const definedTables = new Set();
+  const definedArrayTables = {};
+
+  let i = 0;  // line index
+
+  function err(msg) { throw new TOMLError(msg, i + 1); }
+
+  // ---- Value parsers ----
+
+  function skipWS(s, pos) {
+    while (pos < s.length && (s[pos] === ' ' || s[pos] === '\t')) pos++;
+    return pos;
+  }
+
+  function parseValue(s, pos) {
+    pos = skipWS(s, pos);
+    if (pos >= s.length || s[pos] === '#') err('Expected value');
+
+    const ch = s[pos];
+
+    // Multi-line basic string
+    if (s.startsWith('"""', pos)) return parseMLBasicString(s, pos);
+    // Multi-line literal string
+    if (s.startsWith("'''", pos)) return parseMLLiteralString(s, pos);
+    // Basic string
+    if (ch === '"') return parseBasicString(s, pos);
+    // Literal string
+    if (ch === "'") return parseLiteralString(s, pos);
+    // Array
+    if (ch === '[') return parseArray(s, pos);
+    // Inline table
+    if (ch === '{') return parseInlineTable(s, pos);
+    // Boolean
+    if (s.startsWith('true', pos) && !isKeyChar(s[pos + 4])) return { val: true, end: pos + 4 };
+    if (s.startsWith('false', pos) && !isKeyChar(s[pos + 5])) return { val: false, end: pos + 5 };
+    // Special floats
+    if (s.startsWith('inf', pos) || s.startsWith('+inf', pos)) return { val: Infinity, end: pos + (ch === '+' ? 4 : 3) };
+    if (s.startsWith('-inf', pos)) return { val: -Infinity, end: pos + 4 };
+    if (s.startsWith('nan', pos) || s.startsWith('+nan', pos) || s.startsWith('-nan', pos)) return { val: NaN, end: pos + (ch === '+' || ch === '-' ? 4 : 3) };
+    // Number or datetime
+    return parseNumberOrDate(s, pos);
+  }
+
+  function isKeyChar(c) {
+    return c !== undefined && /[a-zA-Z0-9_\-]/.test(c);
+  }
+
+  function parseBasicString(s, pos) {
+    // pos points at opening "
+    let out = '';
+    let p = pos + 1;
+    while (p < s.length) {
+      const c = s[p];
+      if (c === '"') return { val: out, end: p + 1 };
+      if (c === '\\') {
+        const r = parseEscape(s, p + 1);
+        out += r.ch;
+        p = r.end;
+      } else {
+        out += c;
+        p++;
+      }
+    }
+    err('Unterminated basic string');
+  }
+
+  function parseLiteralString(s, pos) {
+    let p = pos + 1;
+    let out = '';
+    while (p < s.length) {
+      if (s[p] === "'") return { val: out, end: p + 1 };
+      out += s[p++];
+    }
+    err('Unterminated literal string');
+  }
+
+  function parseMLBasicString(s, pos) {
+    // Collect across lines
+    let full = '';
+    let li = i;
+    // Build full text from remaining lines
+    for (let j = i; j < lines.length; j++) {
+      full += (j === i ? '' : '\n') + lines[j];
+    }
+    // Find start (pos within full that corresponds to pos in current line)
+    const lineStart = lines.slice(0, i).join('\n').length + (i > 0 ? 1 : 0);
+    const absPos = lineStart + pos;
+    // Work on the combined text
+    let p = absPos + 3; // skip """
+    // Trim immediate newline after opening """
+    if (full[p] === '\n') p++;
+    else if (full[p] === '\r' && full[p+1] === '\n') p += 2;
+    let out = '';
+    while (p < full.length) {
+      if (full.startsWith('"""', p)) {
+        // handle up to 2 extra quotes before closing
+        let extra = 0;
+        while (full[p + 3 + extra] === '"' && extra < 2) extra++;
+        out += '"'.repeat(extra);
+        const endAbs = p + 3 + extra;
+        // figure out new line index
+        const consumed = full.slice(0, endAbs);
+        const newlines = consumed.split('\n').length - 1;
+        i = newlines;
+        const newLineStart = consumed.lastIndexOf('\n') + 1;
+        const endInLine = endAbs - newLineStart;
+        return { val: processMLBasicString(out), end: endInLine };
+      }
+      if (full[p] === '\\') {
+        const next = full[p + 1];
+        if (next === '\n' || (next === '\r' && full[p+2] === '\n') || next === ' ' || next === '\t' || next === '\r') {
+          // line-ending backslash: skip whitespace/newlines
+          p += 2;
+          while (p < full.length && (full[p] === ' ' || full[p] === '\t' || full[p] === '\n' || full[p] === '\r')) p++;
+        } else {
+          const r = parseEscape(full, p + 1);
+          out += r.ch;
+          p = r.end;
+        }
+      } else {
+        out += full[p++];
+      }
+    }
+    err('Unterminated multi-line basic string');
+  }
+
+  function processMLBasicString(s) { return s; }
+
+  function parseMLLiteralString(s, pos) {
+    let full = '';
+    for (let j = i; j < lines.length; j++) {
+      full += (j === i ? '' : '\n') + lines[j];
+    }
+    const lineStart = lines.slice(0, i).join('\n').length + (i > 0 ? 1 : 0);
+    const absPos = lineStart + pos;
+    let p = absPos + 3;
+    if (full[p] === '\n') p++;
+    else if (full[p] === '\r' && full[p+1] === '\n') p += 2;
+    let out = '';
+    while (p < full.length) {
+      if (full.startsWith("'''", p)) {
+        let extra = 0;
+        while (full[p + 3 + extra] === "'" && extra < 2) extra++;
+        out += "'".repeat(extra);
+        const endAbs = p + 3 + extra;
+        const consumed = full.slice(0, endAbs);
+        const newlines = consumed.split('\n').length - 1;
+        i = newlines;
+        const newLineStart = consumed.lastIndexOf('\n') + 1;
+        const endInLine = endAbs - newLineStart;
+        return { val: out, end: endInLine };
+      }
+      out += full[p++];
+    }
+    err('Unterminated multi-line literal string');
+  }
+
+  function parseEscape(s, pos) {
+    const escMap = { b:'\b', t:'\t', n:'\n', f:'\f', r:'\r', '"':'"', '\\':'\\' };
+    const c = s[pos];
+    if (c === 'u') {
+      const hex = s.slice(pos+1, pos+5);
+      if (!/^[0-9a-fA-F]{4}$/.test(hex)) throw new TOMLError('Invalid unicode escape', i+1);
+      return { ch: String.fromCodePoint(parseInt(hex, 16)), end: pos + 5 };
+    }
+    if (c === 'U') {
+      const hex = s.slice(pos+1, pos+9);
+      if (!/^[0-9a-fA-F]{8}$/.test(hex)) throw new TOMLError('Invalid unicode escape', i+1);
+      return { ch: String.fromCodePoint(parseInt(hex, 16)), end: pos + 9 };
+    }
+    if (c in escMap) return { ch: escMap[c], end: pos + 1 };
+    throw new TOMLError('Invalid escape sequence: \\' + c, i+1);
+  }
+
+  function parseArray(s, pos) {
+    let p = pos + 1;
+    const arr = [];
+    while (true) {
+      p = skipWS(s, p);
+      // skip newlines within arrays (multi-line)
+      while (p >= s.length || s[p] === '#') {
+        i++;
+        if (i >= lines.length) err('Unterminated array');
+        s = lines[i];
+        p = 0;
+        p = skipWS(s, p);
+      }
+      if (s[p] === ']') return { val: arr, end: p + 1 };
+      if (s[p] === ',') { p++; continue; }
+      const r = parseValue(s, p);
+      arr.push(r.val);
+      p = r.end;
+      p = skipWS(s, p);
+      // skip comment or newline
+      while (p >= s.length || s[p] === '#') {
+        i++;
+        if (i >= lines.length) err('Unterminated array');
+        s = lines[i];
+        p = 0;
+        p = skipWS(s, p);
+      }
+      if (s[p] === ',') { p++; continue; }
+      if (s[p] === ']') return { val: arr, end: p + 1 };
+      err('Expected , or ] in array');
+    }
+  }
+
+  function parseInlineTable(s, pos) {
+    let p = pos + 1;
+    const obj = {};
+    let first = true;
+    while (true) {
+      p = skipWS(s, p);
+      if (s[p] === '}') return { val: obj, end: p + 1 };
+      if (!first) {
+        if (s[p] !== ',') err('Expected , in inline table');
+        p++;
+        p = skipWS(s, p);
+      }
+      first = false;
+      const keyRes = parseKey(s, p);
+      p = keyRes.end;
+      p = skipWS(s, p);
+      if (s[p] !== '=') err('Expected = after key in inline table');
+      p++;
+      const valRes = parseValue(s, p);
+      setNestedKey(obj, keyRes.keys, valRes.val);
+      p = valRes.end;
+    }
+  }
+
+  function parseKey(s, pos) {
+    const keys = [];
+    let p = skipWS(s, pos);
+    while (true) {
+      let key;
+      if (s[p] === '"') {
+        const r = parseBasicString(s, p);
+        key = r.val; p = r.end;
+      } else if (s[p] === "'") {
+        const r = parseLiteralString(s, p);
+        key = r.val; p = r.end;
+      } else {
+        // bare key
+        const start = p;
+        while (p < s.length && /[a-zA-Z0-9_\-]/.test(s[p])) p++;
+        if (p === start) err('Empty key');
+        key = s.slice(start, p);
+      }
+      keys.push(key);
+      p = skipWS(s, p);
+      if (s[p] === '.') { p++; p = skipWS(s, p); } else break;
+    }
+    return { keys, end: p };
+  }
+
+  function parseNumberOrDate(s, pos) {
+    // Try to read the token
+    let p = pos;
+    // collect the raw token
+    let raw = '';
+    // sign
+    if (s[p] === '+' || s[p] === '-') { raw += s[p++]; }
+    while (p < s.length && /[0-9a-fA-FxXoObB_eE+\-:TZ.]/.test(s[p])) {
+      raw += s[p++];
+    }
+    if (raw === '' || raw === '+' || raw === '-') err('Expected number or date');
+
+    const full = s[pos] === '+' || s[pos] === '-' ? raw : raw;
+    const unsigned = (s[pos] === '+' || s[pos] === '-') ? raw.slice(1) : raw;
+
+    // Datetime: contains T or - with colons pattern
+    if (/^\d{4}-\d{2}-\d{2}/.test(raw)) {
+      return { val: raw, end: p };  // keep as string, preserve original
+    }
+
+    // Hex / Octal / Binary
+    if (unsigned.startsWith('0x')) {
+      const n = parseInt(unsigned, 16);
+      if (isNaN(n)) err('Invalid hex integer: ' + raw);
+      return { val: (s[pos] === '-' ? -n : n), end: p };
+    }
+    if (unsigned.startsWith('0o')) {
+      const n = parseInt(unsigned.slice(2), 8);
+      if (isNaN(n)) err('Invalid octal integer: ' + raw);
+      return { val: (s[pos] === '-' ? -n : n), end: p };
+    }
+    if (unsigned.startsWith('0b')) {
+      const n = parseInt(unsigned.slice(2), 2);
+      if (isNaN(n)) err('Invalid binary integer: ' + raw);
+      return { val: (s[pos] === '-' ? -n : n), end: p };
+    }
+
+    // Float vs integer
+    const noUnder = raw.replace(/_/g, '');
+    if (/[.eE]/.test(noUnder)) {
+      const f = parseFloat(noUnder);
+      if (isNaN(f)) err('Invalid float: ' + raw);
+      return { val: f, end: p };
+    }
+    // Integer
+    const n = parseInt(noUnder, 10);
+    if (isNaN(n)) err('Invalid integer: ' + raw);
+    return { val: n, end: p };
+  }
+
+  // ---- Key setting helpers ----
+
+  function getOrCreateTable(obj, key) {
+    if (!(key in obj)) { obj[key] = {}; return obj[key]; }
+    if (Array.isArray(obj[key])) return obj[key][obj[key].length - 1];
+    if (typeof obj[key] === 'object' && obj[key] !== null) return obj[key];
+    err('Key "' + key + '" already has a non-table value');
+  }
+
+  function setNestedKey(obj, keys, val) {
+    let cur = obj;
+    for (let k = 0; k < keys.length - 1; k++) {
+      const key = keys[k];
+      if (!(key in cur)) cur[key] = {};
+      else if (Array.isArray(cur[key])) cur = cur[key][cur[key].length - 1];
+      else if (typeof cur[key] !== 'object') err('Key "' + key + '" already defined as non-table');
+      if (k < keys.length - 2 || !(keys[k+1] in (Array.isArray(cur[key]) ? cur[key][cur[key].length-1] : cur[key]))) {
+        cur = Array.isArray(cur[key]) ? cur[key][cur[key].length - 1] : cur[key];
+      } else {
+        cur = Array.isArray(cur[key]) ? cur[key][cur[key].length - 1] : cur[key];
+      }
+    }
+    const lastKey = keys[keys.length - 1];
+    if (lastKey in cur && typeof cur[lastKey] !== 'object') err('Duplicate key: ' + keys.join('.'));
+    cur[lastKey] = val;
+  }
+
+  // Navigate to a path creating tables along the way
+  function navigatePath(pathArr) {
+    let cur = root;
+    for (let k = 0; k < pathArr.length; k++) {
+      const key = pathArr[k];
+      if (Array.isArray(cur[key])) {
+        cur = cur[key][cur[key].length - 1];
+      } else if (typeof cur[key] === 'object' && cur[key] !== null) {
+        cur = cur[key];
+      } else if (!(key in cur)) {
+        cur[key] = {};
+        cur = cur[key];
+      } else {
+        err('Key "' + key + '" already defined as a non-table value');
+      }
+    }
+    return cur;
+  }
+
+  // ---- Main line-by-line parsing ----
+
+  for (i = 0; i < lines.length; i++) {
+    let line = lines[i];
+    let pos = skipWS(line, 0);
+
+    // Empty or comment
+    if (pos >= line.length || line[pos] === '#') continue;
+
+    // Array of tables: [[key]]
+    if (line[pos] === '[' && line[pos + 1] === '[') {
+      pos += 2;
+      const keyRes = parseKey(line, pos);
+      pos = keyRes.end;
+      pos = skipWS(line, pos);
+      if (!line.startsWith(']]', pos)) err('Expected ]] for array of tables');
+      const pathKey = keyRes.keys.join('.');
+      // Navigate to parent
+      let cur = root;
+      for (let k = 0; k < keyRes.keys.length - 1; k++) {
+        cur = getOrCreateTable(cur, keyRes.keys[k]);
+      }
+      const last = keyRes.keys[keyRes.keys.length - 1];
+      if (!(last in cur)) cur[last] = [];
+      else if (!Array.isArray(cur[last])) err('Key "' + last + '" is not an array');
+      const newTable = {};
+      cur[last].push(newTable);
+      current = newTable;
+      currentPath = keyRes.keys;
+      continue;
+    }
+
+    // Standard table: [key]
+    if (line[pos] === '[') {
+      pos++;
+      const keyRes = parseKey(line, pos);
+      pos = keyRes.end;
+      pos = skipWS(line, pos);
+      if (line[pos] !== ']') err('Expected ] to close table header');
+      const pathKey = keyRes.keys.join('.');
+      if (definedTables.has(pathKey)) err('Duplicate table definition: [' + pathKey + ']');
+      definedTables.add(pathKey);
+      current = navigatePath(keyRes.keys);
+      currentPath = keyRes.keys;
+      continue;
+    }
+
+    // Key-value pair
+    const keyRes = parseKey(line, pos);
+    pos = keyRes.end;
+    pos = skipWS(line, pos);
+    if (line[pos] !== '=') err('Expected = after key');
+    pos++;
+    const valRes = parseValue(line, pos);
+    setNestedKey(current, keyRes.keys, valRes.val);
+  }
+
+  return root;
+}
+
+// =============================================================================
+// TOML FORMATTER
+// =============================================================================
+function formatTOML(src) {
+  // Parse to validate, then re-serialize
+  const obj = parseTOML(src);
+  return serializeTOML(obj);
+}
+
+function serializeTOML(obj, pathPrefix, arrayTablesTracked) {
+  if (pathPrefix === undefined) pathPrefix = [];
+  if (!arrayTablesTracked) arrayTablesTracked = new Set();
+  let out = '';
+
+  // Split keys into scalars/inline and sub-tables
+  const scalarKeys = [];
+  const tableKeys = [];
+  const arrayTableKeys = [];
+
+  for (const k of Object.keys(obj)) {
+    const v = obj[k];
+    if (Array.isArray(v) && v.length > 0 && typeof v[0] === 'object' && v[0] !== null && !Array.isArray(v[0])) {
+      arrayTableKeys.push(k);
+    } else if (isInlineValue(v)) {
+      scalarKeys.push(k);
+    } else {
+      tableKeys.push(k);
+    }
+  }
+
+  // Write scalar key-value pairs
+  for (const k of scalarKeys) {
+    out += tomlKey(k) + ' = ' + tomlValue(obj[k]) + '\n';
+  }
+
+  // Write sub-tables
+  for (const k of tableKeys) {
+    const v = obj[k];
+    const subPath = [...pathPrefix, k];
+    const header = '[' + subPath.map(tomlKey).join('.') + ']';
+    if (out.length > 0 || pathPrefix.length > 0) out += '\n';
+    out += header + '\n';
+    out += serializeTOML(v, subPath, arrayTablesTracked);
+  }
+
+  // Write array of tables
+  for (const k of arrayTableKeys) {
+    const subPath = [...pathPrefix, k];
+    const header = '[[' + subPath.map(tomlKey).join('.') + ']]';
+    for (const item of obj[k]) {
+      out += '\n' + header + '\n';
+      out += serializeTOML(item, subPath, arrayTablesTracked);
+    }
+  }
+
+  return out;
+}
+
+function isInlineValue(v) {
+  if (v === null || typeof v !== 'object') return true;
+  if (Array.isArray(v)) {
+    // Array of tables -> not inline
+    if (v.length > 0 && typeof v[0] === 'object' && v[0] !== null && !Array.isArray(v[0])) return false;
+    return true;
+  }
+  return false;
+}
+
+function tomlKey(k) {
+  // Quote if needed
+  if (/^[a-zA-Z0-9_\-]+$/.test(k)) return k;
+  return '"' + k.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
+}
+
+function tomlValue(v) {
+  if (v === null) return '"null"';
+  if (typeof v === 'boolean') return v ? 'true' : 'false';
+  if (typeof v === 'number') {
+    if (Number.isNaN(v)) return 'nan';
+    if (!isFinite(v)) return v > 0 ? 'inf' : '-inf';
+    return String(v);
+  }
+  if (typeof v === 'string') {
+    // Check if it looks like a datetime (keep unquoted representation)
+    if (/^\d{4}-\d{2}-\d{2}/.test(v)) return v;
+    return '"' + v.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t') + '"';
+  }
+  if (Array.isArray(v)) {
+    if (v.length === 0) return '[]';
+    const items = v.map(tomlValue).join(', ');
+    return '[' + items + ']';
+  }
+  if (typeof v === 'object') {
+    // inline table
+    const pairs = Object.keys(v).map(k => tomlKey(k) + ' = ' + tomlValue(v[k]));
+    return '{' + pairs.join(', ') + '}';
+  }
+  return String(v);
+}
+
+// =============================================================================
+// TOML -> JSON
+// =============================================================================
+function tomlToJSON(src) {
+  const obj = parseTOML(src);
+  return JSON.stringify(obj, null, 2);
+}
+
+// =============================================================================
+// JSON -> TOML
+// =============================================================================
+function jsonToTOML(src) {
+  let obj;
+  try { obj = JSON.parse(src); } catch(e) { throw new Error('Invalid JSON: ' + e.message); }
+  if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) {
+    throw new Error('JSON root must be an object to convert to TOML');
+  }
+  return serializeTOML(obj).trimEnd() + '\n';
+}
+
+// =============================================================================
+// SYNTAX HIGHLIGHTER (for display)
+// =============================================================================
+function highlightTOML(src) {
+  const lines = src.split('\n');
+  return lines.map(line => {
+    const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const trimmed = line.trim();
+    if (trimmed.startsWith('#')) return '<span class="t-comment">' + esc(line) + '</span>';
+    if (/^\[\[/.test(trimmed)) return '<span class="t-table">' + esc(line) + '</span>';
+    if (/^\[/.test(trimmed)) return '<span class="t-table">' + esc(line) + '</span>';
+    // key = value
+    const m = line.match(/^(\s*)([^=]+?)(=)(.*)$/);
+    if (m) {
+      const val = m[4];
+      let colored;
+      if (/^\s*"/.test(val) || /^\s*'/.test(val)) colored = '<span class="t-str">' + esc(val) + '</span>';
+      else if (/^\s*(true|false)/.test(val)) colored = '<span class="t-bool">' + esc(val) + '</span>';
+      else if (/^\s*\d{4}-/.test(val)) colored = '<span class="t-date">' + esc(val) + '</span>';
+      else if (/^\s*[-+]?\d/.test(val) || /^\s*(inf|nan)/.test(val)) colored = '<span class="t-num">' + esc(val) + '</span>';
+      else colored = esc(val);
+      return esc(m[1]) + '<span class="t-key">' + esc(m[2]) + '</span><span class="t-eq">' + esc(m[3]) + '</span>' + colored;
+    }
+    return esc(line);
+  }).join('\n');
+}
+
+function highlightJSON(src) {
+  const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return esc(src).replace(/("(\\u[a-fA-F0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function(match) {
+    if (/^"/.test(match)) return /:$/.test(match) ? '<span class="j-key">' + match + '</span>' : '<span class="j-str">' + match + '</span>';
+    if (/true|false/.test(match)) return '<span class="j-bool">' + match + '</span>';
+    if (/null/.test(match)) return '<span class="j-null">' + match + '</span>';
+    return '<span class="j-num">' + match + '</span>';
+  });
+}
+
+// =============================================================================
+// UI STATE
+// =============================================================================
+let currentTab = 'formatted';
+let lastResult = { formatted: '', json: '', errors: [] };
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  renderOutput();
+}
+
+function renderOutput() {
+  const el = document.getElementById('outputArea');
+  el.className = 'output-content' + (currentTab === 'errors' ? ' errors-view' : '');
+  if (currentTab === 'formatted') {
+    el.innerHTML = lastResult.formatted ? highlightTOML(lastResult.formatted) : '';
+  } else if (currentTab === 'json') {
+    el.innerHTML = lastResult.json ? highlightJSON(lastResult.json) : '';
+  } else {
+    if (lastResult.errors.length === 0) {
+      el.innerHTML = '<span class="no-errors">No errors found.</span>';
+    } else {
+      el.innerHTML = lastResult.errors.map(e => {
+        const loc = e.line ? 'Line ' + e.line + ': ' : '';
+        return '<div class="err-line"><span class="err-msg">' + loc + escapeHTML(e.message) + '</span></div>';
+      }).join('');
+    }
+  }
+}
+
+function escapeHTML(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function setStatus(msg, cls) {
+  const el = document.getElementById('statusBar');
+  el.textContent = msg;
+  el.className = 'status-bar ' + cls;
+}
+
+function runFormat() {
+  const src = document.getElementById('inputArea').value;
+  lastResult = { formatted: '', json: '', errors: [] };
+  if (!src.trim()) { setStatus('', ''); renderOutput(); return; }
+  try {
+    const formatted = formatTOML(src);
+    lastResult.formatted = formatted;
+    try { lastResult.json = tomlToJSON(src); } catch(_) {}
+    setStatus('Valid TOML — formatted successfully', 'status-ok');
+    switchTab('formatted');
+  } catch(e) {
+    lastResult.errors = [e];
+    setStatus((e.line ? 'Error on line ' + e.line + ': ' : 'Error: ') + e.message, 'status-err');
+    switchTab('errors');
+  }
+  renderOutput();
+}
+
+function runToJSON() {
+  const src = document.getElementById('inputArea').value;
+  lastResult = { formatted: '', json: '', errors: [] };
+  if (!src.trim()) { setStatus('', ''); renderOutput(); return; }
+  try {
+    lastResult.json = tomlToJSON(src);
+    try { lastResult.formatted = formatTOML(src); } catch(_) {}
+    setStatus('TOML parsed and converted to JSON', 'status-ok');
+    switchTab('json');
+  } catch(e) {
+    lastResult.errors = [e];
+    setStatus((e.line ? 'Error on line ' + e.line + ': ' : 'Error: ') + e.message, 'status-err');
+    switchTab('errors');
+  }
+  renderOutput();
+}
+
+function runFromJSON() {
+  const src = document.getElementById('inputArea').value;
+  lastResult = { formatted: '', json: '', errors: [] };
+  if (!src.trim()) { setStatus('', ''); renderOutput(); return; }
+  try {
+    const toml = jsonToTOML(src);
+    lastResult.formatted = toml;
+    lastResult.json = src;
+    setStatus('JSON converted to TOML', 'status-ok');
+    switchTab('formatted');
+  } catch(e) {
+    lastResult.errors = [{ message: e.message }];
+    setStatus('Error: ' + e.message, 'status-err');
+    switchTab('errors');
+  }
+  renderOutput();
+}
+
+function copyOutput() {
+  let text = '';
+  if (currentTab === 'formatted') text = lastResult.formatted;
+  else if (currentTab === 'json') text = lastResult.json;
+  if (!text) { setStatus('Nothing to copy', 'status-warn'); return; }
+  navigator.clipboard.writeText(text).then(() => {
+    setStatus('Copied to clipboard!', 'status-ok');
+  }).catch(() => {
+    setStatus('Copy failed — please select and copy manually', 'status-err');
+  });
+}
+
+function clearAll() {
+  document.getElementById('inputArea').value = '';
+  lastResult = { formatted: '', json: '', errors: [] };
+  setStatus('', '');
+  document.getElementById('outputArea').innerHTML = '';
+}
+
+// =============================================================================
+// SAMPLES
+// =============================================================================
+const SAMPLES = {
+  basic: `# Basic TOML example
+
+title = "TOML Example"
+version = 1
+enabled = true
+score = 3.14
+created_at = 1979-05-27T07:32:00Z
+
+[owner]
+name = "Tom Preston-Werner"
+email = "tom@example.com"
+
+[database]
+host = "localhost"
+port = 5432
+name = "mydb"
+max_connections = 100
+
+[servers]
+  [servers.alpha]
+  ip = "10.0.0.1"
+  role = "frontend"
+
+  [servers.beta]
+  ip = "10.0.0.2"
+  role = "backend"
+
+[settings]
+debug = false
+log_level = "info"
+allowed_ips = ["127.0.0.1", "10.0.0.0/8"]
+
+[[products]]
+name = "Hammer"
+sku = 738594937
+
+[[products]]
+name = "Nail"
+sku = 284758393
+color = "gray"`,
+
+  cargo: `[package]
+name = "my-awesome-crate"
+version = "0.1.0"
+edition = "2021"
+authors = ["Jane Doe <jane@example.com>"]
+description = "An awesome Rust crate"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/example/my-awesome-crate"
+keywords = ["cli", "tool", "utility"]
+categories = ["command-line-utilities"]
+readme = "README.md"
+
+[lib]
+name = "my_awesome_crate"
+crate-type = ["lib"]
+
+[[bin]]
+name = "my-tool"
+path = "src/main.rs"
+
+[features]
+default = ["std"]
+std = []
+async = ["tokio"]
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+tokio = { version = "1", features = ["full"], optional = true }
+anyhow = "1.0"
+clap = { version = "4", features = ["derive"] }
+log = "0.4"
+
+[dev-dependencies]
+pretty_assertions = "1"
+tempfile = "3"
+
+[build-dependencies]
+build_script_utils = "0.1"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = "symbols"
+
+[profile.dev]
+opt-level = 0
+debug = true`,
+
+  pyproject: `[build-system]
+requires = ["hatchling>=1.21"]
+build-backend = "hatchling.build"
+
+[project]
+name = "my-python-package"
+version = "0.5.0"
+description = "A sample Python package"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [
+  { name = "Alice Smith", email = "alice@example.com" },
+]
+maintainers = [
+  { name = "Bob Jones", email = "bob@example.com" },
+]
+keywords = ["sample", "package", "python"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+]
+requires-python = ">=3.9"
+dependencies = [
+  "httpx>=0.24",
+  "pydantic>=2.0",
+  "rich>=13.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7",
+  "ruff>=0.1",
+  "mypy>=1.5",
+]
+docs = [
+  "mkdocs>=1.5",
+  "mkdocs-material>=9",
+]
+
+[project.scripts]
+my-tool = "my_python_package.cli:main"
+
+[project.urls]
+Homepage = "https://example.com"
+Repository = "https://github.com/example/my-python-package"
+Issues = "https://github.com/example/my-python-package/issues"
+
+[tool.ruff]
+line-length = 88
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.9"
+strict = true
+ignore_missing_imports = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"`
+};
+
+function loadSample(name) {
+  document.getElementById('inputArea').value = SAMPLES[name] || '';
+  lastResult = { formatted: '', json: '', errors: [] };
+  document.getElementById('outputArea').innerHTML = '';
+  setStatus('Sample loaded — click "Format / Validate" to process', 'status-warn');
+}
+</script>
+</body>
+</html>

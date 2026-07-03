@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CORS Headers Generator – devnestio</title>
+  <meta name="description" content="Generate CORS (Cross-Origin Resource Sharing) headers for any setup. Configure allowed origins, methods, headers, credentials, and max-age. Get ready-to-paste code for Express.js, nginx, Apache, and Cloudflare Workers." />
+  <link rel="canonical" href="https://devnestio.pages.dev/cors-generator/" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    header { background: #1a1d2e; border-bottom: 1px solid #2d3748; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+    header a { color: #7c85f3; text-decoration: none; font-size: 14px; }
+    header h1 { font-size: 18px; font-weight: 700; color: #fff; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; display: grid; grid-template-columns: 360px 1fr; gap: 24px; }
+    @media (max-width: 800px) { .container { grid-template-columns: 1fr; } }
+    .panel { background: #1a1d2e; border: 1px solid #2d3748; border-radius: 10px; padding: 20px; }
+    .panel-title { font-size: 12px; font-weight: 700; color: #a0aec0; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 16px; }
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 13px; color: #a0aec0; margin-bottom: 5px; }
+    .field label .hint { font-size: 11px; color: #4a5568; font-style: italic; margin-left: 4px; }
+    input[type=text], input[type=number], select, textarea {
+      width: 100%; background: #0f1117; border: 1px solid #2d3748; border-radius: 6px;
+      padding: 8px 10px; color: #e2e8f0; font-size: 13px; font-family: inherit; outline: none;
+    }
+    input[type=text]:focus, input[type=number]:focus, select:focus, textarea:focus { border-color: #7c85f3; }
+    textarea { resize: vertical; font-family: 'Courier New', monospace; font-size: 12px; min-height: 60px; }
+    .check-group { display: flex; flex-wrap: wrap; gap: 8px; }
+    .check-item { display: flex; align-items: center; gap: 5px; font-size: 13px; color: #e2e8f0; }
+    .check-item input[type=checkbox] { accent-color: #7c85f3; width: 14px; height: 14px; }
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #2d3748; margin-bottom: 8px; }
+    .toggle-row:last-child { border-bottom: none; }
+    .toggle-label { font-size: 13px; color: #e2e8f0; }
+    .toggle-sub { font-size: 11px; color: #718096; }
+    .toggle { width: 36px; height: 20px; background: #2d3748; border-radius: 20px; border: none; cursor: pointer; position: relative; transition: background .2s; flex-shrink: 0; }
+    .toggle.on { background: #7c85f3; }
+    .toggle::after { content: ''; position: absolute; width: 14px; height: 14px; background: #fff; border-radius: 50%; top: 3px; left: 3px; transition: left .2s; }
+    .toggle.on::after { left: 19px; }
+    .divider { border: none; border-top: 1px solid #2d3748; margin: 16px 0; }
+    .tabs { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; }
+    .tab { background: #0f1117; border: 1px solid #2d3748; border-radius: 6px; padding: 6px 14px; font-size: 12px; color: #718096; cursor: pointer; }
+    .tab.active { background: #7c85f3; border-color: #7c85f3; color: #fff; }
+    .code-block { background: #0a0d1a; border: 1px solid #1e2435; border-radius: 8px; padding: 14px; font-family: 'Courier New', monospace; font-size: 12px; color: #c3dafe; white-space: pre; overflow-x: auto; line-height: 1.6; position: relative; min-height: 180px; }
+    .copy-btn { position: absolute; top: 10px; right: 10px; background: #2d3748; border: none; border-radius: 4px; padding: 4px 10px; font-size: 11px; color: #a0aec0; cursor: pointer; }
+    .copy-btn:hover { background: #3d4a5c; color: #e2e8f0; }
+    .copy-btn.copied { background: #276749; color: #68d391; }
+    .warning { background: rgba(234,179,8,.08); border: 1px solid rgba(234,179,8,.25); border-radius: 6px; padding: 8px 12px; font-size: 12px; color: #fbbf24; margin-top: 10px; }
+    .origin-warning { display: none; }
+    .header-preview { background: #0f1117; border: 1px solid #2d3748; border-radius: 8px; padding: 14px; margin-bottom: 16px; }
+    .header-row { display: flex; gap: 8px; padding: 4px 0; border-bottom: 1px solid #1a2030; font-size: 12px; }
+    .header-row:last-child { border-bottom: none; }
+    .hname { color: #7c85f3; font-family: monospace; flex-shrink: 0; min-width: 200px; }
+    .hval { color: #7ee787; font-family: monospace; word-break: break-all; }
+    .section-note { font-size: 12px; color: #718096; margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+<header>
+  <a href="https://devnestio.pages.dev/">← devnestio</a>
+  <h1>CORS Headers Generator</h1>
+</header>
+<div class="container">
+  <div>
+    <div class="panel" style="margin-bottom:16px">
+      <div class="panel-title">Origin Settings</div>
+      <div class="field">
+        <label>Allowed Origins <span class="hint">(one per line, or * for all)</span></label>
+        <textarea id="origins" rows="3" placeholder="https://example.com&#10;https://app.example.com">https://example.com</textarea>
+      </div>
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Allow Credentials</div>
+          <div class="toggle-sub">Sets Access-Control-Allow-Credentials: true</div>
+        </div>
+        <button class="toggle" id="togCreds" onclick="toggleBtn(this)"></button>
+      </div>
+    </div>
+    <div class="panel" style="margin-bottom:16px">
+      <div class="panel-title">Allowed Methods</div>
+      <div class="check-group" id="methodGroup">
+        <label class="check-item"><input type="checkbox" value="GET" checked> GET</label>
+        <label class="check-item"><input type="checkbox" value="POST" checked> POST</label>
+        <label class="check-item"><input type="checkbox" value="PUT"> PUT</label>
+        <label class="check-item"><input type="checkbox" value="PATCH"> PATCH</label>
+        <label class="check-item"><input type="checkbox" value="DELETE"> DELETE</label>
+        <label class="check-item"><input type="checkbox" value="HEAD"> HEAD</label>
+        <label class="check-item"><input type="checkbox" value="OPTIONS" checked> OPTIONS</label>
+      </div>
+    </div>
+    <div class="panel" style="margin-bottom:16px">
+      <div class="panel-title">Allowed Headers</div>
+      <div class="check-group" id="headerGroup" style="margin-bottom:8px">
+        <label class="check-item"><input type="checkbox" value="Content-Type" checked> Content-Type</label>
+        <label class="check-item"><input type="checkbox" value="Authorization" checked> Authorization</label>
+        <label class="check-item"><input type="checkbox" value="Accept"> Accept</label>
+        <label class="check-item"><input type="checkbox" value="X-Requested-With"> X-Requested-With</label>
+        <label class="check-item"><input type="checkbox" value="Origin"> Origin</label>
+        <label class="check-item"><input type="checkbox" value="Cache-Control"> Cache-Control</label>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>Custom Headers <span class="hint">(comma-separated)</span></label>
+        <input type="text" id="customHeaders" placeholder="X-Api-Key, X-Custom-Header" />
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Expose & Preflight</div>
+      <div class="field">
+        <label>Exposed Headers <span class="hint">(readable by JS)</span></label>
+        <input type="text" id="exposeHeaders" placeholder="X-Total-Count, X-Request-Id" />
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>Preflight Max-Age <span class="hint">(seconds, 0 = disable)</span></label>
+        <input type="number" id="maxAge" value="86400" min="0" />
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="panel">
+      <div class="panel-title">Generated Headers Preview</div>
+      <div class="section-note">These are the response headers your server should send.</div>
+      <div class="header-preview" id="headerPreview"></div>
+      <div class="warning origin-warning" id="originWarn">
+        ⚠ Using <code>*</code> with credentials is invalid per CORS spec. The browser will block the request.
+      </div>
+      <div class="tabs">
+        <button class="tab active" data-tab="express">Express.js</button>
+        <button class="tab" data-tab="nginx">nginx</button>
+        <button class="tab" data-tab="apache">Apache</button>
+        <button class="tab" data-tab="workers">CF Workers</button>
+        <button class="tab" data-tab="raw">Raw Headers</button>
+      </div>
+      <div style="position:relative">
+        <div class="code-block" id="codeBlock"></div>
+        <button class="copy-btn" id="copyBtn" onclick="copyCode()">Copy</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+let activeTab = 'express';
+
+function toggleBtn(btn) {
+  btn.classList.toggle('on');
+  update();
+}
+
+function getConfig() {
+  const originsRaw = document.getElementById('origins').value;
+  const origins = originsRaw.split('\n').map(s => s.trim()).filter(Boolean);
+  const isStar = origins.length === 1 && origins[0] === '*';
+  const creds = document.getElementById('togCreds').classList.contains('on');
+  const methods = [...document.querySelectorAll('#methodGroup input:checked')].map(i => i.value);
+  const headers = [...document.querySelectorAll('#headerGroup input:checked')].map(i => i.value);
+  const custom = document.getElementById('customHeaders').value.split(',').map(s => s.trim()).filter(Boolean);
+  const allHeaders = [...new Set([...headers, ...custom])];
+  const expose = document.getElementById('exposeHeaders').value.split(',').map(s => s.trim()).filter(Boolean);
+  const maxAge = parseInt(document.getElementById('maxAge').value) || 0;
+  return { origins, isStar, creds, methods, allHeaders, expose, maxAge };
+}
+
+function buildHeaders(cfg, requestOrigin) {
+  const origin = cfg.isStar ? '*' : (requestOrigin || cfg.origins[0] || '*');
+  const h = {};
+  h['Access-Control-Allow-Origin'] = origin;
+  if (!cfg.isStar && cfg.origins.length > 1) h['Vary'] = 'Origin';
+  if (cfg.creds && !cfg.isStar) h['Access-Control-Allow-Credentials'] = 'true';
+  if (cfg.methods.length) h['Access-Control-Allow-Methods'] = cfg.methods.join(', ');
+  if (cfg.allHeaders.length) h['Access-Control-Allow-Headers'] = cfg.allHeaders.join(', ');
+  if (cfg.expose.length) h['Access-Control-Expose-Headers'] = cfg.expose.join(', ');
+  if (cfg.maxAge > 0) h['Access-Control-Max-Age'] = String(cfg.maxAge);
+  return h;
+}
+
+function renderPreview(cfg) {
+  const h = buildHeaders(cfg);
+  const warn = document.getElementById('originWarn');
+  warn.classList.toggle('origin-warning', !(cfg.isStar && cfg.creds));
+  warn.style.display = (cfg.isStar && cfg.creds) ? '' : 'none';
+  const container = document.getElementById('headerPreview');
+  container.innerHTML = Object.entries(h).map(([k, v]) =>
+    `<div class="header-row"><span class="hname">${k}:</span><span class="hval">${v}</span></div>`
+  ).join('');
+}
+
+function genExpress(cfg) {
+  const multiOrigin = !cfg.isStar && cfg.origins.length > 1;
+  const allowedOrigins = cfg.origins.map(o => `'${o}'`).join(', ');
+  let code = `const cors = require('cors');\n\n`;
+  if (multiOrigin) {
+    code += `const ALLOWED_ORIGINS = [${allowedOrigins}];\n\n`;
+    code += `const corsOptions = {\n  origin: (origin, callback) => {\n    if (!origin || ALLOWED_ORIGINS.includes(origin)) {\n      callback(null, true);\n    } else {\n      callback(new Error('CORS not allowed'));\n    }\n  },\n`;
+  } else {
+    code += `const corsOptions = {\n  origin: '${cfg.isStar ? '*' : cfg.origins[0] || '*'}',\n`;
+  }
+  if (cfg.creds) code += `  credentials: true,\n`;
+  if (cfg.methods.length) code += `  methods: [${cfg.methods.map(m => `'${m}'`).join(', ')}],\n`;
+  if (cfg.allHeaders.length) code += `  allowedHeaders: [${cfg.allHeaders.map(h => `'${h}'`).join(', ')}],\n`;
+  if (cfg.expose.length) code += `  exposedHeaders: [${cfg.expose.map(h => `'${h}'`).join(', ')}],\n`;
+  if (cfg.maxAge > 0) code += `  maxAge: ${cfg.maxAge},\n`;
+  code += `};\n\napp.use(cors(corsOptions));\n\n`;
+  code += `// Handle preflight requests\napp.options('*', cors(corsOptions));`;
+  return code;
+}
+
+function genNginx(cfg) {
+  const multiOrigin = !cfg.isStar && cfg.origins.length > 1;
+  let code = `# nginx CORS configuration\n# Add inside your server {} or location {} block\n\n`;
+  if (multiOrigin) {
+    code += `set $cors_origin "";\n`;
+    cfg.origins.forEach((o, i) => {
+      code += i === 0
+        ? `if ($http_origin = "${o}") { set $cors_origin "$http_origin"; }\n`
+        : `if ($http_origin = "${o}") { set $cors_origin "$http_origin"; }\n`;
+    });
+    code += `\nadd_header Access-Control-Allow-Origin $cors_origin always;\nadd_header Vary Origin always;\n`;
+  } else {
+    code += `add_header Access-Control-Allow-Origin "${cfg.isStar ? '*' : cfg.origins[0] || '*'}" always;\n`;
+    if (!cfg.isStar && cfg.origins.length > 1) code += `add_header Vary "Origin" always;\n`;
+  }
+  if (cfg.creds && !cfg.isStar) code += `add_header Access-Control-Allow-Credentials "true" always;\n`;
+  if (cfg.methods.length) code += `add_header Access-Control-Allow-Methods "${cfg.methods.join(', ')}" always;\n`;
+  if (cfg.allHeaders.length) code += `add_header Access-Control-Allow-Headers "${cfg.allHeaders.join(', ')}" always;\n`;
+  if (cfg.expose.length) code += `add_header Access-Control-Expose-Headers "${cfg.expose.join(', ')}" always;\n`;
+  if (cfg.maxAge > 0) code += `add_header Access-Control-Max-Age "${cfg.maxAge}" always;\n`;
+  code += `\n# Handle OPTIONS preflight\nif ($request_method = OPTIONS) {\n  add_header Content-Length 0;\n  add_header Content-Type text/plain;\n  return 204;\n}`;
+  return code;
+}
+
+function genApache(cfg) {
+  let code = `# Apache CORS configuration (.htaccess or VirtualHost)\n\n<IfModule mod_headers.c>\n`;
+  const origin = cfg.isStar ? '*' : cfg.origins[0] || '*';
+  code += `  Header always set Access-Control-Allow-Origin "${origin}"\n`;
+  if (!cfg.isStar && cfg.origins.length > 1) code += `  Header always set Vary "Origin"\n`;
+  if (cfg.creds && !cfg.isStar) code += `  Header always set Access-Control-Allow-Credentials "true"\n`;
+  if (cfg.methods.length) code += `  Header always set Access-Control-Allow-Methods "${cfg.methods.join(', ')}"\n`;
+  if (cfg.allHeaders.length) code += `  Header always set Access-Control-Allow-Headers "${cfg.allHeaders.join(', ')}"\n`;
+  if (cfg.expose.length) code += `  Header always set Access-Control-Expose-Headers "${cfg.expose.join(', ')}"\n`;
+  if (cfg.maxAge > 0) code += `  Header always set Access-Control-Max-Age "${cfg.maxAge}"\n`;
+  code += `</IfModule>\n\n# Handle OPTIONS preflight\nRewriteEngine On\nRewriteCond %{REQUEST_METHOD} OPTIONS\nRewriteRule .* - [R=204,L]`;
+  return code;
+}
+
+function genWorkers(cfg) {
+  const multiOrigin = !cfg.isStar && cfg.origins.length > 1;
+  const allowedOrigins = cfg.origins.map(o => `'${o}'`).join(', ');
+  let code = `export default {\n  async fetch(request, env) {\n    const origin = request.headers.get('Origin');\n\n`;
+  if (multiOrigin) {
+    code += `    const ALLOWED = [${allowedOrigins}];\n    const allow = ALLOWED.includes(origin) ? origin : null;\n\n`;
+  }
+  code += `    const corsHeaders = {\n`;
+  code += multiOrigin
+    ? `      'Access-Control-Allow-Origin': allow || '',\n      'Vary': 'Origin',\n`
+    : `      'Access-Control-Allow-Origin': '${cfg.isStar ? '*' : cfg.origins[0] || '*'}',\n`;
+  if (cfg.creds && !cfg.isStar) code += `      'Access-Control-Allow-Credentials': 'true',\n`;
+  if (cfg.methods.length) code += `      'Access-Control-Allow-Methods': '${cfg.methods.join(', ')}',\n`;
+  if (cfg.allHeaders.length) code += `      'Access-Control-Allow-Headers': '${cfg.allHeaders.join(', ')}',\n`;
+  if (cfg.expose.length) code += `      'Access-Control-Expose-Headers': '${cfg.expose.join(', ')}',\n`;
+  if (cfg.maxAge > 0) code += `      'Access-Control-Max-Age': '${cfg.maxAge}',\n`;
+  code += `    };\n\n    if (request.method === 'OPTIONS') {\n      return new Response(null, { status: 204, headers: corsHeaders });\n    }\n\n    const response = await fetch(request);\n    const newHeaders = new Headers(response.headers);\n    Object.entries(corsHeaders).forEach(([k, v]) => newHeaders.set(k, v));\n    return new Response(response.body, { ...response, headers: newHeaders });\n  }\n};`;
+  return code;
+}
+
+function genRaw(cfg) {
+  const h = buildHeaders(cfg);
+  return Object.entries(h).map(([k, v]) => `${k}: ${v}`).join('\n');
+}
+
+function update() {
+  const cfg = getConfig();
+  renderPreview(cfg);
+  const generators = { express: genExpress, nginx: genNginx, apache: genApache, workers: genWorkers, raw: genRaw };
+  document.getElementById('codeBlock').textContent = generators[activeTab](cfg);
+}
+
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    activeTab = btn.dataset.tab;
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    update();
+  });
+});
+
+function copyCode() {
+  const text = document.getElementById('codeBlock').textContent;
+  const btn = document.getElementById('copyBtn');
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+  });
+}
+
+document.getElementById('origins').addEventListener('input', update);
+document.getElementById('customHeaders').addEventListener('input', update);
+document.getElementById('exposeHeaders').addEventListener('input', update);
+document.getElementById('maxAge').addEventListener('input', update);
+document.querySelectorAll('#methodGroup input, #headerGroup input').forEach(cb => cb.addEventListener('change', update));
+
+update();
+</script>
+</body>
+</html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQL Cheat Sheet — devnestio</title>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#0f1117;color:#e2e8f0;min-height:100vh}
+header{padding:24px 32px;border-bottom:1px solid #1e2535}
+h1{font-size:1.5rem;font-weight:700;color:#f8fafc}
+h1 span{color:#60a5fa}
+.desc{color:#94a3b8;margin-top:4px;font-size:.9rem}
+.controls{display:flex;gap:12px;flex-wrap:wrap;padding:16px 32px;border-bottom:1px solid #1e2535;align-items:center}
+.search-wrap{position:relative;flex:1;min-width:200px}
+.search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#64748b}
+#search{width:100%;background:#1e2535;border:1px solid #334155;color:#e2e8f0;padding:8px 12px 8px 34px;border-radius:6px;font-size:.9rem;outline:none}
+#search:focus{border-color:#60a5fa}
+.cat-filters{display:flex;gap:8px;flex-wrap:wrap}
+.cat-btn{padding:5px 12px;border-radius:99px;border:1px solid #334155;background:#1e2535;color:#94a3b8;font-size:.8rem;cursor:pointer}
+.cat-btn.active,.cat-btn:hover{background:#2563eb;border-color:#2563eb;color:#fff}
+.content{max-width:900px;margin:0 auto;padding:24px 32px}
+.section{margin-bottom:28px}
+.section-title{font-size:.95rem;font-weight:700;color:#60a5fa;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #1e2535}
+.sql-card{background:#141924;border:1px solid #1e2535;border-radius:8px;margin-bottom:10px;overflow:hidden}
+.sql-card:hover{border-color:#334155}
+.sql-header{padding:10px 16px;border-bottom:1px solid #1e2535;display:flex;align-items:center;gap:10px}
+.sql-title{font-size:.88rem;font-weight:600;color:#f8fafc;flex:1}
+.kw-badge{font-family:monospace;font-size:.75rem;background:#1e3a5f;border:1px solid #1d4ed8;color:#93c5fd;padding:2px 7px;border-radius:3px}
+.sql-body{padding:12px 16px}
+.sql-desc{font-size:.83rem;color:#94a3b8;line-height:1.5;margin-bottom:8px}
+pre{background:#0f1117;border:1px solid #1e2535;border-radius:4px;padding:10px;font-size:.8rem;overflow:auto;line-height:1.7;position:relative}
+code{font-family:'Courier New',monospace}
+.kw{color:#c084fc}
+.fn{color:#60a5fa}
+.str{color:#4ade80}
+.cmt{color:#4b5563;font-style:italic}
+.num{color:#fb923c}
+.copy-btn{position:absolute;top:8px;right:8px;background:#1e2535;border:1px solid #334155;color:#64748b;padding:3px 8px;border-radius:4px;font-size:.73rem;cursor:pointer}
+.copy-btn:hover{color:#e2e8f0;background:#334155}
+.no-results{text-align:center;color:#64748b;padding:48px}
+</style>
+</head>
+<body>
+<header>
+  <h1>SQL <span>Cheat Sheet</span></h1>
+  <p class="desc">Essential SQL — SELECT, JOIN, GROUP BY, window functions, and more with copy-ready examples</p>
+</header>
+<div class="controls">
+  <div class="search-wrap">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="search" placeholder="Search SQL…">
+  </div>
+  <div class="cat-filters" id="cats"></div>
+</div>
+<div class="content" id="content"></div>
+<script>
+const SQL = [
+  {cat:'SELECT',title:'Basic SELECT',kw:'SELECT',desc:'Retrieve columns from a table. Use * for all columns.',
+   code:`SELECT id, name, email\nFROM users\nWHERE active = 1\nORDER BY name ASC\nLIMIT 10;`},
+  {cat:'SELECT',title:'SELECT DISTINCT',kw:'DISTINCT',desc:'Remove duplicate rows from the result set.',
+   code:`SELECT DISTINCT country\nFROM users\nORDER BY country;`},
+  {cat:'SELECT',title:'WHERE conditions',kw:'WHERE',desc:'Filter rows using comparison, BETWEEN, IN, LIKE, IS NULL, and logical operators.',
+   code:`SELECT * FROM products\nWHERE price BETWEEN 10 AND 100\n  AND category IN ('books', 'music')\n  AND name LIKE '%guitar%'\n  AND deleted_at IS NULL;`},
+  {cat:'SELECT',title:'ORDER BY',kw:'ORDER BY',desc:'Sort results by one or more columns. ASC (default) or DESC.',
+   code:`SELECT name, price, created_at\nFROM products\nORDER BY price DESC, name ASC;`},
+  {cat:'SELECT',title:'LIMIT and OFFSET',kw:'LIMIT',desc:'Restrict the number of rows returned. Use OFFSET for pagination.',
+   code:`-- Page 2, 10 rows per page\nSELECT * FROM posts\nORDER BY created_at DESC\nLIMIT 10 OFFSET 10;\n\n-- SQL Server / Oracle syntax\nSELECT * FROM posts\nORDER BY created_at DESC\nOFFSET 10 ROWS FETCH NEXT 10 ROWS ONLY;`},
+  {cat:'SELECT',title:'Column aliases (AS)',kw:'AS',desc:'Rename a column in the output. Useful with expressions.',
+   code:`SELECT\n  CONCAT(first_name, ' ', last_name) AS full_name,\n  salary * 1.1 AS new_salary,\n  COUNT(*) AS total\nFROM employees;`},
+  {cat:'JOINs',title:'INNER JOIN',kw:'INNER JOIN',desc:'Returns rows where there is a match in BOTH tables.',
+   code:`SELECT u.name, o.total_amount\nFROM users u\nINNER JOIN orders o ON u.id = o.user_id\nWHERE o.status = 'completed';`},
+  {cat:'JOINs',title:'LEFT JOIN',kw:'LEFT JOIN',desc:'Returns all rows from the left table, matched rows from the right (NULL if no match).',
+   code:`SELECT u.name, COUNT(o.id) AS order_count\nFROM users u\nLEFT JOIN orders o ON u.id = o.user_id\nGROUP BY u.id, u.name;`},
+  {cat:'JOINs',title:'RIGHT JOIN',kw:'RIGHT JOIN',desc:'Returns all rows from the right table, matched rows from the left (NULL if no match).',
+   code:`SELECT u.name, o.total_amount\nFROM orders o\nRIGHT JOIN users u ON o.user_id = u.id;`},
+  {cat:'JOINs',title:'FULL OUTER JOIN',kw:'FULL JOIN',desc:'Returns all rows from both tables, with NULLs where there is no match.',
+   code:`SELECT u.name, o.id AS order_id\nFROM users u\nFULL OUTER JOIN orders o ON u.id = o.user_id;`},
+  {cat:'JOINs',title:'Self JOIN',kw:'JOIN',desc:'Join a table with itself — useful for hierarchical data.',
+   code:`-- Find employees and their managers\nSELECT e.name AS employee, m.name AS manager\nFROM employees e\nLEFT JOIN employees m ON e.manager_id = m.id;`},
+  {cat:'Aggregates',title:'GROUP BY with aggregate functions',kw:'GROUP BY',desc:'Group rows and apply aggregate functions. HAVING filters groups (like WHERE for aggregates).',
+   code:`SELECT\n  department,\n  COUNT(*) AS headcount,\n  AVG(salary) AS avg_salary,\n  MAX(salary) AS max_salary,\n  MIN(salary) AS min_salary,\n  SUM(salary) AS payroll\nFROM employees\nGROUP BY department\nHAVING COUNT(*) > 5\nORDER BY avg_salary DESC;`},
+  {cat:'Aggregates',title:'COUNT variations',kw:'COUNT',desc:'COUNT(*) counts all rows; COUNT(col) counts non-NULL values; COUNT(DISTINCT col) counts unique values.',
+   code:`SELECT\n  COUNT(*) AS total_rows,\n  COUNT(email) AS rows_with_email,\n  COUNT(DISTINCT country) AS unique_countries\nFROM users;`},
+  {cat:'Aggregates',title:'CASE expression',kw:'CASE',desc:'Conditional logic within a query. Like an if-else.',
+   code:`SELECT\n  name,\n  salary,\n  CASE\n    WHEN salary >= 100000 THEN 'Senior'\n    WHEN salary >= 60000  THEN 'Mid'\n    ELSE 'Junior'\n  END AS level\nFROM employees;`},
+  {cat:'Subqueries',title:'Subquery in WHERE',kw:'IN',desc:'A query nested inside another query. Can use IN, EXISTS, or comparison operators.',
+   code:`-- Users who placed at least one order\nSELECT * FROM users\nWHERE id IN (\n  SELECT DISTINCT user_id FROM orders\n  WHERE status = 'completed'\n);\n\n-- Equivalent with EXISTS\nSELECT * FROM users u\nWHERE EXISTS (\n  SELECT 1 FROM orders o\n  WHERE o.user_id = u.id AND o.status = 'completed'\n);`},
+  {cat:'Subqueries',title:'Common Table Expression (CTE)',kw:'WITH',desc:'Named temporary result set. Improves readability over nested subqueries. Can be recursive.',
+   code:`WITH active_users AS (\n  SELECT id, name\n  FROM users\n  WHERE active = 1 AND last_login > NOW() - INTERVAL 30 DAY\n),\nrecent_orders AS (\n  SELECT user_id, COUNT(*) AS order_count\n  FROM orders\n  WHERE created_at > NOW() - INTERVAL 30 DAY\n  GROUP BY user_id\n)\nSELECT u.name, COALESCE(o.order_count, 0) AS orders\nFROM active_users u\nLEFT JOIN recent_orders o ON u.id = o.user_id;`},
+  {cat:'Window Functions',title:'ROW_NUMBER, RANK, DENSE_RANK',kw:'OVER',desc:'Assign sequential numbers to rows within a partition. Window functions don\'t collapse rows.',
+   code:`SELECT\n  name,\n  department,\n  salary,\n  ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC) AS rn,\n  RANK()       OVER (PARTITION BY department ORDER BY salary DESC) AS rnk,\n  DENSE_RANK() OVER (PARTITION BY department ORDER BY salary DESC) AS d_rnk\nFROM employees;`},
+  {cat:'Window Functions',title:'LAG and LEAD',kw:'LAG/LEAD',desc:'Access values from previous or next rows. Useful for period-over-period comparisons.',
+   code:`SELECT\n  date,\n  revenue,\n  LAG(revenue, 1, 0) OVER (ORDER BY date) AS prev_revenue,\n  revenue - LAG(revenue, 1, 0) OVER (ORDER BY date) AS revenue_delta\nFROM daily_sales\nORDER BY date;`},
+  {cat:'Window Functions',title:'Running totals and moving averages',kw:'ROWS',desc:'Use ROWS BETWEEN for cumulative sums and rolling window aggregates.',
+   code:`SELECT\n  date,\n  amount,\n  SUM(amount) OVER (\n    ORDER BY date\n    ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW\n  ) AS running_total,\n  AVG(amount) OVER (\n    ORDER BY date\n    ROWS BETWEEN 6 PRECEDING AND CURRENT ROW\n  ) AS rolling_7d_avg\nFROM transactions;`},
+  {cat:'DML',title:'INSERT',kw:'INSERT',desc:'Add one or more rows to a table.',
+   code:`-- Single row\nINSERT INTO users (name, email, created_at)\nVALUES ('Alice', 'alice@example.com', NOW());\n\n-- Multiple rows\nINSERT INTO users (name, email)\nVALUES\n  ('Bob', 'bob@example.com'),\n  ('Carol', 'carol@example.com');\n\n-- Insert from SELECT\nINSERT INTO archived_users\nSELECT * FROM users WHERE active = 0;`},
+  {cat:'DML',title:'UPDATE',kw:'UPDATE',desc:'Modify existing rows. Always use WHERE to avoid updating all rows.',
+   code:`-- Update specific rows\nUPDATE products\nSET price = price * 1.1, updated_at = NOW()\nWHERE category = 'electronics';\n\n-- Update with JOIN\nUPDATE orders o\nJOIN users u ON o.user_id = u.id\nSET o.customer_email = u.email\nWHERE o.customer_email IS NULL;`},
+  {cat:'DML',title:'DELETE',kw:'DELETE',desc:'Remove rows from a table. Always use WHERE (or TRUNCATE for all rows).',
+   code:`-- Delete specific rows\nDELETE FROM sessions WHERE expires_at < NOW();\n\n-- Delete with subquery\nDELETE FROM notifications\nWHERE user_id IN (SELECT id FROM users WHERE active = 0);\n\n-- Remove ALL rows (faster than DELETE)\nTRUNCATE TABLE temp_data;`},
+  {cat:'DDL',title:'CREATE TABLE',kw:'CREATE',desc:'Define a new table with columns, types, and constraints.',
+   code:`CREATE TABLE users (\n  id         INT PRIMARY KEY AUTO_INCREMENT,\n  email      VARCHAR(255) NOT NULL UNIQUE,\n  name       VARCHAR(100) NOT NULL,\n  role       ENUM('admin','user') DEFAULT 'user',\n  active     TINYINT(1) DEFAULT 1,\n  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP\n);`},
+  {cat:'DDL',title:'ALTER TABLE',kw:'ALTER',desc:'Modify an existing table — add/drop/rename columns, change types.',
+   code:`-- Add column\nALTER TABLE users ADD COLUMN phone VARCHAR(20) AFTER email;\n\n-- Modify column type\nALTER TABLE users MODIFY COLUMN name VARCHAR(200) NOT NULL;\n\n-- Rename column\nALTER TABLE users RENAME COLUMN phone TO phone_number;\n\n-- Drop column\nALTER TABLE users DROP COLUMN legacy_field;\n\n-- Add index\nALTER TABLE users ADD INDEX idx_email (email);`},
+  {cat:'DDL',title:'CREATE INDEX',kw:'INDEX',desc:'Create an index to speed up queries on frequently searched columns.',
+   code:`-- Single column index\nCREATE INDEX idx_users_email ON users (email);\n\n-- Composite index\nCREATE INDEX idx_orders_user_date ON orders (user_id, created_at);\n\n-- Unique index\nCREATE UNIQUE INDEX idx_users_username ON users (username);\n\n-- Drop index\nDROP INDEX idx_users_email ON users;`},
+];
+
+const CATS=['All',...new Set(SQL.map(s=>s.cat))];
+let activeCat='All', query='';
+
+function highlight(sql){
+  const keywords=['SELECT','FROM','WHERE','JOIN','INNER','LEFT','RIGHT','FULL','OUTER','ON','GROUP','BY','ORDER','HAVING','LIMIT','OFFSET','INSERT','INTO','VALUES','UPDATE','SET','DELETE','TRUNCATE','CREATE','TABLE','ALTER','DROP','ADD','MODIFY','RENAME','COLUMN','INDEX','DISTINCT','AS','CASE','WHEN','THEN','ELSE','END','WITH','OVER','PARTITION','ROWS','BETWEEN','AND','OR','NOT','IN','EXISTS','IS','NULL','ASC','DESC','UNION','ALL','FETCH','NEXT','ONLY'];
+  const fns=['COUNT','SUM','AVG','MAX','MIN','COALESCE','CONCAT','NOW','INTERVAL','ROW_NUMBER','RANK','DENSE_RANK','LAG','LEAD','UNBOUNDED','PRECEDING','CURRENT','ROW','ENUM'];
+  let result=sql.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // Comments
+  result=result.replace(/(--[^\n]*)/g,'<span class="cmt">$1</span>');
+  // Strings
+  result=result.replace(/'([^']*)'/g,'<span class="str">\'$1\'</span>');
+  // Numbers
+  result=result.replace(/\b(\d+)\b/g,'<span class="num">$1</span>');
+  // Functions
+  fns.forEach(fn=>{result=result.replace(new RegExp(`\\b(${fn})\\b`,'g'),'<span class="fn">$1</span>');});
+  // Keywords
+  keywords.forEach(kw=>{result=result.replace(new RegExp(`\\b(${kw})\\b`,'g'),'<span class="kw">$1</span>');});
+  return result;
+}
+
+function render(){
+  const visible=SQL.filter(s=>{
+    const mc=activeCat==='All'||s.cat===activeCat;
+    const mq=!query||s.title.toLowerCase().includes(query)||s.desc.toLowerCase().includes(query)||s.kw.toLowerCase().includes(query)||s.code.toLowerCase().includes(query);
+    return mc&&mq;
+  });
+  const el=document.getElementById('content');
+  if(!visible.length){el.innerHTML='<div class="no-results">No results</div>';return;}
+  const byCat={};
+  visible.forEach(s=>{(byCat[s.cat]=byCat[s.cat]||[]).push(s);});
+  el.innerHTML=Object.entries(byCat).map(([cat,items])=>`
+    <div class="section">
+      <div class="section-title">${cat}</div>
+      ${items.map(s=>`
+        <div class="sql-card">
+          <div class="sql-header">
+            <span class="sql-title">${s.title}</span>
+            <span class="kw-badge">${s.kw}</span>
+          </div>
+          <div class="sql-body">
+            <div class="sql-desc">${s.desc}</div>
+            <pre><code>${highlight(s.code)}</code><button class="copy-btn" onclick="cp(${JSON.stringify(s.code)},this)">Copy</button></pre>
+          </div>
+        </div>`).join('')}
+    </div>`).join('');
+}
+function cp(text,btn){
+  navigator.clipboard.writeText(text);
+  const orig=btn.textContent;btn.textContent='Copied!';setTimeout(()=>btn.textContent=orig,1400);
+}
+document.getElementById('cats').innerHTML=CATS.map(c=>`
+  <button class="cat-btn${c==='All'?' active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
+function setCat(c){
+  activeCat=c;
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.toggle('active',b.textContent===c));
+  render();
+}
+document.getElementById('search').addEventListener('input',e=>{query=e.target.value.toLowerCase();render();});
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nano ID Generator — devnestio</title>
+  <meta name="description" content="Generate Nano IDs, ULIDs, cuid2-style IDs, and random tokens. Customize alphabet, length, and count. Browser-only, no server calls." />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    header { background: #1a1d2e; border-bottom: 1px solid #2d3748; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+    header a { color: #7c85f3; text-decoration: none; font-size: 14px; }
+    header h1 { font-size: 18px; font-weight: 700; color: #fff; }
+    .container { max-width: 820px; margin: 0 auto; padding: 24px 16px; display: grid; grid-template-columns: 300px 1fr; gap: 24px; }
+    @media (max-width: 680px) { .container { grid-template-columns: 1fr; } }
+    .panel { background: #1a1d2e; border: 1px solid #2d3748; border-radius: 10px; padding: 20px; }
+    .panel h2 { font-size: 14px; font-weight: 600; color: #a0aec0; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 16px; }
+    .tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 18px; }
+    .tab { background: #0f1117; border: 1px solid #2d3748; border-radius: 6px; padding: 6px 12px; font-size: 12px; cursor: pointer; color: #718096; }
+    .tab.active { background: #7c85f3; color: #fff; border-color: #7c85f3; }
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 12px; color: #a0aec0; margin-bottom: 5px; }
+    .field input[type=range] { width: 100%; accent-color: #7c85f3; }
+    .field input[type=number], .field input[type=text] { width: 100%; background: #0f1117; border: 1px solid #2d3748; border-radius: 6px; padding: 8px 10px; color: #e2e8f0; font-size: 13px; }
+    .range-row { display: flex; align-items: center; gap: 8px; }
+    .range-val { font-size: 13px; color: #7c85f3; font-weight: 700; min-width: 30px; }
+    .alphabet-presets { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .alph-btn { background: #0f1117; border: 1px solid #2d3748; border-radius: 4px; padding: 3px 8px; font-size: 11px; color: #a0aec0; cursor: pointer; }
+    .alph-btn:hover { border-color: #7c85f3; color: #7c85f3; }
+    .btn { background: #7c85f3; color: #fff; border: none; border-radius: 6px; padding: 9px 18px; font-size: 14px; cursor: pointer; font-weight: 600; width: 100%; }
+    .btn:hover { background: #6b74e0; }
+    .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .results-actions { display: flex; gap: 8px; }
+    .btn-sm { padding: 5px 12px; font-size: 12px; border-radius: 6px; background: #2d3748; color: #e2e8f0; border: none; cursor: pointer; font-weight: 600; }
+    .btn-sm:hover { background: #3d4a5c; }
+    .copied { background: #276749 !important; }
+    .id-list { display: flex; flex-direction: column; gap: 6px; max-height: 480px; overflow-y: auto; }
+    .id-item { background: #0f1117; border: 1px solid #2d3748; border-radius: 6px; padding: 10px 14px; font-family: 'Courier New', monospace; font-size: 14px; color: #7ee787; display: flex; justify-content: space-between; align-items: center; gap: 8px; cursor: pointer; transition: border-color .1s; }
+    .id-item:hover { border-color: #7c85f3; }
+    .id-item .copy-icon { opacity: .4; font-size: 12px; flex-shrink: 0; }
+    .id-item:hover .copy-icon { opacity: 1; }
+    .id-text { word-break: break-all; }
+    .stats { font-size: 11px; color: #718096; margin-top: 10px; }
+    .info-box { background: #0f1117; border: 1px solid #2d3748; border-radius: 8px; padding: 12px; margin-top: 14px; font-size: 12px; color: #718096; line-height: 1.7; }
+    .info-box strong { color: #a0aec0; }
+  </style>
+</head>
+<body>
+<header>
+  <a href="/">← devnestio</a>
+  <h1>Nano ID Generator</h1>
+</header>
+<div class="container">
+  <div>
+    <div class="panel">
+      <h2>Settings</h2>
+
+      <div class="tabs" id="type-tabs">
+        <div class="tab active" onclick="setType('nanoid',this)">Nano ID</div>
+        <div class="tab" onclick="setType('ulid',this)">ULID</div>
+        <div class="tab" onclick="setType('hex',this)">Hex Token</div>
+        <div class="tab" onclick="setType('custom',this)">Custom</div>
+      </div>
+
+      <div class="field" id="length-field">
+        <label>Length: <span id="length-val">21</span></label>
+        <div class="range-row">
+          <input type="range" id="length-range" min="4" max="64" value="21" oninput="setLength(+this.value)">
+        </div>
+      </div>
+
+      <div class="field" id="alphabet-field" style="display:none">
+        <label>Alphabet</label>
+        <input type="text" id="alphabet-input" value="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-" oninput="render()">
+        <div class="alphabet-presets">
+          <div class="alph-btn" onclick="setAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-')">Nano ID default</div>
+          <div class="alph-btn" onclick="setAlphabet('0123456789abcdef')">Hex</div>
+          <div class="alph-btn" onclick="setAlphabet('0123456789')">Decimal</div>
+          <div class="alph-btn" onclick="setAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ')">Uppercase</div>
+          <div class="alph-btn" onclick="setAlphabet('abcdefghijklmnopqrstuvwxyz')">Lowercase</div>
+          <div class="alph-btn" onclick="setAlphabet('abcdefghjkmnpqrstuvwxyz23456789')">No ambiguous</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Count</label>
+        <input type="number" id="count-input" min="1" max="100" value="10" oninput="render()">
+      </div>
+
+      <button class="btn" onclick="generate()">Generate</button>
+
+      <div class="info-box" id="info-box">
+        <strong>Nano ID</strong> — URL-safe unique ID, similar to UUID but smaller. Default alphabet: 64 chars, default length: 21. Collision probability ≈1% at 1 billion IDs.
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="panel">
+      <div class="results-header">
+        <h2>Generated IDs</h2>
+        <div class="results-actions">
+          <button class="btn-sm" onclick="copyAll()">Copy All</button>
+          <button class="btn-sm" onclick="clearResults()">Clear</button>
+        </div>
+      </div>
+      <div class="id-list" id="id-list"></div>
+      <div class="stats" id="stats"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentType = 'nanoid';
+let currentLength = 21;
+
+const NANOID_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-';
+const HEX_CHARS = '0123456789abcdef';
+
+const INFOS = {
+  nanoid: '<strong>Nano ID</strong> — URL-safe unique ID. Default: 64-char alphabet, 21-char length. ~1% collision at 1 billion IDs.',
+  ulid: '<strong>ULID</strong> — Universally Unique Lexicographically Sortable Identifier. 26 chars: 10-char timestamp + 16-char random. Sortable by creation time.',
+  hex: '<strong>Hex Token</strong> — Cryptographically random hex string. Great for API keys, session tokens, CSRF tokens.',
+  custom: '<strong>Custom</strong> — Build your own ID format. Define your own alphabet and length.'
+};
+
+const ids = [];
+
+function getRandomValues(n) {
+  const buf = new Uint8Array(n);
+  crypto.getRandomValues(buf);
+  return buf;
+}
+
+function generateNanoId(alphabet, size) {
+  const mask = (2 << Math.log2(alphabet.length - 1)) - 1;
+  const step = Math.ceil(1.6 * mask * size / alphabet.length);
+  let result = '';
+  while (result.length < size) {
+    const bytes = getRandomValues(step);
+    for (let i = 0; i < bytes.length && result.length < size; i++) {
+      const byte = bytes[i] & mask;
+      if (byte < alphabet.length) result += alphabet[byte];
+    }
+  }
+  return result;
+}
+
+function generateULID() {
+  const ENCODING = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+  const now = Date.now();
+  let t = now;
+  let timeStr = '';
+  for (let i = 9; i >= 0; i--) {
+    timeStr = ENCODING[t % 32] + timeStr;
+    t = Math.floor(t / 32);
+  }
+  let rand = '';
+  const bytes = getRandomValues(16);
+  for (let i = 0; i < 16; i++) {
+    rand += ENCODING[bytes[i] % 32];
+  }
+  return timeStr + rand;
+}
+
+function generateHex(length) {
+  const bytes = getRandomValues(Math.ceil(length / 2));
+  return Array.from(bytes).map(b => b.toString(16).padStart(2,'0')).join('').slice(0, length);
+}
+
+function generateOne() {
+  if (currentType === 'nanoid') return generateNanoId(NANOID_ALPHABET, currentLength);
+  if (currentType === 'ulid') return generateULID();
+  if (currentType === 'hex') return generateHex(currentLength);
+  if (currentType === 'custom') {
+    const alph = document.getElementById('alphabet-input').value || NANOID_ALPHABET;
+    return generateNanoId(alph, currentLength);
+  }
+}
+
+function generate() {
+  const count = Math.min(100, Math.max(1, parseInt(document.getElementById('count-input').value) || 10));
+  const list = document.getElementById('id-list');
+  list.innerHTML = '';
+  ids.length = 0;
+  for (let i = 0; i < count; i++) {
+    const id = generateOne();
+    ids.push(id);
+    const item = document.createElement('div');
+    item.className = 'id-item';
+    item.innerHTML = `<span class="id-text">${id}</span><span class="copy-icon">copy</span>`;
+    item.onclick = () => {
+      navigator.clipboard.writeText(id);
+      item.style.borderColor = '#276749';
+      setTimeout(() => item.style.borderColor = '', 800);
+    };
+    list.appendChild(item);
+  }
+  const len = ids[0]?.length || 0;
+  document.getElementById('stats').textContent =
+    `${count} ID${count !== 1 ? 's' : ''} • ${len} chars each`;
+}
+
+function copyAll() {
+  if (!ids.length) return;
+  navigator.clipboard.writeText(ids.join('\n')).then(() => {
+    const btn = document.querySelector('.btn-sm');
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy All'; btn.classList.remove('copied'); }, 1500);
+  });
+}
+
+function clearResults() {
+  document.getElementById('id-list').innerHTML = '';
+  document.getElementById('stats').textContent = '';
+  ids.length = 0;
+}
+
+function setType(type, el) {
+  currentType = type;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('info-box').innerHTML = INFOS[type];
+
+  const isUlid = type === 'ulid';
+  const isCustom = type === 'custom';
+  document.getElementById('length-field').style.display = isUlid ? 'none' : '';
+  document.getElementById('alphabet-field').style.display = isCustom ? '' : 'none';
+
+  if (type === 'nanoid') setLength(21);
+  else if (type === 'hex') setLength(32);
+  else if (type === 'custom') setLength(21);
+}
+
+function setLength(v) {
+  currentLength = v;
+  document.getElementById('length-val').textContent = v;
+  document.getElementById('length-range').value = v;
+}
+
+function setAlphabet(a) {
+  document.getElementById('alphabet-input').value = a;
+}
+
+function render() {}
+
+generate();
+</script>
+</body>
+</html>

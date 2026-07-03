@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSS Unit Converter – px / rem / em / vw | DevNestio</title>
+  <meta name="description" content="Convert CSS units between px, rem, em, vw, vh, pt, and pc. Set custom base font size and viewport dimensions. Instant conversion table. Browser-only." />
+  <meta property="og:title" content="CSS Unit Converter – px / rem / em / vw | DevNestio" />
+  <meta property="og:description" content="Convert between CSS units: px, rem, em, vw, vh, pt, pc. Set base font size and viewport. Instant results, browser-only." />
+  <meta property="og:url" content="https://devnestio.pages.dev/px-rem-converter/" />
+  <meta name="twitter:card" content="summary" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    #privacy-banner { background: #1e293b; border-bottom: 1px solid #334155; padding: 8px 16px; font-size: 12px; color: #94a3b8; text-align: center; }
+    header { background: #1e293b; border-bottom: 1px solid #334155; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+    header a { color: #64748b; font-size: 13px; text-decoration: none; margin-left: auto; }
+    header a:hover { color: #94a3b8; }
+    .badge { background: #7c3aed; color: #fff; font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+    main { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
+    .settings { display: flex; gap: 16px; flex-wrap: wrap; background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 16px; margin-bottom: 20px; }
+    .setting-item { display: flex; flex-direction: column; gap: 5px; }
+    .setting-label { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+    .setting-input { display: flex; align-items: center; gap: 6px; }
+    .setting-input input { width: 90px; padding: 7px 10px; background: #0f1117; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 14px; font-family: monospace; outline: none; }
+    .setting-input input:focus { border-color: #7c3aed; }
+    .setting-input span { font-size: 12px; color: #64748b; }
+    /* Converter */
+    .converter { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-bottom: 24px; }
+    .unit-card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 14px; }
+    .unit-card.active { border-color: #7c3aed; }
+    .unit-label { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+    .unit-input { width: 100%; padding: 8px 10px; background: #0f1117; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 16px; font-family: monospace; outline: none; }
+    .unit-input:focus { border-color: #7c3aed; }
+    .unit-desc { font-size: 11px; color: #475569; margin-top: 5px; }
+    /* Reference table */
+    .panel { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 16px; margin-bottom: 20px; }
+    .panel h2 { font-size: 13px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th { text-align: left; padding: 7px 12px; color: #64748b; border-bottom: 1px solid #334155; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+    td { padding: 7px 12px; color: #e2e8f0; font-family: monospace; border-bottom: 1px solid #1e293b; }
+    tr:last-child td { border-bottom: none; }
+    td:first-child { color: #94a3b8; }
+    .formula-val { color: #a78bfa; }
+    .ref-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 640px) { .ref-grid { grid-template-columns: 1fr; } .converter { grid-template-columns: 1fr 1fr; } }
+    #ad-slot { margin: 20px auto; text-align: center; }
+  </style>
+</head>
+<body>
+<div id="privacy-banner">🔒 All processing happens in your browser. No data is sent to any server.</div>
+<header>
+  <span class="badge">FREE</span>
+  <h1>CSS Unit Converter</h1>
+  <a href="https://devnestio.pages.dev">← All Tools</a>
+</header>
+<main>
+  <div class="settings">
+    <div class="setting-item">
+      <div class="setting-label">Base Font Size</div>
+      <div class="setting-input">
+        <input type="number" id="base-font" value="16" min="1" max="100" step="0.5" />
+        <span>px</span>
+      </div>
+    </div>
+    <div class="setting-item">
+      <div class="setting-label">Parent Font Size (for em)</div>
+      <div class="setting-input">
+        <input type="number" id="parent-font" value="16" min="1" max="200" step="0.5" />
+        <span>px</span>
+      </div>
+    </div>
+    <div class="setting-item">
+      <div class="setting-label">Viewport Width</div>
+      <div class="setting-input">
+        <input type="number" id="vp-width" value="1440" min="1" step="1" />
+        <span>px</span>
+      </div>
+    </div>
+    <div class="setting-item">
+      <div class="setting-label">Viewport Height</div>
+      <div class="setting-input">
+        <input type="number" id="vp-height" value="900" min="1" step="1" />
+        <span>px</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="converter" id="converter">
+    <!-- cards injected by JS -->
+  </div>
+
+  <div class="ref-grid">
+    <div class="panel">
+      <h2>Conversion Formulas</h2>
+      <table>
+        <thead><tr><th>Unit</th><th>Formula</th></tr></thead>
+        <tbody>
+          <tr><td>rem</td><td class="formula-val">px ÷ base</td></tr>
+          <tr><td>em</td><td class="formula-val">px ÷ parent</td></tr>
+          <tr><td>vw</td><td class="formula-val">px ÷ vp-width × 100</td></tr>
+          <tr><td>vh</td><td class="formula-val">px ÷ vp-height × 100</td></tr>
+          <tr><td>pt</td><td class="formula-val">px × 0.75</td></tr>
+          <tr><td>pc</td><td class="formula-val">px ÷ 16</td></tr>
+          <tr><td>cm</td><td class="formula-val">px × 0.026458</td></tr>
+          <tr><td>mm</td><td class="formula-val">px × 0.26458</td></tr>
+          <tr><td>in</td><td class="formula-val">px × 0.010417</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="panel">
+      <h2>Common Values Reference</h2>
+      <table>
+        <thead><tr><th>px</th><th>rem (÷16)</th><th>pt</th></tr></thead>
+        <tbody id="ref-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="ad-slot" data-ea-publisher="devnestio" data-ea-type="image"></div>
+</main>
+<script>
+const UNITS = [
+  { id: 'px',  label: 'px',  desc: 'Pixels (absolute)' },
+  { id: 'rem', label: 'rem', desc: 'Root em (relative to base)' },
+  { id: 'em',  label: 'em',  desc: 'Em (relative to parent)' },
+  { id: 'vw',  label: 'vw',  desc: 'Viewport width %' },
+  { id: 'vh',  label: 'vh',  desc: 'Viewport height %' },
+  { id: 'pt',  label: 'pt',  desc: 'Points (1pt = 1.333px)' },
+  { id: 'pc',  label: 'pc',  desc: 'Picas (1pc = 16px)' },
+  { id: 'cm',  label: 'cm',  desc: 'Centimeters' },
+  { id: 'mm',  label: 'mm',  desc: 'Millimeters' },
+  { id: 'in',  label: 'in',  desc: 'Inches' },
+];
+
+function getBase() { return parseFloat(document.getElementById('base-font').value) || 16; }
+function getParent() { return parseFloat(document.getElementById('parent-font').value) || 16; }
+function getVpW() { return parseFloat(document.getElementById('vp-width').value) || 1440; }
+function getVpH() { return parseFloat(document.getElementById('vp-height').value) || 900; }
+
+function toPx(value, unit) {
+  const base = getBase(), parent = getParent(), vpW = getVpW(), vpH = getVpH();
+  switch(unit) {
+    case 'px':  return value;
+    case 'rem': return value * base;
+    case 'em':  return value * parent;
+    case 'vw':  return value * vpW / 100;
+    case 'vh':  return value * vpH / 100;
+    case 'pt':  return value / 0.75;
+    case 'pc':  return value * 16;
+    case 'cm':  return value / 0.026458;
+    case 'mm':  return value / 0.26458;
+    case 'in':  return value / 0.010417;
+    default: return value;
+  }
+}
+
+function fromPx(px, unit) {
+  const base = getBase(), parent = getParent(), vpW = getVpW(), vpH = getVpH();
+  switch(unit) {
+    case 'px':  return px;
+    case 'rem': return px / base;
+    case 'em':  return px / parent;
+    case 'vw':  return px / vpW * 100;
+    case 'vh':  return px / vpH * 100;
+    case 'pt':  return px * 0.75;
+    case 'pc':  return px / 16;
+    case 'cm':  return px * 0.026458;
+    case 'mm':  return px * 0.26458;
+    case 'in':  return px * 0.010417;
+    default: return px;
+  }
+}
+
+function fmt(n) {
+  if (Math.abs(n) < 0.0001 && n !== 0) return n.toExponential(4);
+  if (Number.isInteger(n) || Math.abs(n) >= 100) return n.toFixed(3).replace(/\.?0+$/, '');
+  return parseFloat(n.toPrecision(6)).toString();
+}
+
+let activeUnit = 'px';
+
+function buildCards() {
+  const container = document.getElementById('converter');
+  container.innerHTML = '';
+  UNITS.forEach(u => {
+    const card = document.createElement('div');
+    card.className = 'unit-card' + (u.id === activeUnit ? ' active' : '');
+    card.id = 'card-' + u.id;
+    card.innerHTML = `<div class="unit-label">${u.label}</div>
+      <input class="unit-input" id="inp-${u.id}" type="number" step="any" placeholder="0" value="${u.id === 'px' ? '16' : ''}" />
+      <div class="unit-desc">${u.desc}</div>`;
+    container.appendChild(card);
+    const input = card.querySelector('input');
+    input.addEventListener('focus', () => {
+      activeUnit = u.id;
+      document.querySelectorAll('.unit-card').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+    });
+    input.addEventListener('input', () => convertFrom(u.id));
+  });
+}
+
+function convertFrom(srcUnit) {
+  const input = document.getElementById('inp-' + srcUnit);
+  const raw = parseFloat(input.value);
+  if (isNaN(raw)) { UNITS.forEach(u => { if (u.id !== srcUnit) document.getElementById('inp-' + u.id).value = ''; }); return; }
+  const px = toPx(raw, srcUnit);
+  UNITS.forEach(u => {
+    if (u.id === srcUnit) return;
+    const el = document.getElementById('inp-' + u.id);
+    if (el) el.value = fmt(fromPx(px, u.id));
+  });
+}
+
+function buildRefTable() {
+  const base = getBase();
+  const vals = [1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 24, 32, 36, 48, 64, 72, 96];
+  const tbody = document.getElementById('ref-tbody');
+  tbody.innerHTML = vals.map(px =>
+    `<tr><td>${px}</td><td>${fmt(px / base)}</td><td>${fmt(px * 0.75)}</td></tr>`
+  ).join('');
+}
+
+function recalcAll() {
+  convertFrom(activeUnit);
+  buildRefTable();
+}
+
+['base-font','parent-font','vp-width','vp-height'].forEach(id => {
+  document.getElementById(id).addEventListener('input', recalcAll);
+});
+
+buildCards();
+buildRefTable();
+// default: 16px
+convertFrom('px');
+</script>
+</body>
+</html>

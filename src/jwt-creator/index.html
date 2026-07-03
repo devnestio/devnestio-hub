@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JWT Creator & Signer – HS256/HS384/HS512 | DevNestio</title>
+  <meta name="description" content="Create and sign JSON Web Tokens (JWT) with HS256, HS384, or HS512. Edit header and payload, enter secret, get signed JWT instantly. Browser-only, no server." />
+  <meta property="og:title" content="JWT Creator & Signer – HS256/HS384/HS512 | DevNestio" />
+  <meta property="og:description" content="Create and sign JSON Web Tokens (JWT) with HS256, HS384, or HS512. Browser-only, no data sent to servers." />
+  <meta property="og:url" content="https://devnestio.pages.dev/jwt-creator/" />
+  <meta name="twitter:card" content="summary" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    #privacy-banner { background: #1e293b; border-bottom: 1px solid #334155; padding: 8px 16px; font-size: 12px; color: #94a3b8; text-align: center; }
+    header { background: #1e293b; border-bottom: 1px solid #334155; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+    header a { color: #64748b; font-size: 13px; text-decoration: none; margin-left: auto; }
+    header a:hover { color: #94a3b8; }
+    .badge { background: #7c3aed; color: #fff; font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 600; letter-spacing: 0.04em; }
+    main { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+    .panel { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 16px; }
+    .panel h2 { font-size: 13px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+    label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 4px; margin-top: 10px; }
+    label:first-of-type { margin-top: 0; }
+    select, input[type="text"], input[type="password"] {
+      width: 100%; padding: 8px 10px; background: #0f1117; border: 1px solid #334155;
+      border-radius: 6px; color: #e2e8f0; font-size: 13px; outline: none;
+    }
+    select:focus, input:focus { border-color: #7c3aed; }
+    textarea {
+      width: 100%; padding: 8px 10px; background: #0f1117; border: 1px solid #334155;
+      border-radius: 6px; color: #e2e8f0; font-size: 12px; font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      outline: none; resize: vertical; min-height: 120px;
+    }
+    textarea:focus { border-color: #7c3aed; }
+    .btn { padding: 8px 18px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: background 0.15s; }
+    .btn-primary { background: #7c3aed; color: #fff; }
+    .btn-primary:hover { background: #6d28d9; }
+    .btn-secondary { background: #334155; color: #e2e8f0; }
+    .btn-secondary:hover { background: #475569; }
+    .btn-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .output-box { background: #0f1117; border: 1px solid #334155; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 11px; word-break: break-all; line-height: 1.6; min-height: 60px; }
+    .jwt-part-header { color: #f87171; }
+    .jwt-part-payload { color: #4ade80; }
+    .jwt-part-sig { color: #60a5fa; }
+    .status { margin-top: 10px; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: 500; }
+    .status.ok { background: #14532d; color: #86efac; }
+    .status.err { background: #450a0a; color: #fca5a5; }
+    .status.info { background: #1e3a5f; color: #93c5fd; }
+    .divider { grid-column: 1 / -1; border: none; border-top: 1px solid #334155; margin: 4px 0; }
+    .full { grid-column: 1 / -1; }
+    .legend { display: flex; gap: 16px; font-size: 12px; margin-top: 6px; }
+    .legend span { display: flex; align-items: center; gap: 4px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    #ad-slot { margin: 20px auto; text-align: center; }
+  </style>
+</head>
+<body>
+
+<div id="privacy-banner">🔒 All processing happens in your browser. No data is sent to any server.</div>
+
+<header>
+  <span class="badge">FREE</span>
+  <h1>JWT Creator &amp; Signer</h1>
+  <a href="https://devnestio.pages.dev">← All Tools</a>
+</header>
+
+<main>
+  <div class="grid">
+    <!-- Left: Header -->
+    <div class="panel">
+      <h2>Header</h2>
+      <label>Algorithm</label>
+      <select id="alg">
+        <option value="HS256">HS256 (HMAC-SHA256)</option>
+        <option value="HS384">HS384 (HMAC-SHA384)</option>
+        <option value="HS512">HS512 (HMAC-SHA512)</option>
+      </select>
+      <label>Type</label>
+      <input type="text" id="typ" value="JWT" readonly style="opacity:0.6;cursor:default" />
+      <label>Header JSON (auto-generated)</label>
+      <textarea id="header-json" readonly rows="3" style="opacity:0.7;cursor:default">{"alg":"HS256","typ":"JWT"}</textarea>
+    </div>
+
+    <!-- Right: Payload -->
+    <div class="panel">
+      <h2>Payload</h2>
+      <div class="btn-row" style="margin-top:0;margin-bottom:10px">
+        <button class="btn btn-secondary" onclick="insertClaim('sub','1234567890')" style="font-size:11px;padding:4px 10px">+ sub</button>
+        <button class="btn btn-secondary" onclick="insertClaim('name','John Doe')" style="font-size:11px;padding:4px 10px">+ name</button>
+        <button class="btn btn-secondary" onclick="insertClaimExp()" style="font-size:11px;padding:4px 10px">+ exp (1h)</button>
+        <button class="btn btn-secondary" onclick="insertClaim('iss','example.com')" style="font-size:11px;padding:4px 10px">+ iss</button>
+      </div>
+      <textarea id="payload-json" rows="8" spellcheck="false">{
+  "sub": "1234567890",
+  "name": "John Doe",
+  "iat": 1516239022
+}</textarea>
+      <div id="payload-err" class="status err" style="display:none"></div>
+    </div>
+
+    <!-- Secret -->
+    <div class="panel full">
+      <h2>Secret Key</h2>
+      <label>Secret (used to sign the JWT)</label>
+      <div style="display:flex;gap:8px">
+        <input type="password" id="secret" value="your-256-bit-secret" style="flex:1" />
+        <button class="btn btn-secondary" onclick="toggleSecret()" id="toggle-secret-btn" style="white-space:nowrap">Show</button>
+        <button class="btn btn-secondary" onclick="generateSecret()" style="white-space:nowrap">Generate</button>
+      </div>
+    </div>
+
+    <!-- Action -->
+    <div class="full" style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="signJWT()">Sign JWT</button>
+      <button class="btn btn-secondary" onclick="clearAll()">Clear</button>
+    </div>
+
+    <!-- Output -->
+    <div class="panel full">
+      <h2>Signed JWT</h2>
+      <div class="output-box" id="jwt-output"><span style="color:#475569">Click "Sign JWT" to generate the token…</span></div>
+      <div class="legend">
+        <span><span class="dot" style="background:#f87171"></span>Header</span>
+        <span><span class="dot" style="background:#4ade80"></span>Payload</span>
+        <span><span class="dot" style="background:#60a5fa"></span>Signature</span>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="copyJWT()">Copy JWT</button>
+        <button class="btn btn-secondary" onclick="decodeOutput()">Decode &amp; Verify</button>
+      </div>
+      <div id="sign-status" style="display:none" class="status"></div>
+    </div>
+
+    <!-- Verify -->
+    <div class="panel full">
+      <h2>Verify Existing JWT</h2>
+      <label>Paste a JWT to verify</label>
+      <textarea id="verify-input" rows="4" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."></textarea>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="verifyJWT()">Verify with Secret Above</button>
+      </div>
+      <div id="verify-status" style="display:none" class="status"></div>
+      <div id="verify-decoded" class="output-box" style="margin-top:10px;display:none"></div>
+    </div>
+  </div>
+
+  <div id="ad-slot" data-ea-publisher="devnestio" data-ea-type="image"></div>
+</main>
+
+<script>
+  const algMap = { HS256: 'SHA-256', HS384: 'SHA-384', HS512: 'SHA-512' };
+
+  function b64url(buf) {
+    return btoa(String.fromCharCode(...new Uint8Array(buf)))
+      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+
+  function b64urlStr(str) {
+    return btoa(unescape(encodeURIComponent(str)))
+      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+
+  function b64urlDecode(str) {
+    str = str.replace(/-/g, '+').replace(/_/g, '/');
+    while (str.length % 4) str += '=';
+    return atob(str);
+  }
+
+  document.getElementById('alg').addEventListener('change', () => {
+    const alg = document.getElementById('alg').value;
+    document.getElementById('header-json').value = JSON.stringify({ alg, typ: 'JWT' }, null, 0);
+  });
+
+  async function signJWT() {
+    try {
+      const alg = document.getElementById('alg').value;
+      const secret = document.getElementById('secret').value;
+      const payloadStr = document.getElementById('payload-json').value.trim();
+
+      let payload;
+      try { payload = JSON.parse(payloadStr); } catch(e) {
+        showStatus('sign-status', 'err', 'Payload JSON is invalid: ' + e.message);
+        return;
+      }
+
+      const header = { alg, typ: 'JWT' };
+      const headerEnc = b64urlStr(JSON.stringify(header));
+      const payloadEnc = b64urlStr(JSON.stringify(payload));
+      const signingInput = headerEnc + '.' + payloadEnc;
+
+      const keyData = new TextEncoder().encode(secret);
+      const hashName = algMap[alg];
+
+      const key = await crypto.subtle.importKey(
+        'raw', keyData,
+        { name: 'HMAC', hash: hashName },
+        false, ['sign']
+      );
+
+      const sigBuf = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(signingInput));
+      const sigEnc = b64url(sigBuf);
+      const jwt = signingInput + '.' + sigEnc;
+
+      const out = document.getElementById('jwt-output');
+      out.innerHTML = `<span class="jwt-part-header">${headerEnc}</span>.<span class="jwt-part-payload">${payloadEnc}</span>.<span class="jwt-part-sig">${sigEnc}</span>`;
+      out.dataset.jwt = jwt;
+
+      showStatus('sign-status', 'ok', `✅ JWT signed with ${alg} — ${jwt.length} chars`);
+    } catch(e) {
+      showStatus('sign-status', 'err', '❌ ' + e.message);
+    }
+  }
+
+  async function verifyJWT() {
+    try {
+      const token = document.getElementById('verify-input').value.trim();
+      const secret = document.getElementById('secret').value;
+      const parts = token.split('.');
+      if (parts.length !== 3) { showStatus('verify-status', 'err', '❌ Invalid JWT format (need 3 parts)'); return; }
+
+      const [hEnc, pEnc, sigEnc] = parts;
+      let header, payload;
+      try { header = JSON.parse(b64urlDecode(hEnc)); } catch(e) { showStatus('verify-status', 'err', '❌ Cannot decode header'); return; }
+      try { payload = JSON.parse(b64urlDecode(pEnc)); } catch(e) { showStatus('verify-status', 'err', '❌ Cannot decode payload'); return; }
+
+      const alg = header.alg || 'HS256';
+      const hashName = algMap[alg];
+      if (!hashName) { showStatus('verify-status', 'err', '❌ Unsupported algorithm: ' + alg); return; }
+
+      const keyData = new TextEncoder().encode(secret);
+      const key = await crypto.subtle.importKey('raw', keyData, { name: 'HMAC', hash: hashName }, false, ['verify']);
+      const sigBuf = Uint8Array.from(atob(sigEnc.replace(/-/g,'+').replace(/_/g,'/')), c => c.charCodeAt(0));
+      const signingInput = hEnc + '.' + pEnc;
+      const valid = await crypto.subtle.verify('HMAC', key, sigBuf, new TextEncoder().encode(signingInput));
+
+      const exp = payload.exp ? new Date(payload.exp * 1000) : null;
+      const expired = exp && exp < new Date();
+
+      if (valid && !expired) {
+        showStatus('verify-status', 'ok', '✅ Signature valid' + (exp ? ` · Expires ${exp.toUTCString()}` : ''));
+      } else if (valid && expired) {
+        showStatus('verify-status', 'err', `⚠️ Signature valid but token EXPIRED at ${exp.toUTCString()}`);
+      } else {
+        showStatus('verify-status', 'err', '❌ Invalid signature — secret mismatch or tampered token');
+      }
+
+      const decoded = document.getElementById('verify-decoded');
+      decoded.style.display = 'block';
+      decoded.textContent = 'Header: ' + JSON.stringify(header, null, 2) + '\n\nPayload: ' + JSON.stringify(payload, null, 2);
+    } catch(e) {
+      showStatus('verify-status', 'err', '❌ ' + e.message);
+    }
+  }
+
+  function decodeOutput() {
+    const jwt = document.getElementById('jwt-output').dataset.jwt;
+    if (jwt) {
+      document.getElementById('verify-input').value = jwt;
+      verifyJWT();
+    }
+  }
+
+  function copyJWT() {
+    const jwt = document.getElementById('jwt-output').dataset.jwt;
+    if (jwt) {
+      navigator.clipboard.writeText(jwt).then(() => showStatus('sign-status', 'ok', '📋 Copied to clipboard!'));
+    }
+  }
+
+  function showStatus(id, type, msg) {
+    const el = document.getElementById(id);
+    el.style.display = 'block';
+    el.className = 'status ' + type;
+    el.textContent = msg;
+  }
+
+  function toggleSecret() {
+    const inp = document.getElementById('secret');
+    const btn = document.getElementById('toggle-secret-btn');
+    if (inp.type === 'password') { inp.type = 'text'; btn.textContent = 'Hide'; }
+    else { inp.type = 'password'; btn.textContent = 'Show'; }
+  }
+
+  async function generateSecret() {
+    const buf = new Uint8Array(32);
+    crypto.getRandomValues(buf);
+    document.getElementById('secret').value = Array.from(buf).map(b => b.toString(16).padStart(2,'0')).join('');
+    document.getElementById('secret').type = 'text';
+    document.getElementById('toggle-secret-btn').textContent = 'Hide';
+  }
+
+  function insertClaim(key, val) {
+    try {
+      const ta = document.getElementById('payload-json');
+      const obj = JSON.parse(ta.value);
+      obj[key] = val;
+      ta.value = JSON.stringify(obj, null, 2);
+    } catch(e) {}
+  }
+
+  function insertClaimExp() {
+    try {
+      const ta = document.getElementById('payload-json');
+      const obj = JSON.parse(ta.value);
+      obj.exp = Math.floor(Date.now() / 1000) + 3600;
+      ta.value = JSON.stringify(obj, null, 2);
+    } catch(e) {}
+  }
+
+  function clearAll() {
+    document.getElementById('payload-json').value = '{\n  "sub": "1234567890",\n  "name": "John Doe",\n  "iat": ' + Math.floor(Date.now()/1000) + '\n}';
+    document.getElementById('secret').value = 'your-256-bit-secret';
+    document.getElementById('jwt-output').innerHTML = '<span style="color:#475569">Click "Sign JWT" to generate the token…</span>';
+    document.getElementById('jwt-output').dataset.jwt = '';
+    document.getElementById('verify-input').value = '';
+    document.getElementById('verify-decoded').style.display = 'none';
+    ['sign-status','verify-status','payload-err'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+  }
+
+  // Update header JSON when alg changes
+  document.getElementById('alg').dispatchEvent(new Event('change'));
+</script>
+</body>
+</html>

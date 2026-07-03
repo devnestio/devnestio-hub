@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unix Permissions Calculator – chmod Octal & Symbolic | DevNestio</title>
+  <meta name="description" content="Calculate Unix file permissions with visual checkboxes. Converts between octal (chmod 755) and symbolic (rwxr-xr-x) notation. Includes common presets." />
+  <link rel="canonical" href="https://devnestio.pages.dev/unix-permissions-calc/" />
+  <meta property="og:title" content="Unix Permissions Calculator – chmod Octal & Symbolic" />
+  <meta property="og:description" content="Visual Unix chmod calculator. Toggle permissions with checkboxes, get octal and symbolic notation instantly." />
+  <meta property="og:url" content="https://devnestio.pages.dev/unix-permissions-calc/" />
+  <meta property="og:type" content="website" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1117; --surface: #1a1d27; --surface2: #22263a; --border: #2e3248;
+      --text: #e2e8f0; --muted: #8892a4;
+      --accent: #38bdf8; --green: #4ade80; --yellow: #fbbf24; --red: #f87171;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1.2rem 1.5rem; }
+    header h1 { font-size: 1.4rem; font-weight: 700; color: var(--accent); }
+    header p { font-size: .85rem; color: var(--muted); margin-top: .25rem; }
+    .main { max-width: 900px; margin: 0 auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
+
+    /* Checkbox grid */
+    .perm-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .perm-header { display: grid; grid-template-columns: 90px repeat(3, 1fr) repeat(3, 1fr) repeat(3, 1fr); background: var(--surface2); border-bottom: 1px solid var(--border); }
+    .ph-label { padding: .6rem .5rem; font-size: .75rem; font-weight: 600; color: var(--muted); text-align: center; text-transform: uppercase; letter-spacing: .04em; }
+    .ph-label.owner { color: var(--green); }
+    .ph-label.group { color: var(--yellow); }
+    .ph-label.other { color: var(--red); }
+    .ph-label:first-child { text-align: left; padding-left: 1rem; }
+    .perm-row { display: grid; grid-template-columns: 90px repeat(9, 1fr); align-items: center; border-bottom: 1px solid var(--border); }
+    .perm-row:last-child { border-bottom: none; }
+    .row-label { padding: .7rem 1rem; font-size: .85rem; font-weight: 600; color: var(--muted); }
+    .cb-cell { display: flex; justify-content: center; align-items: center; padding: .5rem; }
+    .cb-wrap { position: relative; }
+    .cb-wrap input[type="checkbox"] { appearance: none; width: 28px; height: 28px; border: 2px solid var(--border); border-radius: 6px; background: var(--bg); cursor: pointer; transition: all .15s; }
+    .cb-wrap input[type="checkbox"]:checked { background: var(--accent); border-color: var(--accent); }
+    .cb-wrap input[type="checkbox"]:checked::after { content: '✓'; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); color: #000; font-size: .85rem; font-weight: 700; pointer-events: none; }
+    .cb-wrap input[type="checkbox"].owner:checked { background: var(--green); border-color: var(--green); }
+    .cb-wrap input[type="checkbox"].group:checked { background: var(--yellow); border-color: var(--yellow); }
+    .cb-wrap input[type="checkbox"].other:checked { background: var(--red); border-color: var(--red); }
+
+    /* Output */
+    .output-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+    .output-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+    .out-item { background: var(--surface2); border-radius: 8px; padding: .85rem 1rem; }
+    .out-label { font-size: .75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: .4rem; }
+    .out-value { font-family: 'Fira Code', monospace; font-size: 1.4rem; font-weight: 700; color: var(--accent); display: flex; align-items: center; gap: .5rem; }
+    .out-value.symbolic { font-size: 1.1rem; letter-spacing: .05em; }
+    .copy-btn { background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 5px; padding: .15rem .45rem; font-size: .7rem; cursor: pointer; transition: all .15s; flex-shrink: 0; }
+    .copy-btn:hover { background: var(--accent); border-color: var(--accent); color: #000; }
+    .out-desc { font-size: .78rem; color: var(--muted); margin-top: .35rem; }
+
+    /* Direct input */
+    .input-row { display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; }
+    .input-group { display: flex; flex-direction: column; gap: .3rem; }
+    .input-group label { font-size: .78rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+    .input-group input { background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: .5rem .85rem; font-family: monospace; font-size: 1rem; width: 120px; outline: none; transition: border-color .2s; }
+    .input-group input:focus { border-color: var(--accent); }
+    .input-group input.err { border-color: var(--red); }
+
+    /* Presets */
+    .presets-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem 1.5rem; }
+    .presets-card h2 { font-size: .85rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: .75rem; }
+    .presets-grid { display: flex; flex-wrap: wrap; gap: .5rem; }
+    .preset-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 7px; padding: .4rem .85rem; font-size: .82rem; cursor: pointer; transition: all .15s; display: flex; flex-direction: column; align-items: center; gap: .1rem; }
+    .preset-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .preset-code { font-family: monospace; font-size: .75rem; color: var(--muted); }
+
+    /* Explanation */
+    .explain-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem 1.5rem; }
+    .explain-card h2 { font-size: .85rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: .75rem; }
+    .sym-display { font-family: monospace; font-size: 1.3rem; letter-spacing: .05em; display: flex; gap: 0; }
+    .sym-char { padding: .15rem .08rem; }
+    .sym-char.r { color: var(--green); }
+    .sym-char.w { color: var(--yellow); }
+    .sym-char.x { color: var(--red); }
+    .sym-char.d { font-size: 1.3rem; }
+    .bits-table { width: 100%; border-collapse: collapse; margin-top: .75rem; font-size: .82rem; }
+    .bits-table th, .bits-table td { padding: .4rem .6rem; text-align: left; border-bottom: 1px solid var(--border); }
+    .bits-table th { color: var(--muted); font-weight: 600; }
+    .bits-table td { font-family: monospace; }
+    .bits-table tr:last-child td { border-bottom: none; }
+
+    footer { text-align: center; padding: 2rem; color: var(--muted); font-size: .8rem; border-top: 1px solid var(--border); margin-top: .5rem; }
+    @media (max-width: 600px) {
+      .perm-header, .perm-row { grid-template-columns: 70px repeat(9, 1fr); }
+      .ph-label:first-child, .row-label { padding-left: .5rem; font-size: .75rem; }
+      .cb-wrap input[type="checkbox"] { width: 22px; height: 22px; }
+      .main { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>🔐 Unix Permissions Calculator</h1>
+  <p>chmod octal &amp; symbolic — visual checkboxes, presets, instant conversion</p>
+</header>
+
+<div class="main">
+
+  <!-- Checkbox grid -->
+  <div class="perm-card">
+    <div class="perm-header">
+      <div class="ph-label"></div>
+      <div class="ph-label owner" style="grid-column:span 3">Owner (u)</div>
+      <div class="ph-label group" style="grid-column:span 3">Group (g)</div>
+      <div class="ph-label other" style="grid-column:span 3">Other (o)</div>
+    </div>
+    <div class="perm-row" id="headerRow">
+      <div class="row-label"></div>
+      <div class="ph-label" style="font-size:.7rem;color:var(--muted)">r</div>
+      <div class="ph-label" style="font-size:.7rem;color:var(--muted)">w</div>
+      <div class="ph-label" style="font-size:.7rem;color:var(--muted)">x</div>
+      <div class="ph-label" style="font-size:.7rem;color:var(--muted)">r</div>
+      <div class="ph-label" style="font-size:.7rem;color:var(--muted)">w</div>
+      <div class="ph-label" style="font-size:.7rem;color:var(--muted)">x</div>
+      <div class="ph-label" style="font-size:.7rem;color:var(--muted)">r</div>
+      <div class="ph-label" style="font-size:.7rem;color:var(--muted)">w</div>
+      <div class="ph-label" style="font-size:.7rem;color:var(--muted)">x</div>
+    </div>
+    <div class="perm-row" id="fileRow">
+      <div class="row-label">File</div>
+      <!-- 9 checkboxes: owner r,w,x | group r,w,x | other r,w,x -->
+    </div>
+    <div class="perm-row" id="dirRow">
+      <div class="row-label">Dir</div>
+    </div>
+  </div>
+
+  <!-- Direct input -->
+  <div class="output-card">
+    <div class="input-row" style="margin-bottom:1rem">
+      <div class="input-group">
+        <label>Octal</label>
+        <input type="text" id="octalInput" maxlength="4" placeholder="755" />
+      </div>
+      <div class="input-group">
+        <label>Symbolic</label>
+        <input type="text" id="symbolicInput" maxlength="9" placeholder="rwxr-xr-x" />
+      </div>
+      <div style="align-self:flex-end">
+        <button class="preset-btn" onclick="resetAll()" style="border-color:var(--red);color:var(--red)">Reset</button>
+      </div>
+    </div>
+    <div class="output-grid" id="outputGrid"></div>
+  </div>
+
+  <!-- Presets -->
+  <div class="presets-card">
+    <h2>Common Presets</h2>
+    <div class="presets-grid" id="presetsGrid"></div>
+  </div>
+
+  <!-- Explanation -->
+  <div class="explain-card">
+    <h2>Permission Bits Reference</h2>
+    <table class="bits-table">
+      <thead><tr><th>Octal</th><th>Binary</th><th>rwx</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td>7</td><td>111</td><td>rwx</td><td>Read, write, execute</td></tr>
+        <tr><td>6</td><td>110</td><td>rw-</td><td>Read and write</td></tr>
+        <tr><td>5</td><td>101</td><td>r-x</td><td>Read and execute</td></tr>
+        <tr><td>4</td><td>100</td><td>r--</td><td>Read only</td></tr>
+        <tr><td>3</td><td>011</td><td>-wx</td><td>Write and execute</td></tr>
+        <tr><td>2</td><td>010</td><td>-w-</td><td>Write only</td></tr>
+        <tr><td>1</td><td>001</td><td>--x</td><td>Execute only</td></tr>
+        <tr><td>0</td><td>000</td><td>---</td><td>No permissions</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<footer>
+  DevNestio Unix Permissions Calculator · <a href="https://devnestio.pages.dev/" style="color:var(--accent)">More Tools</a>
+</footer>
+
+<script>
+const PRESETS = [
+  { name:'Public web file',  octal:'644', desc:'rw-r--r--' },
+  { name:'Private file',     octal:'600', desc:'rw-------' },
+  { name:'Executable',       octal:'755', desc:'rwxr-xr-x' },
+  { name:'Private exec',     octal:'700', desc:'rwx------' },
+  { name:'Public dir',       octal:'755', desc:'rwxr-xr-x' },
+  { name:'Private dir',      octal:'700', desc:'rwx------' },
+  { name:'Read-only file',   octal:'444', desc:'r--r--r--' },
+  { name:'All read-write',   octal:'666', desc:'rw-rw-rw-' },
+  { name:'Full access',      octal:'777', desc:'rwxrwxrwx' },
+  { name:'Sticky dir',       octal:'1755', desc:'rwxr-xr-t' },
+  { name:'SetUID exec',      octal:'4755', desc:'rwsr-xr-x' },
+  { name:'No permissions',   octal:'000', desc:'---------' },
+];
+
+// State: 9 bits [owner-r, owner-w, owner-x, group-r, group-w, group-x, other-r, other-w, other-x]
+let bits = [1,1,1,1,0,1,1,0,1]; // 755
+
+let updating = false;
+
+function octalToDisplay(octal) {
+  // Strip special bits for display (just rwx)
+  const o = parseInt(octal, 8);
+  const rwx = o & 0o777;
+  return [(rwx>>8)&7, (rwx>>6)&7, (rwx>>3)&7, rwx&7];
+}
+
+function bitsFromOctal(oct3) {
+  // oct3: decimal number whose digits are the octal permission values (e.g. 755)
+  const d = [Math.floor(oct3/100)%10, Math.floor(oct3/10)%10, oct3%10];
+  const result = [];
+  d.forEach(n => { result.push((n>>2)&1, (n>>1)&1, n&1); });
+  return result;
+}
+
+function bitsToOctal(b) {
+  const owner = (b[0]<<2)|(b[1]<<1)|b[2];
+  const group = (b[3]<<2)|(b[4]<<1)|b[5];
+  const other = (b[6]<<2)|(b[7]<<1)|b[8];
+  return '' + owner + group + other;
+}
+
+function bitsToSymbolic(b) {
+  const chars = ['r','w','x','r','w','x','r','w','x'];
+  return b.map((v,i) => v ? chars[i] : '-').join('');
+}
+
+function symbolicToBits(sym) {
+  if (sym.length !== 9) return null;
+  const map = {r:0,w:1,x:2};
+  const b = [];
+  for (let i = 0; i < 9; i++) {
+    const c = sym[i];
+    const expected = ['r','w','x'][i%3];
+    if (c === expected) b.push(1);
+    else if (c === '-') b.push(0);
+    else return null;
+  }
+  return b;
+}
+
+function updateFromBits() {
+  if (updating) return;
+  updating = true;
+  const oct = bitsToOctal(bits);
+  const sym = bitsToSymbolic(bits);
+  document.getElementById('octalInput').value = oct;
+  document.getElementById('octalInput').classList.remove('err');
+  document.getElementById('symbolicInput').value = sym;
+  document.getElementById('symbolicInput').classList.remove('err');
+
+  // Update checkboxes
+  ['file','dir'].forEach((type, ti) => {
+    bits.forEach((v, i) => {
+      const cb = document.getElementById(`cb-${type}-${i}`);
+      if (cb) cb.checked = !!v;
+    });
+  });
+
+  renderOutput(oct, sym);
+  updating = false;
+}
+
+function renderOutput(oct, sym) {
+  const owner = parseInt(oct[0]||'0');
+  const group = parseInt(oct[1]||'0');
+  const other = parseInt(oct[2]||'0');
+  const perm = (owner<<6)|(group<<3)|other;
+
+  const ownerDesc = describeOctet(owner);
+  const groupDesc = describeOctet(group);
+  const otherDesc = describeOctet(other);
+
+  document.getElementById('outputGrid').innerHTML = `
+    <div class="out-item">
+      <div class="out-label">Octal (chmod)</div>
+      <div class="out-value">
+        <span>${oct}</span>
+        <button class="copy-btn" onclick="copy(this,'${oct}')">Copy</button>
+      </div>
+      <div class="out-desc">chmod ${oct} filename</div>
+    </div>
+    <div class="out-item">
+      <div class="out-label">Symbolic</div>
+      <div class="out-value symbolic">
+        <span>${sym}</span>
+        <button class="copy-btn" onclick="copy(this,'${sym}')">Copy</button>
+      </div>
+      <div class="out-desc">${ownerDesc} / ${groupDesc} / ${otherDesc}</div>
+    </div>
+    <div class="out-item">
+      <div class="out-label">Owner</div>
+      <div class="out-value" style="font-size:1.1rem">
+        <span style="color:var(--green)">${oct[0]||'0'} (${sym.slice(0,3)})</span>
+      </div>
+      <div class="out-desc">${ownerDesc}</div>
+    </div>
+    <div class="out-item">
+      <div class="out-label">Group</div>
+      <div class="out-value" style="font-size:1.1rem">
+        <span style="color:var(--yellow)">${oct[1]||'0'} (${sym.slice(3,6)})</span>
+      </div>
+      <div class="out-desc">${groupDesc}</div>
+    </div>
+    <div class="out-item">
+      <div class="out-label">Other</div>
+      <div class="out-value" style="font-size:1.1rem">
+        <span style="color:var(--red)">${oct[2]||'0'} (${sym.slice(6,9)})</span>
+      </div>
+      <div class="out-desc">${otherDesc}</div>
+    </div>
+  `;
+}
+
+function describeOctet(n) {
+  const r = (n>>2)&1, w = (n>>1)&1, x = n&1;
+  if (r&&w&&x) return 'read, write, execute';
+  if (r&&w&&!x) return 'read & write';
+  if (r&&!w&&x) return 'read & execute';
+  if (r&&!w&&!x) return 'read only';
+  if (!r&&w&&x) return 'write & execute';
+  if (!r&&w&&!x) return 'write only';
+  if (!r&&!w&&x) return 'execute only';
+  return 'no permissions';
+}
+
+function copy(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '✓';
+    setTimeout(() => btn.textContent = orig, 1200);
+  });
+}
+
+function resetAll() {
+  bits = [0,0,0,0,0,0,0,0,0];
+  updateFromBits();
+}
+
+// Build checkbox rows
+function buildRows() {
+  ['file','dir'].forEach((type, ti) => {
+    const row = document.getElementById(`${type}Row`);
+    const owners = ['owner','owner','owner','group','group','group','other','other','other'];
+    bits.forEach((v, i) => {
+      const cell = document.createElement('div');
+      cell.className = 'cb-cell';
+      const wrap = document.createElement('div');
+      wrap.className = 'cb-wrap';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.id = `cb-${type}-${i}`;
+      cb.className = owners[i];
+      cb.checked = !!v;
+      cb.addEventListener('change', () => {
+        // Sync both rows
+        bits[i] = cb.checked ? 1 : 0;
+        ['file','dir'].forEach(t => {
+          const other = document.getElementById(`cb-${t}-${i}`);
+          if (other && other !== cb) other.checked = cb.checked;
+        });
+        updateFromBits();
+      });
+      wrap.appendChild(cb);
+      cell.appendChild(wrap);
+      row.appendChild(cell);
+    });
+  });
+}
+
+// Presets
+function buildPresets() {
+  const grid = document.getElementById('presetsGrid');
+  PRESETS.forEach(p => {
+    const btn = document.createElement('button');
+    btn.className = 'preset-btn';
+    btn.innerHTML = `<span>${p.name}</span><span class="preset-code">${p.octal} (${p.desc})</span>`;
+    btn.addEventListener('click', () => applyOctal(p.octal));
+    grid.appendChild(btn);
+  });
+}
+
+function applyOctal(octalStr) {
+  const n = parseInt(octalStr, 8);
+  if (isNaN(n)) return;
+  const rwx = n & 0o777;
+  bits = bitsFromOctal(
+    Math.floor(rwx/64) * 100 +
+    Math.floor((rwx%64)/8) * 10 +
+    (rwx%8)
+  );
+  updateFromBits();
+}
+
+// Octal input
+document.getElementById('octalInput').addEventListener('input', e => {
+  if (updating) return;
+  const val = e.target.value.trim();
+  const n = parseInt(val, 8);
+  if (!isNaN(n) && /^[0-7]{1,4}$/.test(val)) {
+    e.target.classList.remove('err');
+    applyOctal(val);
+  } else {
+    e.target.classList.add('err');
+  }
+});
+
+// Symbolic input
+document.getElementById('symbolicInput').addEventListener('input', e => {
+  if (updating) return;
+  const val = e.target.value.trim();
+  const b = symbolicToBits(val);
+  if (b) {
+    e.target.classList.remove('err');
+    bits = b;
+    updateFromBits();
+  } else {
+    e.target.classList.add('err');
+  }
+});
+
+buildRows();
+buildPresets();
+updateFromBits();
+</script>
+</body>
+</html>

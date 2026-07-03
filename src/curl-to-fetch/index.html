@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cURL to Fetch Converter — devnestio</title>
+  <meta name="description" content="Convert cURL commands to JavaScript fetch() calls instantly. Handles -H headers, -d data, -X method, --data-raw, --user, -u, and more. Browser-only, zero dependencies." />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    header { background: #1a1d2e; border-bottom: 1px solid #2d3748; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+    header a { color: #7c85f3; text-decoration: none; font-size: 14px; }
+    header h1 { font-size: 18px; font-weight: 700; color: #fff; }
+    .container { max-width: 900px; margin: 0 auto; padding: 24px 16px; display: flex; flex-direction: column; gap: 20px; }
+    .panel { background: #1a1d2e; border: 1px solid #2d3748; border-radius: 10px; padding: 20px; }
+    .panel h2 { font-size: 13px; font-weight: 600; color: #a0aec0; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 12px; }
+    textarea { width: 100%; background: #0f1117; border: 1px solid #2d3748; border-radius: 8px; padding: 12px 14px; color: #e2e8f0; font-family: 'Courier New', monospace; font-size: 13px; resize: vertical; min-height: 100px; }
+    textarea:focus { outline: none; border-color: #7c85f3; }
+    .examples { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    .ex-btn { background: #0f1117; border: 1px solid #2d3748; border-radius: 6px; padding: 5px 10px; font-size: 11px; color: #a0aec0; cursor: pointer; }
+    .ex-btn:hover { border-color: #7c85f3; color: #7c85f3; }
+    .output-box { background: #0f1117; border: 1px solid #2d3748; border-radius: 8px; padding: 14px; font-family: 'Courier New', monospace; font-size: 13px; color: #7ee787; white-space: pre-wrap; word-break: break-word; min-height: 120px; }
+    .error-box { background: #742a2a; border: 1px solid #e53e3e; border-radius: 8px; padding: 10px 14px; color: #fc8181; font-size: 13px; }
+    .meta-row { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 12px; font-size: 12px; color: #718096; }
+    .meta-item { display: flex; gap: 6px; align-items: center; }
+    .meta-val { font-family: 'Courier New', monospace; color: #a0aec0; }
+    .btn-row { display: flex; gap: 8px; margin-top: 10px; }
+    .btn { background: #7c85f3; color: #fff; border: none; border-radius: 6px; padding: 7px 14px; font-size: 13px; cursor: pointer; font-weight: 600; }
+    .btn-secondary { background: #2d3748; }
+    .btn-secondary:hover { background: #3d4a5c; }
+    .btn-sm { padding: 5px 10px; font-size: 12px; border-radius: 4px; }
+    .copied { background: #276749 !important; }
+    .options-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; font-size: 12px; }
+    .options-row label { display: flex; align-items: center; gap: 5px; cursor: pointer; color: #a0aec0; }
+    .options-row input[type=checkbox] { accent-color: #7c85f3; }
+  </style>
+</head>
+<body>
+<header>
+  <a href="/">← devnestio</a>
+  <h1>cURL to Fetch Converter</h1>
+</header>
+<div class="container">
+  <div class="panel">
+    <h2>cURL Command</h2>
+    <textarea id="curl-input" placeholder="Paste your cURL command here…&#10;e.g. curl -X POST https://api.example.com/users -H 'Content-Type: application/json' -d '{&quot;name&quot;:&quot;Alice&quot;}'" oninput="convert()"></textarea>
+    <div class="examples">
+      <span style="font-size:11px;color:#4a5568;">Examples:</span>
+      <div class="ex-btn" onclick="loadExample('simple')">GET request</div>
+      <div class="ex-btn" onclick="loadExample('post')">POST JSON</div>
+      <div class="ex-btn" onclick="loadExample('auth')">With auth</div>
+      <div class="ex-btn" onclick="loadExample('form')">Form data</div>
+      <div class="ex-btn" onclick="loadExample('headers')">Multi-headers</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Options</h2>
+    <div class="options-row">
+      <label><input type="checkbox" id="opt-async" checked onchange="convert()"> async/await</label>
+      <label><input type="checkbox" id="opt-try" checked onchange="convert()"> try/catch</label>
+      <label><input type="checkbox" id="opt-json" checked onchange="convert()"> Auto-parse JSON response</label>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>fetch() Output</h2>
+    <div id="error-box" class="error-box" style="display:none"></div>
+    <div class="output-box" id="output-box"></div>
+    <div class="meta-row" id="meta-row"></div>
+    <div class="btn-row">
+      <button class="btn btn-secondary btn-sm" onclick="copyOutput()">Copy</button>
+      <button class="btn btn-secondary btn-sm" onclick="clearAll()">Clear</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const EXAMPLES = {
+  simple: `curl https://api.github.com/users/octocat`,
+  post: `curl -X POST https://api.example.com/users \\
+  -H 'Content-Type: application/json' \\
+  -H 'Accept: application/json' \\
+  -d '{"name":"Alice","email":"alice@example.com"}'`,
+  auth: `curl https://api.example.com/protected \\
+  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9' \\
+  -H 'Accept: application/json'`,
+  form: `curl -X POST https://httpbin.org/post \\
+  -H 'Content-Type: application/x-www-form-urlencoded' \\
+  -d 'username=alice&password=secret'`,
+  headers: `curl -X PUT https://api.example.com/items/42 \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-API-Key: sk-1234567890abcdef' \\
+  -H 'Accept: application/json' \\
+  --data-raw '{"status":"active","priority":1}'`,
+};
+
+function loadExample(key) {
+  document.getElementById('curl-input').value = EXAMPLES[key];
+  convert();
+}
+
+function parseCurl(cmd) {
+  // Normalize: join line continuations, collapse whitespace
+  let s = cmd.replace(/\\\n\s*/g, ' ').trim();
+  if (!s.startsWith('curl')) throw new Error('Input must start with "curl"');
+  s = s.slice(4).trim();
+
+  const result = { url: '', method: 'GET', headers: {}, body: null, user: null };
+  const tokens = tokenize(s);
+  let i = 0;
+
+  while (i < tokens.length) {
+    const t = tokens[i];
+    if (t === '-X' || t === '--request') {
+      result.method = tokens[++i] || 'GET';
+    } else if (t === '-H' || t === '--header') {
+      const hdr = tokens[++i] || '';
+      const colon = hdr.indexOf(':');
+      if (colon > 0) {
+        const key = hdr.slice(0, colon).trim();
+        const val = hdr.slice(colon + 1).trim();
+        result.headers[key] = val;
+      }
+    } else if (t === '-d' || t === '--data' || t === '--data-raw' || t === '--data-binary') {
+      result.body = tokens[++i] || '';
+      if (result.method === 'GET') result.method = 'POST';
+    } else if (t === '-u' || t === '--user') {
+      result.user = tokens[++i] || '';
+    } else if (t === '-L' || t === '--location' || t === '-s' || t === '--silent' || t === '-v' || t === '--verbose') {
+      // ignore
+    } else if (!t.startsWith('-')) {
+      if (!result.url) result.url = t;
+    }
+    i++;
+  }
+
+  if (result.user) {
+    result.headers['Authorization'] = 'Basic ' + btoa(result.user);
+  }
+  if (!result.url) throw new Error('No URL found in cURL command');
+  return result;
+}
+
+function tokenize(s) {
+  const tokens = [];
+  let i = 0;
+  while (i < s.length) {
+    while (i < s.length && /\s/.test(s[i])) i++;
+    if (i >= s.length) break;
+    if (s[i] === '"' || s[i] === "'") {
+      const q = s[i++];
+      let tok = '';
+      while (i < s.length && s[i] !== q) {
+        if (s[i] === '\\' && i + 1 < s.length) { tok += s[++i]; }
+        else tok += s[i];
+        i++;
+      }
+      i++; // skip closing quote
+      tokens.push(tok);
+    } else {
+      let tok = '';
+      while (i < s.length && !/\s/.test(s[i])) tok += s[i++];
+      tokens.push(tok);
+    }
+  }
+  return tokens;
+}
+
+function buildFetch(parsed) {
+  const useAsync = document.getElementById('opt-async').checked;
+  const useTry = document.getElementById('opt-try').checked;
+  const parseJson = document.getElementById('opt-json').checked;
+
+  const hasHeaders = Object.keys(parsed.headers).length > 0;
+  const hasBody = parsed.body !== null;
+  const isSimpleGet = parsed.method === 'GET' && !hasHeaders && !hasBody;
+
+  let opts = '';
+  if (!isSimpleGet) {
+    const parts = [];
+    parts.push(`  method: '${parsed.method}'`);
+    if (hasHeaders) {
+      const hdrs = Object.entries(parsed.headers)
+        .map(([k,v]) => `    '${k}': '${v}'`)
+        .join(',\n');
+      parts.push(`  headers: {\n${hdrs}\n  }`);
+    }
+    if (hasBody) {
+      const bodyStr = parsed.body.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\${/g,'\\${');
+      parts.push(`  body: \`${bodyStr}\``);
+    }
+    opts = `, {\n${parts.join(',\n')}\n}`;
+  }
+
+  const fetchCall = `fetch('${parsed.url}'${opts})`;
+
+  let code = '';
+  if (useAsync) {
+    if (useTry) {
+      code = `try {\n  const response = await ${fetchCall};\n`;
+      if (parseJson) {
+        code += `  const data = await response.json();\n  console.log(data);\n`;
+      } else {
+        code += `  const text = await response.text();\n  console.log(text);\n`;
+      }
+      code += `} catch (error) {\n  console.error('Error:', error);\n}`;
+    } else {
+      code = `const response = await ${fetchCall};\n`;
+      if (parseJson) code += `const data = await response.json();\nconsole.log(data);`;
+      else code += `const text = await response.text();\nconsole.log(text);`;
+    }
+  } else {
+    code = `${fetchCall}\n  .then(response => `;
+    if (parseJson) code += `response.json())\n  .then(data => console.log(data))`;
+    else code += `response.text())\n  .then(text => console.log(text))`;
+    if (useTry) code += `\n  .catch(error => console.error('Error:', error))`;
+    code += ';';
+  }
+
+  return code;
+}
+
+function convert() {
+  const input = document.getElementById('curl-input').value.trim();
+  const errBox = document.getElementById('error-box');
+  const outBox = document.getElementById('output-box');
+  const metaRow = document.getElementById('meta-row');
+
+  if (!input) { outBox.textContent = ''; errBox.style.display = 'none'; metaRow.innerHTML = ''; return; }
+
+  try {
+    const parsed = parseCurl(input);
+    const code = buildFetch(parsed);
+    outBox.textContent = code;
+    errBox.style.display = 'none';
+    const hCount = Object.keys(parsed.headers).length;
+    metaRow.innerHTML = `
+      <div class="meta-item">Method: <span class="meta-val">${parsed.method}</span></div>
+      <div class="meta-item">Headers: <span class="meta-val">${hCount}</span></div>
+      <div class="meta-item">Body: <span class="meta-val">${parsed.body ? 'yes' : 'none'}</span></div>`;
+  } catch(e) {
+    errBox.textContent = e.message;
+    errBox.style.display = '';
+    outBox.textContent = '';
+    metaRow.innerHTML = '';
+  }
+}
+
+function copyOutput() {
+  const text = document.getElementById('output-box').textContent;
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.btn-secondary');
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+  });
+}
+
+function clearAll() {
+  document.getElementById('curl-input').value = '';
+  document.getElementById('output-box').textContent = '';
+  document.getElementById('error-box').style.display = 'none';
+  document.getElementById('meta-row').innerHTML = '';
+}
+
+loadExample('post');
+</script>
+</body>
+</html>

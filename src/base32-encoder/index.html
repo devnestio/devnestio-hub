@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Base32 Encoder / Decoder – RFC 4648 | DevNestio</title>
+  <meta name="description" content="Encode and decode Base32 (RFC 4648). Supports standard and hex alphabets, padding options, and ASCII/hex byte inspection. Browser-only." />
+  <meta property="og:title" content="Base32 Encoder / Decoder – RFC 4648 | DevNestio" />
+  <meta property="og:description" content="Encode text or bytes to Base32, decode Base32 back to text. RFC 4648 compliant, standard and hex alphabets. Browser-only." />
+  <meta property="og:url" content="https://devnestio.pages.dev/base32-encoder/" />
+  <meta name="twitter:card" content="summary" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    #privacy-banner { background: #1e293b; border-bottom: 1px solid #334155; padding: 8px 16px; font-size: 12px; color: #94a3b8; text-align: center; }
+    header { background: #1e293b; border-bottom: 1px solid #334155; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+    header a { color: #64748b; font-size: 13px; text-decoration: none; margin-left: auto; }
+    header a:hover { color: #94a3b8; }
+    .badge { background: #ea580c; color: #fff; font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+    main { max-width: 860px; margin: 0 auto; padding: 24px 16px; }
+    .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+    .btn { padding: 8px 16px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; }
+    .btn-primary { background: #ea580c; color: #fff; }
+    .btn-primary:hover { background: #c2410c; }
+    .btn-secondary { background: #334155; color: #e2e8f0; }
+    .btn-secondary:hover { background: #475569; }
+    .opt { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #94a3b8; }
+    .opt input[type="checkbox"] { accent-color: #ea580c; width: 14px; height: 14px; cursor: pointer; }
+    select.opt-sel { padding: 5px 8px; background: #0f1117; border: 1px solid #334155; border-radius: 5px; color: #e2e8f0; font-size: 12px; outline: none; }
+    select.opt-sel:focus { border-color: #ea580c; }
+    .editor-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 640px) { .editor-row { grid-template-columns: 1fr; } }
+    .panel { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 16px; }
+    .panel-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .panel-hdr h2 { font-size: 13px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em; }
+    textarea { width: 100%; padding: 10px 12px; background: #0f1117; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 13px; font-family: 'JetBrains Mono', monospace; outline: none; resize: vertical; min-height: 160px; }
+    textarea:focus { border-color: #ea580c; }
+    .btn-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+    .status { margin-top: 8px; padding: 7px 12px; border-radius: 6px; font-size: 12px; }
+    .status.err { background: #450a0a; color: #fca5a5; }
+    .status.ok { background: #14532d; color: #86efac; }
+    .stats { display: flex; gap: 16px; flex-wrap: wrap; background: #0f1117; border: 1px solid #334155; border-radius: 8px; padding: 10px 14px; margin-top: 14px; }
+    .stat { font-size: 12px; color: #94a3b8; }
+    .stat strong { color: #e2e8f0; }
+    .ref-table { margin-top: 16px; background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 16px; }
+    .ref-table h2 { font-size: 13px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th { text-align: left; padding: 6px 10px; color: #64748b; border-bottom: 1px solid #334155; }
+    td { padding: 5px 10px; color: #e2e8f0; font-family: monospace; border-bottom: 1px solid #1e293b; }
+    td:first-child { color: #94a3b8; }
+    #ad-slot { margin: 20px auto; text-align: center; }
+  </style>
+</head>
+<body>
+
+<div id="privacy-banner">🔒 All processing happens in your browser. No data is sent to any server.</div>
+
+<header>
+  <span class="badge">FREE</span>
+  <h1>Base32 Encoder / Decoder</h1>
+  <a href="https://devnestio.pages.dev">← All Tools</a>
+</header>
+
+<main>
+  <div class="toolbar">
+    <button class="btn btn-primary" onclick="encode()">Encode →</button>
+    <button class="btn btn-secondary" onclick="decode()">← Decode</button>
+    <button class="btn btn-secondary" onclick="swapIO()">⇄ Swap</button>
+    <button class="btn btn-secondary" onclick="clearAll()">Clear</button>
+    <div class="opt">
+      <label for="opt-padding">Padding:</label>
+      <input type="checkbox" id="opt-padding" checked />
+    </div>
+    <div class="opt">
+      <label for="opt-alphabet">Alphabet:</label>
+      <select class="opt-sel" id="opt-alphabet">
+        <option value="std">Standard (RFC 4648)</option>
+        <option value="hex">Hex Extended (Base32Hex)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="editor-row">
+    <div class="panel">
+      <div class="panel-hdr">
+        <h2>Input (Plain Text)</h2>
+        <span id="input-bytes" style="font-size:12px;color:#64748b">0 bytes</span>
+      </div>
+      <textarea id="input-text" spellcheck="false" placeholder="Type or paste text to encode…">Hello, World!</textarea>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="encode()">Encode →</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-hdr">
+        <h2>Output (Base32)</h2>
+        <span id="output-chars" style="font-size:12px;color:#64748b">0 chars</span>
+      </div>
+      <textarea id="output-b32" spellcheck="false" placeholder="Base32 output will appear here…"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="copyOutput()">Copy</button>
+        <button class="btn btn-secondary" onclick="decode()">← Decode</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="status" class="status" style="display:none"></div>
+
+  <div class="stats" id="stats" style="display:none">
+    <div class="stat">Input: <strong id="st-input-len">—</strong></div>
+    <div class="stat">Output: <strong id="st-output-len">—</strong></div>
+    <div class="stat">Overhead: <strong id="st-overhead">—</strong></div>
+    <div class="stat">Padding chars: <strong id="st-padding">—</strong></div>
+  </div>
+
+  <div class="ref-table">
+    <h2>Base32 Alphabet Reference</h2>
+    <table>
+      <thead>
+        <tr><th>Value</th><th>Std Char</th><th>Hex Char</th><th>Value</th><th>Std Char</th><th>Hex Char</th></tr>
+      </thead>
+      <tbody id="ref-tbody"></tbody>
+    </table>
+  </div>
+
+  <div id="ad-slot" data-ea-publisher="devnestio" data-ea-type="image"></div>
+</main>
+
+<script>
+const STD_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+const HEX_ALPHABET = '0123456789ABCDEFGHIJKLMNOPQRSTUV';
+
+function getAlphabet() {
+  return document.getElementById('opt-alphabet').value === 'hex' ? HEX_ALPHABET : STD_ALPHABET;
+}
+
+function getPadding() {
+  return document.getElementById('opt-padding').checked;
+}
+
+function base32Encode(input, alphabet, addPadding) {
+  const bytes = new TextEncoder().encode(input);
+  let bits = 0, value = 0, out = '';
+  for (const byte of bytes) {
+    value = (value << 8) | byte;
+    bits += 8;
+    while (bits >= 5) {
+      out += alphabet[(value >>> (bits - 5)) & 31];
+      bits -= 5;
+    }
+  }
+  if (bits > 0) out += alphabet[(value << (5 - bits)) & 31];
+  if (addPadding) {
+    while (out.length % 8 !== 0) out += '=';
+  }
+  return out;
+}
+
+function base32Decode(input, alphabet) {
+  const clean = input.toUpperCase().replace(/=+$/, '').replace(/\s/g, '');
+  let bits = 0, value = 0;
+  const bytes = [];
+  for (const c of clean) {
+    const idx = alphabet.indexOf(c);
+    if (idx < 0) throw new Error(`Invalid Base32 character: '${c}'`);
+    value = (value << 5) | idx;
+    bits += 5;
+    if (bits >= 8) {
+      bytes.push((value >>> (bits - 8)) & 0xff);
+      bits -= 8;
+    }
+  }
+  return new TextDecoder().decode(new Uint8Array(bytes));
+}
+
+function encode() {
+  const input = document.getElementById('input-text').value;
+  const alphabet = getAlphabet();
+  const padding = getPadding();
+  try {
+    const result = base32Encode(input, alphabet, padding);
+    document.getElementById('output-b32').value = result;
+    updateStats(input, result);
+    hideStatus();
+  } catch(e) {
+    showStatus('err', '❌ ' + e.message);
+  }
+}
+
+function decode() {
+  const input = document.getElementById('output-b32').value.trim();
+  const alphabet = getAlphabet();
+  try {
+    const result = base32Decode(input, alphabet);
+    document.getElementById('input-text').value = result;
+    updateStats(result, input);
+    hideStatus();
+  } catch(e) {
+    showStatus('err', '❌ ' + e.message);
+  }
+}
+
+function updateStats(plain, b32) {
+  const inputLen = new TextEncoder().encode(plain).length;
+  const outputLen = b32.replace(/=/g, '').length;
+  const paddingCount = (b32.match(/=/g) || []).length;
+  const overhead = inputLen > 0 ? (((b32.length / inputLen) - 1) * 100).toFixed(1) + '%' : '—';
+
+  document.getElementById('st-input-len').textContent = inputLen + ' bytes';
+  document.getElementById('st-output-len').textContent = b32.length + ' chars';
+  document.getElementById('st-overhead').textContent = overhead;
+  document.getElementById('st-padding').textContent = paddingCount;
+  document.getElementById('stats').style.display = 'flex';
+
+  document.getElementById('input-bytes').textContent = inputLen + ' bytes';
+  document.getElementById('output-chars').textContent = b32.length + ' chars';
+}
+
+function showStatus(type, msg) {
+  const el = document.getElementById('status');
+  el.className = 'status ' + type;
+  el.textContent = msg;
+  el.style.display = '';
+}
+
+function hideStatus() {
+  document.getElementById('status').style.display = 'none';
+}
+
+function copyOutput() {
+  navigator.clipboard.writeText(document.getElementById('output-b32').value);
+}
+
+function swapIO() {
+  const inp = document.getElementById('input-text');
+  const out = document.getElementById('output-b32');
+  const tmp = inp.value;
+  inp.value = out.value;
+  out.value = tmp;
+}
+
+function clearAll() {
+  document.getElementById('input-text').value = '';
+  document.getElementById('output-b32').value = '';
+  document.getElementById('stats').style.display = 'none';
+  document.getElementById('input-bytes').textContent = '0 bytes';
+  document.getElementById('output-chars').textContent = '0 chars';
+  hideStatus();
+}
+
+// Build reference table
+function buildRefTable() {
+  const tbody = document.getElementById('ref-tbody');
+  const rows = [];
+  for (let i = 0; i < 16; i++) {
+    rows.push(`<tr>
+      <td>${i}</td><td>${STD_ALPHABET[i]}</td><td>${HEX_ALPHABET[i]}</td>
+      <td>${i + 16}</td><td>${STD_ALPHABET[i + 16]}</td><td>${HEX_ALPHABET[i + 16]}</td>
+    </tr>`);
+  }
+  tbody.innerHTML = rows.join('');
+}
+
+buildRefTable();
+document.getElementById('input-text').addEventListener('input', () => {
+  const bytes = new TextEncoder().encode(document.getElementById('input-text').value).length;
+  document.getElementById('input-bytes').textContent = bytes + ' bytes';
+});
+
+// Auto-encode on load
+encode();
+</script>
+</body>
+</html>

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Bitwise Calculator — Tests</title>
+  <style>
+    body { font-family: monospace; background: #0f1117; color: #e2e8f0; padding: 20px; }
+    .pass { color: #4ade80; } .fail { color: #f87171; }
+    #summary { font-size: 18px; font-weight: bold; margin-top: 16px; }
+  </style>
+</head>
+<body>
+<pre id="out"></pre>
+<div id="summary"></div>
+<script>
+// ── Logic from index.html ──────────────────────────────────────────────────
+
+function parseNum(str, base) {
+  str = str.trim();
+  if (!str) return NaN;
+  if (base === 'auto') {
+    if (/^0x/i.test(str)) return parseInt(str, 16);
+    if (/^0b/i.test(str)) return parseInt(str.slice(2), 2);
+    if (/^0o/i.test(str)) return parseInt(str.slice(2), 8);
+    if (/^-?\d+$/.test(str)) return parseInt(str, 10);
+    return NaN;
+  }
+  return parseInt(str, parseInt(base));
+}
+
+function compute(a, b, op, shiftN) {
+  a = a | 0;
+  b = b | 0;
+  const n = (shiftN || 0) & 31;
+  switch(op) {
+    case 'AND':   return (a & b) >>> 0;
+    case 'OR':    return (a | b) >>> 0;
+    case 'XOR':   return (a ^ b) >>> 0;
+    case 'NOT_A': return (~a) >>> 0;
+    case 'NOT_B': return (~b) >>> 0;
+    case 'NAND':  return (~(a & b)) >>> 0;
+    case 'NOR':   return (~(a | b)) >>> 0;
+    case 'XNOR':  return (~(a ^ b)) >>> 0;
+    case 'SHL':   return (a << n) >>> 0;
+    case 'SHR':   return (a >>> n) >>> 0;
+    case 'SHRA':  return (a >> n) >>> 0;
+    case 'ROTL':  { const s = n & 31; return ((a << s) | (a >>> (32 - s))) >>> 0; }
+    case 'ROTR':  { const s = n & 31; return ((a >>> s) | (a << (32 - s))) >>> 0; }
+    default: return 0;
+  }
+}
+
+// ── Test framework ─────────────────────────────────────────────────────────
+let passed = 0, failed = 0;
+const out = document.getElementById('out');
+
+function test(name, fn) {
+  try {
+    fn();
+    out.innerHTML += `<span class="pass">PASS</span> ${name}\n`;
+    passed++;
+  } catch(e) {
+    out.innerHTML += `<span class="fail">FAIL</span> ${name}: ${e.message}\n`;
+    failed++;
+  }
+}
+
+function eq(a, b, msg) {
+  if (a !== b) throw new Error(msg || `expected ${b}, got ${a}`);
+}
+
+function ok(v, msg) { if (!v) throw new Error(msg || 'assertion failed'); }
+
+// ── parseNum tests ─────────────────────────────────────────────────────────
+test('parseNum: auto decimal', () => eq(parseNum('255', 'auto'), 255));
+test('parseNum: auto hex 0x', () => eq(parseNum('0xFF', 'auto'), 255));
+test('parseNum: auto hex 0X', () => eq(parseNum('0XFF', 'auto'), 255));
+test('parseNum: auto binary 0b', () => eq(parseNum('0b1010', 'auto'), 10));
+test('parseNum: auto octal 0o', () => eq(parseNum('0o77', 'auto'), 63));
+test('parseNum: auto negative', () => eq(parseNum('-10', 'auto'), -10));
+test('parseNum: explicit base 16', () => eq(parseNum('FF', '16'), 255));
+test('parseNum: explicit base 2', () => eq(parseNum('1010', '2'), 10));
+test('parseNum: explicit base 8', () => eq(parseNum('77', '8'), 63));
+test('parseNum: explicit base 10', () => eq(parseNum('42', '10'), 42));
+test('parseNum: empty string NaN', () => ok(isNaN(parseNum('', 'auto'))));
+test('parseNum: invalid auto NaN', () => ok(isNaN(parseNum('xyz', 'auto'))));
+
+// ── AND tests ──────────────────────────────────────────────────────────────
+test('AND: 0xFF & 0x0F = 0x0F', () => eq(compute(0xFF, 0x0F, 'AND', 0), 0x0F));
+test('AND: 0xFF & 0x00 = 0x00', () => eq(compute(0xFF, 0x00, 'AND', 0), 0x00));
+test('AND: 0xFF & 0xFF = 0xFF', () => eq(compute(0xFF, 0xFF, 'AND', 0), 0xFF));
+test('AND: 0xAA & 0x55 = 0x00', () => eq(compute(0xAA, 0x55, 'AND', 0), 0x00));
+test('AND: 12 & 10 = 8', () => eq(compute(12, 10, 'AND', 0), 8));
+
+// ── OR tests ───────────────────────────────────────────────────────────────
+test('OR: 0xF0 | 0x0F = 0xFF', () => eq(compute(0xF0, 0x0F, 'OR', 0), 0xFF));
+test('OR: 0x00 | 0x00 = 0x00', () => eq(compute(0, 0, 'OR', 0), 0));
+test('OR: 0xAA | 0x55 = 0xFF', () => eq(compute(0xAA, 0x55, 'OR', 0), 0xFF));
+test('OR: 5 | 3 = 7', () => eq(compute(5, 3, 'OR', 0), 7));
+
+// ── XOR tests ──────────────────────────────────────────────────────────────
+test('XOR: 0xFF ^ 0xFF = 0', () => eq(compute(0xFF, 0xFF, 'XOR', 0), 0));
+test('XOR: 0xAA ^ 0x55 = 0xFF', () => eq(compute(0xAA, 0x55, 'XOR', 0), 0xFF));
+test('XOR: 5 ^ 3 = 6', () => eq(compute(5, 3, 'XOR', 0), 6));
+test('XOR: 0 ^ 0xFF = 0xFF', () => eq(compute(0, 0xFF, 'XOR', 0), 0xFF));
+
+// ── NOT tests ──────────────────────────────────────────────────────────────
+test('NOT_A: ~0 = 0xFFFFFFFF', () => eq(compute(0, 0, 'NOT_A', 0), 0xFFFFFFFF));
+test('NOT_A: ~0xFF = 0xFFFFFF00', () => eq(compute(0xFF, 0, 'NOT_A', 0), 0xFFFFFF00));
+test('NOT_A: ~0xFFFFFFFF = 0', () => eq(compute(0xFFFFFFFF, 0, 'NOT_A', 0), 0));
+test('NOT_B: ~0 = 0xFFFFFFFF', () => eq(compute(0, 0, 'NOT_B', 0), 0xFFFFFFFF));
+test('NOT_B: ~0xFF = 0xFFFFFF00', () => eq(compute(0, 0xFF, 'NOT_B', 0), 0xFFFFFF00));
+
+// ── NAND / NOR / XNOR ─────────────────────────────────────────────────────
+test('NAND: 0xFF NAND 0xFF = 0xFFFFFF00', () => eq(compute(0xFF, 0xFF, 'NAND', 0), (~0xFF) >>> 0));
+test('NAND: 0 NAND 0 = 0xFFFFFFFF', () => eq(compute(0, 0, 'NAND', 0), 0xFFFFFFFF));
+test('NOR: 0xF0 NOR 0x0F = 0xFFFFFF00', () => eq(compute(0xF0, 0x0F, 'NOR', 0), (~0xFF) >>> 0));
+test('NOR: 0 NOR 0 = 0xFFFFFFFF', () => eq(compute(0, 0, 'NOR', 0), 0xFFFFFFFF));
+test('XNOR: 0xFF XNOR 0xFF = 0xFFFFFFFF', () => eq(compute(0xFF, 0xFF, 'XNOR', 0), 0xFFFFFFFF));
+test('XNOR: 0xAA XNOR 0x55 = 0xFFFFFF00', () => eq(compute(0xAA, 0x55, 'XNOR', 0), 0xFFFFFF00 >>> 0));
+
+// ── Shift tests ────────────────────────────────────────────────────────────
+test('SHL: 1 << 1 = 2', () => eq(compute(1, 0, 'SHL', 1), 2));
+test('SHL: 1 << 8 = 256', () => eq(compute(1, 0, 'SHL', 8), 256));
+test('SHL: 0xFF << 4 = 0xFF0', () => eq(compute(0xFF, 0, 'SHL', 4), 0xFF0));
+test('SHL: 1 << 0 = 1', () => eq(compute(1, 0, 'SHL', 0), 1));
+test('SHL: 0x80000000 << 1 = 0', () => eq(compute(0x80000000, 0, 'SHL', 1), 0));
+
+test('SHR: 256 >> 1 = 128', () => eq(compute(256, 0, 'SHR', 1), 128));
+test('SHR: 0xFF >> 4 = 0x0F', () => eq(compute(0xFF, 0, 'SHR', 4), 0x0F));
+test('SHR: 1 >> 1 = 0', () => eq(compute(1, 0, 'SHR', 1), 0));
+test('SHR: 0xFFFFFFFF >> 1 = 0x7FFFFFFF', () => eq(compute(0xFFFFFFFF, 0, 'SHR', 1), 0x7FFFFFFF));
+
+test('SHRA: -1 >> 1 = -1 (sign extended)', () => {
+  // 0xFFFFFFFF >> 1 arithmetic = 0xFFFFFFFF (all bits 1)
+  eq(compute(0xFFFFFFFF, 0, 'SHRA', 1), 0xFFFFFFFF >>> 0);
+});
+test('SHRA: 0x80000000 >> 1 = 0xC0000000', () => {
+  eq(compute(0x80000000, 0, 'SHRA', 1), 0xC0000000 >>> 0);
+});
+
+// ── Rotate tests ───────────────────────────────────────────────────────────
+test('ROTL: 0x80000000 ROTL 1 = 1', () => eq(compute(0x80000000, 0, 'ROTL', 1), 1));
+test('ROTL: 1 ROTL 1 = 2', () => eq(compute(1, 0, 'ROTL', 1), 2));
+test('ROTL: 1 ROTL 31 = 0x80000000', () => eq(compute(1, 0, 'ROTL', 31), 0x80000000));
+test('ROTL: x ROTL 32 = x', () => eq(compute(0xABCD1234, 0, 'ROTL', 32), 0xABCD1234));
+
+test('ROTR: 1 ROTR 1 = 0x80000000', () => eq(compute(1, 0, 'ROTR', 1), 0x80000000));
+test('ROTR: 2 ROTR 1 = 1', () => eq(compute(2, 0, 'ROTR', 1), 1));
+test('ROTR: 0x80000000 ROTR 1 = 0x40000000', () => eq(compute(0x80000000, 0, 'ROTR', 1), 0x40000000));
+test('ROTR: x ROTR 32 = x', () => eq(compute(0xABCD1234, 0, 'ROTR', 32), 0xABCD1234));
+
+// ── Unsigned output (>>> 0) ────────────────────────────────────────────────
+test('compute always returns unsigned', () => {
+  const r = compute(0, 0, 'NOT_A', 0);
+  ok(r >= 0, 'result must be non-negative');
+  eq(r, 0xFFFFFFFF);
+});
+
+test('AND result is unsigned', () => ok(compute(-1, 0xFF, 'AND', 0) >= 0));
+test('OR result is unsigned', () => ok(compute(-1, 0, 'OR', 0) >= 0));
+test('XOR result is unsigned', () => ok(compute(-1, 0, 'XOR', 0) >= 0));
+
+// ── HTML structure tests ───────────────────────────────────────────────────
+test('HTML: title present', () => ok(document.title.includes('Bitwise')));
+test('HTML: inp-a exists', () => ok(document.getElementById('inp-a') !== null));
+test('HTML: inp-b exists', () => ok(document.getElementById('inp-b') !== null));
+test('HTML: ops-grid exists', () => ok(document.getElementById('ops-grid') !== null));
+test('HTML: bit-grid exists', () => ok(document.getElementById('bit-grid') !== null));
+test('HTML: bit-indices exists', () => ok(document.getElementById('bit-indices') !== null));
+test('HTML: result hex exists', () => ok(document.getElementById('r-hex') !== null));
+test('HTML: result dec exists', () => ok(document.getElementById('r-dec') !== null));
+test('HTML: result bin exists', () => ok(document.getElementById('r-bin') !== null));
+test('HTML: result oct exists', () => ok(document.getElementById('r-oct') !== null));
+test('HTML: shift-n input exists', () => ok(document.getElementById('shift-n') !== null));
+test('HTML: shift-row exists', () => ok(document.getElementById('shift-row') !== null));
+test('HTML: ad slot present', () => ok(document.querySelector('[data-ea-publisher="devnestio"]') !== null));
+test('HTML: privacy banner present', () => ok(document.getElementById('privacy-banner') !== null));
+test('HTML: back link present', () => ok(document.querySelector('a[href="https://devnestio.pages.dev"]') !== null));
+test('HTML: 13 op buttons', () => eq(document.querySelectorAll('.op-btn').length, 13));
+
+// ── DOM state after page load (recalc called with 0xFF AND 0x0F) ───────────
+test('DOM: r-hex shows 0x0000000F', () => {
+  eq(document.getElementById('r-hex').textContent, '0x0000000F');
+});
+test('DOM: r-dec shows 15', () => {
+  eq(document.getElementById('r-dec').textContent, '15');
+});
+test('DOM: r-bin shows 32 bits', () => {
+  const b = document.getElementById('r-bin').textContent.replace(/ /g, '');
+  eq(b.length, 32);
+});
+test('DOM: r-bin value is correct', () => {
+  const b = document.getElementById('r-bin').textContent.replace(/ /g, '');
+  eq(b, (0x0F).toString(2).padStart(32, '0'));
+});
+test('DOM: r-oct shows octal', () => {
+  ok(document.getElementById('r-oct').textContent.startsWith('0o'));
+});
+test('DOM: bit grid has 32 bits', () => {
+  eq(document.querySelectorAll('.bit').length, 32);
+});
+test('DOM: bit indices rendered', () => {
+  ok(document.querySelectorAll('.bit-idx').length >= 32);
+});
+test('DOM: AND button is active on load', () => {
+  const btn = document.querySelector('.op-btn[data-op="AND"]');
+  ok(btn.classList.contains('active'));
+});
+test('DOM: shift-row hidden by default', () => {
+  eq(document.getElementById('shift-row').style.display, 'none');
+});
+test('DOM: view-a-btn active on load', () => {
+  ok(document.getElementById('view-a-btn').classList.contains('active'));
+});
+
+// ── Summary ────────────────────────────────────────────────────────────────
+const total = passed + failed;
+document.getElementById('summary').innerHTML =
+  `<span class="${failed ? 'fail' : 'pass'}">${passed}/${total} tests passed${failed ? ` (${failed} FAILED)` : ' ✓'}</span>`;
+</script>
+</body>
+</html>

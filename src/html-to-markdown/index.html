@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HTML to Markdown Converter — Convert HTML to .md | DevNestio</title>
+  <meta name="description" content="Convert HTML to Markdown in your browser. Supports headings, bold, italic, links, images, lists, tables, code blocks, blockquotes, and more. No server, no upload." />
+  <meta property="og:title" content="HTML to Markdown Converter | DevNestio" />
+  <meta property="og:description" content="Paste HTML and get clean Markdown instantly. Handles nested lists, tables, inline code, fenced code blocks, and all common HTML elements." />
+  <meta property="og:url" content="https://devnestio.pages.dev/html-to-markdown/" />
+  <meta name="twitter:card" content="summary" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    #privacy-banner { background: #1e293b; border-bottom: 1px solid #334155; padding: 8px 16px; font-size: 12px; color: #94a3b8; text-align: center; }
+    header { background: #1e293b; border-bottom: 1px solid #334155; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+    header a { color: #64748b; font-size: 13px; text-decoration: none; margin-left: auto; }
+    header a:hover { color: #94a3b8; }
+    .badge { background: #f59e0b; color: #000; font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+    main { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+    .toolbar { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+    .toolbar button { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid #334155; background: #0f1117; color: #94a3b8; }
+    .toolbar button:hover { border-color: #f59e0b; color: #f59e0b; }
+    .toolbar button.primary { background: #f59e0b; border-color: #f59e0b; color: #000; }
+    .toolbar button.primary:hover { background: #d97706; }
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 700px) { .split { grid-template-columns: 1fr; } }
+    .pane { background: #1e293b; border: 1px solid #334155; border-radius: 10px; overflow: hidden; }
+    .pane-title { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.07em; padding: 10px 14px; border-bottom: 1px solid #334155; display: flex; align-items: center; justify-content: space-between; }
+    .pane-title button { padding: 2px 9px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid #334155; background: transparent; color: #64748b; }
+    .pane-title button:hover { border-color: #f59e0b; color: #f59e0b; }
+    textarea { width: 100%; height: 480px; padding: 14px; background: #0f1117; border: none; color: #e2e8f0; font-size: 13px; font-family: 'Menlo', 'Courier New', monospace; outline: none; resize: none; line-height: 1.6; }
+    .opt-row { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+    .opt { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #94a3b8; cursor: pointer; user-select: none; }
+    .opt input[type=checkbox] { accent-color: #f59e0b; width: 14px; height: 14px; cursor: pointer; }
+    #ad-slot { margin: 20px auto; text-align: center; }
+  </style>
+</head>
+<body>
+<div id="privacy-banner">🔒 All processing happens in your browser. No data is sent to any server.</div>
+<header>
+  <span class="badge">FREE</span>
+  <h1>HTML to Markdown Converter</h1>
+  <a href="https://devnestio.pages.dev">← All Tools</a>
+</header>
+<main>
+
+  <div class="opt-row">
+    <label class="opt"><input type="checkbox" id="opt-setext" onchange="convert()" /> Setext headings (=== / ---)</label>
+    <label class="opt"><input type="checkbox" id="opt-fence" checked onchange="convert()" /> Fenced code blocks (```)</label>
+    <label class="opt"><input type="checkbox" id="opt-table" checked onchange="convert()" /> GFM tables</label>
+    <label class="opt"><input type="checkbox" id="opt-br" onchange="convert()" /> Preserve &lt;br&gt; as \</label>
+  </div>
+
+  <div class="toolbar">
+    <button class="primary" onclick="convert()">Convert →</button>
+    <button onclick="loadSample()">Load Sample</button>
+    <button onclick="clearAll()">Clear</button>
+  </div>
+
+  <div class="split">
+    <div class="pane">
+      <div class="pane-title">
+        HTML Input
+        <button onclick="pasteHtml()">Paste</button>
+      </div>
+      <textarea id="html-input" oninput="convert()" spellcheck="false" placeholder="Paste HTML here..."></textarea>
+    </div>
+    <div class="pane">
+      <div class="pane-title">
+        Markdown Output
+        <button onclick="copyMd()">Copy</button>
+      </div>
+      <textarea id="md-output" readonly spellcheck="false"></textarea>
+    </div>
+  </div>
+
+  <div id="ad-slot" data-ea-publisher="devnestio" data-ea-type="image"></div>
+</main>
+<script>
+function htmlToMarkdown(html, opts = {}) {
+  const { setext = false, fence = true, tables = true, preserveBr = false } = opts;
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString('<div id="root">' + html + '</div>', 'text/html');
+  const root = doc.getElementById('root');
+
+  function escape(text) {
+    return text.replace(/([\\`*_{}[\]()#+\-.!|])/g, '\\$1');
+  }
+
+  function processNode(node, ctx = {}) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const t = node.textContent;
+      if (ctx.pre) return t;
+      if (ctx.code) return t;
+      const cleaned = t.replace(/\s+/g, ' ');
+      if (ctx.noEscape) return cleaned;
+      return cleaned;
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE) return '';
+
+    const tag = node.tagName.toLowerCase();
+    const children = () => Array.from(node.childNodes).map(c => processNode(c, ctx)).join('');
+    const inline = () => Array.from(node.childNodes).map(c => processNode(c, { ...ctx })).join('').trim();
+
+    switch (tag) {
+      case 'h1': case 'h2': case 'h3': case 'h4': case 'h5': case 'h6': {
+        const level = parseInt(tag[1]);
+        const text = inline();
+        if (setext && level <= 2) {
+          const under = level === 1 ? '='.repeat(text.length) : '-'.repeat(text.length);
+          return '\n\n' + text + '\n' + under + '\n\n';
+        }
+        return '\n\n' + '#'.repeat(level) + ' ' + text + '\n\n';
+      }
+      case 'p': return '\n\n' + inline() + '\n\n';
+      case 'br': return preserveBr ? '  \n' : '\n';
+      case 'strong': case 'b': return '**' + inline() + '**';
+      case 'em': case 'i': return '*' + inline() + '*';
+      case 's': case 'del': case 'strike': return '~~' + inline() + '~~';
+      case 'u': return '<u>' + inline() + '</u>';
+      case 'mark': return '<mark>' + inline() + '</mark>';
+      case 'sup': return '<sup>' + inline() + '</sup>';
+      case 'sub': return '<sub>' + inline() + '</sub>';
+      case 'code': {
+        if (ctx.pre) return node.textContent;
+        const t = node.textContent;
+        const delim = t.includes('`') ? '``' : '`';
+        return delim + t + delim;
+      }
+      case 'pre': {
+        const codeNode = node.querySelector('code');
+        const lang = codeNode ? (codeNode.className.replace(/^language-/, '').replace(/^lang-/, '') || '') : '';
+        const text = (codeNode || node).textContent;
+        if (fence) {
+          return '\n\n```' + lang + '\n' + text.replace(/\n$/, '') + '\n```\n\n';
+        }
+        return '\n\n' + text.split('\n').map(l => '    ' + l).join('\n') + '\n\n';
+      }
+      case 'blockquote': {
+        const inner = processChildren(node, ctx).trim();
+        return '\n\n' + inner.split('\n').map(l => '> ' + l).join('\n') + '\n\n';
+      }
+      case 'a': {
+        const href = node.getAttribute('href') || '';
+        const title = node.getAttribute('title');
+        const text = inline();
+        if (!href) return text;
+        const titleStr = title ? ` "${title}"` : '';
+        return '[' + text + '](' + href + titleStr + ')';
+      }
+      case 'img': {
+        const src = node.getAttribute('src') || '';
+        const alt = node.getAttribute('alt') || '';
+        const title = node.getAttribute('title');
+        const titleStr = title ? ` "${title}"` : '';
+        return '![' + alt + '](' + src + titleStr + ')';
+      }
+      case 'hr': return '\n\n---\n\n';
+      case 'ul': return '\n\n' + processList(node, ctx, false) + '\n\n';
+      case 'ol': return '\n\n' + processList(node, ctx, true) + '\n\n';
+      case 'li': return inline();
+      case 'table': return tables ? '\n\n' + processTable(node) + '\n\n' : children();
+      case 'thead': case 'tbody': case 'tfoot': return children();
+      case 'tr': case 'td': case 'th': return children();
+      case 'dl': {
+        const items = Array.from(node.children).map(child => {
+          if (child.tagName === 'DT') return '**' + child.textContent.trim() + '**';
+          if (child.tagName === 'DD') return ':   ' + child.textContent.trim();
+          return '';
+        });
+        return '\n\n' + items.join('\n') + '\n\n';
+      }
+      case 'div': case 'section': case 'article': case 'main': case 'header':
+      case 'footer': case 'nav': case 'aside': case 'figure': case 'figcaption':
+        return '\n\n' + processChildren(node, ctx).trim() + '\n\n';
+      case 'span': return inline();
+      case 'abbr': return inline();
+      case 'details': return '\n\n' + processChildren(node, ctx).trim() + '\n\n';
+      case 'summary': return '**' + inline() + '**';
+      case 'script': case 'style': case 'noscript': case 'template': return '';
+      default: return children();
+    }
+  }
+
+  function processChildren(node, ctx) {
+    return Array.from(node.childNodes).map(c => processNode(c, ctx)).join('');
+  }
+
+  function processList(node, ctx, ordered, depth = 0) {
+    const indent = '  '.repeat(depth);
+    let counter = parseInt(node.getAttribute('start') || '1');
+    const lines = [];
+    Array.from(node.children).forEach(li => {
+      if (li.tagName !== 'LI') return;
+      const prefix = ordered ? `${counter++}.` : '-';
+      // extract inline content vs nested lists
+      let inlineContent = '';
+      const nestedLists = [];
+      Array.from(li.childNodes).forEach(child => {
+        const t = child.tagName && child.tagName.toLowerCase();
+        if (t === 'ul' || t === 'ol') {
+          nestedLists.push(processList(child, ctx, t === 'ol', depth + 1));
+        } else {
+          inlineContent += processNode(child, ctx);
+        }
+      });
+      const text = inlineContent.replace(/\s+/g, ' ').trim();
+      lines.push(indent + prefix + ' ' + text);
+      nestedLists.forEach(nl => lines.push(nl));
+    });
+    return lines.join('\n');
+  }
+
+  function processTable(tableNode) {
+    const rows = Array.from(tableNode.querySelectorAll('tr'));
+    if (!rows.length) return '';
+
+    const grid = rows.map(row =>
+      Array.from(row.querySelectorAll('th,td')).map(cell => cell.textContent.trim().replace(/\|/g, '\\|'))
+    );
+    if (!grid.length) return '';
+
+    const colCount = Math.max(...grid.map(r => r.length));
+    const padded = grid.map(r => {
+      while (r.length < colCount) r.push('');
+      return r;
+    });
+
+    // col widths
+    const widths = Array.from({ length: colCount }, (_, i) =>
+      Math.max(3, ...padded.map(r => (r[i] || '').length))
+    );
+
+    const fmtRow = row => '| ' + row.map((c, i) => c.padEnd(widths[i])).join(' | ') + ' |';
+    const sep = '| ' + widths.map(w => '-'.repeat(w)).join(' | ') + ' |';
+
+    const isHeader = tableNode.querySelector('thead') !== null ||
+                     rows[0].querySelectorAll('th').length > 0;
+    const lines = [];
+    if (isHeader) {
+      lines.push(fmtRow(padded[0]));
+      lines.push(sep);
+      padded.slice(1).forEach(r => lines.push(fmtRow(r)));
+    } else {
+      lines.push(fmtRow(padded[0]));
+      lines.push(sep);
+      padded.slice(1).forEach(r => lines.push(fmtRow(r)));
+    }
+    return lines.join('\n');
+  }
+
+  const raw = processChildren(root, {});
+  return raw
+    .replace(/\n{3,}/g, '\n\n')
+    .replace(/^\n+/, '')
+    .replace(/\n+$/, '')
+    .trim();
+}
+
+function getOpts() {
+  return {
+    setext: document.getElementById('opt-setext').checked,
+    fence: document.getElementById('opt-fence').checked,
+    tables: document.getElementById('opt-table').checked,
+    preserveBr: document.getElementById('opt-br').checked,
+  };
+}
+
+function convert() {
+  const html = document.getElementById('html-input').value;
+  try {
+    const md = htmlToMarkdown(html, getOpts());
+    document.getElementById('md-output').value = md;
+  } catch(e) {
+    document.getElementById('md-output').value = '// Error: ' + e.message;
+  }
+}
+
+function copyMd() {
+  const val = document.getElementById('md-output').value;
+  if (val) navigator.clipboard.writeText(val);
+}
+
+async function pasteHtml() {
+  try {
+    const text = await navigator.clipboard.readText();
+    document.getElementById('html-input').value = text;
+    convert();
+  } catch(e) {}
+}
+
+function clearAll() {
+  document.getElementById('html-input').value = '';
+  document.getElementById('md-output').value = '';
+}
+
+function loadSample() {
+  document.getElementById('html-input').value = `<h1>Welcome to HTML to Markdown</h1>
+<p>This tool converts <strong>HTML</strong> to <em>Markdown</em> instantly.</p>
+<h2>Features</h2>
+<ul>
+  <li>Headings (<code>h1</code>–<code>h6</code>)</li>
+  <li>Bold, <strong>italic</strong>, and <del>strikethrough</del></li>
+  <li>Nested lists:
+    <ul>
+      <li>Item A</li>
+      <li>Item B</li>
+    </ul>
+  </li>
+</ul>
+<h2>Code Example</h2>
+<pre><code class="language-js">function greet(name) {
+  return \`Hello, \${name}!\`;
+}</code></pre>
+<h2>Links &amp; Images</h2>
+<p>Visit <a href="https://devnestio.pages.dev" title="DevNestio">DevNestio</a> for more tools.</p>
+<img src="logo.png" alt="Logo" />
+<h2>Table</h2>
+<table>
+  <thead><tr><th>Name</th><th>Role</th><th>Score</th></tr></thead>
+  <tbody>
+    <tr><td>Alice</td><td>Admin</td><td>95</td></tr>
+    <tr><td>Bob</td><td>User</td><td>82</td></tr>
+  </tbody>
+</table>
+<blockquote><p>The best tool is the one you actually use.</p></blockquote>`;
+  convert();
+}
+
+// Auto convert on load if there's content
+if (document.getElementById('html-input').value) convert();
+</script>
+</body>
+</html>

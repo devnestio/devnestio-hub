@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSS Background Patterns — devnestio</title>
+  <meta name="description" content="Generate pure CSS background patterns: dots, grid, lines, checkerboard, diagonal stripes, and more. Customize colors and size. Copy-ready CSS, zero images." />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    header { background: #1a1d2e; border-bottom: 1px solid #2d3748; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+    header a { color: #7c85f3; text-decoration: none; font-size: 14px; }
+    header h1 { font-size: 18px; font-weight: 700; color: #fff; }
+    .container { max-width: 960px; margin: 0 auto; padding: 24px 16px; display: grid; grid-template-columns: 300px 1fr; gap: 24px; }
+    @media (max-width: 700px) { .container { grid-template-columns: 1fr; } }
+    .panel { background: #1a1d2e; border: 1px solid #2d3748; border-radius: 10px; padding: 18px; }
+    .panel h2 { font-size: 13px; font-weight: 600; color: #a0aec0; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 14px; }
+    .pattern-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 6px; }
+    .pattern-card { border: 2px solid #2d3748; border-radius: 8px; overflow: hidden; cursor: pointer; aspect-ratio: 1; }
+    .pattern-card:hover { border-color: #4a5568; }
+    .pattern-card.active { border-color: #7c85f3; }
+    .pattern-thumb { width: 100%; height: 100%; }
+    .pattern-name { font-size: 10px; text-align: center; color: #718096; padding: 4px 2px; }
+    .field { margin-bottom: 12px; }
+    .field label { display: flex; justify-content: space-between; font-size: 12px; color: #a0aec0; margin-bottom: 4px; }
+    .field label span { color: #7c85f3; font-weight: 700; }
+    .field input[type=range] { width: 100%; accent-color: #7c85f3; }
+    .color-row { display: flex; gap: 10px; }
+    .color-field { flex: 1; }
+    .color-field label { font-size: 11px; color: #a0aec0; display: block; margin-bottom: 4px; }
+    .color-field input[type=color] { width: 100%; height: 36px; border: 1px solid #2d3748; border-radius: 6px; background: none; cursor: pointer; padding: 2px; }
+    .preview-box { background: #0f1117; border: 1px solid #2d3748; border-radius: 8px; overflow: hidden; aspect-ratio: 16/10; }
+    .preview-inner { width: 100%; height: 100%; }
+    .output-box { background: #0f1117; border: 1px solid #2d3748; border-radius: 8px; padding: 12px; font-family: 'Courier New', monospace; font-size: 12px; color: #7ee787; white-space: pre-wrap; word-break: break-all; min-height: 80px; margin-top: 10px; }
+    .btn-row { display: flex; gap: 8px; margin-top: 10px; }
+    .btn { background: #7c85f3; color: #fff; border: none; border-radius: 6px; padding: 7px 14px; font-size: 13px; cursor: pointer; font-weight: 600; }
+    .btn-secondary { background: #2d3748; }
+    .btn-secondary:hover { background: #3d4a5c; }
+    .btn-sm { padding: 5px 12px; font-size: 12px; border-radius: 4px; }
+    .copied { background: #276749 !important; }
+  </style>
+</head>
+<body>
+<header>
+  <a href="/">← devnestio</a>
+  <h1>CSS Background Patterns</h1>
+</header>
+<div class="container">
+  <div style="display:flex;flex-direction:column;gap:16px;">
+    <div class="panel">
+      <h2>Pattern</h2>
+      <div class="pattern-grid" id="pattern-grid"></div>
+    </div>
+    <div class="panel">
+      <h2>Customize</h2>
+      <div class="color-row">
+        <div class="color-field">
+          <label>Color 1</label>
+          <input type="color" id="color1" value="#7c85f3" oninput="render()">
+        </div>
+        <div class="color-field">
+          <label>Color 2 (bg)</label>
+          <input type="color" id="color2" value="#0f1117" oninput="render()">
+        </div>
+      </div>
+      <div class="field" style="margin-top:12px">
+        <label>Size <span id="size-val">20px</span></label>
+        <input type="range" id="size" min="4" max="80" value="20" oninput="document.getElementById('size-val').textContent=this.value+'px';render()">
+      </div>
+      <div class="field" id="angle-field">
+        <label>Angle <span id="angle-val">45°</span></label>
+        <input type="range" id="angle" min="0" max="180" value="45" oninput="document.getElementById('angle-val').textContent=this.value+'°';render()">
+      </div>
+      <div class="field" id="dot-size-field" style="display:none">
+        <label>Dot Size <span id="dot-size-val">2px</span></label>
+        <input type="range" id="dot-size" min="1" max="16" value="2" oninput="document.getElementById('dot-size-val').textContent=this.value+'px';render()">
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:16px;">
+    <div class="panel">
+      <h2>Preview</h2>
+      <div class="preview-box"><div class="preview-inner" id="preview-inner"></div></div>
+    </div>
+    <div class="panel">
+      <h2>CSS Output</h2>
+      <div class="output-box" id="output-box"></div>
+      <div class="btn-row">
+        <button class="btn btn-secondary btn-sm" onclick="copyCSS()">Copy CSS</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const PATTERNS = [
+  { id: 'dots', name: 'Dots' },
+  { id: 'grid', name: 'Grid' },
+  { id: 'lines', name: 'Lines' },
+  { id: 'checker', name: 'Checker' },
+  { id: 'diagonal', name: 'Diagonal' },
+  { id: 'cross', name: 'Cross +' },
+  { id: 'zigzag', name: 'Zigzag' },
+  { id: 'triangle', name: 'Triangles' },
+  { id: 'hexagon', name: 'Hexagons' },
+];
+
+let activePattern = 'dots';
+
+function buildCSS(pattern, c1, c2, size, angle, dotSize) {
+  switch (pattern) {
+    case 'dots':
+      return `background-color: ${c2};\nbackground-image: radial-gradient(circle, ${c1} ${dotSize}px, transparent ${dotSize}px);\nbackground-size: ${size}px ${size}px;`;
+    case 'grid':
+      return `background-color: ${c2};\nbackground-image:\n  linear-gradient(${c1} 1px, transparent 1px),\n  linear-gradient(to right, ${c1} 1px, transparent 1px);\nbackground-size: ${size}px ${size}px;`;
+    case 'lines':
+      return `background-color: ${c2};\nbackground-image: repeating-linear-gradient(\n  ${angle}deg,\n  ${c1},\n  ${c1} 1px,\n  ${c2} 1px,\n  ${c2} ${size}px\n);`;
+    case 'checker':
+      return `background-color: ${c1};\nbackground-image:\n  linear-gradient(45deg, ${c2} 25%, transparent 25%),\n  linear-gradient(-45deg, ${c2} 25%, transparent 25%),\n  linear-gradient(45deg, transparent 75%, ${c2} 75%),\n  linear-gradient(-45deg, transparent 75%, ${c2} 75%);\nbackground-size: ${size}px ${size}px;\nbackground-position: 0 0, 0 ${size/2}px, ${size/2}px -${size/2}px, -${size/2}px 0px;`;
+    case 'diagonal':
+      return `background-color: ${c2};\nbackground-image: repeating-linear-gradient(\n  ${angle}deg,\n  ${c1},\n  ${c1} ${size/4}px,\n  ${c2} ${size/4}px,\n  ${c2} ${size}px\n);`;
+    case 'cross':
+      return `background-color: ${c2};\nbackground-image:\n  linear-gradient(${c1} 1px, transparent 1px),\n  linear-gradient(to right, ${c1} 1px, transparent 1px);\nbackground-size: ${size}px ${size}px;\nbackground-position: center center;`;
+    case 'zigzag':
+      return `background-color: ${c2};\nbackground-image:\n  linear-gradient(135deg, ${c1} 25%, transparent 25%) -${size/2}px 0,\n  linear-gradient(225deg, ${c1} 25%, transparent 25%) -${size/2}px 0,\n  linear-gradient(315deg, ${c1} 25%, transparent 25%),\n  linear-gradient(45deg, ${c1} 25%, transparent 25%);\nbackground-size: ${size}px ${size/2}px;`;
+    case 'triangle':
+      return `background-color: ${c2};\nbackground-image:\n  linear-gradient(120deg, ${c1} 33.33%, transparent 33.33%),\n  linear-gradient(240deg, ${c1} 33.33%, transparent 33.33%),\n  linear-gradient(0deg, ${c1} 33.33%, transparent 33.33%);\nbackground-size: ${size}px ${Math.round(size * 0.866)}px;`;
+    case 'hexagon':
+      const h = Math.round(size * 0.866);
+      return `background-color: ${c2};\nbackground-image:\n  radial-gradient(circle farthest-side at 0% 50%, ${c2} 23.5%, rgba(240,166,17,0) 0) 21px 30px,\n  radial-gradient(circle farthest-side at 0% 50%, ${c1} 24%, rgba(240,166,17,0) 0) 19px 30px,\n  linear-gradient(${c2} 14%, rgba(240,166,17,0) 0, rgba(240,166,17,0) 85%, ${c2} 0) 0 0,\n  linear-gradient(150deg, ${c1} 24%, ${c2} 0, ${c2} 26%, rgba(240,166,17,0) 0, rgba(240,166,17,0) 74%, ${c2} 0, ${c2} 76%, ${c1} 0) 0 0,\n  linear-gradient(30deg, ${c1} 24%, ${c2} 0, ${c2} 26%, rgba(240,166,17,0) 0, rgba(240,166,17,0) 74%, ${c2} 0, ${c2} 76%, ${c1} 0) 0 0,\n  linear-gradient(90deg, ${c2} 2%, ${c1} 0, ${c1} 98%, ${c2} 0%) 0 0 ${c1};\nbackground-size: ${size*2}px ${size*2}px;`;
+    default:
+      return '';
+  }
+}
+
+function render() {
+  const c1 = document.getElementById('color1').value;
+  const c2 = document.getElementById('color2').value;
+  const size = +document.getElementById('size').value;
+  const angle = +document.getElementById('angle').value;
+  const dotSize = +document.getElementById('dot-size').value;
+
+  const hasAngle = ['lines','diagonal'].includes(activePattern);
+  const hasDotSize = activePattern === 'dots';
+  document.getElementById('angle-field').style.display = hasAngle ? '' : 'none';
+  document.getElementById('dot-size-field').style.display = hasDotSize ? '' : 'none';
+
+  const css = buildCSS(activePattern, c1, c2, size, angle, dotSize);
+  document.getElementById('output-box').textContent = css;
+
+  const preview = document.getElementById('preview-inner');
+  css.split('\n').forEach(line => {
+    const [prop, ...rest] = line.split(':');
+    if (prop && rest.length) {
+      preview.style[prop.trim().replace(/-([a-z])/g, (_, c) => c.toUpperCase())] = rest.join(':').trim().replace(/;$/, '');
+    }
+  });
+
+  // Update thumbnails
+  document.querySelectorAll('.pattern-thumb').forEach(el => {
+    const pid = el.dataset.pid;
+    const thumbCSS = buildCSS(pid, c1, c2, 12, 45, 2);
+    thumbCSS.split('\n').forEach(line => {
+      const [prop, ...rest] = line.split(':');
+      if (prop && rest.length) {
+        el.style[prop.trim().replace(/-([a-z])/g, (_, c) => c.toUpperCase())] = rest.join(':').trim().replace(/;$/, '');
+      }
+    });
+  });
+}
+
+function buildGrid() {
+  const el = document.getElementById('pattern-grid');
+  PATTERNS.forEach(p => {
+    const wrap = document.createElement('div');
+    wrap.style.textAlign = 'center';
+    const card = document.createElement('div');
+    card.className = 'pattern-card' + (p.id === activePattern ? ' active' : '');
+    const thumb = document.createElement('div');
+    thumb.className = 'pattern-thumb';
+    thumb.dataset.pid = p.id;
+    card.appendChild(thumb);
+    card.onclick = () => {
+      activePattern = p.id;
+      document.querySelectorAll('.pattern-card').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+      render();
+    };
+    const name = document.createElement('div');
+    name.className = 'pattern-name';
+    name.textContent = p.name;
+    wrap.appendChild(card);
+    wrap.appendChild(name);
+    el.appendChild(wrap);
+  });
+}
+
+function copyCSS() {
+  navigator.clipboard.writeText(document.getElementById('output-box').textContent).then(() => {
+    const btn = document.querySelector('.btn-secondary');
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy CSS'; btn.classList.remove('copied'); }, 1500);
+  });
+}
+
+buildGrid();
+render();
+</script>
+</body>
+</html>

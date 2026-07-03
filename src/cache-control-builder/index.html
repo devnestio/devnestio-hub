@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HTTP Cache-Control Header Builder – devnestio</title>
+  <meta name="description" content="Visual builder for HTTP Cache-Control response headers. Toggle directives like max-age, s-maxage, no-cache, no-store, immutable, stale-while-revalidate and get copy-ready values for nginx, Apache, Express, and CloudFront." />
+  <link rel="canonical" href="https://devnestio.pages.dev/cache-control-builder/" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    header { background: #1a1d2e; border-bottom: 1px solid #2d3748; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+    header a { color: #7c85f3; text-decoration: none; font-size: 14px; }
+    header h1 { font-size: 18px; font-weight: 700; color: #fff; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; display: grid; grid-template-columns: 1fr 380px; gap: 24px; }
+    @media (max-width: 800px) { .container { grid-template-columns: 1fr; } }
+    .panel { background: #1a1d2e; border: 1px solid #2d3748; border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+    .panel-title { font-size: 12px; font-weight: 700; color: #a0aec0; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 14px; }
+    .presets { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
+    .preset { background: #0f1117; border: 1px solid #2d3748; border-radius: 6px; padding: 6px 12px; font-size: 12px; color: #a0aec0; cursor: pointer; }
+    .preset:hover { border-color: #7c85f3; color: #7c85f3; }
+    .directive-row { display: grid; grid-template-columns: 200px 1fr auto; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid #1e2636; }
+    .directive-row:last-child { border-bottom: none; }
+    .dir-info { }
+    .dir-name { font-size: 13px; font-weight: 600; color: #e2e8f0; font-family: 'Courier New', monospace; }
+    .dir-desc { font-size: 11px; color: #718096; margin-top: 2px; line-height: 1.4; }
+    .dir-input { display: flex; align-items: center; gap: 6px; }
+    .dir-input input[type=number] { width: 90px; background: #0f1117; border: 1px solid #2d3748; border-radius: 5px; padding: 5px 8px; color: #e2e8f0; font-size: 13px; }
+    .dir-input input[type=number]:focus { outline: none; border-color: #7c85f3; }
+    .dir-input span { font-size: 11px; color: #718096; }
+    .toggle { width: 36px; height: 20px; background: #2d3748; border-radius: 20px; border: none; cursor: pointer; position: relative; flex-shrink: 0; }
+    .toggle.on { background: #7c85f3; }
+    .toggle::after { content:''; position: absolute; width: 14px; height: 14px; background: #fff; border-radius: 50%; top: 3px; left: 3px; transition: left .15s; }
+    .toggle.on::after { left: 19px; }
+    .output-box { background: #0f1117; border: 1px solid #2d3748; border-radius: 8px; padding: 14px; font-family: 'Courier New', monospace; font-size: 14px; color: #7ee787; word-break: break-all; line-height: 1.6; min-height: 50px; margin-bottom: 10px; }
+    .header-label { font-size: 11px; color: #7c85f3; font-family: monospace; margin-bottom: 4px; }
+    .copy-row { display: flex; gap: 8px; margin-bottom: 16px; }
+    .btn { background: #7c85f3; border: none; border-radius: 6px; padding: 7px 16px; font-size: 13px; color: #fff; cursor: pointer; font-weight: 600; }
+    .btn:hover { background: #6b74e0; }
+    .btn-sm { padding: 5px 12px; font-size: 12px; background: #2d3748; }
+    .btn-sm:hover { background: #3d4a5c; }
+    .btn.copied { background: #276749; }
+    .snippet-tabs { display: flex; gap: 4px; margin-bottom: 10px; flex-wrap: wrap; }
+    .stab { background: #0f1117; border: 1px solid #2d3748; border-radius: 5px; padding: 5px 12px; font-size: 12px; color: #718096; cursor: pointer; }
+    .stab.active { border-color: #7c85f3; color: #7c85f3; background: rgba(124,133,243,.08); }
+    .snippet-box { background: #0a0d1a; border: 1px solid #1e2435; border-radius: 8px; padding: 14px; font-family: 'Courier New', monospace; font-size: 12px; color: #c3dafe; white-space: pre; overflow-x: auto; min-height: 80px; position: relative; line-height: 1.6; }
+    .copy-btn { position: absolute; top: 8px; right: 8px; background: #2d3748; border: none; border-radius: 4px; padding: 3px 8px; font-size: 11px; color: #a0aec0; cursor: pointer; }
+    .copy-btn:hover { background: #3d4a5c; }
+    .copy-btn.copied { background: #276749; color: #68d391; }
+    .conflict-box { background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.3); border-radius: 6px; padding: 10px 12px; font-size: 12px; color: #f87171; margin-bottom: 12px; display: none; }
+    .section { margin-bottom: 0; }
+    .section-head { font-size: 11px; font-weight: 700; color: #7c85f3; text-transform: uppercase; letter-spacing: .06em; padding: 6px 0 2px; }
+  </style>
+</head>
+<body>
+<header>
+  <a href="https://devnestio.pages.dev/">← devnestio</a>
+  <h1>HTTP Cache-Control Builder</h1>
+</header>
+<div class="container">
+  <div>
+    <div class="panel">
+      <div class="panel-title">Quick Presets</div>
+      <div class="presets">
+        <button class="preset" data-preset="static">Static assets (1 year)</button>
+        <button class="preset" data-preset="html">HTML pages</button>
+        <button class="preset" data-preset="api">API responses</button>
+        <button class="preset" data-preset="private">Private / user data</button>
+        <button class="preset" data-preset="nocache">Always revalidate</button>
+        <button class="preset" data-preset="nostore">Never cache</button>
+        <button class="preset" data-preset="cdn">CDN-only cache</button>
+        <button class="preset" data-preset="swr">Stale-while-revalidate</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Cache Storage Directives</div>
+      <div class="section-head">Visibility</div>
+      <div id="directives"></div>
+    </div>
+  </div>
+  <div>
+    <div class="panel">
+      <div class="panel-title">Output</div>
+      <div class="header-label">Cache-Control:</div>
+      <div class="output-box" id="output">public, max-age=31536000, immutable</div>
+      <div class="copy-row">
+        <button class="btn" id="copyHeader" onclick="copyHeader()">Copy Header</button>
+        <button class="btn btn-sm" onclick="resetAll()">Reset</button>
+      </div>
+      <div class="conflict-box" id="conflictBox"></div>
+      <div class="panel-title">Framework Snippet</div>
+      <div class="snippet-tabs">
+        <button class="stab active" data-stab="express">Express</button>
+        <button class="stab" data-stab="nginx">nginx</button>
+        <button class="stab" data-stab="apache">Apache</button>
+        <button class="stab" data-stab="cf">CloudFront</button>
+      </div>
+      <div style="position:relative">
+        <div class="snippet-box" id="snippet"></div>
+        <button class="copy-btn" id="copySnip" onclick="copySnip()">Copy</button>
+      </div>
+    </div>
+    <div class="panel" style="margin-top:0">
+      <div class="panel-title">Active Directives Explained</div>
+      <div id="explanation" style="font-size:13px;color:#a0aec0;line-height:1.7;"></div>
+    </div>
+  </div>
+</div>
+<script>
+const DIRECTIVES = [
+  { id: 'public',    label: 'public',    kind: 'flag', group: 'Visibility', desc: 'Response may be cached by any cache (CDN, proxy, browser).' },
+  { id: 'private',   label: 'private',   kind: 'flag', group: 'Visibility', desc: 'Response is for a single user only. CDNs must not cache it.' },
+  { id: 'no-store',  label: 'no-store',  kind: 'flag', group: 'Storage', desc: 'Do not store this response anywhere. Overrides all other caching.' },
+  { id: 'no-cache',  label: 'no-cache',  kind: 'flag', group: 'Revalidation', desc: 'Cache must revalidate with the server before serving a stored response.' },
+  { id: 'max-age',   label: 'max-age',   kind: 'seconds', group: 'Freshness (browser)', desc: 'Maximum time in seconds the response is considered fresh by the browser cache.' },
+  { id: 's-maxage',  label: 's-maxage',  kind: 'seconds', group: 'Freshness (shared)', desc: 'Overrides max-age for shared caches (CDNs, proxies) only.' },
+  { id: 'must-revalidate', label: 'must-revalidate', kind: 'flag', group: 'Revalidation', desc: 'Once stale, the cache must not serve the response without revalidating with the server.' },
+  { id: 'proxy-revalidate', label: 'proxy-revalidate', kind: 'flag', group: 'Revalidation', desc: 'Like must-revalidate, but only for shared caches (CDNs, proxies).' },
+  { id: 'immutable', label: 'immutable', kind: 'flag', group: 'Freshness (browser)', desc: 'Tells the browser the response will never change. Skips revalidation during max-age.' },
+  { id: 'stale-while-revalidate', label: 'stale-while-revalidate', kind: 'seconds', group: 'Advanced', desc: 'Serve stale response for N seconds while asynchronously revalidating in the background.' },
+  { id: 'stale-if-error', label: 'stale-if-error', kind: 'seconds', group: 'Advanced', desc: 'Serve stale response for N seconds if the origin is unreachable or returns a 5xx error.' },
+  { id: 'must-understand', label: 'must-understand', kind: 'flag', group: 'Advanced', desc: 'Cache should only store the response if it understands the requirements for caching based on status code.' },
+  { id: 'no-transform', label: 'no-transform', kind: 'flag', group: 'Advanced', desc: 'Intermediate caches must not modify the response (e.g., no compression or format conversion).' },
+];
+
+const PRESETS = {
+  static:  { public: true, 'max-age': 31536000, immutable: true },
+  html:    { public: true, 'max-age': 0, 'must-revalidate': true },
+  api:     { private: true, 'max-age': 0, 'no-cache': true },
+  private: { private: true, 'no-store': true },
+  nocache: { 'no-cache': true, 'must-revalidate': true },
+  nostore: { 'no-store': true },
+  cdn:     { public: true, 's-maxage': 86400, 'max-age': 3600 },
+  swr:     { public: true, 'max-age': 60, 'stale-while-revalidate': 86400 },
+};
+
+const state = {};
+
+function getSeconds(id) {
+  const el = document.getElementById('num-' + id);
+  return el ? (parseInt(el.value) || 0) : 0;
+}
+
+function isOn(id) {
+  const btn = document.getElementById('tog-' + id);
+  return btn && btn.classList.contains('on');
+}
+
+function buildValue() {
+  const parts = [];
+  DIRECTIVES.forEach(d => {
+    if (!isOn(d.id)) return;
+    if (d.kind === 'flag') parts.push(d.label);
+    else { const s = getSeconds(d.id); if (s >= 0) parts.push(`${d.label}=${s}`); }
+  });
+  return parts.join(', ') || '(none)';
+}
+
+function getConflicts() {
+  const conflicts = [];
+  if (isOn('public') && isOn('private')) conflicts.push('public and private are mutually exclusive.');
+  if (isOn('no-store') && isOn('no-cache')) conflicts.push('no-store makes no-cache redundant (no-store is stronger).');
+  if (isOn('no-store') && isOn('max-age')) conflicts.push('no-store overrides max-age — the value will be ignored.');
+  if (isOn('immutable') && isOn('no-cache')) conflicts.push('immutable and no-cache are contradictory.');
+  if (isOn('must-revalidate') && isOn('no-store')) conflicts.push('must-revalidate and no-store conflict — stale responses cannot be served if nothing is stored.');
+  return conflicts;
+}
+
+function buildSnippet(tab) {
+  const val = buildValue();
+  if (tab === 'express') return `// Express.js\nres.set('Cache-Control', '${val}');`;
+  if (tab === 'nginx') return `# nginx\nadd_header Cache-Control "${val}" always;`;
+  if (tab === 'apache') return `# Apache (.htaccess / VirtualHost)\nHeader always set Cache-Control "${val}"`;
+  if (tab === 'cf') return `// CloudFront Response Headers Policy\n// Console → CloudFront → Policies → Response headers\n// Name: Cache-Control, Value: ${val}\n\n// Or via CloudFront Function:\nfunction handler(event) {\n  var response = event.response;\n  response.headers['cache-control'] = { value: '${val}' };\n  return response;\n}`;
+  return val;
+}
+
+function getExplanation() {
+  const active = DIRECTIVES.filter(d => isOn(d.id));
+  if (!active.length) return '<span style="color:#4a5568">Toggle directives on the left to see explanations.</span>';
+  return active.map(d => {
+    const val = d.kind === 'seconds' ? ` = ${getSeconds(d.id)}s` : '';
+    return `<div style="margin-bottom:8px"><span style="color:#7c85f3;font-family:monospace">${d.label}${val}</span><br>${d.desc}</div>`;
+  }).join('');
+}
+
+let activeTab = 'express';
+
+function update() {
+  const val = buildValue();
+  document.getElementById('output').textContent = val;
+  const conflicts = getConflicts();
+  const cbox = document.getElementById('conflictBox');
+  if (conflicts.length) {
+    cbox.style.display = '';
+    cbox.innerHTML = '⚠ ' + conflicts.join('<br>⚠ ');
+  } else {
+    cbox.style.display = 'none';
+  }
+  document.getElementById('snippet').textContent = buildSnippet(activeTab);
+  document.getElementById('explanation').innerHTML = getExplanation();
+}
+
+function toggleDir(id) {
+  const btn = document.getElementById('tog-' + id);
+  btn.classList.toggle('on');
+  update();
+}
+
+function resetAll() {
+  DIRECTIVES.forEach(d => {
+    const btn = document.getElementById('tog-' + d.id);
+    if (btn) btn.classList.remove('on');
+    if (d.kind === 'seconds') {
+      const inp = document.getElementById('num-' + d.id);
+      if (inp) inp.value = d.id === 'max-age' ? 3600 : d.id === 's-maxage' ? 86400 : 60;
+    }
+  });
+  update();
+}
+
+function applyPreset(key) {
+  resetAll();
+  const p = PRESETS[key];
+  Object.entries(p).forEach(([id, val]) => {
+    const btn = document.getElementById('tog-' + id);
+    if (btn) btn.classList.add('on');
+    if (typeof val === 'number') {
+      const inp = document.getElementById('num-' + id);
+      if (inp) inp.value = val;
+    }
+  });
+  update();
+}
+
+function copyHeader() {
+  const val = document.getElementById('output').textContent;
+  const btn = document.getElementById('copyHeader');
+  navigator.clipboard.writeText(val).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy Header'; btn.classList.remove('copied'); }, 1500);
+  });
+}
+
+function copySnip() {
+  const text = document.getElementById('snippet').textContent;
+  const btn = document.getElementById('copySnip');
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+  });
+}
+
+// Build UI
+const container = document.getElementById('directives');
+let lastGroup = '';
+DIRECTIVES.forEach(d => {
+  if (d.group !== lastGroup) {
+    lastGroup = d.group;
+    const gh = document.createElement('div');
+    gh.className = 'section-head';
+    gh.textContent = d.group;
+    container.appendChild(gh);
+  }
+  const row = document.createElement('div');
+  row.className = 'directive-row';
+  const defaults = { 'max-age': 3600, 's-maxage': 86400, 'stale-while-revalidate': 60, 'stale-if-error': 86400 };
+  row.innerHTML = `
+    <div class="dir-info">
+      <div class="dir-name">${d.label}</div>
+      <div class="dir-desc">${d.desc.slice(0,60)}${d.desc.length>60?'…':''}</div>
+    </div>
+    <div class="dir-input">
+      ${d.kind === 'seconds' ? `<input type="number" id="num-${d.id}" value="${defaults[d.id]||60}" min="0" oninput="update()"> <span>sec</span>` : ''}
+    </div>
+    <button class="toggle" id="tog-${d.id}" onclick="toggleDir('${d.id}')"></button>`;
+  container.appendChild(row);
+});
+
+document.querySelectorAll('.preset').forEach(btn => {
+  btn.addEventListener('click', () => applyPreset(btn.dataset.preset));
+});
+document.querySelectorAll('.stab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    activeTab = btn.dataset.stab;
+    document.querySelectorAll('.stab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    update();
+  });
+});
+
+applyPreset('static');
+</script>
+</body>
+</html>

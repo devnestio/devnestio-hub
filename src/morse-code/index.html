@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Morse Code Converter — Text to Morse & Morse to Text | DevNestio</title>
+  <meta name="description" content="Convert text to Morse code and Morse code to text instantly. Supports letters, digits, and punctuation. Audio playback, copy-ready output. Browser-only." />
+  <meta property="og:title" content="Morse Code Converter | DevNestio" />
+  <meta property="og:description" content="Encode text to Morse code or decode Morse to plain text. Includes audio playback and visual flash. All processing in your browser." />
+  <meta property="og:url" content="https://devnestio.pages.dev/morse-code/" />
+  <meta name="twitter:card" content="summary" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    #privacy-banner { background: #1e293b; border-bottom: 1px solid #334155; padding: 8px 16px; font-size: 12px; color: #94a3b8; text-align: center; }
+    header { background: #1e293b; border-bottom: 1px solid #334155; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+    header a { color: #64748b; font-size: 13px; text-decoration: none; margin-left: auto; }
+    header a:hover { color: #94a3b8; }
+    .badge { background: #f59e0b; color: #000; font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+    main { max-width: 820px; margin: 0 auto; padding: 24px 16px; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 18px; margin-bottom: 16px; }
+    .card-title { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 12px; }
+    .mode-tabs { display: flex; gap: 4px; margin-bottom: 16px; }
+    .mode-tab { padding: 6px 18px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid #334155; background: #0f1117; color: #64748b; }
+    .mode-tab.active { background: #f59e0b; border-color: #f59e0b; color: #000; }
+    textarea { width: 100%; padding: 12px 14px; background: #0f1117; border: 1px solid #334155; border-radius: 8px; color: #e2e8f0; font-size: 15px; font-family: 'Menlo','Courier New',monospace; resize: vertical; outline: none; line-height: 1.6; }
+    textarea:focus { border-color: #f59e0b; }
+    .output-box { background: #0f1117; border: 1px solid #334155; border-radius: 8px; padding: 14px; font-family: 'Menlo','Courier New',monospace; font-size: 15px; line-height: 1.8; color: #e2e8f0; min-height: 80px; word-break: break-all; white-space: pre-wrap; position: relative; }
+    .err { color: #f87171; }
+    .copy-btn { position: absolute; top: 8px; right: 8px; padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid #334155; background: #1e293b; color: #64748b; }
+    .copy-btn:hover { border-color: #f59e0b; color: #f59e0b; }
+    .controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+    .play-btn { padding: 8px 20px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; background: #f59e0b; color: #000; }
+    .play-btn:hover { background: #fbbf24; }
+    .play-btn:disabled { background: #334155; color: #64748b; cursor: not-allowed; }
+    .speed-label { font-size: 12px; color: #64748b; }
+    input[type=range] { width: 100px; accent-color: #f59e0b; }
+    .flash-dot { width: 60px; height: 60px; border-radius: 50%; background: #1e293b; border: 2px solid #334155; transition: background .04s; display: flex; align-items: center; justify-content: center; font-size: 22px; margin-left: auto; }
+    .flash-dot.on { background: #f59e0b; border-color: #f59e0b; }
+    .ref-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 4px; }
+    .ref-item { display: flex; justify-content: space-between; padding: 4px 8px; font-size: 12px; font-family: monospace; border-radius: 4px; background: #0f1117; }
+    .ref-item span:first-child { color: #94a3b8; }
+    .ref-item span:last-child { color: #f59e0b; }
+    #ad-slot { margin: 20px auto; text-align: center; }
+  </style>
+</head>
+<body>
+<div id="privacy-banner">🔒 All conversion and audio processing happens locally in your browser.</div>
+<header>
+  <span class="badge">FREE</span>
+  <h1>Morse Code Converter</h1>
+  <a href="https://devnestio.pages.dev">← All Tools</a>
+</header>
+<main>
+
+  <div class="mode-tabs">
+    <button class="mode-tab active" data-mode="encode" onclick="setMode('encode')">Text → Morse</button>
+    <button class="mode-tab" data-mode="decode" onclick="setMode('decode')">Morse → Text</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title" id="input-label">Text Input</div>
+    <textarea id="input" rows="4" placeholder="Type text to convert…" oninput="convert()"></textarea>
+  </div>
+
+  <div class="card">
+    <div class="card-title" id="output-label">Morse Output</div>
+    <div class="output-box" id="output">
+      <button class="copy-btn" onclick="copyOutput()">Copy</button>
+      <span id="output-text"></span>
+    </div>
+    <div class="controls">
+      <button class="play-btn" id="play-btn" onclick="playMorse()" disabled>▶ Play</button>
+      <span class="speed-label">WPM:</span>
+      <input type="range" id="wpm" min="5" max="40" value="15" oninput="document.getElementById('wpm-val').textContent=this.value" />
+      <span class="speed-label" id="wpm-val">15</span>
+      <div class="flash-dot" id="flash-dot">📡</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Reference Table</div>
+    <div class="ref-grid" id="ref-grid"></div>
+  </div>
+
+  <div id="ad-slot" data-ea-publisher="devnestio" data-ea-type="image"></div>
+</main>
+<script>
+const MORSE = {
+  A:'.-',   B:'-...',  C:'-.-.',  D:'-..',  E:'.',    F:'..-.',
+  G:'--.',  H:'....',  I:'..',    J:'.---', K:'-.-',  L:'.-..',
+  M:'--',   N:'-.',    O:'---',   P:'.--.',  Q:'--.-', R:'.-.',
+  S:'...',  T:'-',     U:'..-',   V:'...-',  W:'.--', X:'-..-',
+  Y:'-.--', Z:'--..',
+  '0':'-----','1':'.----','2':'..---','3':'...--','4':'....-',
+  '5':'.....','6':'-....','7':'--...','8':'---..','9':'----.',
+  '.':'.-.-.-', ',':'--..--', '?':'..--..', "'":'.----.','!':'-.-.--',
+  '/':'-..-.','(':'-.--.',')':`-.--.-`,'&':'.-...',':':'---...',
+  ';':'-.-.-.','=':'-...-','+':'.-.-.','-':'-....-',
+  '_':'..--.-','"':'.-..-.','$':'...-..-','@':'.--.-.','¿':'..-.-','¡':'--...-',
+};
+
+const REVERSE = Object.fromEntries(Object.entries(MORSE).map(([k,v]) => [v,k]));
+
+function textToMorse(text) {
+  return text.toUpperCase().split('').map(c => {
+    if (c === ' ') return '/';
+    return MORSE[c] || '?';
+  }).join(' ');
+}
+
+function morseToText(morse) {
+  return morse.trim().split(/\s+\/\s+|\s*\/\s*/).map(word =>
+    word.trim().split(/\s+/).map(sym => {
+      if (!sym) return '';
+      return REVERSE[sym] || '?';
+    }).join('')
+  ).join(' ');
+}
+
+let mode = 'encode';
+
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === m));
+  if (m === 'encode') {
+    document.getElementById('input-label').textContent = 'Text Input';
+    document.getElementById('output-label').textContent = 'Morse Output';
+    document.getElementById('input').placeholder = 'Type text to convert…';
+  } else {
+    document.getElementById('input-label').textContent = 'Morse Input';
+    document.getElementById('output-label').textContent = 'Text Output';
+    document.getElementById('input').placeholder = 'Enter Morse code (dots, dashes, spaces, / for word break)…';
+  }
+  document.getElementById('input').value = '';
+  document.getElementById('output-text').textContent = '';
+  document.getElementById('play-btn').disabled = true;
+  convert();
+}
+
+function convert() {
+  const inp = document.getElementById('input').value;
+  const outEl = document.getElementById('output-text');
+  const playBtn = document.getElementById('play-btn');
+
+  if (!inp.trim()) { outEl.textContent = ''; playBtn.disabled = true; return; }
+
+  let out;
+  if (mode === 'encode') {
+    out = textToMorse(inp);
+  } else {
+    out = morseToText(inp);
+  }
+  outEl.textContent = out;
+  playBtn.disabled = (mode !== 'encode');
+}
+
+function copyOutput() {
+  const t = document.getElementById('output-text').textContent;
+  if (t) navigator.clipboard.writeText(t);
+}
+
+// Audio playback via Web Audio API
+let audioCtx = null;
+let playing = false;
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+async function playMorse() {
+  if (playing) return;
+  const morse = document.getElementById('output-text').textContent;
+  if (!morse) return;
+
+  const wpm = parseInt(document.getElementById('wpm').value);
+  const dot = 1200 / wpm; // ms per dot (PARIS standard)
+  const dash = dot * 3;
+  const gap = dot;       // between signals in same letter
+  const letterGap = dot * 3;
+  const wordGap = dot * 7;
+
+  const ctx = getAudioCtx();
+  const freq = 600;
+  const btn = document.getElementById('play-btn');
+  const flashEl = document.getElementById('flash-dot');
+
+  playing = true;
+  btn.disabled = true;
+  btn.textContent = '■ Stop';
+  btn.onclick = stopMorse;
+
+  let t = ctx.currentTime + 0.05;
+  const scheduledNodes = [];
+
+  function beep(dur) {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.value = freq;
+    osc.type = 'sine';
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.5, t + 0.005);
+    gain.gain.setValueAtTime(0.5, t + dur / 1000 - 0.005);
+    gain.gain.linearRampToValueAtTime(0, t + dur / 1000);
+    osc.start(t);
+    osc.stop(t + dur / 1000);
+    scheduledNodes.push(osc);
+    t += dur / 1000;
+  }
+
+  const tokens = morse.split(' ');
+  for (let i = 0; i < tokens.length; i++) {
+    const tok = tokens[i];
+    if (tok === '/') {
+      t += (wordGap - letterGap) / 1000;
+    } else {
+      for (let j = 0; j < tok.length; j++) {
+        const c = tok[j];
+        if (c === '.') beep(dot);
+        else if (c === '-') beep(dash);
+        if (j < tok.length - 1) t += gap / 1000;
+      }
+      if (i < tokens.length - 1 && tokens[i+1] !== '/') {
+        t += letterGap / 1000;
+      }
+    }
+  }
+
+  // Flash sync using setTimeout approximation
+  let flashTime = 50;
+  const flashTokens = morse.split(' ');
+  for (const tok of flashTokens) {
+    if (tok === '/') { flashTime += wordGap - letterGap; }
+    else {
+      for (let j = 0; j < tok.length; j++) {
+        const dur = tok[j] === '.' ? dot : dash;
+        ((delay, length) => {
+          setTimeout(() => { if (playing) { flashEl.classList.add('on'); flashEl.textContent = ''; } }, delay);
+          setTimeout(() => { flashEl.classList.remove('on'); flashEl.textContent = '📡'; }, delay + length - 10);
+        })(flashTime, dur);
+        flashTime += dur + gap;
+      }
+      flashTime += letterGap - gap;
+    }
+  }
+
+  const totalMs = (t - ctx.currentTime) * 1000 + 200;
+  setTimeout(() => { if (playing) stopMorse(); }, totalMs);
+}
+
+function stopMorse() {
+  playing = false;
+  document.getElementById('play-btn').disabled = false;
+  document.getElementById('play-btn').textContent = '▶ Play';
+  document.getElementById('play-btn').onclick = playMorse;
+  document.getElementById('flash-dot').classList.remove('on');
+  document.getElementById('flash-dot').textContent = '📡';
+  if (audioCtx) { audioCtx.close(); audioCtx = null; }
+}
+
+// Reference table
+const REF_ITEMS = Object.entries(MORSE).filter(([k]) => /[A-Z0-9]/.test(k));
+document.getElementById('ref-grid').innerHTML = REF_ITEMS.map(([k,v]) =>
+  `<div class="ref-item"><span>${k}</span><span>${v}</span></div>`
+).join('');
+</script>
+</body>
+</html>

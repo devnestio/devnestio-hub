@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GraphQL Query Formatter & Minifier – devnestio</title>
+  <meta name="description" content="Format and minify GraphQL queries, mutations, subscriptions, and fragments online. Syntax highlight, validate structure, and convert between compact and pretty-printed forms instantly." />
+  <link rel="canonical" href="https://devnestio.pages.dev/graphql-formatter/" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+</head>
+<body>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+  header { background: #1a1d2e; border-bottom: 1px solid #2d3748; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+  header a { color: #e040fb; text-decoration: none; font-size: 14px; }
+  header h1 { font-size: 18px; font-weight: 700; color: #fff; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
+  .top-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+  .mode-tabs { display: flex; gap: 4px; background: #0a0d1a; border: 1px solid #2d3748; border-radius: 8px; padding: 3px; }
+  .mode-tab { background: none; border: none; border-radius: 5px; padding: 6px 16px; font-size: 13px; color: #718096; cursor: pointer; transition: all .15s; }
+  .mode-tab.active { background: #e040fb; color: #fff; }
+  .btn { background: #2d3748; border: 1px solid #3d4a5c; border-radius: 6px; padding: 6px 14px; font-size: 13px; color: #e2e8f0; cursor: pointer; }
+  .btn:hover { background: #3d4a5c; }
+  .btn-primary { background: #e040fb; border-color: #e040fb; color: #fff; }
+  .btn-primary:hover { background: #ea4cff; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+  .panel { background: #1a1d2e; border: 1px solid #2d3748; border-radius: 10px; padding: 16px; }
+  .panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .panel-title { font-size: 11px; font-weight: 700; color: #a0aec0; text-transform: uppercase; letter-spacing: .07em; }
+  textarea { width: 100%; background: #0a0d1a; border: 1px solid #2d3748; border-radius: 6px; padding: 12px; color: #e2e8f0; font-size: 13px; font-family: 'Courier New', monospace; outline: none; resize: vertical; line-height: 1.7; min-height: 380px; }
+  textarea:focus { border-color: #e040fb; }
+  .output-code { background: #0a0d1a; border: 1px solid #2d3748; border-radius: 6px; padding: 14px; font-family: 'Courier New', monospace; font-size: 12px; white-space: pre-wrap; overflow: auto; min-height: 380px; line-height: 1.7; position: relative; word-break: break-all; }
+  .token-keyword { color: #ff79c6; }
+  .token-op-name { color: #50fa7b; font-weight: 700; }
+  .token-field { color: #f8f8f2; }
+  .token-alias { color: #8be9fd; }
+  .token-arg-name { color: #ffb86c; }
+  .token-var { color: #bd93f9; }
+  .token-string { color: #f1fa8c; }
+  .token-directive { color: #ff79c6; }
+  .token-fragment-name { color: #50fa7b; }
+  .token-type { color: #8be9fd; }
+  .token-punc { color: #6272a4; }
+  .token-comment { color: #6272a4; font-style: italic; }
+  .copy-btn { position: absolute; top: 10px; right: 10px; background: #2d3748; border: none; border-radius: 4px; padding: 4px 10px; font-size: 11px; color: #a0aec0; cursor: pointer; }
+  .copy-btn:hover { background: #3d4a5c; }
+  .copy-btn.copied { background: #276749; color: #68d391; }
+  .stats-bar { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; padding-top: 12px; border-top: 1px solid #2d3748; font-size: 12px; color: #a0aec0; }
+  .stats-bar strong { color: #e2e8f0; }
+  .issues-area { margin-top: 16px; }
+  .issue { padding: 8px 12px; border-radius: 6px; margin-bottom: 6px; font-size: 12px; display: flex; gap: 8px; }
+  .issue-err { background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.25); color: #fca5a5; }
+  .issue-ok { background: rgba(52,211,153,.1); border: 1px solid rgba(52,211,153,.25); color: #6ee7b7; }
+  .op-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+  .op-chip { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 600; }
+  .chip-query { background: #1a3a5c; color: #90cdf4; }
+  .chip-mutation { background: #3b1f5e; color: #d6bcfa; }
+  .chip-subscription { background: #1e3a2f; color: #9ae6b4; }
+  .chip-fragment { background: #3d2b00; color: #fbd38d; }
+  .empty-hint { color: #4a5568; font-style: italic; text-align: center; padding: 40px 20px; font-size: 13px; }
+</style>
+
+<header>
+  <a href="https://devnestio.pages.dev/">← devnestio</a>
+  <h1>GraphQL Query Formatter & Minifier</h1>
+</header>
+
+<div class="container">
+  <div class="top-bar">
+    <div class="mode-tabs">
+      <button class="mode-tab active" id="tabFormat" onclick="setMode('format')">Format</button>
+      <button class="mode-tab" id="tabMinify" onclick="setMode('minify')">Minify</button>
+    </div>
+    <button class="btn btn-primary" onclick="run()">Run</button>
+    <button class="btn" onclick="loadSample()">Load Sample</button>
+    <button class="btn" onclick="clearAll()">Clear</button>
+  </div>
+
+  <div class="grid">
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Input GraphQL</div>
+      </div>
+      <textarea id="input" placeholder="Paste your GraphQL query, mutation, or schema fragment here..."></textarea>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Output</div>
+      </div>
+      <div style="position:relative">
+        <button class="copy-btn" id="copyBtn" onclick="copyOutput()">Copy</button>
+        <div class="output-code" id="output"><span class="empty-hint">Formatted or minified output will appear here</span></div>
+      </div>
+      <div class="stats-bar" id="statsBar" style="display:none"></div>
+    </div>
+  </div>
+
+  <div id="opChips" class="op-chips" style="margin-top:16px;display:none"></div>
+  <div class="issues-area" id="issuesArea"></div>
+</div>
+
+<script>
+let mode = 'format';
+
+const SAMPLE = `# Get user with friends and posts
+query GetUser($id: ID!, $includeInactive: Boolean = false) {
+  user(id: $id) {
+    id
+    name
+    email
+    profile {
+      avatarUrl
+      bio
+      location
+    }
+    friends(limit: 10, active: $includeInactive) {
+      id
+      name
+    }
+    posts(first: 5) @include(if: $includeInactive) {
+      edges {
+        node {
+          id
+          title
+          createdAt
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+}
+
+mutation CreatePost($input: CreatePostInput!) {
+  createPost(input: $input) {
+    post {
+      id
+      title
+      author {
+        id
+        name
+      }
+    }
+    errors {
+      field
+      message
+    }
+  }
+}
+
+fragment UserFields on User {
+  id
+  name
+  email
+}
+
+subscription OnPostCreated($userId: ID!) {
+  postCreated(userId: $userId) {
+    id
+    title
+    author {
+      ...UserFields
+    }
+  }
+}
+`;
+
+function setMode(m) {
+  mode = m;
+  document.getElementById('tabFormat').classList.toggle('active', m === 'format');
+  document.getElementById('tabMinify').classList.toggle('active', m === 'minify');
+}
+
+function tokenizeGraphQL(src) {
+  const GQL_KEYWORDS = new Set(['query','mutation','subscription','fragment','on','type','interface','union','enum','input','scalar','directive','schema','extend','implements','true','false','null','repeatable']);
+  let html = '';
+  let i = 0;
+  while (i < src.length) {
+    if (src[i] === '#') {
+      let j = i;
+      while (j < src.length && src[j] !== '\n') j++;
+      html += `<span class="token-comment">${esc(src.slice(i, j))}</span>`;
+      i = j;
+      continue;
+    }
+    if (src[i] === '"') {
+      if (src[i+1] === '"' && src[i+2] === '"') {
+        let j = i + 3;
+        while (j < src.length && !(src[j]==='"'&&src[j+1]==='"'&&src[j+2]==='"')) j++;
+        html += `<span class="token-string">${esc(src.slice(i, j+3))}</span>`;
+        i = j + 3;
+      } else {
+        let j = i + 1;
+        while (j < src.length && src[j] !== '"') j++;
+        html += `<span class="token-string">${esc(src.slice(i, j+1))}</span>`;
+        i = j + 1;
+      }
+      continue;
+    }
+    if (src[i] === '$') {
+      let j = i + 1;
+      while (j < src.length && /\w/.test(src[j])) j++;
+      html += `<span class="token-var">${esc(src.slice(i, j))}</span>`;
+      i = j;
+      continue;
+    }
+    if (src[i] === '@') {
+      let j = i + 1;
+      while (j < src.length && /\w/.test(src[j])) j++;
+      html += `<span class="token-directive">${esc(src.slice(i, j))}</span>`;
+      i = j;
+      continue;
+    }
+    if (src[i] === '.' && src[i+1] === '.' && src[i+2] === '.') {
+      html += `<span class="token-punc">...</span>`;
+      i += 3;
+      continue;
+    }
+    if (/[{}()\[\]:!,|]/.test(src[i])) {
+      html += `<span class="token-punc">${esc(src[i])}</span>`;
+      i++;
+      continue;
+    }
+    if (/[a-zA-Z_]/.test(src[i])) {
+      let j = i;
+      while (j < src.length && /[\w]/.test(src[j])) j++;
+      const word = src.slice(i, j);
+      if (GQL_KEYWORDS.has(word)) {
+        html += `<span class="token-keyword">${esc(word)}</span>`;
+      } else if (/^[A-Z]/.test(word)) {
+        html += `<span class="token-type">${esc(word)}</span>`;
+      } else {
+        html += `<span class="token-field">${esc(word)}</span>`;
+      }
+      i = j;
+      continue;
+    }
+    html += esc(src[i]);
+    i++;
+  }
+  return html;
+}
+
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function formatGQL(src) {
+  const INDENT = '  ';
+  let out = '';
+  let depth = 0;
+  let i = 0;
+  const tokens = tokenizeRaw(src);
+
+  for (let t of tokens) {
+    if (t === '{') {
+      out += ' {\n';
+      depth++;
+      out += INDENT.repeat(depth);
+    } else if (t === '}') {
+      depth = Math.max(0, depth - 1);
+      out = out.trimEnd() + '\n' + INDENT.repeat(depth) + '}\n';
+      if (depth > 0) out += INDENT.repeat(depth);
+    } else if (t === '(') {
+      out += '(';
+    } else if (t === ')') {
+      out += ')';
+    } else if (t === ',') {
+      out += ', ';
+    } else if (t === ':') {
+      out += ': ';
+    } else if (t.startsWith('#')) {
+      out += t + '\n' + INDENT.repeat(depth);
+    } else if (t === '\n') {
+      // newlines handled by brace logic
+    } else {
+      out += t + ' ';
+    }
+  }
+  return out.replace(/ +\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+}
+
+function minifyGQL(src) {
+  return src
+    .replace(/#[^\n]*/g, '')
+    .replace(/\s+/g, ' ')
+    .replace(/\s*([{}()\[\]:!,])\s*/g, '$1')
+    .replace(/\s*\.\.\.\s*/g, '...')
+    .trim();
+}
+
+function tokenizeRaw(src) {
+  const tokens = [];
+  let i = 0;
+  while (i < src.length) {
+    if (src[i] === '#') {
+      let j = i;
+      while (j < src.length && src[j] !== '\n') j++;
+      tokens.push(src.slice(i, j));
+      i = j;
+      continue;
+    }
+    if (src[i] === '"') {
+      let j = i + 1;
+      while (j < src.length && src[j] !== '"') j++;
+      tokens.push(src.slice(i, j+1));
+      i = j + 1;
+      continue;
+    }
+    if (src[i] === '.' && src[i+1] === '.' && src[i+2] === '.') {
+      tokens.push('...');
+      i += 3;
+      continue;
+    }
+    if (/[\s\n]/.test(src[i])) { i++; continue; }
+    if (/[{}()\[\]:!,|@$]/.test(src[i])) { tokens.push(src[i]); i++; continue; }
+    if (/[\w]/.test(src[i])) {
+      let j = i;
+      while (j < src.length && /[\w]/.test(src[j])) j++;
+      tokens.push(src.slice(i, j));
+      i = j;
+      continue;
+    }
+    i++;
+  }
+  return tokens;
+}
+
+function detectOperations(src) {
+  const ops = [];
+  for (const m of src.matchAll(/\b(query|mutation|subscription|fragment)\s+(\w+)/g)) {
+    ops.push({ kind: m[1], name: m[2] });
+  }
+  return ops;
+}
+
+function validateGQL(src) {
+  const issues = [];
+  const opens = (src.match(/\{/g) || []).length;
+  const closes = (src.match(/\}/g) || []).length;
+  if (opens !== closes) {
+    issues.push({ type: 'err', msg: `Unbalanced braces: ${opens} opening, ${closes} closing` });
+  }
+  const openP = (src.match(/\(/g) || []).length;
+  const closeP = (src.match(/\)/g) || []).length;
+  if (openP !== closeP) {
+    issues.push({ type: 'err', msg: `Unbalanced parentheses: ${openP} opening, ${closeP} closing` });
+  }
+  if (issues.length === 0) issues.push({ type: 'ok', msg: 'Structure looks valid' });
+  return issues;
+}
+
+function run() {
+  const src = document.getElementById('input').value.trim();
+  if (!src) return;
+
+  const result = mode === 'format' ? formatGQL(src) : minifyGQL(src);
+  window._outputText = result;
+  document.getElementById('output').innerHTML = tokenizeGraphQL(result);
+
+  const inputLen = src.length;
+  const outputLen = result.length;
+  const ratio = ((1 - outputLen / inputLen) * 100).toFixed(1);
+  const stats = document.getElementById('statsBar');
+  stats.innerHTML = `
+    <span>Input: <strong>${inputLen}</strong> chars</span>
+    <span>Output: <strong>${outputLen}</strong> chars</span>
+    ${mode === 'minify' && inputLen > 0 ? `<span>Reduction: <strong>${ratio}%</strong></span>` : ''}
+  `;
+  stats.style.display = 'flex';
+
+  const ops = detectOperations(src);
+  const chipsEl = document.getElementById('opChips');
+  if (ops.length > 0) {
+    chipsEl.innerHTML = ops.map(op => {
+      const cls = `chip-${op.kind}`;
+      return `<span class="op-chip ${cls}">${op.kind}: ${op.name}</span>`;
+    }).join('');
+    chipsEl.style.display = 'flex';
+  } else {
+    chipsEl.style.display = 'none';
+  }
+
+  const issues = validateGQL(src);
+  document.getElementById('issuesArea').innerHTML = issues.map(i => {
+    const cls = i.type === 'err' ? 'issue-err' : 'issue-ok';
+    return `<div class="issue ${cls}">${esc(i.msg)}</div>`;
+  }).join('');
+}
+
+function copyOutput() {
+  navigator.clipboard.writeText(window._outputText || '').then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function loadSample() {
+  document.getElementById('input').value = SAMPLE;
+  setMode('format');
+  run();
+}
+
+function clearAll() {
+  document.getElementById('input').value = '';
+  document.getElementById('output').innerHTML = '<span class="empty-hint">Formatted or minified output will appear here</span>';
+  document.getElementById('statsBar').style.display = 'none';
+  document.getElementById('opChips').style.display = 'none';
+  document.getElementById('issuesArea').innerHTML = '';
+  window._outputText = '';
+}
+</script>
+</body>
+</html>

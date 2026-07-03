@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Keyboard Shortcut Reference – VS Code, Chrome, Mac | DevNestio</title>
+  <meta name="description" content="Searchable keyboard shortcut reference for VS Code, Chrome, and Mac. Filter by app and category. Copy shortcuts instantly." />
+  <link rel="canonical" href="https://devnestio.pages.dev/keyboard-shortcut-ref/" />
+  <meta property="og:title" content="Keyboard Shortcut Reference – VS Code, Chrome, Mac" />
+  <meta property="og:description" content="Searchable keyboard shortcut reference for VS Code, Chrome, and Mac. Filter by app and category." />
+  <meta property="og:url" content="https://devnestio.pages.dev/keyboard-shortcut-ref/" />
+  <meta property="og:type" content="website" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3248;
+      --accent: #7c6af7;
+      --accent2: #56cfb2;
+      --text: #e2e8f0;
+      --text-muted: #8892a4;
+      --red: #f87171;
+      --green: #4ade80;
+      --yellow: #fbbf24;
+      --blue: #60a5fa;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1.2rem 1.5rem; }
+    header h1 { font-size: 1.4rem; font-weight: 700; color: var(--accent); display: flex; align-items: center; gap: .5rem; }
+    header p { font-size: .85rem; color: var(--text-muted); margin-top: .25rem; }
+    .controls { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 1.5rem; display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; position: sticky; top: 0; z-index: 100; }
+    .search-box { flex: 1; min-width: 200px; position: relative; }
+    .search-box input { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: .5rem 1rem .5rem 2.2rem; font-size: .9rem; outline: none; transition: border-color .2s; }
+    .search-box input:focus { border-color: var(--accent); }
+    .search-box::before { content: '⌕'; position: absolute; left: .7rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 1rem; }
+    .filter-group { display: flex; gap: .4rem; flex-wrap: wrap; }
+    .filter-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted); border-radius: 6px; padding: .35rem .85rem; font-size: .8rem; cursor: pointer; transition: all .15s; }
+    .filter-btn:hover, .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .filter-btn.vscode.active { background: #007acc; border-color: #007acc; }
+    .filter-btn.chrome.active { background: #f4a219; border-color: #f4a219; color: #000; }
+    .filter-btn.mac.active { background: #555; border-color: #888; color: #fff; }
+    .main { padding: 1.5rem; max-width: 1400px; margin: 0 auto; }
+    .stats { font-size: .8rem; color: var(--text-muted); margin-bottom: 1rem; }
+    .category-section { margin-bottom: 2rem; }
+    .category-title { font-size: 1rem; font-weight: 600; color: var(--accent2); margin-bottom: .75rem; padding-bottom: .4rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: .5rem; }
+    .shortcuts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: .6rem; }
+    .shortcut-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: .7rem 1rem; display: flex; align-items: center; gap: .75rem; transition: border-color .15s; cursor: default; }
+    .shortcut-card:hover { border-color: var(--accent); }
+    .shortcut-card.hidden { display: none; }
+    .sc-keys { display: flex; gap: .25rem; flex-shrink: 0; }
+    kbd { background: var(--surface2); border: 1px solid var(--border); border-bottom: 3px solid var(--border); color: var(--text); border-radius: 4px; padding: .15rem .4rem; font-family: monospace; font-size: .8rem; white-space: nowrap; }
+    .sc-info { flex: 1; min-width: 0; }
+    .sc-action { font-size: .85rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sc-meta { display: flex; gap: .4rem; margin-top: .2rem; align-items: center; }
+    .app-badge { font-size: .7rem; padding: .1rem .45rem; border-radius: 4px; font-weight: 600; }
+    .app-badge.vscode { background: #007acc22; color: #007acc; }
+    .app-badge.chrome { background: #f4a21922; color: #f4a219; }
+    .app-badge.mac { background: #88888822; color: #aaa; }
+    .copy-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: .75rem; padding: .2rem .4rem; border-radius: 4px; transition: all .15s; white-space: nowrap; flex-shrink: 0; }
+    .copy-btn:hover { background: var(--accent); color: #fff; }
+    .empty { text-align: center; padding: 4rem 2rem; color: var(--text-muted); font-size: 1rem; }
+    footer { text-align: center; padding: 2rem; color: var(--text-muted); font-size: .8rem; border-top: 1px solid var(--border); margin-top: 2rem; }
+    @media (max-width: 600px) {
+      .shortcuts-grid { grid-template-columns: 1fr; }
+      .controls { padding: .75rem 1rem; }
+      .main { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>⌨ Keyboard Shortcut Reference</h1>
+  <p>VS Code · Chrome · Mac — Search and filter 150+ shortcuts</p>
+</header>
+<div class="controls">
+  <div class="search-box"><input type="text" id="search" placeholder="Search shortcuts or actions…" autocomplete="off" /></div>
+  <div class="filter-group" id="appFilter">
+    <button class="filter-btn active" data-app="all">All</button>
+    <button class="filter-btn vscode" data-app="vscode">VS Code</button>
+    <button class="filter-btn chrome" data-app="chrome">Chrome</button>
+    <button class="filter-btn mac" data-app="mac">Mac</button>
+  </div>
+</div>
+<div class="main">
+  <div class="stats" id="stats"></div>
+  <div id="output"></div>
+</div>
+<footer>
+  <p>DevNestio Keyboard Shortcut Reference · <a href="https://devnestio.pages.dev/" style="color:var(--accent)">More Tools</a></p>
+</footer>
+<script>
+const SHORTCUTS = [
+  // ---- VS Code ----
+  // Editing
+  { app:"vscode", cat:"Editing", action:"Cut line (empty selection)", keys:["Ctrl","X"] },
+  { app:"vscode", cat:"Editing", action:"Copy line (empty selection)", keys:["Ctrl","C"] },
+  { app:"vscode", cat:"Editing", action:"Delete line", keys:["Ctrl","Shift","K"] },
+  { app:"vscode", cat:"Editing", action:"Insert line below", keys:["Ctrl","Enter"] },
+  { app:"vscode", cat:"Editing", action:"Insert line above", keys:["Ctrl","Shift","Enter"] },
+  { app:"vscode", cat:"Editing", action:"Move line down", keys:["Alt","↓"] },
+  { app:"vscode", cat:"Editing", action:"Move line up", keys:["Alt","↑"] },
+  { app:"vscode", cat:"Editing", action:"Copy line down", keys:["Shift","Alt","↓"] },
+  { app:"vscode", cat:"Editing", action:"Copy line up", keys:["Shift","Alt","↑"] },
+  { app:"vscode", cat:"Editing", action:"Undo", keys:["Ctrl","Z"] },
+  { app:"vscode", cat:"Editing", action:"Redo", keys:["Ctrl","Y"] },
+  { app:"vscode", cat:"Editing", action:"Add cursor above", keys:["Ctrl","Alt","↑"] },
+  { app:"vscode", cat:"Editing", action:"Add cursor below", keys:["Ctrl","Alt","↓"] },
+  { app:"vscode", cat:"Editing", action:"Select all occurrences of current selection", keys:["Ctrl","Shift","L"] },
+  { app:"vscode", cat:"Editing", action:"Select all occurrences of current word", keys:["Ctrl","F2"] },
+  { app:"vscode", cat:"Editing", action:"Add selection to next find match", keys:["Ctrl","D"] },
+  { app:"vscode", cat:"Editing", action:"Format document", keys:["Shift","Alt","F"] },
+  { app:"vscode", cat:"Editing", action:"Indent line", keys:["Ctrl","]"] },
+  { app:"vscode", cat:"Editing", action:"Outdent line", keys:["Ctrl","["] },
+  { app:"vscode", cat:"Editing", action:"Toggle line comment", keys:["Ctrl","/"] },
+  { app:"vscode", cat:"Editing", action:"Toggle block comment", keys:["Shift","Alt","A"] },
+  // Navigation
+  { app:"vscode", cat:"Navigation", action:"Go to file", keys:["Ctrl","P"] },
+  { app:"vscode", cat:"Navigation", action:"Go to symbol in workspace", keys:["Ctrl","T"] },
+  { app:"vscode", cat:"Navigation", action:"Go to line", keys:["Ctrl","G"] },
+  { app:"vscode", cat:"Navigation", action:"Go to definition", keys:["F12"] },
+  { app:"vscode", cat:"Navigation", action:"Peek definition", keys:["Alt","F12"] },
+  { app:"vscode", cat:"Navigation", action:"Go to references", keys:["Shift","F12"] },
+  { app:"vscode", cat:"Navigation", action:"Go back", keys:["Alt","←"] },
+  { app:"vscode", cat:"Navigation", action:"Go forward", keys:["Alt","→"] },
+  { app:"vscode", cat:"Navigation", action:"Switch editor tab", keys:["Ctrl","Tab"] },
+  { app:"vscode", cat:"Navigation", action:"Close editor", keys:["Ctrl","W"] },
+  { app:"vscode", cat:"Navigation", action:"New editor group", keys:["Ctrl","\\"] },
+  { app:"vscode", cat:"Navigation", action:"Focus sidebar", keys:["Ctrl","B"] },
+  { app:"vscode", cat:"Navigation", action:"Focus terminal", keys:["Ctrl","`"] },
+  // Search & Replace
+  { app:"vscode", cat:"Search", action:"Find", keys:["Ctrl","F"] },
+  { app:"vscode", cat:"Search", action:"Replace", keys:["Ctrl","H"] },
+  { app:"vscode", cat:"Search", action:"Find in files", keys:["Ctrl","Shift","F"] },
+  { app:"vscode", cat:"Search", action:"Replace in files", keys:["Ctrl","Shift","H"] },
+  { app:"vscode", cat:"Search", action:"Find next", keys:["F3"] },
+  { app:"vscode", cat:"Search", action:"Find previous", keys:["Shift","F3"] },
+  // View
+  { app:"vscode", cat:"View", action:"Command palette", keys:["Ctrl","Shift","P"] },
+  { app:"vscode", cat:"View", action:"Toggle sidebar", keys:["Ctrl","B"] },
+  { app:"vscode", cat:"View", action:"Zoom in", keys:["Ctrl","="] },
+  { app:"vscode", cat:"View", action:"Zoom out", keys:["Ctrl","-"] },
+  { app:"vscode", cat:"View", action:"Toggle full screen", keys:["F11"] },
+  { app:"vscode", cat:"View", action:"Split editor", keys:["Ctrl","\\"] },
+  { app:"vscode", cat:"View", action:"Toggle minimap", keys:["Ctrl","Shift","M"] },
+  { app:"vscode", cat:"View", action:"Toggle word wrap", keys:["Alt","Z"] },
+  { app:"vscode", cat:"View", action:"Open integrated terminal", keys:["Ctrl","`"] },
+  { app:"vscode", cat:"View", action:"New terminal", keys:["Ctrl","Shift","`"] },
+  // Refactoring
+  { app:"vscode", cat:"Refactor", action:"Rename symbol", keys:["F2"] },
+  { app:"vscode", cat:"Refactor", action:"Quick fix", keys:["Ctrl","."] },
+  { app:"vscode", cat:"Refactor", action:"Trigger suggest", keys:["Ctrl","Space"] },
+  { app:"vscode", cat:"Refactor", action:"Show hover info", keys:["Ctrl","K","Ctrl","I"] },
+  // Debug
+  { app:"vscode", cat:"Debug", action:"Start / continue", keys:["F5"] },
+  { app:"vscode", cat:"Debug", action:"Stop", keys:["Shift","F5"] },
+  { app:"vscode", cat:"Debug", action:"Step over", keys:["F10"] },
+  { app:"vscode", cat:"Debug", action:"Step into", keys:["F11"] },
+  { app:"vscode", cat:"Debug", action:"Step out", keys:["Shift","F11"] },
+  { app:"vscode", cat:"Debug", action:"Toggle breakpoint", keys:["F9"] },
+  // ---- Chrome ----
+  // Tabs
+  { app:"chrome", cat:"Tabs", action:"New tab", keys:["Ctrl","T"] },
+  { app:"chrome", cat:"Tabs", action:"Close tab", keys:["Ctrl","W"] },
+  { app:"chrome", cat:"Tabs", action:"Reopen closed tab", keys:["Ctrl","Shift","T"] },
+  { app:"chrome", cat:"Tabs", action:"Next tab", keys:["Ctrl","Tab"] },
+  { app:"chrome", cat:"Tabs", action:"Previous tab", keys:["Ctrl","Shift","Tab"] },
+  { app:"chrome", cat:"Tabs", action:"Go to tab 1–8", keys:["Ctrl","1–8"] },
+  { app:"chrome", cat:"Tabs", action:"Go to last tab", keys:["Ctrl","9"] },
+  { app:"chrome", cat:"Tabs", action:"Pin tab", keys:["Ctrl","Shift","P"] },
+  { app:"chrome", cat:"Tabs", action:"Duplicate tab", keys:["Ctrl","Shift","K"] },
+  // Navigation
+  { app:"chrome", cat:"Navigation", action:"Go back", keys:["Alt","←"] },
+  { app:"chrome", cat:"Navigation", action:"Go forward", keys:["Alt","→"] },
+  { app:"chrome", cat:"Navigation", action:"Reload page", keys:["Ctrl","R"] },
+  { app:"chrome", cat:"Navigation", action:"Hard reload (bypass cache)", keys:["Ctrl","Shift","R"] },
+  { app:"chrome", cat:"Navigation", action:"Focus address bar", keys:["Ctrl","L"] },
+  { app:"chrome", cat:"Navigation", action:"Open new window", keys:["Ctrl","N"] },
+  { app:"chrome", cat:"Navigation", action:"Open incognito window", keys:["Ctrl","Shift","N"] },
+  { app:"chrome", cat:"Navigation", action:"Scroll to top", keys:["Ctrl","Home"] },
+  { app:"chrome", cat:"Navigation", action:"Scroll to bottom", keys:["Ctrl","End"] },
+  // Developer Tools
+  { app:"chrome", cat:"DevTools", action:"Open DevTools", keys:["F12"] },
+  { app:"chrome", cat:"DevTools", action:"Open DevTools (Elements)", keys:["Ctrl","Shift","C"] },
+  { app:"chrome", cat:"DevTools", action:"Open DevTools (Console)", keys:["Ctrl","Shift","J"] },
+  { app:"chrome", cat:"DevTools", action:"Inspect element", keys:["Ctrl","Shift","I"] },
+  { app:"chrome", cat:"DevTools", action:"View page source", keys:["Ctrl","U"] },
+  // Page
+  { app:"chrome", cat:"Page", action:"Find on page", keys:["Ctrl","F"] },
+  { app:"chrome", cat:"Page", action:"Zoom in", keys:["Ctrl","="] },
+  { app:"chrome", cat:"Page", action:"Zoom out", keys:["Ctrl","-"] },
+  { app:"chrome", cat:"Page", action:"Reset zoom", keys:["Ctrl","0"] },
+  { app:"chrome", cat:"Page", action:"Print", keys:["Ctrl","P"] },
+  { app:"chrome", cat:"Page", action:"Save page", keys:["Ctrl","S"] },
+  { app:"chrome", cat:"Page", action:"Bookmark page", keys:["Ctrl","D"] },
+  { app:"chrome", cat:"Page", action:"Full screen", keys:["F11"] },
+  // ---- Mac ----
+  // General
+  { app:"mac", cat:"General", action:"Copy", keys:["⌘","C"] },
+  { app:"mac", cat:"General", action:"Cut", keys:["⌘","X"] },
+  { app:"mac", cat:"General", action:"Paste", keys:["⌘","V"] },
+  { app:"mac", cat:"General", action:"Undo", keys:["⌘","Z"] },
+  { app:"mac", cat:"General", action:"Redo", keys:["⌘","Shift","Z"] },
+  { app:"mac", cat:"General", action:"Select all", keys:["⌘","A"] },
+  { app:"mac", cat:"General", action:"Save", keys:["⌘","S"] },
+  { app:"mac", cat:"General", action:"Print", keys:["⌘","P"] },
+  { app:"mac", cat:"General", action:"Find", keys:["⌘","F"] },
+  { app:"mac", cat:"General", action:"Quit application", keys:["⌘","Q"] },
+  { app:"mac", cat:"General", action:"Hide application", keys:["⌘","H"] },
+  { app:"mac", cat:"General", action:"Minimize window", keys:["⌘","M"] },
+  { app:"mac", cat:"General", action:"New window", keys:["⌘","N"] },
+  { app:"mac", cat:"General", action:"Close window", keys:["⌘","W"] },
+  { app:"mac", cat:"General", action:"Open file", keys:["⌘","O"] },
+  { app:"mac", cat:"General", action:"Preferences", keys:["⌘",","] },
+  { app:"mac", cat:"General", action:"Switch application", keys:["⌘","Tab"] },
+  // Finder
+  { app:"mac", cat:"Finder", action:"New Finder window", keys:["⌘","N"] },
+  { app:"mac", cat:"Finder", action:"New folder", keys:["⌘","Shift","N"] },
+  { app:"mac", cat:"Finder", action:"Get info", keys:["⌘","I"] },
+  { app:"mac", cat:"Finder", action:"Move to trash", keys:["⌘","Delete"] },
+  { app:"mac", cat:"Finder", action:"Empty trash", keys:["⌘","Shift","Delete"] },
+  { app:"mac", cat:"Finder", action:"Go to Applications", keys:["⌘","Shift","A"] },
+  { app:"mac", cat:"Finder", action:"Go to Desktop", keys:["⌘","Shift","D"] },
+  { app:"mac", cat:"Finder", action:"Go to Downloads", keys:["⌘","Shift","L"] },
+  { app:"mac", cat:"Finder", action:"Go to Home", keys:["⌘","Shift","H"] },
+  { app:"mac", cat:"Finder", action:"Show/hide hidden files", keys:["⌘","Shift","."] },
+  { app:"mac", cat:"Finder", action:"Quick look", keys:["Space"] },
+  // Screenshots
+  { app:"mac", cat:"Screenshots", action:"Screenshot entire screen", keys:["⌘","Shift","3"] },
+  { app:"mac", cat:"Screenshots", action:"Screenshot selection", keys:["⌘","Shift","4"] },
+  { app:"mac", cat:"Screenshots", action:"Screenshot window", keys:["⌘","Shift","4","Space"] },
+  { app:"mac", cat:"Screenshots", action:"Screenshot to clipboard", keys:["⌘","Ctrl","Shift","3"] },
+  { app:"mac", cat:"Screenshots", action:"Screen recording (Screenshot app)", keys:["⌘","Shift","5"] },
+  // System
+  { app:"mac", cat:"System", action:"Spotlight search", keys:["⌘","Space"] },
+  { app:"mac", cat:"System", action:"Force quit", keys:["⌘","Opt","Esc"] },
+  { app:"mac", cat:"System", action:"Lock screen", keys:["⌘","Ctrl","Q"] },
+  { app:"mac", cat:"System", action:"Sleep", keys:["⌘","Opt","Power"] },
+  { app:"mac", cat:"System", action:"Logout", keys:["⌘","Shift","Q"] },
+  { app:"mac", cat:"System", action:"Mission Control", keys:["Ctrl","↑"] },
+  { app:"mac", cat:"System", action:"Show Desktop", keys:["Fn","F11"] },
+  { app:"mac", cat:"System", action:"Switch space left", keys:["Ctrl","←"] },
+  { app:"mac", cat:"System", action:"Switch space right", keys:["Ctrl","→"] },
+  { app:"mac", cat:"System", action:"Emoji picker", keys:["⌘","Ctrl","Space"] },
+  // Text
+  { app:"mac", cat:"Text", action:"Move to beginning of line", keys:["⌘","←"] },
+  { app:"mac", cat:"Text", action:"Move to end of line", keys:["⌘","→"] },
+  { app:"mac", cat:"Text", action:"Move to beginning of doc", keys:["⌘","↑"] },
+  { app:"mac", cat:"Text", action:"Move to end of doc", keys:["⌘","↓"] },
+  { app:"mac", cat:"Text", action:"Select to beginning of line", keys:["⌘","Shift","←"] },
+  { app:"mac", cat:"Text", action:"Select to end of line", keys:["⌘","Shift","→"] },
+  { app:"mac", cat:"Text", action:"Delete word backward", keys:["Opt","Delete"] },
+  { app:"mac", cat:"Text", action:"Delete to beginning of line", keys:["⌘","Delete"] },
+];
+
+let activeApp = 'all';
+let searchTerm = '';
+
+function keysToText(keys) {
+  return keys.join('+');
+}
+
+function renderKeys(keys) {
+  return keys.map(k => `<kbd>${k}</kbd>`).join('<span style="color:var(--text-muted);font-size:.8rem;margin:0 .1rem">+</span>');
+}
+
+function render() {
+  const filtered = SHORTCUTS.filter(s => {
+    const appOk = activeApp === 'all' || s.app === activeApp;
+    const term = searchTerm.toLowerCase();
+    const textOk = !term || s.action.toLowerCase().includes(term) || s.cat.toLowerCase().includes(term) || keysToText(s.keys).toLowerCase().includes(term);
+    return appOk && textOk;
+  });
+
+  document.getElementById('stats').textContent = `Showing ${filtered.length} of ${SHORTCUTS.length} shortcuts`;
+
+  const groups = {};
+  filtered.forEach(s => {
+    const key = s.app + '|' + s.cat;
+    if (!groups[key]) groups[key] = { app: s.app, cat: s.cat, items: [] };
+    groups[key].items.push(s);
+  });
+
+  const appOrder = ['vscode', 'chrome', 'mac'];
+  const appLabels = { vscode: 'VS Code', chrome: 'Chrome', mac: 'Mac' };
+  const appIcons = { vscode: '🟦', chrome: '🔵', mac: '🍎' };
+
+  const output = document.getElementById('output');
+  if (!filtered.length) {
+    output.innerHTML = '<div class="empty">No shortcuts found. Try a different search term.</div>';
+    return;
+  }
+
+  let html = '';
+  const sorted = Object.values(groups).sort((a, b) => {
+    const ai = appOrder.indexOf(a.app), bi = appOrder.indexOf(b.app);
+    if (ai !== bi) return ai - bi;
+    return a.cat.localeCompare(b.cat);
+  });
+
+  sorted.forEach(g => {
+    html += `<div class="category-section">
+      <div class="category-title">${appIcons[g.app]} ${appLabels[g.app]} — ${g.cat}</div>
+      <div class="shortcuts-grid">`;
+    g.items.forEach(s => {
+      const keysText = keysToText(s.keys);
+      html += `<div class="shortcut-card">
+        <div class="sc-keys">${renderKeys(s.keys)}</div>
+        <div class="sc-info">
+          <div class="sc-action">${s.action}</div>
+        </div>
+        <button class="copy-btn" onclick="copy(this,'${keysText.replace(/'/g,"\\'")}')">Copy</button>
+      </div>`;
+    });
+    html += `</div></div>`;
+  });
+  output.innerHTML = html;
+}
+
+function copy(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 1200);
+  });
+}
+
+document.getElementById('search').addEventListener('input', e => {
+  searchTerm = e.target.value;
+  render();
+});
+
+document.getElementById('appFilter').addEventListener('click', e => {
+  const btn = e.target.closest('[data-app]');
+  if (!btn) return;
+  activeApp = btn.dataset.app;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+});
+
+render();
+</script>
+</body>
+</html>

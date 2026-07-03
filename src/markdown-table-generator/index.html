@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Markdown Table Generator — Spreadsheet-Style Table Builder</title>
+  <meta name="description" content="Generate Markdown and HTML tables instantly with a spreadsheet-style UI. Add rows/columns, set alignment, import CSV, copy output. Free, browser-only, zero dependencies." />
+  <link rel="canonical" href="https://markdown-table-generator.pages.dev/" />
+  <meta property="og:title" content="Markdown Table Generator — Spreadsheet-Style Table Builder" />
+  <meta property="og:description" content="Build Markdown and HTML tables with a spreadsheet UI. CSV import, column alignment, row/column reordering. Free and browser-only." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary" />
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d1117;
+      --bg-card: #161b22;
+      --bg-card-hover: #1c2128;
+      --border: #30363d;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --accent-hover: #79b8ff;
+      --green: #3fb950;
+      --yellow: #d29922;
+      --red: #f85149;
+      --radius: 8px;
+      --font-mono: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', Consolas, monospace;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* Privacy banner */
+    #privacy-banner {
+      background: #161b22;
+      border-bottom: 1px solid var(--border);
+      padding: 8px 16px;
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    #privacy-banner button {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 2px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+    #privacy-banner button:hover { border-color: var(--accent); color: var(--accent); }
+
+    header {
+      padding: 24px 16px 12px;
+      text-align: center;
+    }
+    header h1 { font-size: clamp(20px, 4vw, 28px); font-weight: 700; }
+    header p { color: var(--text-muted); margin-top: 6px; font-size: 14px; }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 16px 48px;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    .toolbar-group {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .toolbar-sep {
+      width: 1px;
+      height: 24px;
+      background: var(--border);
+      margin: 0 4px;
+    }
+    .btn {
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      transition: border-color .15s, background .15s;
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-danger:hover { border-color: var(--red); color: var(--red); }
+    .btn-primary {
+      background: var(--accent);
+      color: #0d1117;
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+    .btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); color: #0d1117; }
+    .btn-sm { padding: 3px 8px; font-size: 12px; }
+
+    label.checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      color: var(--text-muted);
+      user-select: none;
+    }
+    label.checkbox-label input[type="checkbox"] { accent-color: var(--accent); }
+
+    /* Grid wrapper */
+    .grid-wrapper {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg-card);
+      margin-bottom: 20px;
+    }
+
+    #grid-table {
+      border-collapse: collapse;
+      min-width: 100%;
+    }
+
+    /* Col controls row */
+    .col-controls td {
+      padding: 4px 2px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+    }
+    .col-controls td.row-ctrl-cell { /* spacer */ }
+
+    .col-ctrl-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+    .col-move-btns {
+      display: flex;
+      gap: 2px;
+    }
+    .col-align-btns {
+      display: flex;
+      gap: 2px;
+    }
+    .align-btn {
+      padding: 2px 6px;
+      font-size: 11px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all .12s;
+    }
+    .align-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(88,166,255,0.1);
+    }
+    .align-btn:hover:not(.active) { border-color: var(--text-muted); color: var(--text); }
+
+    /* Data rows */
+    #grid-table tbody tr:first-child td.data-cell {
+      border-top: none;
+    }
+    #grid-table tbody tr.header-row td.data-cell {
+      background: rgba(88,166,255,0.07);
+    }
+
+    td.data-cell {
+      border: 1px solid var(--border);
+      padding: 0;
+      min-width: 100px;
+      position: relative;
+    }
+    td.data-cell input {
+      width: 100%;
+      min-width: 80px;
+      padding: 6px 8px;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-size: 13px;
+      font-family: var(--font-mono);
+    }
+    td.data-cell input:focus {
+      background: rgba(88,166,255,0.06);
+    }
+
+    td.row-ctrl-cell {
+      background: var(--bg-card);
+      border-right: 1px solid var(--border);
+      white-space: nowrap;
+      padding: 2px 6px;
+    }
+    .row-ctrl-wrap {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .row-num {
+      font-size: 11px;
+      color: var(--text-muted);
+      min-width: 18px;
+      text-align: right;
+    }
+
+    /* Add col button column */
+    .add-col-cell {
+      padding: 4px 6px;
+      background: var(--bg-card);
+      border-left: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    /* Add row row */
+    #add-row-row td {
+      padding: 4px 6px;
+      text-align: center;
+      background: var(--bg-card);
+      border-top: 1px solid var(--border);
+    }
+
+    /* Outputs */
+    .output-section {
+      margin-top: 4px;
+    }
+    .output-section + .output-section { margin-top: 16px; }
+    .output-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .output-header h3 { font-size: 14px; font-weight: 600; color: var(--text-muted); letter-spacing: .03em; }
+    .output-area {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      white-space: pre;
+      overflow-x: auto;
+      min-height: 80px;
+      color: var(--green);
+      tab-size: 2;
+      line-height: 1.6;
+    }
+    .copy-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 12px;
+      font-size: 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .copy-btn:hover { border-color: var(--green); color: var(--green); }
+    .copy-btn.copied { border-color: var(--green); color: var(--green); }
+
+    /* CSV import */
+    .import-area {
+      margin-bottom: 20px;
+      padding: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    .import-area h3 { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
+    .import-area textarea {
+      width: 100%;
+      height: 80px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      padding: 8px;
+      resize: vertical;
+      outline: none;
+    }
+    .import-area textarea:focus { border-color: var(--accent); }
+    .import-controls { display: flex; gap: 8px; margin-top: 8px; align-items: center; flex-wrap: wrap; }
+
+    /* Ad slot */
+    #ad-slot {
+      margin: 20px 0;
+      min-height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 24px 16px;
+      color: var(--text-muted);
+      font-size: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Highlight active col del button */
+    .btn-icon {
+      padding: 2px 5px;
+      font-size: 11px;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      background: transparent;
+      cursor: pointer;
+      color: var(--text-muted);
+      line-height: 1;
+      transition: all .12s;
+    }
+    .btn-icon:hover { background: rgba(248,81,73,0.12); color: var(--red); border-color: var(--red); }
+    .btn-icon.move:hover { background: rgba(88,166,255,0.12); color: var(--accent); border-color: var(--accent); }
+
+    @media (max-width: 600px) {
+      .toolbar-sep { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="privacy-banner">
+  <span>🔒 All processing is done locally in your browser. No data is sent to any server.</span>
+  <button onclick="document.getElementById('privacy-banner').remove()">✕</button>
+</div>
+
+<header>
+  <h1>Markdown Table Generator</h1>
+  <p>Spreadsheet-style editor — generate Markdown &amp; HTML tables instantly</p>
+</header>
+
+<div class="container">
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="toolbar-group">
+      <button class="btn" id="btn-add-row">+ Row</button>
+      <button class="btn" id="btn-add-col">+ Column</button>
+    </div>
+    <div class="toolbar-sep"></div>
+    <div class="toolbar-group">
+      <button class="btn btn-danger" id="btn-trim">Trim Empty</button>
+      <button class="btn btn-danger" id="btn-clear">Clear All</button>
+    </div>
+    <div class="toolbar-sep"></div>
+    <div class="toolbar-group">
+      <label class="checkbox-label">
+        <input type="checkbox" id="chk-header" checked />
+        First row is header
+      </label>
+    </div>
+    <div class="toolbar-sep"></div>
+    <div class="toolbar-group">
+      <button class="btn btn-primary" id="btn-generate">Generate</button>
+    </div>
+  </div>
+
+  <!-- CSV Import -->
+  <div class="import-area">
+    <h3>CSV Import</h3>
+    <textarea id="csv-input" placeholder="Paste CSV data here… e.g.&#10;Name,Age,City&#10;Alice,30,New York&#10;Bob,25,London"></textarea>
+    <div class="import-controls">
+      <label class="checkbox-label">
+        <input type="checkbox" id="chk-csv-header" checked />
+        First row is header
+      </label>
+      <button class="btn btn-primary btn-sm" id="btn-import-csv">Import CSV</button>
+      <span id="import-msg" style="font-size:12px;color:var(--text-muted)"></span>
+    </div>
+  </div>
+
+  <!-- Grid -->
+  <div class="grid-wrapper">
+    <table id="grid-table">
+      <thead>
+        <tr class="col-controls" id="col-controls-row">
+          <td class="row-ctrl-cell"></td>
+          <!-- col ctrl cells inserted here -->
+          <td class="add-col-cell">
+            <button class="btn-icon move" title="Add column" onclick="addColumn()">+col</button>
+          </td>
+        </tr>
+      </thead>
+      <tbody id="grid-body">
+        <!-- rows inserted here -->
+      </tbody>
+      <tfoot>
+        <tr id="add-row-row">
+          <td colspan="999">
+            <button class="btn-icon move" onclick="addRow()" title="Add row">+ Add Row</button>
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <!-- Outputs -->
+  <div class="output-section">
+    <div class="output-header">
+      <h3>MARKDOWN TABLE</h3>
+      <button class="copy-btn" id="copy-md" onclick="copyOutput('md')">
+        <span>⎘</span> Copy
+      </button>
+    </div>
+    <div class="output-area" id="output-md"></div>
+  </div>
+
+  <div class="output-section">
+    <div class="output-header">
+      <h3>HTML TABLE</h3>
+      <button class="copy-btn" id="copy-html" onclick="copyOutput('html')">
+        <span>⎘</span> Copy
+      </button>
+    </div>
+    <div class="output-area" id="output-html"></div>
+  </div>
+
+  <!-- Ad slot -->
+  <div id="ad-slot" data-ea-publisher="devnestio">Advertisement</div>
+
+</div>
+
+<footer>
+  &copy; 2026 devnestio — <a href="https://devnestio.pages.dev" style="color:var(--accent)">More Tools</a>
+</footer>
+
+<script>
+'use strict';
+
+/* ── State ──────────────────────────────────────────────────────────────────*/
+let numRows = 3;
+let numCols = 3;
+// alignments[col] = 'left'|'center'|'right'
+let alignments = [];
+// cells[row][col] = string
+let cells = [];
+
+/* ── Init ───────────────────────────────────────────────────────────────────*/
+function initState(rows, cols) {
+  numRows = rows;
+  numCols = cols;
+  alignments = Array.from({ length: cols }, () => 'left');
+  cells = Array.from({ length: rows }, () => Array(cols).fill(''));
+}
+
+function loadFromDOM() {
+  const tbody = document.getElementById('grid-body');
+  const rows = tbody.querySelectorAll('tr');
+  numRows = rows.length;
+  cells = [];
+  rows.forEach((tr) => {
+    const inputs = tr.querySelectorAll('input.cell-input');
+    const row = [];
+    inputs.forEach(inp => row.push(inp.value));
+    cells.push(row);
+  });
+}
+
+/* ── Core Logic (pure, also used by tests) ──────────────────────────────────*/
+
+/**
+ * Parse CSV string → 2D array of strings.
+ * Handles quoted fields (RFC 4180 subset).
+ */
+function parseCSV(text) {
+  const rows = [];
+  const src = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  let i = 0;
+  const n = src.length;
+
+  while (i < n) {
+    if (src[i] === '\n') { i++; continue; }
+    const row = [];
+    let expectMore = true;
+    while (expectMore) {
+      if (i < n && src[i] === '"') {
+        i++;
+        let val = '';
+        while (i < n) {
+          if (src[i] === '"') {
+            if (src[i + 1] === '"') { val += '"'; i += 2; }
+            else { i++; break; }
+          } else { val += src[i++]; }
+        }
+        row.push(val);
+      } else {
+        let val = '';
+        while (i < n && src[i] !== ',' && src[i] !== '\n') val += src[i++];
+        row.push(val);
+      }
+      if (i < n && src[i] === ',') { i++; }
+      else { expectMore = false; }
+    }
+    if (i < n && src[i] === '\n') i++;
+    if (row.length > 0) rows.push(row);
+  }
+  return rows;
+}
+
+/**
+ * Normalize 2D array so all rows have same number of cols.
+ */
+function normalizeCells(arr) {
+  if (arr.length === 0) return arr;
+  const maxCols = arr.reduce((m, r) => Math.max(m, r.length), 0);
+  return arr.map(r => {
+    const out = r.slice();
+    while (out.length < maxCols) out.push('');
+    return out;
+  });
+}
+
+/**
+ * Detect empty rows (all cells are blank/whitespace).
+ */
+function isEmptyRow(row) {
+  return row.every(c => c.trim() === '');
+}
+
+/**
+ * Detect empty column by index.
+ */
+function isEmptyCol(data, colIdx) {
+  return data.every(row => (row[colIdx] || '').trim() === '');
+}
+
+/**
+ * Remove all-blank rows and columns.
+ */
+function trimEmpty(data) {
+  if (data.length === 0) return data;
+  let out = data.filter(r => !isEmptyRow(r));
+  if (out.length === 0) return out;
+  const cols = out[0].length;
+  const keptCols = [];
+  for (let c = 0; c < cols; c++) {
+    if (!isEmptyCol(out, c)) keptCols.push(c);
+  }
+  return out.map(r => keptCols.map(c => r[c]));
+}
+
+/**
+ * Escape pipe and backslash for Markdown table cells.
+ */
+function escapeMdCell(val) {
+  return val.replace(/\\/g, '\\\\').replace(/\|/g, '\\|');
+}
+
+/**
+ * Escape HTML special characters.
+ */
+function escapeHtml(val) {
+  return val
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/**
+ * Generate alignment separator cell for Markdown.
+ * align: 'left'|'center'|'right'
+ */
+function mdAlignSep(align) {
+  if (align === 'center') return ':---:';
+  if (align === 'right')  return '---:';
+  return ':---';
+}
+
+/**
+ * Generate Markdown table from 2D cells array.
+ * @param {string[][]} data
+ * @param {string[]} aligns - per-column alignment
+ * @param {boolean} hasHeader - first row is header
+ */
+function generateMarkdown(data, aligns, hasHeader) {
+  if (data.length === 0) return '';
+  const cols = data[0].length;
+  const effectiveAligns = Array.from({ length: cols }, (_, i) => aligns[i] || 'left');
+
+  // compute column widths
+  const widths = Array(cols).fill(0);
+  data.forEach(row => {
+    row.forEach((cell, ci) => {
+      widths[ci] = Math.max(widths[ci], escapeMdCell(cell).length, mdAlignSep(effectiveAligns[ci]).length);
+    });
+  });
+
+  const padCell = (val, width, align) => {
+    const escaped = escapeMdCell(val);
+    if (align === 'right')  return escaped.padStart(width);
+    if (align === 'center') {
+      const totalPad = width - escaped.length;
+      const left = Math.floor(totalPad / 2);
+      const right = totalPad - left;
+      return ' '.repeat(Math.max(0, left)) + escaped + ' '.repeat(Math.max(0, right));
+    }
+    return escaped.padEnd(width);
+  };
+
+  const renderRow = (row) =>
+    '| ' + row.map((cell, ci) => padCell(cell, widths[ci], effectiveAligns[ci])).join(' | ') + ' |';
+
+  const sepRow = () =>
+    '| ' + effectiveAligns.map((a, ci) => mdAlignSep(a).padEnd(widths[ci], '-').replace(/^(-+)$/, (m) => {
+      // re-apply align markers after padding
+      if (a === 'center') return ':' + '-'.repeat(widths[ci] - 2) + ':';
+      if (a === 'right')  return '-'.repeat(widths[ci] - 1) + ':';
+      return ':' + '-'.repeat(widths[ci] - 1);
+    })).join(' | ') + ' |';
+
+  const lines = [];
+  data.forEach((row, ri) => {
+    lines.push(renderRow(row));
+    if (ri === 0 && hasHeader) lines.push(sepRow());
+  });
+  if (!hasHeader) {
+    // insert separator after row 0 if no header (still need one for Markdown)
+    lines.splice(1, 0, sepRow());
+  }
+  return lines.join('\n');
+}
+
+/**
+ * Generate HTML table from 2D cells array.
+ */
+function generateHTML(data, aligns, hasHeader) {
+  if (data.length === 0) return '';
+  const cols = data[0].length;
+  const effectiveAligns = Array.from({ length: cols }, (_, i) => aligns[i] || 'left');
+
+  const alignStyle = (a) => `text-align: ${a};`;
+
+  const lines = ['<table border="1" cellspacing="0" cellpadding="6">'];
+  data.forEach((row, ri) => {
+    if (ri === 0 && hasHeader) lines.push('  <thead>');
+    if (ri === 1 && hasHeader) lines.push('  <tbody>');
+    if (ri === 0 && !hasHeader) lines.push('  <tbody>');
+    lines.push('    <tr>');
+    row.forEach((cell, ci) => {
+      const tag = (ri === 0 && hasHeader) ? 'th' : 'td';
+      lines.push(`      <${tag} style="${alignStyle(effectiveAligns[ci])}">${escapeHtml(cell)}</${tag}>`);
+    });
+    lines.push('    </tr>');
+    if (ri === 0 && hasHeader) lines.push('  </thead>');
+  });
+  lines.push('  </tbody>');
+  lines.push('</table>');
+  return lines.join('\n');
+}
+
+/* ── DOM helpers ─────────────────────────────────────────────────────────────*/
+
+function getGridData() {
+  loadFromDOM();
+  return cells;
+}
+
+function renderGrid() {
+  renderColControls();
+  renderRows();
+  generateOutputs();
+}
+
+function renderColControls() {
+  const colRow = document.getElementById('col-controls-row');
+  // Remove all except first (row-ctrl-cell) and last (add-col-cell)
+  const children = Array.from(colRow.children);
+  children.slice(1, children.length - 1).forEach(c => c.remove());
+
+  const addColCell = colRow.lastElementChild;
+  for (let ci = 0; ci < numCols; ci++) {
+    const td = document.createElement('td');
+    td.className = 'col-controls';
+    const align = alignments[ci] || 'left';
+    td.innerHTML = `
+      <div class="col-ctrl-wrap">
+        <div class="col-move-btns">
+          <button class="btn-icon move" title="Move left" onclick="moveColLeft(${ci})">◀</button>
+          <button class="btn-icon move" title="Move right" onclick="moveColRight(${ci})">▶</button>
+          <button class="btn-icon" title="Delete column" onclick="deleteCol(${ci})">✕</button>
+        </div>
+        <div class="col-align-btns">
+          <button class="align-btn ${align === 'left' ? 'active' : ''}" onclick="setAlign(${ci},'left')" title="Align left">L</button>
+          <button class="align-btn ${align === 'center' ? 'active' : ''}" onclick="setAlign(${ci},'center')" title="Align center">C</button>
+          <button class="align-btn ${align === 'right' ? 'active' : ''}" onclick="setAlign(${ci},'right')" title="Align right">R</button>
+        </div>
+      </div>`;
+    colRow.insertBefore(td, addColCell);
+  }
+}
+
+function renderRows() {
+  const tbody = document.getElementById('grid-body');
+  tbody.innerHTML = '';
+  const hasHeader = document.getElementById('chk-header').checked;
+
+  for (let ri = 0; ri < numRows; ri++) {
+    const tr = document.createElement('tr');
+    if (ri === 0 && hasHeader) tr.className = 'header-row';
+
+    // Row control cell
+    const ctrlTd = document.createElement('td');
+    ctrlTd.className = 'row-ctrl-cell';
+    ctrlTd.innerHTML = `
+      <div class="row-ctrl-wrap">
+        <span class="row-num">${ri + 1}</span>
+        <button class="btn-icon move" title="Move up" onclick="moveRowUp(${ri})">▲</button>
+        <button class="btn-icon move" title="Move down" onclick="moveRowDown(${ri})">▼</button>
+        <button class="btn-icon" title="Delete row" onclick="deleteRow(${ri})">✕</button>
+      </div>`;
+    tr.appendChild(ctrlTd);
+
+    // Data cells
+    for (let ci = 0; ci < numCols; ci++) {
+      const td = document.createElement('td');
+      td.className = 'data-cell';
+      const inp = document.createElement('input');
+      inp.className = 'cell-input';
+      inp.type = 'text';
+      inp.value = (cells[ri] && cells[ri][ci] !== undefined) ? cells[ri][ci] : '';
+      inp.setAttribute('data-row', ri);
+      inp.setAttribute('data-col', ci);
+      inp.addEventListener('input', () => generateOutputs());
+      inp.addEventListener('keydown', handleCellKey);
+      td.appendChild(inp);
+      tr.appendChild(td);
+    }
+
+    // Extra cell to not conflict with add-col-cell column
+    const extraTd = document.createElement('td');
+    extraTd.style.background = 'var(--bg-card)';
+    tr.appendChild(extraTd);
+
+    tbody.appendChild(tr);
+  }
+}
+
+function handleCellKey(e) {
+  const ri = parseInt(e.target.dataset.row);
+  const ci = parseInt(e.target.dataset.col);
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const nextCi = e.shiftKey ? ci - 1 : ci + 1;
+    if (nextCi >= 0 && nextCi < numCols) {
+      focusCell(ri, nextCi);
+    } else if (!e.shiftKey && ri < numRows - 1) {
+      focusCell(ri + 1, 0);
+    } else if (e.shiftKey && ri > 0) {
+      focusCell(ri - 1, numCols - 1);
+    }
+  }
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    if (ri < numRows - 1) focusCell(ri + 1, ci);
+    else { addRow(); focusCell(ri + 1, ci); }
+  }
+  if (e.key === 'ArrowUp' && ri > 0) { e.preventDefault(); focusCell(ri - 1, ci); }
+  if (e.key === 'ArrowDown' && ri < numRows - 1) { e.preventDefault(); focusCell(ri + 1, ci); }
+}
+
+function focusCell(ri, ci) {
+  const tbody = document.getElementById('grid-body');
+  const rows = tbody.querySelectorAll('tr');
+  if (rows[ri]) {
+    const inputs = rows[ri].querySelectorAll('input.cell-input');
+    if (inputs[ci]) inputs[ci].focus();
+  }
+}
+
+/* ── State mutations ─────────────────────────────────────────────────────────*/
+
+function saveToCells() {
+  loadFromDOM();
+}
+
+function addRow() {
+  saveToCells();
+  cells.push(Array(numCols).fill(''));
+  numRows++;
+  renderGrid();
+}
+
+function addColumn() {
+  saveToCells();
+  cells.forEach(row => row.push(''));
+  alignments.push('left');
+  numCols++;
+  renderGrid();
+}
+
+function deleteRow(ri) {
+  saveToCells();
+  if (numRows <= 1) return;
+  cells.splice(ri, 1);
+  numRows--;
+  renderGrid();
+}
+
+function deleteCol(ci) {
+  saveToCells();
+  if (numCols <= 1) return;
+  cells.forEach(row => row.splice(ci, 1));
+  alignments.splice(ci, 1);
+  numCols--;
+  renderGrid();
+}
+
+function moveRowUp(ri) {
+  if (ri === 0) return;
+  saveToCells();
+  [cells[ri - 1], cells[ri]] = [cells[ri], cells[ri - 1]];
+  renderGrid();
+}
+
+function moveRowDown(ri) {
+  if (ri >= numRows - 1) return;
+  saveToCells();
+  [cells[ri], cells[ri + 1]] = [cells[ri + 1], cells[ri]];
+  renderGrid();
+}
+
+function moveColLeft(ci) {
+  if (ci === 0) return;
+  saveToCells();
+  cells.forEach(row => { [row[ci - 1], row[ci]] = [row[ci], row[ci - 1]]; });
+  [alignments[ci - 1], alignments[ci]] = [alignments[ci], alignments[ci - 1]];
+  numCols = cells[0].length;
+  renderGrid();
+}
+
+function moveColRight(ci) {
+  if (ci >= numCols - 1) return;
+  saveToCells();
+  cells.forEach(row => { [row[ci], row[ci + 1]] = [row[ci + 1], row[ci]]; });
+  [alignments[ci], alignments[ci + 1]] = [alignments[ci + 1], alignments[ci]];
+  numCols = cells[0].length;
+  renderGrid();
+}
+
+function setAlign(ci, align) {
+  saveToCells();
+  alignments[ci] = align;
+  renderGrid();
+}
+
+function trimEmptyAction() {
+  saveToCells();
+  const trimmed = trimEmpty(cells);
+  if (trimmed.length === 0) {
+    initState(2, 2);
+  } else {
+    cells = normalizeCells(trimmed);
+    numRows = cells.length;
+    numCols = cells[0].length;
+    while (alignments.length < numCols) alignments.push('left');
+    alignments = alignments.slice(0, numCols);
+  }
+  renderGrid();
+}
+
+function clearAll() {
+  initState(3, 3);
+  renderGrid();
+}
+
+/* ── Output generation ───────────────────────────────────────────────────────*/
+
+function generateOutputs() {
+  try {
+    const data = getGridData();
+    const hasHeader = document.getElementById('chk-header').checked;
+    const md = generateMarkdown(data, alignments, hasHeader);
+    const html = generateHTML(data, alignments, hasHeader);
+    document.getElementById('output-md').textContent = md;
+    document.getElementById('output-html').textContent = html;
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+/* ── CSV Import ──────────────────────────────────────────────────────────────*/
+
+function importCSV() {
+  try {
+    const raw = document.getElementById('csv-input').value;
+    if (!raw.trim()) {
+      document.getElementById('import-msg').textContent = 'No CSV data.';
+      return;
+    }
+    const parsed = parseCSV(raw);
+    if (parsed.length === 0) {
+      document.getElementById('import-msg').textContent = 'Could not parse CSV.';
+      return;
+    }
+    cells = normalizeCells(parsed);
+    numRows = cells.length;
+    numCols = cells[0].length;
+    alignments = Array(numCols).fill('left');
+    document.getElementById('import-msg').textContent =
+      `Imported ${numRows} rows × ${numCols} cols`;
+    renderGrid();
+  } catch (e) {
+    document.getElementById('import-msg').textContent = 'Error: ' + e.message;
+  }
+}
+
+/* ── Copy ────────────────────────────────────────────────────────────────────*/
+
+function copyOutput(type) {
+  try {
+    const el = document.getElementById(type === 'md' ? 'output-md' : 'output-html');
+    const btn = document.getElementById(type === 'md' ? 'copy-md' : 'copy-html');
+    navigator.clipboard.writeText(el.textContent).then(() => {
+      btn.classList.add('copied');
+      btn.querySelector('span').textContent = '✓';
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.querySelector('span').textContent = '⎘';
+      }, 1500);
+    });
+  } catch (e) { console.error(e); }
+}
+
+/* ── Event wiring ────────────────────────────────────────────────────────────*/
+
+document.getElementById('btn-add-row').addEventListener('click', addRow);
+document.getElementById('btn-add-col').addEventListener('click', addColumn);
+document.getElementById('btn-trim').addEventListener('click', trimEmptyAction);
+document.getElementById('btn-clear').addEventListener('click', clearAll);
+document.getElementById('btn-generate').addEventListener('click', generateOutputs);
+document.getElementById('btn-import-csv').addEventListener('click', importCSV);
+document.getElementById('chk-header').addEventListener('change', () => { saveToCells(); renderGrid(); });
+
+/* ── Bootstrap ───────────────────────────────────────────────────────────────*/
+
+initState(3, 3);
+cells[0] = ['Name', 'Age', 'City'];
+cells[1] = ['Alice', '30', 'New York'];
+cells[2] = ['Bob', '25', 'London'];
+renderGrid();
+
+</script>
+</body>
+</html>

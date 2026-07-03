@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SVG Path Command Inspector | DevNestio</title>
+  <meta name="description" content="Parse and inspect SVG path 'd' attribute commands. View each M, L, C, Q, A, Z command with coordinates, preview the path, and understand the drawing instructions." />
+  <meta property="og:title" content="SVG Path Command Inspector | DevNestio" />
+  <meta property="og:description" content="Break down SVG path data into individual commands. Preview shapes, inspect bezier curves, arcs, and move commands. Browser-only." />
+  <meta property="og:url" content="https://devnestio.pages.dev/svg-path-editor/" />
+  <meta name="twitter:card" content="summary" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    #privacy-banner { background: #1e293b; border-bottom: 1px solid #334155; padding: 8px 16px; font-size: 12px; color: #94a3b8; text-align: center; }
+    header { background: #1e293b; border-bottom: 1px solid #334155; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+    header a { color: #64748b; font-size: 13px; text-decoration: none; margin-left: auto; }
+    header a:hover { color: #94a3b8; }
+    .badge { background: #d97706; color: #fff; font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+    main { max-width: 1000px; margin: 0 auto; padding: 24px 16px; }
+    .input-row { display: flex; gap: 8px; margin-bottom: 14px; align-items: flex-start; }
+    .path-input { flex: 1; padding: 10px 12px; background: #1e293b; border: 1px solid #334155; border-radius: 7px; color: #e2e8f0; font-size: 13px; font-family: 'JetBrains Mono', monospace; outline: none; min-height: 60px; resize: vertical; }
+    .path-input:focus { border-color: #d97706; }
+    .btn { padding: 8px 16px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; white-space: nowrap; }
+    .btn-primary { background: #d97706; color: #fff; }
+    .btn-primary:hover { background: #b45309; }
+    .btn-secondary { background: #334155; color: #e2e8f0; }
+    .btn-secondary:hover { background: #475569; }
+    .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+    .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 700px) { .layout { grid-template-columns: 1fr; } }
+    .panel { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 16px; }
+    .panel-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .panel-hdr h2 { font-size: 13px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em; }
+    /* Preview SVG */
+    .svg-preview { background: #0f1117; border: 1px solid #334155; border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 8px; }
+    .svg-preview svg { width: 100%; height: 280px; }
+    .preview-opts { display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
+    .preview-opt { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #94a3b8; }
+    .preview-opt input[type="checkbox"] { accent-color: #d97706; cursor: pointer; }
+    .preview-opt input[type="color"] { width: 28px; height: 20px; border: none; border-radius: 3px; cursor: pointer; background: none; padding: 0; }
+    /* Command list */
+    .cmd-list { display: flex; flex-direction: column; gap: 6px; max-height: 360px; overflow-y: auto; }
+    .cmd-item { background: #0f1117; border-radius: 7px; padding: 10px 12px; border-left: 3px solid; display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
+    .cmd-item:hover { background: #1a2333; }
+    .cmd-item.active { outline: 1px solid #d97706; }
+    .cmd-letter { font-size: 18px; font-weight: 900; font-family: monospace; min-width: 24px; }
+    .cmd-body { flex: 1; min-width: 0; }
+    .cmd-name { font-size: 11px; color: #64748b; margin-bottom: 3px; }
+    .cmd-params { font-size: 12px; font-family: monospace; color: #e2e8f0; word-break: break-all; }
+    .cmd-desc { font-size: 11px; color: #94a3b8; margin-top: 3px; }
+    .stats-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+    .stat { font-size: 12px; background: #1e293b; border: 1px solid #334155; border-radius: 6px; padding: 6px 12px; }
+    .stat strong { color: #d97706; }
+    .error-msg { background: #450a0a; border: 1px solid #7f1d1d; border-radius: 7px; padding: 10px 14px; font-size: 13px; color: #fca5a5; margin-bottom: 12px; }
+    .empty-state { text-align: center; padding: 40px; color: #475569; font-size: 13px; }
+    /* Command color palette */
+    .cmd-item[data-cmd="M"], .cmd-item[data-cmd="m"] { border-color: #38bdf8; }
+    .cmd-item[data-cmd="L"], .cmd-item[data-cmd="l"],
+    .cmd-item[data-cmd="H"], .cmd-item[data-cmd="h"],
+    .cmd-item[data-cmd="V"], .cmd-item[data-cmd="v"] { border-color: #4ade80; }
+    .cmd-item[data-cmd="C"], .cmd-item[data-cmd="c"],
+    .cmd-item[data-cmd="S"], .cmd-item[data-cmd="s"] { border-color: #a78bfa; }
+    .cmd-item[data-cmd="Q"], .cmd-item[data-cmd="q"],
+    .cmd-item[data-cmd="T"], .cmd-item[data-cmd="t"] { border-color: #fb923c; }
+    .cmd-item[data-cmd="A"], .cmd-item[data-cmd="a"] { border-color: #f472b6; }
+    .cmd-item[data-cmd="Z"], .cmd-item[data-cmd="z"] { border-color: #94a3b8; }
+    .legend { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #94a3b8; }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+    #ad-slot { margin: 20px auto; text-align: center; }
+  </style>
+</head>
+<body>
+<div id="privacy-banner">🔒 All processing happens in your browser. No data is sent to any server.</div>
+<header>
+  <span class="badge">FREE</span>
+  <h1>SVG Path Command Inspector</h1>
+  <a href="https://devnestio.pages.dev">← All Tools</a>
+</header>
+<main>
+  <div class="input-row">
+    <textarea class="path-input" id="path-input" placeholder="Paste SVG path d attribute here, e.g.: M 10 10 L 90 10 L 90 90 Z" spellcheck="false"></textarea>
+    <button class="btn btn-primary" onclick="parse()">Parse</button>
+  </div>
+  <div class="toolbar">
+    <button class="btn btn-secondary" onclick="loadSample('arrow')">Arrow</button>
+    <button class="btn btn-secondary" onclick="loadSample('star')">Star</button>
+    <button class="btn btn-secondary" onclick="loadSample('heart')">Heart</button>
+    <button class="btn btn-secondary" onclick="loadSample('bezier')">Bezier</button>
+    <button class="btn btn-secondary" onclick="loadSample('arc')">Arc</button>
+    <button class="btn btn-secondary" onclick="clearAll()">Clear</button>
+  </div>
+
+  <div id="error-area"></div>
+
+  <div class="stats-row" id="stats-row" style="display:none">
+    <div class="stat">Commands: <strong id="st-count">0</strong></div>
+    <div class="stat">Segments: <strong id="st-segs">0</strong></div>
+    <div class="stat">SubPaths: <strong id="st-subpaths">0</strong></div>
+    <div class="stat">Closed: <strong id="st-closed">—</strong></div>
+    <div class="stat">Bounds: <strong id="st-bounds">—</strong></div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#38bdf8"></div>Move</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#4ade80"></div>Line</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div>Cubic Bezier</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#fb923c"></div>Quadratic Bezier</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f472b6"></div>Arc</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#94a3b8"></div>Close</div>
+  </div>
+
+  <div class="layout">
+    <div class="panel">
+      <div class="panel-hdr">
+        <h2>Preview</h2>
+        <span id="preview-dims" style="font-size:11px;color:#64748b"></span>
+      </div>
+      <div class="svg-preview">
+        <svg id="preview-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <text x="100" y="105" text-anchor="middle" fill="#334155" font-size="12">Paste a path to preview</text>
+        </svg>
+      </div>
+      <div class="preview-opts">
+        <label class="preview-opt"><input type="checkbox" id="opt-fill" checked onchange="renderPreview()"> Fill</label>
+        <label class="preview-opt"><input type="checkbox" id="opt-stroke" checked onchange="renderPreview()"> Stroke</label>
+        <label class="preview-opt"><input type="checkbox" id="opt-points" onchange="renderPreview()"> Control Points</label>
+        <label class="preview-opt">Fill: <input type="color" id="fill-color" value="#d97706" onchange="renderPreview()"></label>
+        <label class="preview-opt">Stroke: <input type="color" id="stroke-color" value="#e2e8f0" onchange="renderPreview()"></label>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-hdr">
+        <h2>Commands</h2>
+        <span id="cmd-count-label" style="font-size:11px;color:#64748b"></span>
+      </div>
+      <div id="cmd-list" class="cmd-list">
+        <div class="empty-state">Parse a path to see commands</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="ad-slot" data-ea-publisher="devnestio" data-ea-type="image"></div>
+</main>
+<script>
+// ── Command metadata ───────────────────────────────────────────
+const CMD_INFO = {
+  M: { name: 'MoveTo (absolute)', desc: 'Move to (x,y) without drawing', params: ['x','y'], repeat: true },
+  m: { name: 'moveto (relative)', desc: 'Move by (dx,dy) without drawing', params: ['dx','dy'], repeat: true },
+  L: { name: 'LineTo (absolute)', desc: 'Draw a straight line to (x,y)', params: ['x','y'], repeat: true },
+  l: { name: 'lineto (relative)', desc: 'Draw a line by (dx,dy)', params: ['dx','dy'], repeat: true },
+  H: { name: 'HorizontalLineTo (absolute)', desc: 'Horizontal line to x', params: ['x'], repeat: true },
+  h: { name: 'horizontallineto (relative)', desc: 'Horizontal line by dx', params: ['dx'], repeat: true },
+  V: { name: 'VerticalLineTo (absolute)', desc: 'Vertical line to y', params: ['y'], repeat: true },
+  v: { name: 'verticallineto (relative)', desc: 'Vertical line by dy', params: ['dy'], repeat: true },
+  C: { name: 'CubicBezier (absolute)', desc: 'Cubic bezier to (x,y) with control points (x1,y1) and (x2,y2)', params: ['x1','y1','x2','y2','x','y'], repeat: true },
+  c: { name: 'cubicbezier (relative)', desc: 'Relative cubic bezier', params: ['dx1','dy1','dx2','dy2','dx','dy'], repeat: true },
+  S: { name: 'SmoothCubic (absolute)', desc: 'Smooth cubic bezier to (x,y) with reflected control point', params: ['x2','y2','x','y'], repeat: true },
+  s: { name: 'smoothcubic (relative)', desc: 'Relative smooth cubic bezier', params: ['dx2','dy2','dx','dy'], repeat: true },
+  Q: { name: 'QuadraticBezier (absolute)', desc: 'Quadratic bezier to (x,y) with control (x1,y1)', params: ['x1','y1','x','y'], repeat: true },
+  q: { name: 'quadraticbezier (relative)', desc: 'Relative quadratic bezier', params: ['dx1','dy1','dx','dy'], repeat: true },
+  T: { name: 'SmoothQuadratic (absolute)', desc: 'Smooth quadratic bezier to (x,y)', params: ['x','y'], repeat: true },
+  t: { name: 'smoothquadratic (relative)', desc: 'Relative smooth quadratic to (dx,dy)', params: ['dx','dy'], repeat: true },
+  A: { name: 'Arc (absolute)', desc: 'Elliptical arc to (x,y)', params: ['rx','ry','x-rotation','large-arc','sweep','x','y'], repeat: true },
+  a: { name: 'arc (relative)', desc: 'Relative elliptical arc', params: ['rx','ry','x-rotation','large-arc','sweep','dx','dy'], repeat: true },
+  Z: { name: 'ClosePath', desc: 'Close the current subpath', params: [], repeat: false },
+  z: { name: 'closepath', desc: 'Close the current subpath', params: [], repeat: false },
+};
+
+// ── Parser ─────────────────────────────────────────────────────
+function parsePath(d) {
+  const tokens = d.trim().match(/[MmLlHhVvCcSsQqTtAaZz]|[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?/g) || [];
+  const cmds = [];
+  let i = 0;
+  while (i < tokens.length) {
+    const t = tokens[i];
+    if (/[MmLlHhVvCcSsQqTtAaZz]/.test(t)) {
+      const letter = t;
+      const info = CMD_INFO[letter];
+      if (!info) { i++; continue; }
+      i++;
+      if (info.params.length === 0) {
+        cmds.push({ cmd: letter, args: [] });
+      } else {
+        const n = info.params.length;
+        while (i < tokens.length && !/[MmLlHhVvCcSsQqTtAaZz]/.test(tokens[i])) {
+          const args = [];
+          for (let j = 0; j < n && i < tokens.length && !/[MmLlHhVvCcSsQqTtAaZz]/.test(tokens[i]); j++, i++) {
+            args.push(parseFloat(tokens[i]));
+          }
+          if (args.length === n) cmds.push({ cmd: letter, args });
+          else break;
+        }
+      }
+    } else {
+      i++;
+    }
+  }
+  return cmds;
+}
+
+// ── Bounding box (approximate) ─────────────────────────────────
+function getBounds(cmds) {
+  let xs = [], ys = [], cx = 0, cy = 0;
+  for (const { cmd, args } of cmds) {
+    const abs = cmd === cmd.toUpperCase();
+    switch (cmd.toUpperCase()) {
+      case 'M': case 'L': case 'T':
+        for (let i = 0; i < args.length; i += 2) {
+          const x = abs ? args[i] : cx + args[i];
+          const y = abs ? args[i+1] : cy + args[i+1];
+          xs.push(x); ys.push(y); cx = x; cy = y;
+        }
+        break;
+      case 'H':
+        for (const a of args) { const x = abs ? a : cx + a; xs.push(x); cx = x; }
+        break;
+      case 'V':
+        for (const a of args) { const y = abs ? a : cy + a; ys.push(y); cy = y; }
+        break;
+      case 'C':
+        for (let i = 0; i < args.length; i += 6) {
+          const endX = abs ? args[i+4] : cx + args[i+4];
+          const endY = abs ? args[i+5] : cy + args[i+5];
+          xs.push(abs ? args[i] : cx+args[i], abs ? args[i+2] : cx+args[i+2], endX);
+          ys.push(abs ? args[i+1] : cy+args[i+1], abs ? args[i+3] : cy+args[i+3], endY);
+          cx = endX; cy = endY;
+        }
+        break;
+      case 'Q':
+        for (let i = 0; i < args.length; i += 4) {
+          const endX = abs ? args[i+2] : cx + args[i+2];
+          const endY = abs ? args[i+3] : cy + args[i+3];
+          xs.push(abs ? args[i] : cx+args[i], endX);
+          ys.push(abs ? args[i+1] : cy+args[i+1], endY);
+          cx = endX; cy = endY;
+        }
+        break;
+      case 'S':
+        for (let i = 0; i < args.length; i += 4) {
+          const endX = abs ? args[i+2] : cx + args[i+2];
+          const endY = abs ? args[i+3] : cy + args[i+3];
+          xs.push(endX); ys.push(endY); cx = endX; cy = endY;
+        }
+        break;
+      case 'A':
+        for (let i = 0; i < args.length; i += 7) {
+          const endX = abs ? args[i+5] : cx + args[i+5];
+          const endY = abs ? args[i+6] : cy + args[i+6];
+          xs.push(endX); ys.push(endY); cx = endX; cy = endY;
+        }
+        break;
+    }
+  }
+  if (!xs.length) return null;
+  return { minX: Math.min(...xs), maxX: Math.max(...xs), minY: Math.min(...ys), maxY: Math.max(...ys) };
+}
+
+let parsedCmds = [];
+let activeIdx = -1;
+
+function parse() {
+  const d = document.getElementById('path-input').value.trim();
+  document.getElementById('error-area').innerHTML = '';
+  if (!d) { clearDisplay(); return; }
+  try {
+    parsedCmds = parsePath(d);
+    if (parsedCmds.length === 0) throw new Error('No valid commands found in path data.');
+    renderAll(d);
+  } catch(e) {
+    document.getElementById('error-area').innerHTML = `<div class="error-msg">❌ ${escHtml(e.message)}</div>`;
+    clearDisplay();
+  }
+}
+
+function renderAll(d) {
+  const cmds = parsedCmds;
+  const bounds = getBounds(cmds);
+
+  // Stats
+  const subpaths = cmds.filter(c => c.cmd === 'M' || c.cmd === 'm').length;
+  const closed = cmds.some(c => c.cmd === 'Z' || c.cmd === 'z');
+  document.getElementById('stats-row').style.display = 'flex';
+  document.getElementById('st-count').textContent = cmds.length;
+  document.getElementById('st-segs').textContent = cmds.filter(c => !'Mm'.includes(c.cmd)).length;
+  document.getElementById('st-subpaths').textContent = subpaths;
+  document.getElementById('st-closed').textContent = closed ? 'Yes' : 'No';
+  if (bounds) {
+    const w = (bounds.maxX - bounds.minX).toFixed(1);
+    const h = (bounds.maxY - bounds.minY).toFixed(1);
+    document.getElementById('st-bounds').textContent = `${w} × ${h}`;
+    document.getElementById('preview-dims').textContent = `${w} × ${h}`;
+  }
+
+  // Command list
+  document.getElementById('cmd-count-label').textContent = `${cmds.length} command${cmds.length !== 1 ? 's' : ''}`;
+  const listEl = document.getElementById('cmd-list');
+  let html = '';
+  cmds.forEach((c, idx) => {
+    const info = CMD_INFO[c.cmd] || { name: c.cmd, desc: '', params: [] };
+    const paramStr = info.params.length > 0
+      ? info.params.map((p, i) => `<span style="color:#64748b">${p}=</span>${c.args[i] !== undefined ? c.args[i] : '?'}`).join(' ')
+      : '(no args)';
+    html += `<div class="cmd-item${activeIdx === idx ? ' active' : ''}" data-cmd="${escAttr(c.cmd)}" data-idx="${idx}" onclick="selectCmd(${idx})">
+      <div class="cmd-letter">${escHtml(c.cmd)}</div>
+      <div class="cmd-body">
+        <div class="cmd-name">${escHtml(info.name)}</div>
+        <div class="cmd-params">${paramStr}</div>
+        <div class="cmd-desc">${escHtml(info.desc)}</div>
+      </div>
+    </div>`;
+  });
+  listEl.innerHTML = html || '<div class="empty-state">No commands</div>';
+
+  renderPreview();
+}
+
+function selectCmd(idx) {
+  activeIdx = idx;
+  document.querySelectorAll('.cmd-item').forEach((el, i) => el.classList.toggle('active', i === idx));
+  renderPreview();
+}
+
+function renderPreview() {
+  const d = document.getElementById('path-input').value.trim();
+  if (!parsedCmds.length || !d) return;
+  const bounds = getBounds(parsedCmds);
+  const svg = document.getElementById('preview-svg');
+  const showFill = document.getElementById('opt-fill').checked;
+  const showStroke = document.getElementById('opt-stroke').checked;
+  const showPoints = document.getElementById('opt-points').checked;
+  const fillColor = document.getElementById('fill-color').value;
+  const strokeColor = document.getElementById('stroke-color').value;
+
+  let pad = 20, vbX, vbY, vbW, vbH;
+  if (bounds) {
+    vbX = bounds.minX - pad;
+    vbY = bounds.minY - pad;
+    vbW = (bounds.maxX - bounds.minX) + pad * 2;
+    vbH = (bounds.maxY - bounds.minY) + pad * 2;
+    if (vbW < 1) vbW = 100;
+    if (vbH < 1) vbH = 100;
+  } else {
+    vbX = -pad; vbY = -pad; vbW = 200 + pad * 2; vbH = 200 + pad * 2;
+  }
+  svg.setAttribute('viewBox', `${vbX} ${vbY} ${vbW} ${vbH}`);
+
+  let inner = '';
+  // Grid
+  const step = Math.max(1, Math.round(Math.max(vbW, vbH) / 8));
+  inner += `<g stroke="#1e293b" stroke-width="0.5">`;
+  for (let gx = Math.floor(vbX / step) * step; gx < vbX + vbW; gx += step)
+    inner += `<line x1="${gx}" y1="${vbY}" x2="${gx}" y2="${vbY + vbH}"/>`;
+  for (let gy = Math.floor(vbY / step) * step; gy < vbY + vbH; gy += step)
+    inner += `<line x1="${vbX}" y1="${gy}" x2="${vbX + vbW}" y2="${gy}"/>`;
+  inner += `</g>`;
+
+  // Path
+  const fill = showFill ? fillColor + '55' : 'none';
+  const stroke = showStroke ? strokeColor : 'none';
+  inner += `<path d="${escAttr(d)}" fill="${fill}" stroke="${stroke}" stroke-width="${Math.max(0.5, vbW * 0.008)}" stroke-linejoin="round" stroke-linecap="round"/>`;
+
+  // Highlighted command
+  if (activeIdx >= 0 && activeIdx < parsedCmds.length) {
+    const c = parsedCmds[activeIdx];
+    const info = CMD_INFO[c.cmd] || {};
+    if (c.args.length >= 2 && (c.cmd.toUpperCase() === 'M' || c.cmd.toUpperCase() === 'L' || c.cmd.toUpperCase() === 'C' || c.cmd.toUpperCase() === 'Q')) {
+      const n = c.args.length;
+      const x = c.args[n - 2], y = c.args[n - 1];
+      const r = Math.max(2, vbW * 0.015);
+      inner += `<circle cx="${x}" cy="${y}" r="${r}" fill="#d97706" opacity="0.9"/>`;
+    }
+  }
+
+  // Control points
+  if (showPoints) {
+    let cx = 0, cy = 0;
+    parsedCmds.forEach(c => {
+      const abs = c.cmd === c.cmd.toUpperCase();
+      const r = Math.max(1.5, vbW * 0.01);
+      if (c.cmd.toUpperCase() === 'C') {
+        for (let i = 0; i < c.args.length; i += 6) {
+          const x1 = abs ? c.args[i] : cx + c.args[i];
+          const y1 = abs ? c.args[i+1] : cy + c.args[i+1];
+          const x2 = abs ? c.args[i+2] : cx + c.args[i+2];
+          const y2 = abs ? c.args[i+3] : cy + c.args[i+3];
+          inner += `<circle cx="${x1}" cy="${y1}" r="${r}" fill="#a78bfa" opacity="0.7"/>`;
+          inner += `<circle cx="${x2}" cy="${y2}" r="${r}" fill="#a78bfa" opacity="0.7"/>`;
+          inner += `<line x1="${cx}" y1="${cy}" x2="${x1}" y2="${y1}" stroke="#a78bfa" stroke-width="${r*0.5}" stroke-dasharray="${r},${r}" opacity="0.5"/>`;
+          cx = abs ? c.args[i+4] : cx + c.args[i+4];
+          cy = abs ? c.args[i+5] : cy + c.args[i+5];
+        }
+      } else if (c.cmd.toUpperCase() === 'Q') {
+        for (let i = 0; i < c.args.length; i += 4) {
+          const x1 = abs ? c.args[i] : cx + c.args[i];
+          const y1 = abs ? c.args[i+1] : cy + c.args[i+1];
+          inner += `<circle cx="${x1}" cy="${y1}" r="${r}" fill="#fb923c" opacity="0.7"/>`;
+          cx = abs ? c.args[i+2] : cx + c.args[i+2];
+          cy = abs ? c.args[i+3] : cy + c.args[i+3];
+        }
+      } else if (c.cmd.toUpperCase() === 'M' || c.cmd.toUpperCase() === 'L') {
+        for (let i = 0; i < c.args.length; i += 2) {
+          const x = abs ? c.args[i] : cx + c.args[i];
+          const y = abs ? c.args[i+1] : cy + c.args[i+1];
+          inner += `<circle cx="${x}" cy="${y}" r="${r}" fill="#38bdf8" opacity="0.7"/>`;
+          cx = x; cy = y;
+        }
+      }
+    });
+  }
+
+  svg.innerHTML = inner;
+}
+
+function clearDisplay() {
+  parsedCmds = [];
+  activeIdx = -1;
+  document.getElementById('stats-row').style.display = 'none';
+  document.getElementById('cmd-list').innerHTML = '<div class="empty-state">Parse a path to see commands</div>';
+  document.getElementById('cmd-count-label').textContent = '';
+  document.getElementById('preview-dims').textContent = '';
+  document.getElementById('preview-svg').innerHTML = '<text x="100" y="105" text-anchor="middle" fill="#334155" font-size="12">Paste a path to preview</text>';
+  document.getElementById('preview-svg').setAttribute('viewBox', '0 0 200 200');
+}
+
+function clearAll() {
+  document.getElementById('path-input').value = '';
+  document.getElementById('error-area').innerHTML = '';
+  clearDisplay();
+}
+
+const SAMPLES = {
+  arrow: 'M 10 50 L 70 50 L 70 30 L 100 60 L 70 90 L 70 70 L 10 70 Z',
+  star: 'M 50 10 L 61 35 L 90 35 L 67 57 L 76 82 L 50 65 L 24 82 L 33 57 L 10 35 L 39 35 Z',
+  heart: 'M 50 80 C 10 60 10 30 30 20 C 40 15 50 20 50 30 C 50 20 60 15 70 20 C 90 30 90 60 50 80 Z',
+  bezier: 'M 10 80 C 10 10 90 10 90 80 S 170 150 170 80',
+  arc: 'M 20 100 A 50 40 0 0 1 120 100 A 50 40 0 0 1 20 100 Z',
+};
+
+function loadSample(name) {
+  document.getElementById('path-input').value = SAMPLES[name] || '';
+  parse();
+}
+
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escAttr(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+// Auto-parse on input after debounce
+let debounce;
+document.getElementById('path-input').addEventListener('input', () => {
+  clearTimeout(debounce);
+  debounce = setTimeout(parse, 400);
+});
+
+// Load star on startup
+loadSample('star');
+</script>
+</body>
+</html>

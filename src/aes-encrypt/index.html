@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AES Encrypt & Decrypt — devnestio</title>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#0f1117;color:#e2e8f0;min-height:100vh}
+header{padding:24px 32px;border-bottom:1px solid #1e2535}
+h1{font-size:1.5rem;font-weight:700;color:#f8fafc}
+h1 span{color:#60a5fa}
+.desc{color:#94a3b8;margin-top:4px;font-size:.9rem}
+.main{max-width:800px;margin:0 auto;padding:32px}
+.card{background:#141924;border:1px solid #1e2535;border-radius:10px;padding:24px;margin-bottom:20px}
+.card-title{font-size:.85rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px}
+label{display:block;font-size:.85rem;color:#94a3b8;margin-bottom:6px}
+.password-wrap{position:relative}
+.password-wrap input{padding-right:44px}
+.show-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:#64748b;cursor:pointer;font-size:.8rem}
+.show-btn:hover{color:#e2e8f0}
+input[type=text],input[type=password],textarea{width:100%;background:#1e2535;border:1px solid #334155;color:#e2e8f0;padding:10px 12px;border-radius:6px;font-size:.9rem;outline:none;font-family:monospace}
+input[type=text]:focus,input[type=password]:focus,textarea:focus{border-color:#60a5fa}
+textarea{resize:vertical;min-height:100px;line-height:1.5}
+.row{display:flex;gap:12px;margin-top:16px}
+.btn{padding:10px 24px;border-radius:6px;border:none;font-size:.9rem;font-weight:600;cursor:pointer;transition:background .15s}
+.btn-primary{background:#2563eb;color:#fff}
+.btn-primary:hover{background:#1d4ed8}
+.btn-secondary{background:#1e2535;border:1px solid #334155;color:#94a3b8}
+.btn-secondary:hover{background:#334155;color:#e2e8f0}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.output-wrap{position:relative;margin-top:16px}
+.output-wrap textarea{padding-right:80px}
+.copy-btn{position:absolute;right:8px;top:8px;background:#1e2535;border:1px solid #334155;color:#94a3b8;padding:4px 10px;border-radius:4px;font-size:.75rem;cursor:pointer}
+.copy-btn:hover{background:#334155;color:#e2e8f0}
+.status{margin-top:12px;font-size:.85rem;padding:8px 12px;border-radius:6px;display:none}
+.status.success{display:block;background:#14532d;border:1px solid #16a34a;color:#86efac}
+.status.error{display:block;background:#450a0a;border:1px solid #dc2626;color:#fca5a5}
+.info-box{background:#1e2535;border:1px solid #334155;border-radius:6px;padding:12px 16px;font-size:.82rem;color:#94a3b8;line-height:1.6;margin-top:16px}
+.info-box strong{color:#e2e8f0}
+.mode-tabs{display:flex;gap:0;margin-bottom:20px;border-radius:6px;overflow:hidden;border:1px solid #334155}
+.mode-tab{flex:1;padding:10px;text-align:center;cursor:pointer;font-size:.85rem;font-weight:600;background:#1e2535;color:#64748b;border:none;transition:background .15s}
+.mode-tab.active{background:#2563eb;color:#fff}
+</style>
+</head>
+<body>
+<header>
+  <h1>AES <span>Encrypt & Decrypt</span></h1>
+  <p class="desc">Browser-based AES-256-GCM encryption — no data leaves your browser</p>
+</header>
+<div class="main">
+  <div class="card">
+    <div class="card-title">Mode</div>
+    <div class="mode-tabs">
+      <button class="mode-tab active" id="tab-enc" onclick="setMode('encrypt')">Encrypt</button>
+      <button class="mode-tab" id="tab-dec" onclick="setMode('decrypt')">Decrypt</button>
+    </div>
+    <label>Password</label>
+    <div class="password-wrap">
+      <input type="password" id="password" placeholder="Enter a strong password…" autocomplete="off">
+      <button class="show-btn" id="show-btn" onclick="toggleShow()">Show</button>
+    </div>
+    <div style="margin-top:16px">
+      <label id="input-label">Plaintext</label>
+      <textarea id="input" placeholder="Text to encrypt…" rows="5"></textarea>
+    </div>
+    <div class="row">
+      <button class="btn btn-primary" id="action-btn" onclick="doAction()">Encrypt</button>
+      <button class="btn btn-secondary" onclick="swapMode()">Switch Mode</button>
+      <button class="btn btn-secondary" onclick="clearAll()">Clear</button>
+    </div>
+    <div class="status" id="status"></div>
+    <div class="output-wrap" id="output-wrap" style="display:none">
+      <label id="output-label">Ciphertext (Base64)</label>
+      <textarea id="output" readonly rows="5"></textarea>
+      <button class="copy-btn" onclick="copyOutput()">Copy</button>
+    </div>
+  </div>
+  <div class="info-box">
+    <strong>How it works:</strong> Uses the <strong>Web Crypto API</strong> built into your browser.
+    Key derivation: <strong>PBKDF2</strong> with SHA-256 (100,000 iterations).
+    Encryption: <strong>AES-256-GCM</strong> with a random 96-bit IV.
+    Output format: <code>base64(salt[16] + iv[12] + ciphertext)</code>.
+    All processing happens locally — no network requests.
+  </div>
+</div>
+<script>
+let mode='encrypt';
+function setMode(m){
+  mode=m;
+  document.getElementById('tab-enc').classList.toggle('active',m==='encrypt');
+  document.getElementById('tab-dec').classList.toggle('active',m==='decrypt');
+  document.getElementById('input-label').textContent=m==='encrypt'?'Plaintext':'Ciphertext (Base64)';
+  document.getElementById('input').placeholder=m==='encrypt'?'Text to encrypt…':'Base64 ciphertext…';
+  document.getElementById('action-btn').textContent=m==='encrypt'?'Encrypt':'Decrypt';
+  document.getElementById('output-label').textContent=m==='encrypt'?'Ciphertext (Base64)':'Decrypted Plaintext';
+  document.getElementById('output-wrap').style.display='none';
+  document.getElementById('status').className='status';
+}
+function swapMode(){
+  const out=document.getElementById('output').value;
+  if(out){
+    document.getElementById('input').value=out;
+  }
+  setMode(mode==='encrypt'?'decrypt':'encrypt');
+}
+function toggleShow(){
+  const inp=document.getElementById('password');
+  const btn=document.getElementById('show-btn');
+  if(inp.type==='password'){inp.type='text';btn.textContent='Hide';}
+  else{inp.type='password';btn.textContent='Show';}
+}
+function clearAll(){
+  document.getElementById('input').value='';
+  document.getElementById('password').value='';
+  document.getElementById('output-wrap').style.display='none';
+  document.getElementById('status').className='status';
+}
+function showStatus(msg,type){
+  const s=document.getElementById('status');
+  s.textContent=msg;
+  s.className='status '+type;
+}
+function b64ToArr(b64){
+  const bin=atob(b64);
+  return Uint8Array.from(bin,c=>c.charCodeAt(0));
+}
+function arrToB64(arr){
+  return btoa(String.fromCharCode(...arr));
+}
+async function deriveKey(password,salt){
+  const enc=new TextEncoder();
+  const keyMat=await crypto.subtle.importKey('raw',enc.encode(password),{name:'PBKDF2'},false,['deriveKey']);
+  return crypto.subtle.deriveKey(
+    {name:'PBKDF2',salt,iterations:100000,hash:'SHA-256'},
+    keyMat,{name:'AES-GCM',length:256},false,['encrypt','decrypt']
+  );
+}
+async function doAction(){
+  const password=document.getElementById('password').value;
+  const input=document.getElementById('input').value.trim();
+  if(!password){showStatus('Please enter a password.','error');return;}
+  if(!input){showStatus('Please enter text to '+(mode==='encrypt'?'encrypt.':'decrypt.'),'error');return;}
+  const btn=document.getElementById('action-btn');
+  btn.disabled=true;
+  try{
+    if(mode==='encrypt'){
+      const salt=crypto.getRandomValues(new Uint8Array(16));
+      const iv=crypto.getRandomValues(new Uint8Array(12));
+      const key=await deriveKey(password,salt);
+      const enc=new TextEncoder();
+      const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,enc.encode(input));
+      const combined=new Uint8Array(16+12+ct.byteLength);
+      combined.set(salt,0);
+      combined.set(iv,16);
+      combined.set(new Uint8Array(ct),28);
+      document.getElementById('output').value=arrToB64(combined);
+      document.getElementById('output-wrap').style.display='block';
+      document.getElementById('output-label').textContent='Ciphertext (Base64)';
+      showStatus('Encrypted successfully.','success');
+    }else{
+      const combined=b64ToArr(input);
+      if(combined.length<29){showStatus('Invalid ciphertext.','error');return;}
+      const salt=combined.slice(0,16);
+      const iv=combined.slice(16,28);
+      const ct=combined.slice(28);
+      const key=await deriveKey(password,salt);
+      const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,ct);
+      document.getElementById('output').value=new TextDecoder().decode(pt);
+      document.getElementById('output-wrap').style.display='block';
+      document.getElementById('output-label').textContent='Decrypted Plaintext';
+      showStatus('Decrypted successfully.','success');
+    }
+  }catch(e){
+    showStatus(mode==='decrypt'?'Decryption failed — wrong password or corrupted data.':'Encryption error: '+e.message,'error');
+  }finally{btn.disabled=false;}
+}
+function copyOutput(){
+  const val=document.getElementById('output').value;
+  navigator.clipboard.writeText(val).then(()=>{
+    const btn=document.querySelector('.copy-btn');
+    btn.textContent='Copied!';
+    setTimeout(()=>btn.textContent='Copy',1500);
+  });
+}
+</script>
+</body>
+</html>

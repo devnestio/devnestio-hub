@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSS Triangle Generator — Pure CSS Triangles & Arrows | DevNestio</title>
+  <meta name="description" content="Generate pure CSS triangles using the border trick or clip-path. Choose direction, size, and color. Live preview with copy-ready code. Browser-only." />
+  <meta property="og:title" content="CSS Triangle Generator | DevNestio" />
+  <meta property="og:description" content="Create CSS triangles pointing in any direction. Border method, clip-path, and transform variants. Live preview and copy-ready CSS." />
+  <meta property="og:url" content="https://devnestio.pages.dev/css-triangle-gen/" />
+  <meta name="twitter:card" content="summary" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    #privacy-banner { background: #1e293b; border-bottom: 1px solid #334155; padding: 8px 16px; font-size: 12px; color: #94a3b8; text-align: center; }
+    header { background: #1e293b; border-bottom: 1px solid #334155; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+    header a { color: #64748b; font-size: 13px; text-decoration: none; margin-left: auto; }
+    header a:hover { color: #94a3b8; }
+    .badge { background: #f59e0b; color: #000; font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+    main { max-width: 860px; margin: 0 auto; padding: 24px 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 640px) { main { grid-template-columns: 1fr; } }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 18px; }
+    .card-title { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 14px; }
+    .full-width { grid-column: 1 / -1; }
+    label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 5px; font-weight: 600; }
+    input[type=number], input[type=color], select { outline: none; }
+    input[type=number] { width: 80px; padding: 7px 10px; background: #0f1117; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 14px; font-family: monospace; }
+    input[type=number]:focus { border-color: #f59e0b; }
+    input[type=color] { width: 48px; height: 36px; padding: 2px; background: #0f1117; border: 1px solid #334155; border-radius: 6px; cursor: pointer; }
+    select { padding: 7px 10px; background: #0f1117; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 13px; width: 100%; }
+    select:focus { border-color: #f59e0b; }
+    .dir-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    .dir-btn { padding: 10px 4px; border-radius: 7px; font-size: 18px; cursor: pointer; border: 1px solid #334155; background: #0f1117; text-align: center; }
+    .dir-btn:hover { border-color: #f59e0b; }
+    .dir-btn.active { background: #f59e0b; border-color: #f59e0b; }
+    .row { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 12px; }
+    .preview-area { background: #0f1117; border-radius: 8px; min-height: 200px; display: flex; align-items: center; justify-content: center; border: 1px solid #334155; }
+    .code-block { background: #0f1117; border: 1px solid #334155; border-radius: 6px; padding: 12px; font-family: 'Menlo','Courier New',monospace; font-size: 12px; white-space: pre; overflow-x: auto; color: #e2e8f0; line-height: 1.6; position: relative; }
+    .copy-btn { position: absolute; top: 8px; right: 8px; padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid #334155; background: #1e293b; color: #64748b; }
+    .copy-btn:hover { border-color: #f59e0b; color: #f59e0b; }
+    .method-tabs { display: flex; gap: 4px; margin-bottom: 14px; }
+    .method-tab { padding: 5px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid #334155; background: #0f1117; color: #64748b; }
+    .method-tab.active { background: #f59e0b; border-color: #f59e0b; color: #000; }
+    #ad-slot { grid-column: 1 / -1; text-align: center; }
+  </style>
+</head>
+<body>
+<div id="privacy-banner">🔒 All processing happens in your browser. No data is sent to any server.</div>
+<header>
+  <span class="badge">FREE</span>
+  <h1>CSS Triangle Generator</h1>
+  <a href="https://devnestio.pages.dev">← All Tools</a>
+</header>
+<main>
+
+  <!-- Controls -->
+  <div class="card">
+    <div class="card-title">Settings</div>
+
+    <div style="margin-bottom:14px">
+      <label>Direction</label>
+      <div class="dir-grid" id="dir-grid">
+        <button class="dir-btn" data-dir="up" onclick="setDir('up')" title="Up">▲</button>
+        <button class="dir-btn" data-dir="down" onclick="setDir('down')" title="Down">▼</button>
+        <button class="dir-btn" data-dir="left" onclick="setDir('left')" title="Left">◀</button>
+        <button class="dir-btn" data-dir="right" onclick="setDir('right')" title="Right">▶</button>
+        <button class="dir-btn" data-dir="up-left" onclick="setDir('up-left')" title="Up-Left">◤</button>
+        <button class="dir-btn" data-dir="up-right" onclick="setDir('up-right')" title="Up-Right">◥</button>
+        <button class="dir-btn" data-dir="down-left" onclick="setDir('down-left')" title="Down-Left">◣</button>
+        <button class="dir-btn" data-dir="down-right" onclick="setDir('down-right')" title="Down-Right">◢</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Width (px)</label>
+        <input type="number" id="width" value="60" min="1" max="500" oninput="update()" />
+      </div>
+      <div>
+        <label>Height (px)</label>
+        <input type="number" id="height" value="60" min="1" max="500" oninput="update()" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Color</label>
+        <input type="color" id="color" value="#f59e0b" oninput="update()" />
+      </div>
+      <div style="flex:1">
+        <label>Hex</label>
+        <input type="number" id="color-hex" style="width:100%" readonly />
+      </div>
+    </div>
+
+    <div style="margin-bottom:14px">
+      <label>Method</label>
+      <div class="method-tabs">
+        <button class="method-tab active" data-method="border" onclick="setMethod('border')">Border</button>
+        <button class="method-tab" data-method="clip" onclick="setMethod('clip')">clip-path</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preview -->
+  <div class="card">
+    <div class="card-title">Preview</div>
+    <div class="preview-area" id="preview-area">
+      <div id="triangle-preview"></div>
+    </div>
+  </div>
+
+  <!-- Code output -->
+  <div class="card full-width">
+    <div class="card-title">Generated CSS</div>
+    <div class="code-block" id="code-block">
+      <button class="copy-btn" onclick="copyCode()">Copy</button>
+      <span id="code-output"></span>
+    </div>
+  </div>
+
+  <div id="ad-slot" data-ea-publisher="devnestio" data-ea-type="image"></div>
+</main>
+<script>
+let dir = 'up', method = 'border';
+
+const DIRECTIONS = {
+  up:         { axes: ['h','w'], borders: { b:'color', l:'transparent', r:'transparent' } },
+  down:       { axes: ['h','w'], borders: { t:'color', l:'transparent', r:'transparent' } },
+  left:       { axes: ['w','h'], borders: { r:'color', t:'transparent', b:'transparent' } },
+  right:      { axes: ['w','h'], borders: { l:'color', t:'transparent', b:'transparent' } },
+  'up-left':  { corner: true, borders: { t:'color', l:'color', r:'transparent', b:'transparent' } },
+  'up-right': { corner: true, borders: { t:'color', r:'color', l:'transparent', b:'transparent' } },
+  'down-left':  { corner: true, borders: { b:'color', l:'color', r:'transparent', t:'transparent' } },
+  'down-right': { corner: true, borders: { b:'color', r:'color', l:'transparent', t:'transparent' } },
+};
+
+function borderCSS(w, h, color, d) {
+  const cfg = DIRECTIONS[d];
+  if (!cfg) return '';
+
+  const bw = {
+    up:    { t:'0', b:`${h}px`, l:`${Math.round(w/2)}px`, r:`${Math.round(w/2)}px` },
+    down:  { b:'0', t:`${h}px`, l:`${Math.round(w/2)}px`, r:`${Math.round(w/2)}px` },
+    left:  { l:'0', r:`${w}px`, t:`${Math.round(h/2)}px`, b:`${Math.round(h/2)}px` },
+    right: { r:'0', l:`${w}px`, t:`${Math.round(h/2)}px`, b:`${Math.round(h/2)}px` },
+    'up-left':    { t:`${h}px`, l:`${w}px`, b:'0', r:'0' },
+    'up-right':   { t:`${h}px`, r:`${w}px`, b:'0', l:'0' },
+    'down-left':  { b:`${h}px`, l:`${w}px`, t:'0', r:'0' },
+    'down-right': { b:`${h}px`, r:`${w}px`, t:'0', l:'0' },
+  }[d];
+
+  const sides = ['top','right','bottom','left'].map(s => {
+    const k = s[0];
+    const val = bw[k] || bw[s[0]] || '0';
+    const isColor = (cfg.borders[k] || cfg.borders[s[0]]) === 'color';
+    return `  border-${s}: ${val} solid ${isColor ? color : 'transparent'}`;
+  });
+
+  return `.triangle {\n  width: 0;\n  height: 0;\n${sides.join(';\n')};\n}`;
+}
+
+function clipCSS(w, h, color, d) {
+  const clip = {
+    up:    `polygon(50% 0%, 0% 100%, 100% 100%)`,
+    down:  `polygon(0% 0%, 100% 0%, 50% 100%)`,
+    left:  `polygon(100% 0%, 0% 50%, 100% 100%)`,
+    right: `polygon(0% 0%, 100% 50%, 0% 100%)`,
+    'up-left':    `polygon(0% 0%, 100% 0%, 0% 100%)`,
+    'up-right':   `polygon(0% 0%, 100% 0%, 100% 100%)`,
+    'down-left':  `polygon(0% 0%, 0% 100%, 100% 100%)`,
+    'down-right': `polygon(0% 100%, 100% 0%, 100% 100%)`,
+  }[d];
+  return `.triangle {\n  width: ${w}px;\n  height: ${h}px;\n  background: ${color};\n  clip-path: ${clip};\n}`;
+}
+
+function setDir(d) {
+  dir = d;
+  document.querySelectorAll('.dir-btn').forEach(b => b.classList.toggle('active', b.dataset.dir === d));
+  update();
+}
+
+function setMethod(m) {
+  method = m;
+  document.querySelectorAll('.method-tab').forEach(t => t.classList.toggle('active', t.dataset.method === m));
+  update();
+}
+
+function update() {
+  const w = parseInt(document.getElementById('width').value) || 60;
+  const h = parseInt(document.getElementById('height').value) || 60;
+  const color = document.getElementById('color').value;
+
+  // Preview
+  const el = document.getElementById('triangle-preview');
+  if (method === 'border') {
+    const cfg = DIRECTIONS[dir];
+    const bw = {
+      up:    { borderBottom:`${h}px solid ${color}`, borderLeft:`${Math.round(w/2)}px solid transparent`, borderRight:`${Math.round(w/2)}px solid transparent` },
+      down:  { borderTop:`${h}px solid ${color}`, borderLeft:`${Math.round(w/2)}px solid transparent`, borderRight:`${Math.round(w/2)}px solid transparent` },
+      left:  { borderRight:`${w}px solid ${color}`, borderTop:`${Math.round(h/2)}px solid transparent`, borderBottom:`${Math.round(h/2)}px solid transparent` },
+      right: { borderLeft:`${w}px solid ${color}`, borderTop:`${Math.round(h/2)}px solid transparent`, borderBottom:`${Math.round(h/2)}px solid transparent` },
+      'up-left':    { borderTop:`${h}px solid ${color}`, borderLeft:`${w}px solid ${color}`, borderBottom:'0', borderRight:'0' },
+      'up-right':   { borderTop:`${h}px solid ${color}`, borderRight:`${w}px solid ${color}`, borderBottom:'0', borderLeft:'0' },
+      'down-left':  { borderBottom:`${h}px solid ${color}`, borderLeft:`${w}px solid ${color}`, borderTop:'0', borderRight:'0' },
+      'down-right': { borderBottom:`${h}px solid ${color}`, borderRight:`${w}px solid ${color}`, borderTop:'0', borderLeft:'0' },
+    }[dir];
+    el.style.cssText = 'width:0;height:0;';
+    Object.assign(el.style, bw);
+  } else {
+    const clips = {
+      up:`polygon(50% 0%,0% 100%,100% 100%)`, down:`polygon(0% 0%,100% 0%,50% 100%)`,
+      left:`polygon(100% 0%,0% 50%,100% 100%)`, right:`polygon(0% 0%,100% 50%,0% 100%)`,
+      'up-left':`polygon(0% 0%,100% 0%,0% 100%)`, 'up-right':`polygon(0% 0%,100% 0%,100% 100%)`,
+      'down-left':`polygon(0% 0%,0% 100%,100% 100%)`, 'down-right':`polygon(0% 100%,100% 0%,100% 100%)`,
+    };
+    el.style.cssText = `width:${w}px;height:${h}px;background:${color};clip-path:${clips[dir]};`;
+  }
+
+  // Code
+  const code = method === 'border' ? borderCSS(w, h, color, dir) : clipCSS(w, h, color, dir);
+  document.getElementById('code-output').textContent = code;
+}
+
+function copyCode() {
+  navigator.clipboard.writeText(document.getElementById('code-output').textContent);
+}
+
+// Init
+setDir('up');
+</script>
+</body>
+</html>

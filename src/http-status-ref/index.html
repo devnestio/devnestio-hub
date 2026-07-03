@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTTP Status Codes Reference — devnestio</title>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#0f1117;color:#e2e8f0;min-height:100vh}
+header{padding:24px 32px;border-bottom:1px solid #1e2535}
+h1{font-size:1.5rem;font-weight:700;color:#f8fafc}
+h1 span{color:#60a5fa}
+.desc{color:#94a3b8;margin-top:4px;font-size:.9rem}
+.controls{display:flex;gap:12px;flex-wrap:wrap;padding:16px 32px;border-bottom:1px solid #1e2535;align-items:center}
+.search-wrap{position:relative;flex:1;min-width:200px}
+.search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#64748b}
+#search{width:100%;background:#1e2535;border:1px solid #334155;color:#e2e8f0;padding:8px 12px 8px 34px;border-radius:6px;font-size:.9rem;outline:none}
+#search:focus{border-color:#60a5fa}
+.cat-filters{display:flex;gap:8px;flex-wrap:wrap}
+.cat-btn{padding:5px 12px;border-radius:99px;border:1px solid #334155;background:#1e2535;color:#94a3b8;font-size:.8rem;cursor:pointer}
+.cat-btn.active,.cat-btn:hover{background:#2563eb;border-color:#2563eb;color:#fff}
+.content{max-width:900px;margin:0 auto;padding:24px 32px}
+.section{margin-bottom:28px}
+.section-title{display:flex;align-items:center;gap:10px;font-size:.95rem;font-weight:700;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #1e2535}
+.status-card{background:#141924;border:1px solid #1e2535;border-radius:8px;margin-bottom:8px;overflow:hidden;display:grid;grid-template-columns:96px 1fr}
+.status-card:hover{border-color:#334155}
+@media(max-width:640px){.status-card{grid-template-columns:1fr}}
+.status-num{display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:800;border-right:1px solid #1e2535;padding:16px 12px;font-family:monospace}
+.status-info{padding:12px 16px}
+.status-name{font-size:.88rem;font-weight:700;color:#f8fafc;margin-bottom:4px}
+.status-desc{font-size:.82rem;color:#94a3b8;line-height:1.5}
+.status-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.tag{font-size:.7rem;padding:1px 6px;border-radius:3px;background:#1e2535;border:1px solid #334155;color:#94a3b8}
+.s1xx .status-num{background:#1a2b1a;color:#4ade80}
+.s2xx .status-num{background:#14532d;color:#4ade80}
+.s3xx .status-num{background:#1e3a5f;color:#60a5fa}
+.s4xx .status-num{background:#422006;color:#fb923c}
+.s5xx .status-num{background:#450a0a;color:#f87171}
+.no-results{text-align:center;color:#64748b;padding:48px}
+</style>
+</head>
+<body>
+<header>
+  <h1>HTTP Status Codes <span>Reference</span></h1>
+  <p class="desc">All HTTP status codes — 1xx informational, 2xx success, 3xx redirect, 4xx client error, 5xx server error</p>
+</header>
+<div class="controls">
+  <div class="search-wrap">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="search" placeholder="Search status codes or names…">
+  </div>
+  <div class="cat-filters" id="cats"></div>
+</div>
+<div class="content" id="content"></div>
+<script>
+const STATUSES = [
+  {code:100,name:'Continue',cat:'1xx Informational',desc:'The server has received the request headers and the client should proceed to send the request body.',tags:['informational']},
+  {code:101,name:'Switching Protocols',cat:'1xx Informational',desc:'The server is switching protocols as requested by the client (e.g., HTTP/1.1 to WebSocket via Upgrade header).',tags:['websocket','upgrade']},
+  {code:102,name:'Processing',cat:'1xx Informational',desc:'(WebDAV) Server has received and is processing the request, but no response is available yet.',tags:['webdav']},
+  {code:103,name:'Early Hints',cat:'1xx Informational',desc:'Used to return some response headers before the final HTTP message. Helps preload resources (Link header).',tags:['performance','preload']},
+  {code:200,name:'OK',cat:'2xx Success',desc:'Standard success response. GET returns resource, POST returns result, PUT/PATCH returns updated resource.',tags:['common']},
+  {code:201,name:'Created',cat:'2xx Success',desc:'Resource was successfully created. Should include a Location header pointing to the new resource.',tags:['common','POST']},
+  {code:202,name:'Accepted',cat:'2xx Success',desc:'Request accepted for processing, but processing is not complete. Used for async operations.',tags:['async']},
+  {code:203,name:'Non-Authoritative Information',cat:'2xx Success',desc:'The returned metadata is from a local or third-party copy, not the original server.',tags:['proxy']},
+  {code:204,name:'No Content',cat:'2xx Success',desc:'Request succeeded but there is no content to return. Common for DELETE and PUT with no body response.',tags:['common','DELETE','PUT']},
+  {code:206,name:'Partial Content',cat:'2xx Success',desc:'The server is delivering only part of the resource (byte serving). Used with Range header for large file downloads.',tags:['streaming','range']},
+  {code:207,name:'Multi-Status',cat:'2xx Success',desc:'(WebDAV) The message body contains multiple separate response codes for sub-requests.',tags:['webdav']},
+  {code:301,name:'Moved Permanently',cat:'3xx Redirection',desc:'The resource has permanently moved to a new URL. Browsers and search engines update their records.',tags:['common','SEO','permanent']},
+  {code:302,name:'Found',cat:'3xx Redirection',desc:'Temporary redirect. The resource is temporarily at a different URI. Clients should use the original URI for future requests.',tags:['common','temporary']},
+  {code:303,name:'See Other',cat:'3xx Redirection',desc:'Redirect to another resource using GET. Commonly used after POST to prevent form resubmission (PRG pattern).',tags:['POST','PRG']},
+  {code:304,name:'Not Modified',cat:'3xx Redirection',desc:'The resource has not changed since the last request. Client should use its cached copy. Used with ETag/If-None-Match.',tags:['caching','common']},
+  {code:307,name:'Temporary Redirect',cat:'3xx Redirection',desc:'Temporary redirect preserving the HTTP method. Unlike 302, the method (POST, PUT) must not change.',tags:['temporary','method-safe']},
+  {code:308,name:'Permanent Redirect',cat:'3xx Redirection',desc:'Permanent redirect preserving the HTTP method. Like 301 but method is not changed.',tags:['permanent','method-safe']},
+  {code:400,name:'Bad Request',cat:'4xx Client Error',desc:'The server cannot process the request due to malformed syntax, invalid request body, or invalid parameters.',tags:['common','validation']},
+  {code:401,name:'Unauthorized',cat:'4xx Client Error',desc:'Authentication is required and has failed or not been provided. Despite the name, this is about authentication, not authorization.',tags:['common','auth']},
+  {code:403,name:'Forbidden',cat:'4xx Client Error',desc:'The client is authenticated but does not have permission to access the resource. Re-authenticating will not help.',tags:['common','auth','authorization']},
+  {code:404,name:'Not Found',cat:'4xx Client Error',desc:'The requested resource could not be found. Also used to hide the existence of a resource from unauthorized users.',tags:['common']},
+  {code:405,name:'Method Not Allowed',cat:'4xx Client Error',desc:'The HTTP method is not allowed for this resource. Response must include an Allow header listing valid methods.',tags:['common']},
+  {code:406,name:'Not Acceptable',cat:'4xx Client Error',desc:'The server cannot produce a response matching the Accept headers sent by the client.',tags:['content-negotiation']},
+  {code:408,name:'Request Timeout',cat:'4xx Client Error',desc:'The server timed out waiting for the request. The client may repeat the request.',tags:['timeout']},
+  {code:409,name:'Conflict',cat:'4xx Client Error',desc:'Conflict with the current state of the resource. For example, trying to create a resource that already exists.',tags:['common']},
+  {code:410,name:'Gone',cat:'4xx Client Error',desc:'The resource is permanently gone with no forwarding address. Like 404 but the client should not request it again.',tags:['permanent']},
+  {code:413,name:'Content Too Large',cat:'4xx Client Error',desc:'Request body is larger than the server is willing to process. The server may close the connection.',tags:['upload']},
+  {code:414,name:'URI Too Long',cat:'4xx Client Error',desc:'The URI requested is longer than the server is willing to interpret.',tags:['url']},
+  {code:415,name:'Unsupported Media Type',cat:'4xx Client Error',desc:'The media type of the request body (Content-Type) is not supported by the server.',tags:['content-type']},
+  {code:422,name:'Unprocessable Content',cat:'4xx Client Error',desc:'The request is well-formed but contains semantic errors. Common for API validation failures.',tags:['common','validation','API']},
+  {code:429,name:'Too Many Requests',cat:'4xx Client Error',desc:'The user has sent too many requests in a given time. Used for rate limiting. Response may include Retry-After header.',tags:['common','rate-limiting']},
+  {code:500,name:'Internal Server Error',cat:'5xx Server Error',desc:'Generic server error. The server encountered an unexpected condition that prevented it from fulfilling the request.',tags:['common']},
+  {code:501,name:'Not Implemented',cat:'5xx Server Error',desc:'The server does not support the functionality required to fulfill the request (e.g., unsupported HTTP method).',tags:[]},
+  {code:502,name:'Bad Gateway',cat:'5xx Server Error',desc:'The server, acting as a gateway, received an invalid response from an upstream server.',tags:['common','proxy','gateway']},
+  {code:503,name:'Service Unavailable',cat:'5xx Server Error',desc:'The server is temporarily unable to handle the request due to maintenance or overload. Retry-After header recommended.',tags:['common','maintenance']},
+  {code:504,name:'Gateway Timeout',cat:'5xx Server Error',desc:'The server, acting as a gateway, did not receive a timely response from an upstream server.',tags:['common','proxy','timeout']},
+  {code:505,name:'HTTP Version Not Supported',cat:'5xx Server Error',desc:'The server does not support the HTTP version used in the request.',tags:[]},
+];
+
+const CATS=['All','1xx Informational','2xx Success','3xx Redirection','4xx Client Error','5xx Server Error'];
+const CLASS_MAP={'1':'s1xx','2':'s2xx','3':'s3xx','4':'s4xx','5':'s5xx'};
+let activeCat='All', query='';
+
+function render(){
+  const visible=STATUSES.filter(s=>{
+    const mc=activeCat==='All'||s.cat===activeCat;
+    const mq=!query||String(s.code).includes(query)||s.name.toLowerCase().includes(query)||s.desc.toLowerCase().includes(query)||s.tags.join(' ').includes(query);
+    return mc&&mq;
+  });
+  const el=document.getElementById('content');
+  if(!visible.length){el.innerHTML='<div class="no-results">No results</div>';return;}
+  const byCat={};
+  visible.forEach(s=>{(byCat[s.cat]=byCat[s.cat]||[]).push(s);});
+  const catColors={'1xx Informational':'#4ade80','2xx Success':'#4ade80','3xx Redirection':'#60a5fa','4xx Client Error':'#fb923c','5xx Server Error':'#f87171'};
+  el.innerHTML=CATS.filter(c=>c!=='All'&&byCat[c]).map(cat=>`
+    <div class="section">
+      <div class="section-title" style="color:${catColors[cat]||'#60a5fa'}">${cat}</div>
+      ${byCat[cat].map(s=>`
+        <div class="status-card ${CLASS_MAP[String(s.code)[0]]||''}">
+          <div class="status-num">${s.code}</div>
+          <div class="status-info">
+            <div class="status-name">${s.name}</div>
+            <div class="status-desc">${s.desc}</div>
+            ${s.tags.length?`<div class="status-tags">${s.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>`:''}
+          </div>
+        </div>`).join('')}
+    </div>`).join('');
+}
+document.getElementById('cats').innerHTML=CATS.map(c=>`
+  <button class="cat-btn${c==='All'?' active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
+function setCat(c){
+  activeCat=c;
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.toggle('active',b.textContent===c));
+  render();
+}
+document.getElementById('search').addEventListener('input',e=>{query=e.target.value.toLowerCase();render();});
+render();
+</script>
+</body>
+</html>

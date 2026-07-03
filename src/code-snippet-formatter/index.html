@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Code Snippet Formatter – Highlight & Export as PNG | DevNestio</title>
+  <meta name="description" content="Format and syntax-highlight code snippets for sharing. Choose theme, font, language, and export as PNG. Free online code screenshot tool." />
+  <meta property="og:title" content="Code Snippet Formatter – Highlight & Export as PNG" />
+  <meta property="og:description" content="Turn code into beautiful shareable images. Syntax highlighting, multiple themes, PNG export — free online tool." />
+  <meta name="twitter:card" content="summary" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1117; --surface: #1a1d27; --surface2: #22253a;
+      --border: #2e3148; --accent: #f59e0b; --accent2: #4ecca3;
+      --text: #e8eaf6; --muted: #8b90b8; --radius: 10px;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 1.2rem; font-weight: 700; }
+    header span { color: var(--accent2); font-size: 0.78rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 2px 10px; }
+    main { flex: 1; max-width: 1000px; margin: 0 auto; padding: 28px 20px; width: 100%; }
+    .layout { display: grid; grid-template-columns: 260px 1fr; gap: 16px; }
+    @media(max-width: 720px) { .layout { grid-template-columns: 1fr; } }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 16px; }
+    .card-title { font-size: 0.82rem; font-weight: 700; color: var(--accent2); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 14px; }
+    label { display: block; font-size: 0.78rem; color: var(--muted); margin-bottom: 4px; }
+    select { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 9px 10px; color: var(--text); font-size: 0.88rem; outline: none; margin-bottom: 12px; cursor: pointer; }
+    select:focus { border-color: var(--accent2); }
+    .field-group { margin-bottom: 12px; }
+    .btn { background: var(--accent2); color: #0f1117; border: none; border-radius: 8px; padding: 10px 18px; font-size: 0.9rem; font-weight: 700; cursor: pointer; width: 100%; margin-bottom: 8px; }
+    .btn:hover { opacity: 0.85; }
+    .btn-outline { background: none; border: 1px solid var(--border); border-radius: 8px; padding: 9px 18px; font-size: 0.88rem; color: var(--muted); cursor: pointer; width: 100%; }
+    .btn-outline:hover { border-color: var(--accent2); color: var(--accent2); }
+
+    /* Code editor */
+    .editor-area { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; width: 100%; min-height: 200px; font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 0.9rem; color: var(--text); padding: 14px; resize: vertical; outline: none; line-height: 1.6; }
+    .editor-area:focus { border-color: var(--accent2); }
+
+    /* Preview window */
+    .preview-outer { border-radius: 12px; overflow: hidden; margin-top: 6px; }
+    .window-bar { display: flex; align-items: center; gap: 7px; padding: 10px 14px; }
+    .win-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .win-dot-r { background: #ff5f57; }
+    .win-dot-y { background: #ffbd2e; }
+    .win-dot-g { background: #28c840; }
+    .win-lang { margin-left: auto; font-size: 0.72rem; opacity: 0.6; font-family: monospace; }
+    .code-body { padding: 18px 20px; overflow-x: auto; }
+    .code-body pre { margin: 0; white-space: pre; }
+    .code-body code { font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 0.92rem; line-height: 1.65; display: block; }
+
+    /* Themes */
+    .theme-chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+    .theme-chip { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; border: 2px solid transparent; transition: border-color 0.15s; }
+    .theme-chip.active { border-color: var(--accent2); }
+
+    /* Padding slider */
+    input[type=range] { width: 100%; accent-color: var(--accent2); cursor: pointer; }
+    .range-val { font-size: 0.8rem; color: var(--accent2); font-weight: 600; margin-left: 6px; }
+
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: 0.85rem; }
+    .toggle { position: relative; display: inline-block; width: 36px; height: 20px; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; inset: 0; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; cursor: pointer; transition: background 0.2s; }
+    .toggle-slider::before { content: ''; position: absolute; left: 3px; top: 3px; width: 12px; height: 12px; border-radius: 50%; background: var(--muted); transition: transform 0.2s, background 0.2s; }
+    .toggle input:checked + .toggle-slider { background: var(--accent2); border-color: var(--accent2); }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(16px); background: #0f1117; }
+
+    footer { text-align: center; padding: 20px; color: var(--muted); font-size: 0.78rem; border-top: 1px solid var(--border); }
+    footer a { color: var(--accent2); text-decoration: none; }
+
+    .preview-section { margin-bottom: 16px; }
+    .preview-label { font-size: 0.78rem; color: var(--muted); margin-bottom: 8px; }
+    #exportCanvas { display: none; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Code Snippet Formatter</h1>
+  <span>Highlight &amp; Export</span>
+</header>
+<main>
+<div class="layout">
+
+  <!-- Controls -->
+  <div>
+    <div class="card">
+      <div class="card-title">Settings</div>
+
+      <div class="field-group">
+        <label>Language</label>
+        <select id="langSel">
+          <option value="javascript">JavaScript</option>
+          <option value="typescript">TypeScript</option>
+          <option value="python">Python</option>
+          <option value="html">HTML</option>
+          <option value="css">CSS</option>
+          <option value="json">JSON</option>
+          <option value="bash">Bash / Shell</option>
+          <option value="sql">SQL</option>
+          <option value="rust">Rust</option>
+          <option value="go">Go</option>
+          <option value="java">Java</option>
+          <option value="cpp">C++</option>
+          <option value="php">PHP</option>
+          <option value="ruby">Ruby</option>
+          <option value="swift">Swift</option>
+          <option value="kotlin">Kotlin</option>
+          <option value="yaml">YAML</option>
+          <option value="markdown">Markdown</option>
+          <option value="plaintext">Plain Text</option>
+        </select>
+      </div>
+
+      <div class="field-group">
+        <label>Theme</label>
+        <div class="theme-chip-row" id="themeChips"></div>
+      </div>
+
+      <div class="field-group">
+        <label>Font Size: <span class="range-val" id="fontSizeVal">14px</span></label>
+        <input type="range" id="fontSizeRange" min="11" max="22" value="14" step="1" />
+      </div>
+
+      <div class="field-group">
+        <label>Padding: <span class="range-val" id="paddingVal">24px</span></label>
+        <input type="range" id="paddingRange" min="8" max="60" value="24" step="4" />
+      </div>
+
+      <div class="toggle-row">
+        <span>Window Frame</span>
+        <label class="toggle"><input type="checkbox" id="showFrame" checked /><span class="toggle-slider"></span></label>
+      </div>
+      <div class="toggle-row">
+        <span>Line Numbers</span>
+        <label class="toggle"><input type="checkbox" id="showLines" /><span class="toggle-slider"></span></label>
+      </div>
+
+      <div class="field-group" style="margin-bottom:0;">
+        <label>Background</label>
+        <select id="bgSel">
+          <option value="transparent">Transparent</option>
+          <option value="#0f1117" selected>Dark (#0f1117)</option>
+          <option value="#1a1d27">Surface (#1a1d27)</option>
+          <option value="#ffffff">White</option>
+          <option value="gradient-purple">Gradient – Purple</option>
+          <option value="gradient-ocean">Gradient – Ocean</option>
+          <option value="gradient-sunset">Gradient – Sunset</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn" id="exportBtn">⬇ Export as PNG</button>
+    <button class="btn-outline" id="copyHtmlBtn">Copy Highlighted HTML</button>
+  </div>
+
+  <!-- Editor + Preview -->
+  <div>
+    <div class="card">
+      <div class="card-title">Code Input</div>
+      <textarea class="editor-area" id="codeInput" spellcheck="false" placeholder="Paste your code here…"></textarea>
+    </div>
+
+    <div class="preview-section">
+      <div class="preview-label">Preview (what will be exported)</div>
+      <div id="previewOuter" class="preview-outer">
+        <div id="windowBar" class="window-bar">
+          <span class="win-dot win-dot-r"></span>
+          <span class="win-dot win-dot-y"></span>
+          <span class="win-dot win-dot-g"></span>
+          <span class="win-lang" id="winLang">javascript</span>
+        </div>
+        <div class="code-body" id="codeBody">
+          <pre><code id="highlighted"></code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</main>
+<footer>
+  <a href="https://devnestio.pages.dev/">← Back to DevNestio Tools</a>
+</footer>
+<canvas id="exportCanvas"></canvas>
+
+<script>
+// ── Themes ──────────────────────────────────────────────────────────
+const THEMES = {
+  'One Dark': {
+    bar: '#282c34', body: '#282c34', text: '#abb2bf',
+    keyword: '#c678dd', string: '#98c379', comment: '#5c6370',
+    number: '#d19a66', fn: '#61afef', tag: '#e06c75', attr: '#d19a66',
+    punct: '#abb2bf', type: '#e5c07b',
+  },
+  'GitHub Dark': {
+    bar: '#161b22', body: '#0d1117', text: '#c9d1d9',
+    keyword: '#ff7b72', string: '#a5d6ff', comment: '#8b949e',
+    number: '#79c0ff', fn: '#d2a8ff', tag: '#7ee787', attr: '#79c0ff',
+    punct: '#c9d1d9', type: '#ffa657',
+  },
+  'Dracula': {
+    bar: '#21222c', body: '#282a36', text: '#f8f8f2',
+    keyword: '#ff79c6', string: '#f1fa8c', comment: '#6272a4',
+    number: '#bd93f9', fn: '#50fa7b', tag: '#ff5555', attr: '#ffb86c',
+    punct: '#f8f8f2', type: '#8be9fd',
+  },
+  'Solarized': {
+    bar: '#002b36', body: '#073642', text: '#839496',
+    keyword: '#859900', string: '#2aa198', comment: '#586e75',
+    number: '#d33682', fn: '#268bd2', tag: '#dc322f', attr: '#b58900',
+    punct: '#839496', type: '#cb4b16',
+  },
+  'Nord': {
+    bar: '#2e3440', body: '#2e3440', text: '#d8dee9',
+    keyword: '#81a1c1', string: '#a3be8c', comment: '#4c566a',
+    number: '#b48ead', fn: '#88c0d0', tag: '#bf616a', attr: '#d08770',
+    punct: '#d8dee9', type: '#ebcb8b',
+  },
+  'Light': {
+    bar: '#f3f3f3', body: '#ffffff', text: '#24292e',
+    keyword: '#d73a49', string: '#032f62', comment: '#6a737d',
+    number: '#005cc5', fn: '#6f42c1', tag: '#22863a', attr: '#e36209',
+    punct: '#24292e', type: '#e36209',
+  },
+};
+
+let currentTheme = 'One Dark';
+let currentLang = 'javascript';
+
+// Build theme chips
+const themeChipsEl = document.getElementById('themeChips');
+Object.keys(THEMES).forEach(name => {
+  const t = THEMES[name];
+  const chip = document.createElement('div');
+  chip.className = 'theme-chip' + (name === currentTheme ? ' active' : '');
+  chip.textContent = name;
+  chip.style.background = t.body;
+  chip.style.color = t.text;
+  chip.style.border = `2px solid ${name === currentTheme ? '#4ecca3' : t.bar}`;
+  chip.addEventListener('click', () => {
+    currentTheme = name;
+    document.querySelectorAll('.theme-chip').forEach((c,_) => {
+      const n = c.textContent;
+      c.classList.toggle('active', n === name);
+      c.style.border = `2px solid ${n === name ? '#4ecca3' : THEMES[n].bar}`;
+    });
+    applyTheme();
+    updateHighlight();
+  });
+  themeChipsEl.appendChild(chip);
+});
+
+function applyTheme() {
+  const t = THEMES[currentTheme];
+  const bar = document.getElementById('windowBar');
+  const body = document.getElementById('codeBody');
+  bar.style.background = t.bar;
+  body.style.background = t.body;
+  document.getElementById('highlighted').style.color = t.text;
+}
+
+// ── Tokenizer / Highlighter ─────────────────────────────────────────
+const KEYWORDS = {
+  javascript: /\b(const|let|var|function|return|if|else|for|while|do|switch|case|break|continue|new|delete|typeof|instanceof|class|extends|import|export|default|from|async|await|try|catch|finally|throw|null|undefined|true|false|this|super|of|in|yield|static|get|set)\b/g,
+  typescript: /\b(const|let|var|function|return|if|else|for|while|do|switch|case|break|continue|new|delete|typeof|instanceof|class|extends|import|export|default|from|async|await|try|catch|finally|throw|null|undefined|true|false|this|super|of|in|yield|static|get|set|interface|type|enum|namespace|declare|abstract|public|private|protected|readonly|as|is|keyof|infer|never)\b/g,
+  python: /\b(def|class|return|if|elif|else|for|while|import|from|as|try|except|finally|raise|with|pass|break|continue|lambda|yield|global|nonlocal|del|assert|True|False|None|and|or|not|in|is)\b/g,
+  java: /\b(public|private|protected|static|final|void|class|interface|extends|implements|new|return|if|else|for|while|do|switch|case|break|continue|import|package|try|catch|finally|throw|throws|null|true|false|this|super|abstract|synchronized|volatile|transient|native|strictfp|instanceof|enum)\b/g,
+  go: /\b(func|var|const|type|struct|interface|import|package|return|if|else|for|range|switch|case|break|continue|defer|go|select|chan|map|nil|true|false|make|new|append|len|cap|delete|copy|close|panic|recover|error)\b/g,
+  rust: /\b(fn|let|mut|const|static|struct|enum|impl|trait|use|mod|pub|crate|super|self|Self|return|if|else|for|while|loop|match|break|continue|move|ref|in|where|type|dyn|Box|Vec|String|Option|Result|Some|None|Ok|Err|true|false)\b/g,
+  php: /\b(function|class|return|if|else|elseif|for|foreach|while|do|switch|case|break|continue|echo|print|new|delete|try|catch|finally|throw|null|true|false|this|extends|implements|interface|abstract|public|private|protected|static|const|namespace|use|include|require)\b/g,
+  ruby: /\b(def|class|module|return|if|elsif|else|unless|while|until|for|do|end|begin|rescue|ensure|raise|nil|true|false|self|super|yield|require|require_relative|include|extend|attr|attr_reader|attr_writer|attr_accessor|lambda|proc|new)\b/g,
+  swift: /\b(func|var|let|class|struct|enum|protocol|extension|return|if|else|guard|for|while|repeat|switch|case|break|continue|import|init|deinit|override|super|self|nil|true|false|as|is|in|where|throw|throws|try|catch|defer|public|private|internal|fileprivate|open|static|final|lazy|weak|unowned|mutating|nonmutating|dynamic)\b/g,
+  kotlin: /\b(fun|val|var|class|object|interface|return|if|else|when|for|while|do|break|continue|import|package|try|catch|finally|throw|null|true|false|this|super|override|open|final|abstract|private|protected|public|internal|companion|data|sealed|inline|suspend|coroutine|by|is|as|in|out|where|init|constructor)\b/g,
+  sql: /\b(SELECT|FROM|WHERE|JOIN|LEFT|RIGHT|INNER|OUTER|ON|AND|OR|NOT|IN|LIKE|BETWEEN|ORDER|BY|GROUP|HAVING|LIMIT|OFFSET|INSERT|INTO|VALUES|UPDATE|SET|DELETE|CREATE|TABLE|ALTER|DROP|INDEX|VIEW|PROCEDURE|FUNCTION|TRIGGER|DATABASE|USE|SHOW|DESCRIBE|EXPLAIN|AS|DISTINCT|ALL|NULL|TRUE|FALSE|IS|ASC|DESC|UNION|COUNT|SUM|AVG|MAX|MIN)\b/gi,
+  bash: /\b(if|then|else|elif|fi|for|while|do|done|case|in|esac|function|return|exit|echo|read|local|export|source|set|unset|shift|break|continue|true|false)\b/g,
+  css: /\b(important)\b|(@[a-zA-Z-]+)/g,
+  html: null,
+  json: null,
+  yaml: null,
+  markdown: null,
+  cpp: /\b(auto|break|case|char|class|const|continue|default|delete|do|double|else|enum|explicit|extern|false|float|for|friend|goto|if|inline|int|long|mutable|namespace|new|nullptr|operator|private|protected|public|register|return|short|signed|sizeof|static|struct|switch|template|this|throw|true|try|typedef|typeid|typename|union|unsigned|using|virtual|void|volatile|while|include|define|ifdef|ifndef|endif|pragma)\b/g,
+  plaintext: null,
+};
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function highlight(code, lang) {
+  const t = THEMES[currentTheme];
+  if (lang === 'plaintext' || lang === 'markdown') return escHtml(code);
+
+  let escaped = escHtml(code);
+
+  if (lang === 'html') {
+    return escaped
+      .replace(/(&lt;\/?)([\w-]+)/g, `$1<span style="color:${t.tag}">$2</span>`)
+      .replace(/([\w-]+=)(&quot;[^&]*&quot;)/g, `<span style="color:${t.attr}">$1</span><span style="color:${t.string}">$2</span>`)
+      .replace(/(&lt;!--[\s\S]*?--&gt;)/g, `<span style="color:${t.comment}">$1</span>`);
+  }
+
+  if (lang === 'css') {
+    return escaped
+      .replace(/(\/\*[\s\S]*?\*\/)/g, `<span style="color:${t.comment}">$1</span>`)
+      .replace(/([.#]?[\w-]+\s*\{)/g, `<span style="color:${t.fn}">$1</span>`)
+      .replace(/([\w-]+)(\s*:)/g, `<span style="color:${t.keyword}">$1</span>$2`)
+      .replace(/(#[0-9a-fA-F]{3,8})/g, `<span style="color:${t.string}">$1</span>`)
+      .replace(/("([^"]*)")/g, `<span style="color:${t.string}">$1</span>`);
+  }
+
+  if (lang === 'json') {
+    return escaped
+      .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?)/g, m =>
+        m.endsWith(':') || m.endsWith(': ')
+          ? `<span style="color:${t.attr}">${m}</span>`
+          : `<span style="color:${t.string}">${m}</span>`)
+      .replace(/\b(true|false|null)\b/g, `<span style="color:${t.keyword}">$1</span>`)
+      .replace(/\b(-?\d+\.?\d*([eE][+-]?\d+)?)\b/g, `<span style="color:${t.number}">$1</span>`);
+  }
+
+  if (lang === 'yaml') {
+    return escaped
+      .replace(/^([\w-]+)(:)/gm, `<span style="color:${t.attr}">$1</span>$2`)
+      .replace(/(#.*$)/gm, `<span style="color:${t.comment}">$1</span>`)
+      .replace(/("([^"]*)")/g, `<span style="color:${t.string}">$1</span>`)
+      .replace(/('([^']*)')/g, `<span style="color:${t.string}">$1</span>`);
+  }
+
+  if (lang === 'bash') {
+    escaped = escaped
+      .replace(/(#.*$)/gm, `<span style="color:${t.comment}">$1</span>`)
+      .replace(/(\$[\w{}\[\]@*#?!$\-]+)/g, `<span style="color:${t.fn}">$1</span>`)
+      .replace(/("([^"]*)")/g, `<span style="color:${t.string}">$1</span>`)
+      .replace(/('([^']*)')/g, `<span style="color:${t.string}">$1</span>`);
+    const kw = KEYWORDS[lang];
+    if (kw) escaped = escaped.replace(kw, `<span style="color:${t.keyword}">$1</span>`);
+    return escaped;
+  }
+
+  if (lang === 'sql') {
+    return escaped
+      .replace(/(--.*$)/gm, `<span style="color:${t.comment}">$1</span>`)
+      .replace(/('([^']*)')/g, `<span style="color:${t.string}">$1</span>`)
+      .replace(/\b(\d+)\b/g, `<span style="color:${t.number}">$1</span>`)
+      .replace(KEYWORDS[lang] || /(?!)/g, `<span style="color:${t.keyword}">$&</span>`);
+  }
+
+  // Generic: JS/TS/Python/etc.
+  let result = escaped;
+
+  // Comments first (avoid re-coloring)
+  result = result
+    .replace(/(\/\/.*$)/gm, `<span style="color:${t.comment}">$1</span>`)
+    .replace(/(\/\*[\s\S]*?\*\/)/g, `<span style="color:${t.comment}">$1</span>`)
+    .replace(/(#.*$)/gm, lang === 'python' || lang === 'ruby' ? `<span style="color:${t.comment}">$1</span>` : '$1');
+
+  // Strings
+  result = result
+    .replace(/(`[^`]*`)/g, `<span style="color:${t.string}">$1</span>`)
+    .replace(/("(?:[^"\\]|\\.)*")/g, `<span style="color:${t.string}">$1</span>`)
+    .replace(/('(?:[^'\\]|\\.)*')/g, `<span style="color:${t.string}">$1</span>`);
+
+  // Numbers
+  result = result.replace(/\b(\d+\.?\d*)\b/g, `<span style="color:${t.number}">$1</span>`);
+
+  // Function calls
+  result = result.replace(/\b([\w$]+)(?=\s*\()/g, `<span style="color:${t.fn}">$1</span>`);
+
+  // Keywords (must come after functions to not double-wrap)
+  const kw = KEYWORDS[lang];
+  if (kw) {
+    kw.lastIndex = 0;
+    result = result.replace(kw, `<span style="color:${t.keyword}">$1</span>`);
+  }
+
+  return result;
+}
+
+// ── Update preview ──────────────────────────────────────────────────
+const codeInput = document.getElementById('codeInput');
+const highlightedEl = document.getElementById('highlighted');
+const winLang = document.getElementById('winLang');
+const fontSizeRange = document.getElementById('fontSizeRange');
+const fontSizeVal = document.getElementById('fontSizeVal');
+const paddingRange = document.getElementById('paddingRange');
+const paddingVal = document.getElementById('paddingVal');
+const showFrame = document.getElementById('showFrame');
+const showLines = document.getElementById('showLines');
+const bgSel = document.getElementById('bgSel');
+const previewOuter = document.getElementById('previewOuter');
+const windowBar = document.getElementById('windowBar');
+const codeBody = document.getElementById('codeBody');
+const langSel = document.getElementById('langSel');
+
+function updateHighlight() {
+  const code = codeInput.value;
+  const lang = langSel.value;
+  currentLang = lang;
+  winLang.textContent = lang;
+
+  const pad = parseInt(paddingRange.value);
+  const fs = parseInt(fontSizeRange.value);
+
+  codeBody.style.padding = `${pad}px`;
+  highlightedEl.style.fontSize = fs + 'px';
+
+  const showLn = showLines.checked;
+  if (showLn) {
+    const lines = code.split('\n');
+    const maxLen = String(lines.length).length;
+    const numbered = lines.map((line, i) => {
+      const num = String(i + 1).padStart(maxLen, ' ');
+      const t = THEMES[currentTheme];
+      return `<span style="color:${t.comment};user-select:none;">${escHtml(num)}  </span>${highlight(line, lang)}`;
+    }).join('\n');
+    highlightedEl.innerHTML = numbered;
+  } else {
+    highlightedEl.innerHTML = highlight(code, lang);
+  }
+
+  // Window frame
+  windowBar.style.display = showFrame.checked ? '' : 'none';
+
+  // Background
+  const bg = bgSel.value;
+  if (bg === 'gradient-purple') previewOuter.style.background = 'linear-gradient(135deg,#667eea,#764ba2)';
+  else if (bg === 'gradient-ocean') previewOuter.style.background = 'linear-gradient(135deg,#0575E6,#021B79)';
+  else if (bg === 'gradient-sunset') previewOuter.style.background = 'linear-gradient(135deg,#f953c6,#b91d73)';
+  else if (bg === 'transparent') previewOuter.style.background = 'transparent';
+  else previewOuter.style.background = bg;
+}
+
+applyTheme();
+
+// Set default code
+codeInput.value = `// Calculate Fibonacci sequence
+function fibonacci(n) {
+  if (n <= 1) return n;
+  return fibonacci(n - 1) + fibonacci(n - 2);
+}
+
+const result = fibonacci(10);
+console.log(\`Fibonacci(10) = \${result}\`);`;
+
+updateHighlight();
+
+codeInput.addEventListener('input', updateHighlight);
+langSel.addEventListener('change', updateHighlight);
+fontSizeRange.addEventListener('input', () => { fontSizeVal.textContent = fontSizeRange.value + 'px'; updateHighlight(); });
+paddingRange.addEventListener('input', () => { paddingVal.textContent = paddingRange.value + 'px'; updateHighlight(); });
+showFrame.addEventListener('change', updateHighlight);
+showLines.addEventListener('change', updateHighlight);
+bgSel.addEventListener('change', updateHighlight);
+
+// ── Export PNG ──────────────────────────────────────────────────────
+document.getElementById('exportBtn').addEventListener('click', async () => {
+  const el = previewOuter;
+  try {
+    // Use html2canvas-like approach: draw to canvas manually
+    // Simple fallback: use getBoundingClientRect + window.devicePixelRatio
+    const scale = window.devicePixelRatio || 2;
+    const rect = el.getBoundingClientRect();
+    const canvas = document.getElementById('exportCanvas');
+    canvas.width = rect.width * scale;
+    canvas.height = rect.height * scale;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(scale, scale);
+
+    // We'll use the foreignObject approach via SVG
+    const html = el.outerHTML;
+    const xmlns = 'http://www.w3.org/2000/svg';
+    const svg = `<svg xmlns="${xmlns}" width="${rect.width}" height="${rect.height}">
+      <foreignObject x="0" y="0" width="${rect.width}" height="${rect.height}">
+        <html xmlns="http://www.w3.org/1999/xhtml">
+          <head>
+            <style>
+              * { box-sizing: border-box; margin:0; padding:0; }
+              body { font-family: 'Consolas', 'Monaco', monospace; }
+              .preview-outer { overflow:hidden; }
+              .window-bar { display:flex; align-items:center; gap:7px; padding:10px 14px; background:${THEMES[currentTheme].bar}; }
+              .win-dot { width:12px; height:12px; border-radius:50%; }
+              .win-dot-r { background:#ff5f57; }
+              .win-dot-y { background:#ffbd2e; }
+              .win-dot-g { background:#28c840; }
+              .win-lang { margin-left:auto; font-size:11px; opacity:0.6; font-family:monospace; color:${THEMES[currentTheme].text}; }
+              .code-body { padding:${paddingRange.value}px; background:${THEMES[currentTheme].body}; overflow:hidden; }
+              pre { margin:0; white-space:pre; }
+              code { font-family:'Consolas','Monaco','Courier New',monospace; font-size:${fontSizeRange.value}px; line-height:1.65; display:block; color:${THEMES[currentTheme].text}; }
+            </style>
+          </head>
+          <body>${html}</body>
+        </html>
+      </foreignObject>
+    </svg>`;
+
+    const blob = new Blob([svg], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = () => {
+      ctx.drawImage(img, 0, 0, rect.width, rect.height);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(pngBlob => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(pngBlob);
+        a.download = `code-snippet-${currentLang}.png`;
+        a.click();
+      }, 'image/png');
+    };
+    img.src = url;
+  } catch (e) {
+    alert('Export failed: ' + e.message);
+  }
+});
+
+// ── Copy Highlighted HTML ───────────────────────────────────────────
+document.getElementById('copyHtmlBtn').addEventListener('click', () => {
+  const html = `<pre><code class="language-${currentLang}">${highlightedEl.innerHTML}</code></pre>`;
+  navigator.clipboard.writeText(html).then(() => {
+    document.getElementById('copyHtmlBtn').textContent = 'Copied!';
+    setTimeout(() => document.getElementById('copyHtmlBtn').textContent = 'Copy Highlighted HTML', 1500);
+  });
+});
+</script>
+
+<!-- 80 test cases
+TEST_ID: csf-001 - Page title "Code Snippet Formatter"
+TEST_ID: csf-002 - Header badge "Highlight & Export"
+TEST_ID: csf-003 - Default code (Fibonacci) appears in editor on load
+TEST_ID: csf-004 - Preview renders syntax highlighting immediately
+TEST_ID: csf-005 - Language selector has JavaScript selected by default
+TEST_ID: csf-006 - Language selector includes TypeScript
+TEST_ID: csf-007 - Language selector includes Python
+TEST_ID: csf-008 - Language selector includes HTML
+TEST_ID: csf-009 - Language selector includes CSS
+TEST_ID: csf-010 - Language selector includes JSON
+TEST_ID: csf-011 - Language selector includes Bash/Shell
+TEST_ID: csf-012 - Language selector includes SQL
+TEST_ID: csf-013 - Language selector includes Rust
+TEST_ID: csf-014 - Language selector includes Go
+TEST_ID: csf-015 - Language change updates preview immediately
+TEST_ID: csf-016 - Six theme chips visible (One Dark, GitHub Dark, Dracula, Solarized, Nord, Light)
+TEST_ID: csf-017 - "One Dark" theme is active by default
+TEST_ID: csf-018 - Clicking "Dracula" theme changes preview colors
+TEST_ID: csf-019 - Clicking "GitHub Dark" theme changes preview colors
+TEST_ID: csf-020 - Clicking "Light" theme shows light background
+TEST_ID: csf-021 - Active theme chip has teal border
+TEST_ID: csf-022 - Font size slider changes preview font size
+TEST_ID: csf-023 - Font size value shows "14px" by default
+TEST_ID: csf-024 - Font size range is 11–22px
+TEST_ID: csf-025 - Padding slider changes preview padding
+TEST_ID: csf-026 - Padding value shows "24px" by default
+TEST_ID: csf-027 - Padding range is 8–60px
+TEST_ID: csf-028 - "Window Frame" toggle shows/hides traffic-light dots
+TEST_ID: csf-029 - Window frame is ON by default
+TEST_ID: csf-030 - Window bar shows language name (e.g. "javascript")
+TEST_ID: csf-031 - "Line Numbers" toggle shows/hides line numbers
+TEST_ID: csf-032 - Line numbers are OFF by default
+TEST_ID: csf-033 - Line numbers appear at start of each line when toggled ON
+TEST_ID: csf-034 - Background selector has "Transparent" option
+TEST_ID: csf-035 - Background selector has "Dark (#0f1117)" option (default)
+TEST_ID: csf-036 - Background selector has "White" option
+TEST_ID: csf-037 - Background selector has gradient options
+TEST_ID: csf-038 - Selecting "Gradient – Purple" applies gradient background
+TEST_ID: csf-039 - Selecting "Gradient – Ocean" applies gradient background
+TEST_ID: csf-040 - Selecting "White" applies white background
+TEST_ID: csf-041 - JavaScript keywords highlighted in purple/pink
+TEST_ID: csf-042 - Strings highlighted in green/teal
+TEST_ID: csf-043 - Comments highlighted in muted gray
+TEST_ID: csf-044 - Numbers highlighted in amber/orange
+TEST_ID: csf-045 - Function calls highlighted distinctly
+TEST_ID: csf-046 - Python "def" keyword highlighted
+TEST_ID: csf-047 - HTML tags highlighted correctly
+TEST_ID: csf-048 - HTML attribute names highlighted
+TEST_ID: csf-049 - CSS property names highlighted
+TEST_ID: csf-050 - JSON keys highlighted differently from values
+TEST_ID: csf-051 - SQL keywords highlighted (case-insensitive)
+TEST_ID: csf-052 - Bash $ variables highlighted
+TEST_ID: csf-053 - Typing in editor updates preview in real time
+TEST_ID: csf-054 - Clearing editor shows empty preview
+TEST_ID: csf-055 - "Export as PNG" button triggers download
+TEST_ID: csf-056 - Downloaded file is named "code-snippet-javascript.png"
+TEST_ID: csf-057 - "Copy Highlighted HTML" button copies to clipboard
+TEST_ID: csf-058 - Copy button shows "Copied!" then reverts
+TEST_ID: csf-059 - Copied HTML contains <pre><code> wrapper
+TEST_ID: csf-060 - Copied HTML has class="language-XXX" attribute
+TEST_ID: csf-061 - Window traffic-light dots: red (#ff5f57)
+TEST_ID: csf-062 - Window traffic-light dots: yellow (#ffbd2e)
+TEST_ID: csf-063 - Window traffic-light dots: green (#28c840)
+TEST_ID: csf-064 - Preview outer has border-radius (rounded corners)
+TEST_ID: csf-065 - Preview area scrolls horizontally for long lines
+TEST_ID: csf-066 - Two-column layout on desktop
+TEST_ID: csf-067 - Single column layout on mobile
+TEST_ID: csf-068 - Dark background (#0f1117)
+TEST_ID: csf-069 - Cards have surface background
+TEST_ID: csf-070 - Card titles in teal uppercase
+TEST_ID: csf-071 - Footer has DevNestio link
+TEST_ID: csf-072 - Code textarea is resizable (resize: vertical)
+TEST_ID: csf-073 - Textarea uses monospace font
+TEST_ID: csf-074 - Line height is 1.65 for readability
+TEST_ID: csf-075 - Changing language updates "javascript" label in window bar
+TEST_ID: csf-076 - Nord theme uses blue palette
+TEST_ID: csf-077 - Solarized theme uses teal/green
+TEST_ID: csf-078 - Template literals (${ }) highlighted correctly
+TEST_ID: csf-079 - Multi-line code renders with proper newlines
+TEST_ID: csf-080 - Exported PNG filename matches selected language
+-->
+</body>
+</html>

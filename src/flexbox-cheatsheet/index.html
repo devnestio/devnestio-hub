@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS Flexbox Cheat Sheet — devnestio</title>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#0f1117;color:#e2e8f0;min-height:100vh}
+header{padding:24px 32px;border-bottom:1px solid #1e2535}
+h1{font-size:1.5rem;font-weight:700;color:#f8fafc}
+h1 span{color:#60a5fa}
+.desc{color:#94a3b8;margin-top:4px;font-size:.9rem}
+.controls{display:flex;gap:12px;flex-wrap:wrap;padding:16px 32px;border-bottom:1px solid #1e2535;align-items:center}
+.search-wrap{position:relative;flex:1;min-width:200px}
+.search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#64748b}
+#search{width:100%;background:#1e2535;border:1px solid #334155;color:#e2e8f0;padding:8px 12px 8px 34px;border-radius:6px;font-size:.9rem;outline:none}
+#search:focus{border-color:#60a5fa}
+.cat-filters{display:flex;gap:8px;flex-wrap:wrap}
+.cat-btn{padding:5px 12px;border-radius:99px;border:1px solid #334155;background:#1e2535;color:#94a3b8;font-size:.8rem;cursor:pointer}
+.cat-btn.active,.cat-btn:hover{background:#2563eb;border-color:#2563eb;color:#fff}
+.content{max-width:1000px;margin:0 auto;padding:24px 32px}
+.section{margin-bottom:28px}
+.section-title{font-size:.95rem;font-weight:700;color:#60a5fa;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #1e2535}
+.prop-card{background:#141924;border:1px solid #1e2535;border-radius:8px;margin-bottom:10px;overflow:hidden}
+.prop-card:hover{border-color:#334155}
+.prop-header{display:flex;align-items:baseline;gap:12px;padding:12px 16px;border-bottom:1px solid #1e2535}
+.prop-name{font-family:monospace;font-size:.9rem;color:#7dd3fc;font-weight:700}
+.badge{font-size:.73rem;padding:2px 7px;border-radius:99px;border:1px solid}
+.badge-container{border-color:#1d4ed8;background:#1e3a5f;color:#93c5fd}
+.badge-item{border-color:#7c3aed;background:#3b0764;color:#c4b5fd}
+.prop-body{padding:12px 16px}
+.prop-desc{font-size:.85rem;color:#94a3b8;line-height:1.5;margin-bottom:10px}
+.values-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.val-chip{background:#1e2535;border:1px solid #334155;border-radius:4px;padding:3px 8px;font-family:monospace;font-size:.78rem;color:#e2e8f0;cursor:pointer}
+.val-chip:hover{background:#2563eb;border-color:#2563eb;color:#fff}
+.example-wrap{position:relative}
+.example-label{font-size:.73rem;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+pre{background:#0f1117;border:1px solid #1e2535;border-radius:4px;padding:8px 10px;font-size:.8rem;overflow:auto;line-height:1.5}
+code{font-family:monospace;color:#7dd3fc}
+.copy-btn{position:absolute;top:20px;right:8px;background:#1e2535;border:1px solid #334155;color:#64748b;padding:3px 8px;border-radius:4px;font-size:.73rem;cursor:pointer}
+.copy-btn:hover{background:#334155;color:#e2e8f0}
+.no-results{text-align:center;color:#64748b;padding:48px}
+.visual-demo{margin-bottom:10px;background:#0f1117;border:1px solid #1e2535;border-radius:6px;padding:10px;min-height:50px}
+.demo-row{display:flex;gap:4px;flex-wrap:wrap}
+.demo-box{background:#2563eb;color:#fff;font-size:.7rem;padding:4px 6px;border-radius:3px;min-width:32px;text-align:center}
+</style>
+</head>
+<body>
+<header>
+  <h1>CSS Flexbox <span>Cheat Sheet</span></h1>
+  <p class="desc">All Flexbox container and item properties with values and examples</p>
+</header>
+<div class="controls">
+  <div class="search-wrap">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="search" placeholder="Search properties…">
+  </div>
+  <div class="cat-filters" id="cats"></div>
+</div>
+<div class="content" id="content"></div>
+<script>
+const PROPS = [
+  {cat:'Container',name:'display',badge:'container',
+   desc:'Defines a flex formatting context. flex is block-level, inline-flex is inline.',
+   values:['flex','inline-flex'],
+   example:'display: flex;'},
+  {cat:'Container',name:'flex-direction',badge:'container',
+   desc:'Sets the main axis direction — the direction flex items are placed.',
+   values:['row','row-reverse','column','column-reverse'],
+   example:'flex-direction: row; /* default */\nflex-direction: column;'},
+  {cat:'Container',name:'flex-wrap',badge:'container',
+   desc:'Controls whether items wrap onto multiple lines.',
+   values:['nowrap','wrap','wrap-reverse'],
+   example:'flex-wrap: wrap;\nflex-wrap: nowrap; /* default */'},
+  {cat:'Container',name:'flex-flow',badge:'container',
+   desc:'Shorthand for flex-direction and flex-wrap.',
+   values:['row wrap','column nowrap','row-reverse wrap'],
+   example:'flex-flow: row wrap;\nflex-flow: column-reverse wrap-reverse;'},
+  {cat:'Container',name:'justify-content',badge:'container',
+   desc:'Aligns items along the main axis. Distributes space when items don\'t fill the container.',
+   values:['flex-start','flex-end','center','space-between','space-around','space-evenly'],
+   example:'justify-content: space-between;\njustify-content: center;\njustify-content: flex-end;'},
+  {cat:'Container',name:'align-items',badge:'container',
+   desc:'Aligns items along the cross axis within the current line.',
+   values:['stretch','flex-start','flex-end','center','baseline'],
+   example:'align-items: center;\nalign-items: stretch; /* default */\nalign-items: baseline;'},
+  {cat:'Container',name:'align-content',badge:'container',
+   desc:'Aligns multiple lines of flex items on the cross axis. Has no effect on single-line containers.',
+   values:['stretch','flex-start','flex-end','center','space-between','space-around','space-evenly'],
+   example:'align-content: space-between; /* multi-line only */\nalign-content: center;'},
+  {cat:'Container',name:'gap',badge:'container',
+   desc:'Sets spacing between flex items. Shorthand for row-gap and column-gap.',
+   values:['16px','1rem','1rem 2rem'],
+   example:'gap: 16px;\ngap: 1rem 2rem; /* row column */'},
+  {cat:'Container',name:'row-gap',badge:'container',
+   desc:'Sets the gap between rows of wrapped flex items.',
+   values:['16px','1rem'],
+   example:'row-gap: 16px;'},
+  {cat:'Container',name:'column-gap',badge:'container',
+   desc:'Sets the gap between flex items in a row.',
+   values:['16px','1rem'],
+   example:'column-gap: 24px;'},
+  {cat:'Container',name:'place-content',badge:'container',
+   desc:'Shorthand for align-content and justify-content.',
+   values:['center','space-between start'],
+   example:'place-content: center;\nplace-content: space-between flex-end;'},
+  {cat:'Item',name:'flex-grow',badge:'item',
+   desc:'Specifies how much the item should grow relative to siblings when positive space is available. 0 = don\'t grow.',
+   values:['0','1','2'],
+   example:'flex-grow: 1; /* take all remaining space */\nflex-grow: 0; /* default — don\'t grow */'},
+  {cat:'Item',name:'flex-shrink',badge:'item',
+   desc:'Specifies how much the item should shrink when there\'s not enough space. 0 = don\'t shrink.',
+   values:['1','0','2'],
+   example:'flex-shrink: 1; /* default — allow shrink */\nflex-shrink: 0; /* don\'t shrink */'},
+  {cat:'Item',name:'flex-basis',badge:'item',
+   desc:'Sets the initial main size of the item before free space is distributed.',
+   values:['auto','0','200px','50%','content'],
+   example:'flex-basis: auto; /* default */\nflex-basis: 200px;\nflex-basis: 0; /* used with flex-grow: 1 */'},
+  {cat:'Item',name:'flex',badge:'item',
+   desc:'Shorthand for flex-grow, flex-shrink, and flex-basis. The most common way to size flex items.',
+   values:['1','0 0 auto','1 1 auto','none','auto','0 1 200px'],
+   example:'flex: 1; /* grow=1 shrink=1 basis=0 */\nflex: none; /* grow=0 shrink=0 basis=auto */\nflex: 0 0 200px; /* fixed 200px, no grow/shrink */'},
+  {cat:'Item',name:'align-self',badge:'item',
+   desc:'Overrides the container\'s align-items for this specific item.',
+   values:['auto','flex-start','flex-end','center','stretch','baseline'],
+   example:'align-self: center;\nalign-self: flex-end;'},
+  {cat:'Item',name:'order',badge:'item',
+   desc:'Controls the visual order of flex items. Lower numbers appear first. Default is 0.',
+   values:['0','-1','1','2'],
+   example:'order: -1; /* move to front */\norder: 1; /* move toward end */'},
+  {cat:'Item',name:'place-self',badge:'item',
+   desc:'Shorthand for align-self and justify-self.',
+   values:['center','start end'],
+   example:'place-self: center;\nplace-self: start end;'},
+];
+
+const CATS=['All','Container','Item'];
+let activeCat='All', query='';
+
+function render(){
+  const visible=PROPS.filter(p=>{
+    const mc=activeCat==='All'||p.cat===activeCat;
+    const mq=!query||p.name.includes(query)||p.desc.toLowerCase().includes(query)||p.values.some(v=>v.includes(query));
+    return mc&&mq;
+  });
+  const el=document.getElementById('content');
+  if(!visible.length){el.innerHTML='<div class="no-results">No results found</div>';return;}
+  const byCat={};
+  visible.forEach(p=>{(byCat[p.cat]=byCat[p.cat]||[]).push(p);});
+  el.innerHTML=Object.entries(byCat).map(([cat,props])=>`
+    <div class="section">
+      <div class="section-title">${cat}</div>
+      ${props.map(p=>`
+        <div class="prop-card">
+          <div class="prop-header">
+            <span class="prop-name">${p.name}</span>
+            <span class="badge badge-${p.badge}">${p.badge==='container'?'Container':'Item'}</span>
+          </div>
+          <div class="prop-body">
+            <div class="prop-desc">${p.desc}</div>
+            <div class="values-row">${p.values.map(v=>`<span class="val-chip" onclick="cp('${p.name}: ${v.split('\\n')[0]};',this)">${v}</span>`).join('')}</div>
+            <div class="example-wrap">
+              <div class="example-label">Example</div>
+              <pre><code>${escHtml(p.example)}</code></pre>
+              <button class="copy-btn" onclick="cp(${JSON.stringify(p.example)},this)">Copy</button>
+            </div>
+          </div>
+        </div>`).join('')}
+    </div>`).join('');
+}
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function cp(text,btn){
+  navigator.clipboard.writeText(text);
+  if(btn){const orig=btn.textContent;btn.textContent='Copied!';setTimeout(()=>btn.textContent=orig,1400);}
+}
+document.getElementById('cats').innerHTML=CATS.map(c=>`
+  <button class="cat-btn${c==='All'?' active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
+function setCat(c){
+  activeCat=c;
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.toggle('active',b.textContent===c));
+  render();
+}
+document.getElementById('search').addEventListener('input',e=>{query=e.target.value.toLowerCase();render();});
+render();
+</script>
+</body>
+</html>

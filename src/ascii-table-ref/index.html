@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ASCII Table Reference — devnestio</title>
+  <meta name="description" content="Interactive ASCII table with decimal, hex, octal, and binary values. Search by character, decimal, or description. Includes control characters and printable ASCII 0–127." />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    header { background: #1a1d2e; border-bottom: 1px solid #2d3748; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+    header a { color: #7c85f3; text-decoration: none; font-size: 14px; }
+    header h1 { font-size: 18px; font-weight: 700; color: #fff; }
+    .container { max-width: 1060px; margin: 0 auto; padding: 24px 16px; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; align-items: center; }
+    .toolbar input { flex: 1; min-width: 180px; background: #1a1d2e; border: 1px solid #2d3748; border-radius: 8px; padding: 9px 14px; color: #e2e8f0; font-size: 14px; }
+    .toolbar input:focus { outline: none; border-color: #7c85f3; }
+    .filter-tabs { display: flex; gap: 6px; }
+    .filter-tab { background: #1a1d2e; border: 1px solid #2d3748; border-radius: 6px; padding: 6px 14px; font-size: 12px; cursor: pointer; color: #718096; }
+    .filter-tab.active { background: #7c85f3; border-color: #7c85f3; color: #fff; }
+    .cols-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; font-size: 12px; color: #718096; }
+    .cols-row label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+    .cols-row input[type=checkbox] { accent-color: #7c85f3; }
+    #count { font-size: 13px; color: #718096; margin-bottom: 8px; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { background: #1a1d2e; padding: 9px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #a0aec0; text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid #2d3748; white-space: nowrap; }
+    td { padding: 7px 12px; border-bottom: 1px solid #1a1d2e; vertical-align: middle; }
+    tr:hover td { background: #1a1d2e; cursor: pointer; }
+    .char-cell { font-family: 'Courier New', monospace; font-size: 18px; color: #7ee787; min-width: 28px; text-align: center; }
+    .ctrl-char { font-size: 11px; color: #7c85f3; font-weight: 700; }
+    .dec-cell { font-family: 'Courier New', monospace; color: #e2e8f0; }
+    .hex-cell { font-family: 'Courier New', monospace; color: #fbd38d; }
+    .oct-cell { font-family: 'Courier New', monospace; color: #a0aec0; }
+    .bin-cell { font-family: 'Courier New', monospace; color: #9ae6b4; font-size: 11px; }
+    .html-cell { font-family: 'Courier New', monospace; color: #fc8181; font-size: 12px; }
+    .desc-cell { color: #a0aec0; font-size: 12px; }
+    .badge { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+    .badge-ctrl { background: #1a365d; color: #90cdf4; }
+    .badge-print { background: #1c3a1e; color: #68d391; }
+    .badge-special { background: #2d1b69; color: #b794f4; }
+    .no-results { text-align: center; padding: 40px; color: #4a5568; }
+    .highlight { background: #b7791f; color: #fff; border-radius: 2px; padding: 0 2px; }
+    .copy-toast { position: fixed; bottom: 24px; right: 24px; background: #276749; color: #fff; padding: 10px 18px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity .3s; pointer-events: none; }
+    .copy-toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+<header>
+  <a href="/">← devnestio</a>
+  <h1>ASCII Table Reference</h1>
+</header>
+<div class="container">
+  <div class="toolbar">
+    <input type="search" id="search" placeholder="Search char, decimal, hex, description…" oninput="render()" />
+    <div class="filter-tabs">
+      <div class="filter-tab active" onclick="setFilter('all',this)">All</div>
+      <div class="filter-tab" onclick="setFilter('control',this)">Control</div>
+      <div class="filter-tab" onclick="setFilter('printable',this)">Printable</div>
+    </div>
+  </div>
+  <div class="cols-row">
+    Show columns:
+    <label><input type="checkbox" id="col-oct" checked onchange="render()"> Oct</label>
+    <label><input type="checkbox" id="col-bin" checked onchange="render()"> Binary</label>
+    <label><input type="checkbox" id="col-html" checked onchange="render()"> HTML Esc</label>
+  </div>
+  <div id="count"></div>
+  <div class="table-wrap">
+    <table>
+      <thead id="thead"></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+  <div class="no-results" id="no-results" style="display:none">No matches found.</div>
+</div>
+<div class="copy-toast" id="toast"></div>
+
+<script>
+const CTRL_NAMES = ['NUL','SOH','STX','ETX','EOT','ENQ','ACK','BEL','BS','HT','LF','VT','FF','CR','SO','SI','DLE','DC1','DC2','DC3','DC4','NAK','SYN','ETB','CAN','EM','SUB','ESC','FS','GS','RS','US'];
+const CTRL_DESC = ['Null','Start of Heading','Start of Text','End of Text','End of Transmission','Enquiry','Acknowledge','Bell','Backspace','Horizontal Tab','Line Feed','Vertical Tab','Form Feed','Carriage Return','Shift Out','Shift In','Data Link Escape','Device Control 1','Device Control 2','Device Control 3','Device Control 4','Negative Acknowledge','Synchronous Idle','End of Transmission Block','Cancel','End of Medium','Substitute','Escape','File Separator','Group Separator','Record Separator','Unit Separator'];
+const SPECIAL_DESC = { 32: 'Space', 127: 'Delete (DEL)' };
+const HTML_ESC = { 34: '&quot;', 38: '&amp;', 39: '&#039;', 60: '&lt;', 62: '&gt;', 160: '&nbsp;' };
+
+const ASCII = Array.from({ length: 128 }, (_, i) => {
+  const isCtrl = i < 32;
+  const isDel = i === 127;
+  const isPrint = !isCtrl && !isDel;
+  let char = '', ctrlName = '';
+  if (isCtrl) { ctrlName = CTRL_NAMES[i]; char = ''; }
+  else if (isDel) { ctrlName = 'DEL'; char = ''; }
+  else char = String.fromCharCode(i);
+  const desc = isCtrl ? CTRL_DESC[i] : (SPECIAL_DESC[i] || (isPrint ? `'${char}'` : 'Delete'));
+  const htmlEsc = HTML_ESC[i] || (isCtrl || isDel ? `&#${i};` : (i < 127 ? '' : `&#${i};`));
+  return {
+    dec: i,
+    hex: i.toString(16).toUpperCase().padStart(2, '0'),
+    oct: i.toString(8).padStart(3, '0'),
+    bin: i.toString(2).padStart(8, '0'),
+    char, ctrlName, desc,
+    htmlEsc: htmlEsc || (i < 32 || i === 127 ? `&#${i};` : ''),
+    type: isCtrl ? 'control' : isDel ? 'control' : 'printable'
+  };
+});
+
+let activeFilter = 'all';
+
+function setFilter(f, el) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+function hl(text, q) {
+  if (!q || !text) return text;
+  const s = String(text);
+  const escapedQ = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return s.replace(new RegExp(`(${escapedQ})`, 'gi'), '<span class="highlight">$1</span>');
+}
+
+function render() {
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  const showOct = document.getElementById('col-oct').checked;
+  const showBin = document.getElementById('col-bin').checked;
+  const showHtml = document.getElementById('col-html').checked;
+
+  // Header
+  document.getElementById('thead').innerHTML = `<tr>
+    <th>Char</th>
+    <th>Dec</th>
+    <th>Hex</th>
+    ${showOct ? '<th>Oct</th>' : ''}
+    ${showBin ? '<th>Binary</th>' : ''}
+    ${showHtml ? '<th>HTML</th>' : ''}
+    <th>Type</th>
+    <th>Description</th>
+  </tr>`;
+
+  let filtered = ASCII;
+  if (activeFilter !== 'all') filtered = filtered.filter(a => a.type === activeFilter);
+  if (q) filtered = filtered.filter(a =>
+    String(a.dec).includes(q) ||
+    a.hex.toLowerCase().includes(q) ||
+    a.oct.includes(q) ||
+    a.bin.includes(q) ||
+    a.char.toLowerCase().includes(q) ||
+    (a.ctrlName && a.ctrlName.toLowerCase().includes(q)) ||
+    a.desc.toLowerCase().includes(q) ||
+    a.htmlEsc.toLowerCase().includes(q)
+  );
+
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  document.getElementById('no-results').style.display = filtered.length ? 'none' : '';
+
+  filtered.forEach(a => {
+    const charDisplay = a.ctrlName
+      ? `<span class="ctrl-char">${a.ctrlName}</span>`
+      : `<span>${hl(a.char, q) || '&nbsp;'}</span>`;
+    const typeBadge = a.type === 'control'
+      ? '<span class="badge badge-ctrl">Control</span>'
+      : '<span class="badge badge-print">Print</span>';
+
+    const tr = document.createElement('tr');
+    tr.title = 'Click to copy character';
+    tr.onclick = () => copyChar(a);
+    tr.innerHTML = `
+      <td class="char-cell">${charDisplay}</td>
+      <td class="dec-cell">${hl(String(a.dec), q)}</td>
+      <td class="hex-cell">0x${hl(a.hex, q)}</td>
+      ${showOct ? `<td class="oct-cell">${hl(a.oct, q)}</td>` : ''}
+      ${showBin ? `<td class="bin-cell">${hl(a.bin, q)}</td>` : ''}
+      ${showHtml ? `<td class="html-cell">${hl(a.htmlEsc || '—', q)}</td>` : ''}
+      <td>${typeBadge}</td>
+      <td class="desc-cell">${hl(a.desc, q)}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('count').textContent = `Showing ${filtered.length} of ${ASCII.length} characters`;
+}
+
+function copyChar(a) {
+  const text = a.char || String.fromCharCode(a.dec);
+  navigator.clipboard.writeText(text).then(() => showToast(`Copied: ${a.ctrlName || a.char} (${a.dec})`));
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+render();
+</script>
+</body>
+</html>

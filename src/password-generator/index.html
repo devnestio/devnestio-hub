@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Password Generator — devnestio</title>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#0f1117;color:#e2e8f0;min-height:100vh}
+header{padding:24px 32px;border-bottom:1px solid #1e2535}
+h1{font-size:1.5rem;font-weight:700;color:#f8fafc}
+h1 span{color:#22d3ee}
+.desc{color:#94a3b8;margin-top:4px;font-size:.9rem}
+.main{max-width:600px;margin:0 auto;padding:28px 32px}
+.output-card{background:#141924;border:1px solid #1e2535;border-radius:10px;padding:20px 20px 16px;margin-bottom:16px}
+.password-display{font-family:monospace;font-size:1.3rem;color:#22d3ee;letter-spacing:.05em;word-break:break-all;min-height:2.2em;line-height:1.5;margin-bottom:12px}
+.output-actions{display:flex;gap:8px}
+.btn{padding:7px 16px;border-radius:6px;border:1px solid #334155;background:#1e2535;color:#e2e8f0;font-size:.83rem;cursor:pointer;font-weight:500}
+.btn:hover{border-color:#22d3ee;color:#22d3ee}
+.btn-primary{background:#0e7490;border-color:#0e7490;color:#fff;font-size:.85rem;padding:8px 20px}
+.btn-primary:hover{background:#0c6880;border-color:#0c6880}
+.strength-bar{height:4px;border-radius:2px;background:#1e2535;margin-bottom:6px;overflow:hidden}
+.strength-fill{height:100%;border-radius:2px;transition:width .3s,background .3s}
+.strength-label{font-size:.75rem;color:#64748b}
+.settings-card{background:#141924;border:1px solid #1e2535;border-radius:10px;padding:16px 20px;margin-bottom:16px}
+.settings-title{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b;margin-bottom:14px}
+.setting-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.setting-row label{flex:1;font-size:.85rem;color:#e2e8f0}
+.setting-row input[type=range]{flex:1;accent-color:#22d3ee}
+.setting-row input[type=checkbox]{width:16px;height:16px;accent-color:#22d3ee;cursor:pointer}
+.len-val{font-family:monospace;font-size:.9rem;color:#22d3ee;min-width:2em;text-align:right}
+.divider{border:none;border-top:1px solid #1e2535;margin:10px 0}
+.bulk-card{background:#141924;border:1px solid #1e2535;border-radius:10px;padding:16px 20px}
+.bulk-title{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b;margin-bottom:10px}
+.bulk-row{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+.bulk-row label{font-size:.83rem;color:#94a3b8}
+.bulk-row input[type=number]{width:60px;background:#0f1117;border:1px solid #334155;color:#e2e8f0;padding:5px 8px;border-radius:4px;font-size:.83rem;outline:none}
+.bulk-output{background:#0f1117;border:1px solid #1e2535;border-radius:6px;padding:10px 12px;font-family:monospace;font-size:.78rem;color:#22d3ee;white-space:pre;overflow:auto;max-height:160px;display:none}
+</style>
+</head>
+<body>
+<header>
+  <h1>Password <span>Generator</span></h1>
+  <p class="desc">Generate cryptographically secure passwords using the Web Crypto API — browser only, nothing sent to a server</p>
+</header>
+<div class="main">
+  <div class="output-card">
+    <div class="password-display" id="pwDisplay">—</div>
+    <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+    <div class="strength-label" id="strengthLabel">—</div>
+    <div class="output-actions" style="margin-top:12px">
+      <button class="btn btn-primary" onclick="generate()">↻ Generate</button>
+      <button class="btn" onclick="copyPw()">Copy</button>
+    </div>
+  </div>
+
+  <div class="settings-card">
+    <div class="settings-title">Settings</div>
+    <div class="setting-row">
+      <label>Length</label>
+      <input type="range" id="lenRange" min="8" max="128" value="20" oninput="updateLen();generate()">
+      <span class="len-val" id="lenVal">20</span>
+    </div>
+    <hr class="divider">
+    <div class="setting-row">
+      <label>Uppercase (A–Z)</label>
+      <input type="checkbox" id="useUpper" checked onchange="generate()">
+    </div>
+    <div class="setting-row">
+      <label>Lowercase (a–z)</label>
+      <input type="checkbox" id="useLower" checked onchange="generate()">
+    </div>
+    <div class="setting-row">
+      <label>Numbers (0–9)</label>
+      <input type="checkbox" id="useDigits" checked onchange="generate()">
+    </div>
+    <div class="setting-row">
+      <label>Symbols (!@#$%^&*)</label>
+      <input type="checkbox" id="useSymbols" checked onchange="generate()">
+    </div>
+    <div class="setting-row">
+      <label>Exclude ambiguous (0Oo1Il)</label>
+      <input type="checkbox" id="noAmbig" onchange="generate()">
+    </div>
+  </div>
+
+  <div class="bulk-card">
+    <div class="bulk-title">Bulk Generate</div>
+    <div class="bulk-row">
+      <label>Count:</label>
+      <input type="number" id="bulkCount" value="10" min="1" max="100">
+      <button class="btn" onclick="bulkGen()">Generate</button>
+      <button class="btn" onclick="copyBulk()">Copy All</button>
+    </div>
+    <div class="bulk-output" id="bulkOutput"></div>
+  </div>
+</div>
+<script>
+const UPPER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const LOWER = 'abcdefghijklmnopqrstuvwxyz';
+const DIGITS = '0123456789';
+const SYMBOLS = '!@#$%^&*()-_=+[]{}|;:,.<>?';
+const AMBIGUOUS = /[0Oo1Il]/g;
+
+function getCharset() {
+  let cs = '';
+  if (document.getElementById('useUpper').checked) cs += UPPER;
+  if (document.getElementById('useLower').checked) cs += LOWER;
+  if (document.getElementById('useDigits').checked) cs += DIGITS;
+  if (document.getElementById('useSymbols').checked) cs += SYMBOLS;
+  if (document.getElementById('noAmbig').checked) cs = cs.replace(AMBIGUOUS, '');
+  return cs;
+}
+
+function randomPassword(len, charset) {
+  if (!charset) return '';
+  const arr = new Uint32Array(len);
+  crypto.getRandomValues(arr);
+  return Array.from(arr, n => charset[n % charset.length]).join('');
+}
+
+function strength(pw) {
+  if (!pw) return { score: 0, label: '—', color: '#334155' };
+  const len = pw.length;
+  const hasUpper = /[A-Z]/.test(pw);
+  const hasLower = /[a-z]/.test(pw);
+  const hasDigit = /[0-9]/.test(pw);
+  const hasSym = /[^a-zA-Z0-9]/.test(pw);
+  const variety = [hasUpper, hasLower, hasDigit, hasSym].filter(Boolean).length;
+  let score = Math.min(len / 4, 5) + variety;
+  if (len >= 16) score += 2;
+  if (len >= 24) score += 2;
+  if (score <= 4) return { score: score / 12, label: 'Weak', color: '#f87171' };
+  if (score <= 6) return { score: score / 12, label: 'Fair', color: '#fb923c' };
+  if (score <= 8) return { score: score / 12, label: 'Good', color: '#60a5fa' };
+  return { score: Math.min(score / 12, 1), label: 'Strong', color: '#4ade80' };
+}
+
+function generate() {
+  const len = parseInt(document.getElementById('lenRange').value);
+  const charset = getCharset();
+  if (!charset) { document.getElementById('pwDisplay').textContent = '⚠ Select at least one character type'; return; }
+  const pw = randomPassword(len, charset);
+  document.getElementById('pwDisplay').textContent = pw;
+  const s = strength(pw);
+  document.getElementById('strengthFill').style.width = (s.score * 100) + '%';
+  document.getElementById('strengthFill').style.background = s.color;
+  document.getElementById('strengthLabel').textContent = s.label + ' — ' + len + ' characters, entropy ≈ ' + Math.floor(len * Math.log2(charset.length)) + ' bits';
+  document.getElementById('strengthLabel').style.color = s.color;
+}
+
+function updateLen() {
+  document.getElementById('lenVal').textContent = document.getElementById('lenRange').value;
+}
+
+function copyPw() {
+  const pw = document.getElementById('pwDisplay').textContent;
+  if (!pw || pw.startsWith('⚠') || pw === '—') return;
+  navigator.clipboard.writeText(pw);
+  const btn = document.querySelector('[onclick="copyPw()"]');
+  const orig = btn.textContent; btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = orig, 1200);
+}
+
+function bulkGen() {
+  const count = Math.min(parseInt(document.getElementById('bulkCount').value) || 10, 100);
+  const len = parseInt(document.getElementById('lenRange').value);
+  const charset = getCharset();
+  if (!charset) return;
+  const pws = Array.from({length: count}, () => randomPassword(len, charset));
+  const el = document.getElementById('bulkOutput');
+  el.textContent = pws.join('\n');
+  el.style.display = 'block';
+}
+
+function copyBulk() {
+  const el = document.getElementById('bulkOutput');
+  if (!el.textContent) return;
+  navigator.clipboard.writeText(el.textContent);
+  const btn = document.querySelector('[onclick="copyBulk()"]');
+  const orig = btn.textContent; btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = orig, 1200);
+}
+
+generate();
+</script>
+</body>
+</html>
