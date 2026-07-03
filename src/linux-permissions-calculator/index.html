@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Linux Permissions Calculator — devnestio</title>
+  <meta name="description" content="Calculate Linux file permissions. Convert between octal, symbolic (rwxrwxrwx), and human-readable. Includes umask calculator and special bits (setuid, setgid, sticky).">
+  <link rel="canonical" href="https://devnestio.pages.dev/linux-permissions-calculator/">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --surface: #161b22; --surface2: #21262d;
+      --border: #30363d; --text: #c9d1d9; --muted: #8b949e;
+      --accent: #58a6ff; --green: #3fb950; --red: #f85149; --yellow: #d29922; --purple: #bc8cff;
+    }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 24px; }
+    header nav a { color: var(--accent); text-decoration: none; font-size: 0.9em; }
+    header h1 { font-size: 1.6rem; margin: 8px 0 4px; }
+    header p { color: var(--muted); font-size: 0.95em; }
+    main { flex: 1; padding: 24px; max-width: 860px; width: 100%; margin: 0 auto; }
+    footer { background: var(--surface); border-top: 1px solid var(--border); padding: 16px 24px; text-align: center; color: var(--muted); font-size: 0.875rem; }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+    .card-title { font-size: 1rem; font-weight: 600; margin-bottom: 16px; }
+
+    /* Permission table */
+    .perm-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+    .perm-table th { font-size: 0.78em; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); padding: 8px; text-align: center; border-bottom: 1px solid var(--border); }
+    .perm-table td { padding: 10px 8px; text-align: center; border-bottom: 1px solid var(--border); }
+    .perm-table tr:last-child td { border-bottom: none; }
+    .row-label { font-weight: 600; text-align: left !important; color: var(--text); padding-left: 0 !important; }
+    .row-label .row-sub { font-size: 0.75em; color: var(--muted); font-weight: 400; display: block; }
+
+    .perm-check { display: none; }
+    .perm-toggle {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 40px; height: 40px; border-radius: 8px; border: 1.5px solid var(--border);
+      background: var(--surface2); color: var(--muted); font-family: 'SF Mono', monospace;
+      font-size: 1em; font-weight: 700; cursor: pointer; transition: all .15s; user-select: none;
+    }
+    .perm-toggle.on { border-color: var(--accent); background: rgba(88,166,255,.15); color: var(--accent); }
+    .perm-toggle.special.on { border-color: var(--purple); background: rgba(188,140,255,.12); color: var(--purple); }
+
+    /* Outputs */
+    .outputs { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 4px; }
+    .output-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+    .output-label { font-size: 0.75em; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: 6px; }
+    .output-val { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 1.05em; color: var(--text); word-break: break-all; }
+    .output-val.accent { color: var(--accent); }
+
+    .copy-row { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+    .copy-btn {
+      background: var(--surface2); border: 1px solid var(--border); color: var(--muted);
+      padding: 7px 14px; border-radius: 6px; cursor: pointer; font-size: 0.82em;
+      font-family: 'SF Mono', monospace; transition: all .15s;
+    }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .copy-btn.ok { border-color: var(--green); color: var(--green); }
+
+    .human-desc { margin-top: 14px; background: var(--surface2); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 6px; padding: 12px 16px; font-size: 0.88em; line-height: 1.7; }
+    .human-row { display: flex; gap: 8px; align-items: baseline; }
+    .human-who { color: var(--accent); font-weight: 600; min-width: 60px; font-size: 0.9em; text-transform: uppercase; letter-spacing: .05em; }
+    .human-perms { color: var(--text); }
+
+    /* Direct inputs */
+    .direct-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .direct-field { display: flex; flex-direction: column; gap: 5px; }
+    .direct-label { font-size: 0.78em; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
+    .direct-input {
+      background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+      padding: 10px 14px; border-radius: 8px; font-family: 'SF Mono', monospace; font-size: 1.05em;
+      transition: border-color .15s; width: 110px;
+    }
+    .direct-input:focus { outline: none; border-color: var(--accent); }
+    .direct-input.error { border-color: var(--red); }
+
+    /* Umask */
+    .umask-row { display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap; }
+    .umask-result { flex: 1; min-width: 200px; }
+    .umask-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 0.85em; }
+    .umask-table th { text-align: left; color: var(--muted); font-size: 0.8em; text-transform: uppercase; letter-spacing: .06em; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+    .umask-table td { padding: 7px 8px; border-bottom: 1px solid var(--border); font-family: 'SF Mono', monospace; }
+    .umask-table tr:last-child td { border-bottom: none; }
+
+    @media (max-width: 600px) { .perm-toggle { width: 34px; height: 34px; font-size: 0.85em; } }
+  </style>
+</head>
+<body>
+<header>
+  <nav><a href="https://devnestio.pages.dev">← devnestio</a></nav>
+  <h1>Linux Permissions Calculator</h1>
+  <p>chmod octal ↔ symbolic ↔ human-readable. Includes umask calculator.</p>
+</header>
+<main>
+  <!-- Visual checkboxes -->
+  <div class="card">
+    <div class="card-title">Permission Builder</div>
+    <div class="direct-row">
+      <div class="direct-field">
+        <div class="direct-label">Octal (e.g. 755)</div>
+        <input class="direct-input" id="octal-input" maxlength="4" placeholder="755" spellcheck="false" autocomplete="off">
+      </div>
+      <div class="direct-field">
+        <div class="direct-label">Symbolic (e.g. rwxr-xr-x)</div>
+        <input class="direct-input" id="sym-input" maxlength="9" placeholder="rwxr-xr-x" spellcheck="false" autocomplete="off" style="width:160px">
+      </div>
+    </div>
+
+    <table class="perm-table" id="perm-table">
+      <thead>
+        <tr>
+          <th style="text-align:left">Entity</th>
+          <th>Read (r)<br><span style="color:var(--accent);font-size:1.1em">+4</span></th>
+          <th>Write (w)<br><span style="color:var(--accent);font-size:1.1em">+2</span></th>
+          <th>Execute (x)<br><span style="color:var(--accent);font-size:1.1em">+1</span></th>
+          <th>Octal</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="row-label">Owner<span class="row-sub">user (u)</span></td>
+          <td><label class="perm-toggle" id="ur">r</label><input class="perm-check" type="checkbox" id="ur-c"></td>
+          <td><label class="perm-toggle" id="uw">w</label><input class="perm-check" type="checkbox" id="uw-c"></td>
+          <td><label class="perm-toggle" id="ux">x</label><input class="perm-check" type="checkbox" id="ux-c"></td>
+          <td id="u-oct" style="font-family:monospace;font-size:1.2em;color:var(--accent)">7</td>
+        </tr>
+        <tr>
+          <td class="row-label">Group<span class="row-sub">group (g)</span></td>
+          <td><label class="perm-toggle" id="gr">r</label><input class="perm-check" type="checkbox" id="gr-c"></td>
+          <td><label class="perm-toggle" id="gw">w</label><input class="perm-check" type="checkbox" id="gw-c"></td>
+          <td><label class="perm-toggle" id="gx">x</label><input class="perm-check" type="checkbox" id="gx-c"></td>
+          <td id="g-oct" style="font-family:monospace;font-size:1.2em;color:var(--accent)">5</td>
+        </tr>
+        <tr>
+          <td class="row-label">Others<span class="row-sub">other (o)</span></td>
+          <td><label class="perm-toggle" id="or">r</label><input class="perm-check" type="checkbox" id="or-c"></td>
+          <td><label class="perm-toggle" id="ow">w</label><input class="perm-check" type="checkbox" id="ow-c"></td>
+          <td><label class="perm-toggle" id="ox">x</label><input class="perm-check" type="checkbox" id="ox-c"></td>
+          <td id="o-oct" style="font-family:monospace;font-size:1.2em;color:var(--accent)">5</td>
+        </tr>
+        <tr>
+          <td class="row-label">Special<span class="row-sub">setuid/setgid/sticky</span></td>
+          <td><label class="perm-toggle special" id="su" title="Setuid">s</label><input class="perm-check" type="checkbox" id="su-c"></td>
+          <td><label class="perm-toggle special" id="sg" title="Setgid">s</label><input class="perm-check" type="checkbox" id="sg-c"></td>
+          <td><label class="perm-toggle special" id="st" title="Sticky bit">t</label><input class="perm-check" type="checkbox" id="st-c"></td>
+          <td id="s-oct" style="font-family:monospace;font-size:1.2em;color:var(--purple)">0</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="outputs" id="outputs">
+      <div class="output-item">
+        <div class="output-label">Octal</div>
+        <div class="output-val accent" id="out-octal">0755</div>
+      </div>
+      <div class="output-item">
+        <div class="output-label">Symbolic</div>
+        <div class="output-val" id="out-sym">rwxr-xr-x</div>
+      </div>
+      <div class="output-item">
+        <div class="output-label">chmod command</div>
+        <div class="output-val" id="out-chmod">chmod 755 file</div>
+      </div>
+      <div class="output-item">
+        <div class="output-label">ls -l type</div>
+        <div class="output-val" id="out-ls">-rwxr-xr-x</div>
+      </div>
+    </div>
+
+    <div class="human-desc" id="human-desc"></div>
+
+    <div class="copy-row">
+      <button class="copy-btn" id="copy-octal">Copy 755</button>
+      <button class="copy-btn" id="copy-sym">Copy rwxr-xr-x</button>
+      <button class="copy-btn" id="copy-chmod">Copy chmod</button>
+    </div>
+  </div>
+
+  <!-- Umask calculator -->
+  <div class="card">
+    <div class="card-title">Umask Calculator</div>
+    <div class="umask-row">
+      <div class="direct-field">
+        <div class="direct-label">Umask value</div>
+        <input class="direct-input" id="umask-input" maxlength="4" value="022" spellcheck="false" autocomplete="off">
+      </div>
+      <div class="umask-result" id="umask-result"></div>
+    </div>
+  </div>
+
+  <!-- Reference table -->
+  <div class="card">
+    <div class="card-title">Common Permission Presets</div>
+    <table class="umask-table">
+      <thead><tr><th>Octal</th><th>Symbolic</th><th>Description</th></tr></thead>
+      <tbody id="presets-body"></tbody>
+    </table>
+  </div>
+</main>
+<footer>
+  <a href="https://www.buymeacoffee.com/devnestio" target="_blank" rel="noopener">☕ Buy me a coffee</a>
+  &nbsp;·&nbsp;
+  <a href="https://devnestio.pages.dev">devnestio — free developer tools</a>
+</footer>
+<script>
+const ROWS = [
+  { prefix: 'u', bits: ['ur','uw','ux'] },
+  { prefix: 'g', bits: ['gr','gw','gx'] },
+  { prefix: 'o', bits: ['or','ow','ox'] },
+];
+const SPECIAL = ['su','sg','st'];
+
+const PRESETS = [
+  { oct: '400', sym: 'r--------', desc: 'Owner read only (private key)' },
+  { oct: '600', sym: 'rw-------', desc: 'Owner read/write (private files)' },
+  { oct: '644', sym: 'rw-r--r--', desc: 'Owner read/write, others read (web files)' },
+  { oct: '664', sym: 'rw-rw-r--', desc: 'Owner/group read/write, others read' },
+  { oct: '755', sym: 'rwxr-xr-x', desc: 'Owner full, others read/execute (executables, dirs)' },
+  { oct: '775', sym: 'rwxrwxr-x', desc: 'Owner/group full, others read/execute' },
+  { oct: '777', sym: 'rwxrwxrwx', desc: 'All permissions (avoid in production)' },
+  { oct: '700', sym: 'rwx------', desc: 'Owner only, no access for others' },
+  { oct: '711', sym: 'rwx--x--x', desc: 'Owner full, others execute only (dir traverse)' },
+  { oct: '444', sym: 'r--r--r--', desc: 'Read-only for everyone' },
+  { oct: '555', sym: 'r-xr-xr-x', desc: 'Read/execute for everyone (shared scripts)' },
+  { oct: '4755', sym: 'rwsr-xr-x', desc: 'Setuid + 755 (e.g. sudo, passwd)' },
+  { oct: '2755', sym: 'rwxr-sr-x', desc: 'Setgid + 755 (e.g. shared dirs)' },
+  { oct: '1755', sym: 'rwxr-xr-t', desc: 'Sticky + 755 (e.g. /tmp)' },
+];
+
+function getState() {
+  const u = (d('ur-c')?4:0)|(d('uw-c')?2:0)|(d('ux-c')?1:0);
+  const g = (d('gr-c')?4:0)|(d('gw-c')?2:0)|(d('gx-c')?1:0);
+  const o = (d('or-c')?4:0)|(d('ow-c')?2:0)|(d('ox-c')?1:0);
+  const s = (d('su-c')?4:0)|(d('sg-c')?2:0)|(d('st-c')?1:0);
+  return { u, g, o, s };
+}
+
+function d(id) { return document.getElementById(id).checked; }
+
+function numToSym(u, g, o, s) {
+  const bit = (n, r, w, x) => (n&4?r:'-')+(n&2?w:'-')+(n&1?x:'-');
+  const us = bit(u,'r','w', s&4 ? (u&1?'s':'S') : (u&1?'x':'-'));
+  const gs = bit(g,'r','w', s&2 ? (g&1?'s':'S') : (g&1?'x':'-'));
+  const os = bit(o,'r','w', s&1 ? (o&1?'t':'T') : (o&1?'x':'-'));
+  return us+gs+os;
+}
+
+function humanDesc(u, g, o, s) {
+  const parts = ['r','w','x'];
+  const names = ['read','write','execute'];
+  function describe(n) {
+    const ps = parts.filter((_,i)=>n&(4>>i)).map((_,i)=>names[i]);
+    return ps.length ? ps.join(', ') : 'no permissions';
+  }
+  let lines = [
+    `<div class="human-row"><span class="human-who">Owner:</span><span class="human-perms">${describe(u)}</span></div>`,
+    `<div class="human-row"><span class="human-who">Group:</span><span class="human-perms">${describe(g)}</span></div>`,
+    `<div class="human-row"><span class="human-who">Others:</span><span class="human-perms">${describe(o)}</span></div>`,
+  ];
+  const specials = [];
+  if (s&4) specials.push('setuid (run as file owner)');
+  if (s&2) specials.push('setgid (run as group / inherit group on dirs)');
+  if (s&1) specials.push('sticky bit (only owner can delete files in dir)');
+  if (specials.length) lines.push(`<div class="human-row"><span class="human-who">Special:</span><span class="human-perms">${specials.join('; ')}</span></div>`);
+  return lines.join('');
+}
+
+function update() {
+  const { u, g, o, s } = getState();
+  // Update toggles
+  ['ur','uw','ux'].forEach((id,i)=>{ const on=(u>>(2-i))&1; document.getElementById(id).classList.toggle('on',!!on); });
+  ['gr','gw','gx'].forEach((id,i)=>{ const on=(g>>(2-i))&1; document.getElementById(id).classList.toggle('on',!!on); });
+  ['or','ow','ox'].forEach((id,i)=>{ const on=(o>>(2-i))&1; document.getElementById(id).classList.toggle('on',!!on); });
+  ['su','sg','st'].forEach((id,i)=>{ const on=(s>>(2-i))&1; document.getElementById(id).classList.toggle('on',!!on); });
+
+  document.getElementById('u-oct').textContent = u;
+  document.getElementById('g-oct').textContent = g;
+  document.getElementById('o-oct').textContent = o;
+  document.getElementById('s-oct').textContent = s;
+
+  const sym = numToSym(u,g,o,s);
+  const octalStr = (s>0?String(s):'') + u + g + o;
+  const octalFull = s > 0 ? `${s}${u}${g}${o}` : `${u}${g}${o}`;
+
+  document.getElementById('out-octal').textContent = s>0 ? `0${s}${u}${g}${o}` : `0${u}${g}${o}`;
+  document.getElementById('out-sym').textContent = sym;
+  document.getElementById('out-chmod').textContent = `chmod ${octalFull} file`;
+  document.getElementById('out-ls').textContent = `-${sym}`;
+  document.getElementById('human-desc').innerHTML = humanDesc(u,g,o,s);
+
+  // Update copy buttons
+  document.getElementById('copy-octal').textContent = `Copy ${octalFull}`;
+  document.getElementById('copy-sym').textContent = `Copy ${sym}`;
+  document.getElementById('copy-chmod').textContent = `Copy chmod ${octalFull}`;
+  document.getElementById('copy-octal').dataset.val = octalFull;
+  document.getElementById('copy-sym').dataset.val = sym;
+  document.getElementById('copy-chmod').dataset.val = `chmod ${octalFull} file`;
+
+  // Sync direct inputs (don't update if they have focus)
+  if (document.activeElement !== document.getElementById('octal-input'))
+    document.getElementById('octal-input').value = octalFull;
+  if (document.activeElement !== document.getElementById('sym-input'))
+    document.getElementById('sym-input').value = sym;
+}
+
+function setState(u, g, o, s) {
+  const set = (id, v) => document.getElementById(id).checked = !!v;
+  set('ur-c', u&4); set('uw-c', u&2); set('ux-c', u&1);
+  set('gr-c', g&4); set('gw-c', g&2); set('gx-c', g&1);
+  set('or-c', o&4); set('ow-c', o&2); set('ox-c', o&1);
+  set('su-c', s&4); set('sg-c', s&2); set('st-c', s&1);
+  update();
+}
+
+// Toggle clicks
+[...document.querySelectorAll('.perm-toggle')].forEach(label => {
+  label.addEventListener('click', () => {
+    const cb = document.getElementById(label.id + '-c');
+    cb.checked = !cb.checked;
+    update();
+  });
+});
+
+// Octal direct input
+document.getElementById('octal-input').addEventListener('input', function() {
+  const v = this.value.trim();
+  const match = v.match(/^([0-7]?)([0-7])([0-7])([0-7])$/);
+  if (match) {
+    this.classList.remove('error');
+    setState(parseInt(match[2]),parseInt(match[3]),parseInt(match[4]),parseInt(match[1]||'0'));
+  } else if (v.length > 0) {
+    this.classList.add('error');
+  }
+});
+
+// Symbolic direct input
+document.getElementById('sym-input').addEventListener('input', function() {
+  const v = this.value.trim();
+  if (v.length === 9) {
+    const m = v.match(/^([r-])([w-])([xsS-])([r-])([w-])([xsS-])([r-])([w-])([xtT-])$/i);
+    if (m) {
+      this.classList.remove('error');
+      const u = (m[1]==='r'?4:0)|(m[2]==='w'?2:0)|(/[xs]/i.test(m[3])?1:0);
+      const g = (m[4]==='r'?4:0)|(m[5]==='w'?2:0)|(/[xs]/i.test(m[6])?1:0);
+      const o = (m[7]==='r'?4:0)|(m[8]==='w'?2:0)|(/[xt]/i.test(m[9])?1:0);
+      const s = (/[sS]/.test(m[3])?4:0)|(/[sS]/.test(m[6])?2:0)|(/[tT]/.test(m[9])?1:0);
+      setState(u,g,o,s);
+      return;
+    }
+  }
+  if (v.length > 0) this.classList.add('error');
+  else this.classList.remove('error');
+});
+
+// Copy buttons
+document.querySelectorAll('.copy-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    navigator.clipboard.writeText(btn.dataset.val || btn.textContent).then(() => {
+      btn.classList.add('ok');
+      const orig = btn.textContent;
+      btn.textContent = 'Copied!';
+      setTimeout(() => { btn.classList.remove('ok'); btn.textContent = orig; }, 1200);
+    });
+  });
+});
+
+// Umask calculator
+document.getElementById('umask-input').addEventListener('input', calcUmask);
+function calcUmask() {
+  const v = document.getElementById('umask-input').value.trim();
+  const el = document.getElementById('umask-result');
+  const match = v.match(/^([0-7]?)([0-7])([0-7])([0-7])$/);
+  if (!match) { el.innerHTML = '<span style="color:var(--red);font-size:.85em">Invalid umask value</span>'; return; }
+  const um = parseInt(match[2])*64 + parseInt(match[3])*8 + parseInt(match[4]);
+  const file = 0o666 & ~um;
+  const dir = 0o777 & ~um;
+  const toSym = n => {
+    const r = n=>n?'r':'-', w = n=>n?'w':'-', x = n=>n?'x':'-';
+    return r(n&256)+w(n&128)+x(n&64)+r(n&32)+w(n&16)+x(n&8)+r(n&4)+w(n&2)+x(n&1);
+  };
+  el.innerHTML = `
+    <table class="umask-table" style="margin-top:0">
+      <thead><tr><th>Type</th><th>Octal</th><th>Symbolic</th></tr></thead>
+      <tbody>
+        <tr><td>Files (base 666)</td><td>${file.toString(8).padStart(3,'0')}</td><td>${toSym(file)}</td></tr>
+        <tr><td>Dirs (base 777)</td><td>${dir.toString(8).padStart(3,'0')}</td><td>${toSym(dir)}</td></tr>
+      </tbody>
+    </table>`;
+}
+
+// Presets
+const pb = document.getElementById('presets-body');
+PRESETS.forEach(p => {
+  const tr = document.createElement('tr');
+  tr.style.cursor = 'pointer';
+  tr.innerHTML = `<td style="font-family:monospace;color:var(--accent)">${p.oct}</td><td style="font-family:monospace">${p.sym}</td><td style="color:var(--muted)">${p.desc}</td>`;
+  tr.addEventListener('click', () => {
+    const v = p.oct.padStart(4,'0');
+    setState(parseInt(v[1]),parseInt(v[2]),parseInt(v[3]),parseInt(v[0]));
+  });
+  pb.appendChild(tr);
+});
+
+// Init
+setState(7, 5, 5, 0);
+calcUmask();
+</script>
+</body>
+</html>

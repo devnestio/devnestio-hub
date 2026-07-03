@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTTP Status Code Reference — devnestio</title>
+  <meta name="description" content="Complete HTTP status code reference covering 1xx–5xx. Search by code or name, see descriptions and use cases. Browser-only, instant results.">
+  <link rel="canonical" href="https://devnestio.pages.dev/http-status-reference/">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --surface: #161b22; --surface2: #21262d;
+      --border: #30363d; --text: #c9d1d9; --muted: #8b949e;
+      --accent: #58a6ff; --green: #3fb950; --red: #f85149; --yellow: #d29922;
+    }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 24px; }
+    header nav a { color: var(--accent); text-decoration: none; font-size: 0.9em; }
+    header h1 { font-size: 1.6rem; margin: 8px 0 4px; }
+    header p { color: var(--muted); font-size: 0.95em; }
+    main { flex: 1; padding: 24px; max-width: 960px; width: 100%; margin: 0 auto; }
+    footer { background: var(--surface); border-top: 1px solid var(--border); padding: 16px 24px; text-align: center; color: var(--muted); font-size: 0.875rem; }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    .controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 20px; }
+    .search-input {
+      flex: 1; min-width: 220px; background: var(--surface); border: 1px solid var(--border);
+      color: var(--text); padding: 10px 14px; border-radius: 8px; font-size: 0.95em;
+    }
+    .search-input:focus { outline: none; border-color: var(--accent); }
+    .filter-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+    .filter-btn {
+      padding: 7px 14px; border-radius: 6px; border: 1px solid var(--border);
+      background: var(--surface2); color: var(--muted); font-size: 0.82em;
+      cursor: pointer; transition: all .15s; font-weight: 500;
+    }
+    .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .filter-btn.active { background: var(--accent); color: #0d1117; border-color: var(--accent); }
+
+    .section-header {
+      font-size: 0.78em; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--muted); padding: 6px 0; margin: 20px 0 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+      padding: 14px 16px; cursor: pointer; transition: border-color .15s, background .15s;
+      position: relative;
+    }
+    .card:hover { border-color: var(--accent); background: var(--surface2); }
+    .card-top { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; }
+    .code-badge {
+      font-family: 'SF Mono', 'Fira Code', monospace; font-size: 1.1em; font-weight: 700;
+      min-width: 42px;
+    }
+    .card-name { font-weight: 600; font-size: 0.95em; color: var(--text); }
+    .card-desc { font-size: 0.82em; color: var(--muted); line-height: 1.5; }
+    .copy-hint { font-size: 0.75em; color: var(--accent); position: absolute; top: 8px; right: 10px; opacity: 0; transition: opacity .15s; }
+    .card:hover .copy-hint { opacity: 1; }
+    .card.copied { border-color: var(--green); }
+    .card.copied .copy-hint { opacity: 1; color: var(--green); }
+
+    .c1xx .code-badge { color: #58a6ff; }
+    .c2xx .code-badge { color: #3fb950; }
+    .c3xx .code-badge { color: #d29922; }
+    .c4xx .code-badge { color: #f85149; }
+    .c5xx .code-badge { color: #bc8cff; }
+
+    .no-results { text-align: center; padding: 48px 0; color: var(--muted); }
+
+    @media (max-width: 600px) { .cards { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<header>
+  <nav><a href="https://devnestio.pages.dev">← devnestio</a></nav>
+  <h1>HTTP Status Code Reference</h1>
+  <p>All HTTP status codes — 1xx to 5xx — with descriptions and use cases.</p>
+</header>
+<main>
+  <div class="controls">
+    <input class="search-input" id="search" type="search" placeholder="Search by code, name, or keyword…" autocomplete="off">
+    <div class="filter-btns">
+      <button class="filter-btn active" data-cat="all">All</button>
+      <button class="filter-btn" data-cat="1xx">1xx</button>
+      <button class="filter-btn" data-cat="2xx">2xx</button>
+      <button class="filter-btn" data-cat="3xx">3xx</button>
+      <button class="filter-btn" data-cat="4xx">4xx</button>
+      <button class="filter-btn" data-cat="5xx">5xx</button>
+    </div>
+  </div>
+  <div id="list"></div>
+  <div class="no-results" id="no-results" style="display:none">No status codes match your search.</div>
+</main>
+<footer>
+  <a href="https://www.buymeacoffee.com/devnestio" target="_blank" rel="noopener">☕ Buy me a coffee</a>
+  &nbsp;·&nbsp;
+  <a href="https://devnestio.pages.dev">devnestio — free developer tools</a>
+</footer>
+<script>
+const CODES = [
+  // 1xx
+  { code: 100, name: "Continue", desc: "The server received the request headers and the client should proceed to send the request body.", cat: "1xx" },
+  { code: 101, name: "Switching Protocols", desc: "The server is switching to a different protocol as requested by the client (e.g., WebSocket upgrade).", cat: "1xx" },
+  { code: 102, name: "Processing", desc: "The server has received and is processing the request, but no response is available yet (WebDAV).", cat: "1xx" },
+  { code: 103, name: "Early Hints", desc: "Used to preload resources while the server prepares a response, sending Link headers early.", cat: "1xx" },
+  // 2xx
+  { code: 200, name: "OK", desc: "The request succeeded. The meaning varies by HTTP method: GET returns the resource, POST returns the result.", cat: "2xx" },
+  { code: 201, name: "Created", desc: "The request succeeded and a new resource was created as a result. Typically used for POST or PUT.", cat: "2xx" },
+  { code: 202, name: "Accepted", desc: "The request was accepted for processing but has not been completed. Processing may happen asynchronously.", cat: "2xx" },
+  { code: 203, name: "Non-Authoritative Information", desc: "The returned metadata is not from the origin server but from a local or third-party copy.", cat: "2xx" },
+  { code: 204, name: "No Content", desc: "The server fulfilled the request but has no content to return. Headers may still be useful.", cat: "2xx" },
+  { code: 205, name: "Reset Content", desc: "Tells the client to reset the document view, e.g., to clear a form after submitting.", cat: "2xx" },
+  { code: 206, name: "Partial Content", desc: "The server is returning only part of the resource due to a Range header in the request.", cat: "2xx" },
+  { code: 207, name: "Multi-Status", desc: "Conveys information about multiple resources in situations where multiple status codes are appropriate (WebDAV).", cat: "2xx" },
+  { code: 208, name: "Already Reported", desc: "The members of a DAV binding have already been enumerated in a previous reply and are not included again.", cat: "2xx" },
+  { code: 226, name: "IM Used", desc: "The server fulfilled a GET request and the response is the result of one or more instance manipulations (delta encoding).", cat: "2xx" },
+  // 3xx
+  { code: 300, name: "Multiple Choices", desc: "The request has more than one possible response. The client should choose one of them.", cat: "3xx" },
+  { code: 301, name: "Moved Permanently", desc: "The URL of the requested resource has been changed permanently. The new URL is in the response.", cat: "3xx" },
+  { code: 302, name: "Found", desc: "The URI of the resource has been changed temporarily. Use the same URI for future requests.", cat: "3xx" },
+  { code: 303, name: "See Other", desc: "The server directs the client to get the resource at another URI using a GET request.", cat: "3xx" },
+  { code: 304, name: "Not Modified", desc: "The cached version of the resource is still valid; the client should use the cached copy.", cat: "3xx" },
+  { code: 305, name: "Use Proxy", desc: "Deprecated. The requested response must be accessed through a proxy.", cat: "3xx" },
+  { code: 307, name: "Temporary Redirect", desc: "The resource is temporarily at a different URI. The method and body must not change on redirect.", cat: "3xx" },
+  { code: 308, name: "Permanent Redirect", desc: "The resource is permanently at a new URI. The method and body must not change on redirect.", cat: "3xx" },
+  // 4xx
+  { code: 400, name: "Bad Request", desc: "The server cannot process the request due to malformed syntax, invalid request message framing, or deceptive routing.", cat: "4xx" },
+  { code: 401, name: "Unauthorized", desc: "Authentication is required and has failed or has not been provided. Response must include a WWW-Authenticate header.", cat: "4xx" },
+  { code: 402, name: "Payment Required", desc: "Reserved for future use. Sometimes used for digital payment systems or API quota exceeded.", cat: "4xx" },
+  { code: 403, name: "Forbidden", desc: "The server refuses to authorize the request. Unlike 401, authentication will not help.", cat: "4xx" },
+  { code: 404, name: "Not Found", desc: "The server cannot find the requested resource. The URL may be wrong or the resource may not exist.", cat: "4xx" },
+  { code: 405, name: "Method Not Allowed", desc: "The HTTP method is known but is not supported for the target resource.", cat: "4xx" },
+  { code: 406, name: "Not Acceptable", desc: "The server cannot produce a response matching the Accept headers in the request.", cat: "4xx" },
+  { code: 407, name: "Proxy Authentication Required", desc: "Authentication is required with the proxy. Similar to 401 but for proxy servers.", cat: "4xx" },
+  { code: 408, name: "Request Timeout", desc: "The server timed out waiting for the request. The client may repeat the request.", cat: "4xx" },
+  { code: 409, name: "Conflict", desc: "The request conflicts with the current state of the server, often used with PUT requests.", cat: "4xx" },
+  { code: 410, name: "Gone", desc: "The resource is no longer available and will not be available again. Different from 404 — it's permanent.", cat: "4xx" },
+  { code: 411, name: "Length Required", desc: "The server requires the Content-Length header but it was not provided.", cat: "4xx" },
+  { code: 412, name: "Precondition Failed", desc: "The server does not meet a precondition in the request headers (e.g., If-Match, If-None-Match).", cat: "4xx" },
+  { code: 413, name: "Content Too Large", desc: "The request body is larger than the server is willing or able to process.", cat: "4xx" },
+  { code: 414, name: "URI Too Long", desc: "The URI requested by the client is longer than the server is willing to interpret.", cat: "4xx" },
+  { code: 415, name: "Unsupported Media Type", desc: "The media format of the requested data is not supported by the server.", cat: "4xx" },
+  { code: 416, name: "Range Not Satisfiable", desc: "The ranges specified in the Range header field cannot be fulfilled.", cat: "4xx" },
+  { code: 417, name: "Expectation Failed", desc: "The expectation in the Expect header cannot be met by the server.", cat: "4xx" },
+  { code: 418, name: "I'm a Teapot", desc: "The server refuses to brew coffee because it is a teapot. An April Fools' joke in RFC 2324.", cat: "4xx" },
+  { code: 421, name: "Misdirected Request", desc: "The request was directed at a server that is unable to produce a response for this combination of scheme and authority.", cat: "4xx" },
+  { code: 422, name: "Unprocessable Content", desc: "The request was well-formed but had semantic errors (e.g., validation failures). Common in REST APIs.", cat: "4xx" },
+  { code: 423, name: "Locked", desc: "The resource being accessed is locked (WebDAV).", cat: "4xx" },
+  { code: 424, name: "Failed Dependency", desc: "The request failed due to failure of a previous request (WebDAV).", cat: "4xx" },
+  { code: 425, name: "Too Early", desc: "The server is unwilling to process a request that might be replayed, preventing replay attacks.", cat: "4xx" },
+  { code: 426, name: "Upgrade Required", desc: "The client should switch to a different protocol (specified in the Upgrade header).", cat: "4xx" },
+  { code: 428, name: "Precondition Required", desc: "The origin server requires the request to be conditional to prevent lost updates.", cat: "4xx" },
+  { code: 429, name: "Too Many Requests", desc: "The client has sent too many requests in a given time (rate limiting). May include Retry-After header.", cat: "4xx" },
+  { code: 431, name: "Request Header Fields Too Large", desc: "The server is unwilling to process the request because the header fields are too large.", cat: "4xx" },
+  { code: 451, name: "Unavailable For Legal Reasons", desc: "The server is denying access due to a legal demand (e.g., government-ordered censorship).", cat: "4xx" },
+  // 5xx
+  { code: 500, name: "Internal Server Error", desc: "A generic error occurred on the server. The server encountered an unexpected condition.", cat: "5xx" },
+  { code: 501, name: "Not Implemented", desc: "The server does not support the functionality required to fulfill the request (e.g., unrecognized method).", cat: "5xx" },
+  { code: 502, name: "Bad Gateway", desc: "The server, acting as a gateway, received an invalid response from an upstream server.", cat: "5xx" },
+  { code: 503, name: "Service Unavailable", desc: "The server is not ready to handle the request — overloaded or down for maintenance. May include Retry-After.", cat: "5xx" },
+  { code: 504, name: "Gateway Timeout", desc: "The server, acting as a gateway, did not receive a timely response from an upstream server.", cat: "5xx" },
+  { code: 505, name: "HTTP Version Not Supported", desc: "The HTTP version used in the request is not supported by the server.", cat: "5xx" },
+  { code: 506, name: "Variant Also Negotiates", desc: "The server has an internal configuration error in content negotiation (circular reference).", cat: "5xx" },
+  { code: 507, name: "Insufficient Storage", desc: "The server cannot store the representation needed to complete the request (WebDAV).", cat: "5xx" },
+  { code: 508, name: "Loop Detected", desc: "The server detected an infinite loop while processing the request (WebDAV).", cat: "5xx" },
+  { code: 510, name: "Not Extended", desc: "Further extensions to the request are required for the server to fulfill it.", cat: "5xx" },
+  { code: 511, name: "Network Authentication Required", desc: "The client needs to authenticate to gain network access (e.g., captive portal).", cat: "5xx" },
+];
+
+const catLabels = { "1xx": "1xx — Informational", "2xx": "2xx — Success", "3xx": "3xx — Redirection", "4xx": "4xx — Client Errors", "5xx": "5xx — Server Errors" };
+
+let activeCat = "all";
+let query = "";
+
+function render() {
+  const q = query.toLowerCase().trim();
+  const list = document.getElementById("list");
+  const noR = document.getElementById("no-results");
+  list.innerHTML = "";
+  let total = 0;
+  const groups = {};
+  CODES.forEach(c => {
+    if (activeCat !== "all" && c.cat !== activeCat) return;
+    if (q && !String(c.code).includes(q) && !c.name.toLowerCase().includes(q) && !c.desc.toLowerCase().includes(q)) return;
+    if (!groups[c.cat]) groups[c.cat] = [];
+    groups[c.cat].push(c);
+    total++;
+  });
+  if (total === 0) { noR.style.display = ""; return; }
+  noR.style.display = "none";
+  ["1xx","2xx","3xx","4xx","5xx"].forEach(cat => {
+    if (!groups[cat]) return;
+    const hdr = document.createElement("div");
+    hdr.className = "section-header";
+    hdr.textContent = catLabels[cat];
+    list.appendChild(hdr);
+    const grid = document.createElement("div");
+    grid.className = "cards";
+    groups[cat].forEach(c => {
+      const el = document.createElement("div");
+      el.className = `card c${c.cat}`;
+      el.innerHTML = `
+        <span class="copy-hint" id="hint-${c.code}">Click to copy</span>
+        <div class="card-top">
+          <span class="code-badge">${c.code}</span>
+          <span class="card-name">${c.name}</span>
+        </div>
+        <div class="card-desc">${c.desc}</div>`;
+      el.addEventListener("click", () => {
+        navigator.clipboard.writeText(String(c.code)).then(() => {
+          el.classList.add("copied");
+          document.getElementById(`hint-${c.code}`).textContent = "Copied!";
+          setTimeout(() => {
+            el.classList.remove("copied");
+            document.getElementById(`hint-${c.code}`).textContent = "Click to copy";
+          }, 1500);
+        });
+      });
+      grid.appendChild(el);
+    });
+    list.appendChild(grid);
+  });
+}
+
+document.getElementById("search").addEventListener("input", e => { query = e.target.value; render(); });
+document.querySelectorAll(".filter-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    activeCat = btn.dataset.cat;
+    render();
+  });
+});
+
+render();
+</script>
+</body>
+</html>

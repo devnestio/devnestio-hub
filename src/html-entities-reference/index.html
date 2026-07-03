@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML Entities Reference — devnestio</title>
+  <meta name="description" content="Searchable HTML entities reference. Find named entities, numeric codes, and characters. Copy entity name or code with one click.">
+  <link rel="canonical" href="https://devnestio.pages.dev/html-entities-reference/">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --surface: #161b22; --surface2: #21262d;
+      --border: #30363d; --text: #c9d1d9; --muted: #8b949e;
+      --accent: #58a6ff; --green: #3fb950; --red: #f85149;
+    }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 24px; }
+    header nav a { color: var(--accent); text-decoration: none; font-size: 0.9em; }
+    header h1 { font-size: 1.6rem; margin: 8px 0 4px; }
+    header p { color: var(--muted); font-size: 0.95em; }
+    main { flex: 1; padding: 24px; max-width: 1040px; width: 100%; margin: 0 auto; }
+    footer { background: var(--surface); border-top: 1px solid var(--border); padding: 16px 24px; text-align: center; color: var(--muted); font-size: 0.875rem; }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    .controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+    .search-input {
+      flex: 1; min-width: 220px; background: var(--surface); border: 1px solid var(--border);
+      color: var(--text); padding: 10px 14px; border-radius: 8px; font-size: 0.95em;
+    }
+    .search-input:focus { outline: none; border-color: var(--accent); }
+    .filter-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+    .filter-btn {
+      padding: 7px 12px; border-radius: 6px; border: 1px solid var(--border);
+      background: var(--surface2); color: var(--muted); font-size: 0.8em;
+      cursor: pointer; transition: all .15s; font-weight: 500;
+    }
+    .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .filter-btn.active { background: var(--accent); color: #0d1117; border-color: var(--accent); }
+
+    .count { font-size: 0.82em; color: var(--muted); margin-bottom: 14px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.88em; }
+    thead th {
+      background: var(--surface); border-bottom: 2px solid var(--border);
+      padding: 10px 12px; text-align: left; font-size: 0.8em;
+      text-transform: uppercase; letter-spacing: .07em; color: var(--muted); position: sticky; top: 0; z-index: 1;
+    }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+    tbody tr:hover { background: var(--surface); }
+    td { padding: 9px 12px; vertical-align: middle; }
+
+    .char-cell { font-size: 1.4em; text-align: center; width: 48px; }
+    .name-cell { font-family: 'SF Mono', 'Fira Code', monospace; color: var(--accent); }
+    .num-cell { font-family: 'SF Mono', 'Fira Code', monospace; color: var(--muted); font-size: 0.9em; }
+    .desc-cell { color: var(--muted); }
+    .cat-cell { color: var(--muted); font-size: 0.82em; }
+
+    .copy-btn {
+      background: var(--surface2); border: 1px solid var(--border); color: var(--muted);
+      padding: 4px 9px; border-radius: 5px; cursor: pointer; font-size: 0.78em;
+      font-family: 'SF Mono', monospace; transition: all .15s; white-space: nowrap;
+    }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .copy-btn.ok { border-color: var(--green); color: var(--green); }
+
+    .no-results { text-align: center; padding: 48px 0; color: var(--muted); }
+  </style>
+</head>
+<body>
+<header>
+  <nav><a href="https://devnestio.pages.dev">← devnestio</a></nav>
+  <h1>HTML Entities Reference</h1>
+  <p>Find named entities, numeric codes, and characters. Click any button to copy.</p>
+</header>
+<main>
+  <div class="controls">
+    <input class="search-input" id="search" type="search" placeholder="Search by name, character, or description…" autocomplete="off">
+    <div class="filter-btns">
+      <button class="filter-btn active" data-cat="all">All</button>
+      <button class="filter-btn" data-cat="Common">Common</button>
+      <button class="filter-btn" data-cat="Symbols">Symbols</button>
+      <button class="filter-btn" data-cat="Arrows">Arrows</button>
+      <button class="filter-btn" data-cat="Math">Math</button>
+      <button class="filter-btn" data-cat="Latin">Latin</button>
+      <button class="filter-btn" data-cat="Punctuation">Punctuation</button>
+    </div>
+  </div>
+  <div class="count" id="count"></div>
+  <div id="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:48px">Char</th>
+          <th>Named Entity</th>
+          <th>Numeric (Dec)</th>
+          <th>Numeric (Hex)</th>
+          <th>Description</th>
+          <th>Category</th>
+          <th style="width:80px">Copy</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="no-results" id="no-results" style="display:none">No entities match your search.</div>
+  </div>
+</main>
+<footer>
+  <a href="https://www.buymeacoffee.com/devnestio" target="_blank" rel="noopener">☕ Buy me a coffee</a>
+  &nbsp;·&nbsp;
+  <a href="https://devnestio.pages.dev">devnestio — free developer tools</a>
+</footer>
+<script>
+const ENTITIES = [
+  // Common
+  { char: "&", name: "&amp;", cp: 38, desc: "Ampersand", cat: "Common" },
+  { char: "<", name: "&lt;", cp: 60, desc: "Less-than sign", cat: "Common" },
+  { char: ">", name: "&gt;", cp: 62, desc: "Greater-than sign", cat: "Common" },
+  { char: '"', name: "&quot;", cp: 34, desc: "Quotation mark", cat: "Common" },
+  { char: "'", name: "&apos;", cp: 39, desc: "Apostrophe", cat: "Common" },
+  { char: " ", name: "&nbsp;", cp: 160, desc: "Non-breaking space", cat: "Common" },
+  { char: "©", name: "&copy;", cp: 169, desc: "Copyright sign", cat: "Common" },
+  { char: "®", name: "&reg;", cp: 174, desc: "Registered sign", cat: "Common" },
+  { char: "™", name: "&trade;", cp: 8482, desc: "Trade mark sign", cat: "Common" },
+  { char: "€", name: "&euro;", cp: 8364, desc: "Euro sign", cat: "Common" },
+  { char: "£", name: "&pound;", cp: 163, desc: "Pound sign", cat: "Common" },
+  { char: "¥", name: "&yen;", cp: 165, desc: "Yen sign", cat: "Common" },
+  { char: "¢", name: "&cent;", cp: 162, desc: "Cent sign", cat: "Common" },
+  { char: "§", name: "&sect;", cp: 167, desc: "Section sign", cat: "Common" },
+  { char: "¶", name: "&para;", cp: 182, desc: "Pilcrow (paragraph) sign", cat: "Common" },
+  // Punctuation
+  { char: "—", name: "&mdash;", cp: 8212, desc: "Em dash", cat: "Punctuation" },
+  { char: "–", name: "&ndash;", cp: 8211, desc: "En dash", cat: "Punctuation" },
+  { char: "…", name: "&hellip;", cp: 8230, desc: "Horizontal ellipsis", cat: "Punctuation" },
+  { char: "‘", name: "&lsquo;", cp: 8216, desc: "Left single quotation mark", cat: "Punctuation" },
+  { char: "’", name: "&rsquo;", cp: 8217, desc: "Right single quotation mark", cat: "Punctuation" },
+  { char: "“", name: "&ldquo;", cp: 8220, desc: "Left double quotation mark", cat: "Punctuation" },
+  { char: "”", name: "&rdquo;", cp: 8221, desc: "Right double quotation mark", cat: "Punctuation" },
+  { char: "‹", name: "&lsaquo;", cp: 8249, desc: "Single left-pointing angle quotation mark", cat: "Punctuation" },
+  { char: "›", name: "&rsaquo;", cp: 8250, desc: "Single right-pointing angle quotation mark", cat: "Punctuation" },
+  { char: "«", name: "&laquo;", cp: 171, desc: "Left-pointing double angle quotation mark", cat: "Punctuation" },
+  { char: "»", name: "&raquo;", cp: 187, desc: "Right-pointing double angle quotation mark", cat: "Punctuation" },
+  { char: "·", name: "&middot;", cp: 183, desc: "Middle dot", cat: "Punctuation" },
+  { char: "•", name: "&bull;", cp: 8226, desc: "Bullet", cat: "Punctuation" },
+  { char: "‣", name: "&#8227;", cp: 8227, desc: "Triangular bullet", cat: "Punctuation" },
+  // Symbols
+  { char: "★", name: "&#9733;", cp: 9733, desc: "Black star", cat: "Symbols" },
+  { char: "☆", name: "&#9734;", cp: 9734, desc: "White star", cat: "Symbols" },
+  { char: "♥", name: "&hearts;", cp: 9829, desc: "Black heart suit", cat: "Symbols" },
+  { char: "♦", name: "&diams;", cp: 9830, desc: "Black diamond suit", cat: "Symbols" },
+  { char: "♣", name: "&clubs;", cp: 9827, desc: "Black club suit", cat: "Symbols" },
+  { char: "♠", name: "&spades;", cp: 9824, desc: "Black spade suit", cat: "Symbols" },
+  { char: "✓", name: "&#10003;", cp: 10003, desc: "Check mark", cat: "Symbols" },
+  { char: "✗", name: "&#10007;", cp: 10007, desc: "Ballot X", cat: "Symbols" },
+  { char: "✔", name: "&#10004;", cp: 10004, desc: "Heavy check mark", cat: "Symbols" },
+  { char: "✘", name: "&#10008;", cp: 10008, desc: "Heavy ballot X", cat: "Symbols" },
+  { char: "☀", name: "&#9728;", cp: 9728, desc: "Black sun with rays", cat: "Symbols" },
+  { char: "☁", name: "&#9729;", cp: 9729, desc: "Cloud", cat: "Symbols" },
+  { char: "⚡", name: "&#9889;", cp: 9889, desc: "High voltage sign", cat: "Symbols" },
+  { char: "⭐", name: "&#11088;", cp: 11088, desc: "Glowing star", cat: "Symbols" },
+  { char: "∞", name: "&infin;", cp: 8734, desc: "Infinity", cat: "Symbols" },
+  { char: "°", name: "&deg;", cp: 176, desc: "Degree sign", cat: "Symbols" },
+  { char: "±", name: "&plusmn;", cp: 177, desc: "Plus-minus sign", cat: "Symbols" },
+  { char: "µ", name: "&micro;", cp: 181, desc: "Micro sign", cat: "Symbols" },
+  // Arrows
+  { char: "←", name: "&larr;", cp: 8592, desc: "Leftwards arrow", cat: "Arrows" },
+  { char: "→", name: "&rarr;", cp: 8594, desc: "Rightwards arrow", cat: "Arrows" },
+  { char: "↑", name: "&uarr;", cp: 8593, desc: "Upwards arrow", cat: "Arrows" },
+  { char: "↓", name: "&darr;", cp: 8595, desc: "Downwards arrow", cat: "Arrows" },
+  { char: "↔", name: "&harr;", cp: 8596, desc: "Left right arrow", cat: "Arrows" },
+  { char: "↕", name: "&#8597;", cp: 8597, desc: "Up down arrow", cat: "Arrows" },
+  { char: "⇐", name: "&lArr;", cp: 8656, desc: "Leftwards double arrow", cat: "Arrows" },
+  { char: "⇒", name: "&rArr;", cp: 8658, desc: "Rightwards double arrow", cat: "Arrows" },
+  { char: "⇑", name: "&uArr;", cp: 8657, desc: "Upwards double arrow", cat: "Arrows" },
+  { char: "⇓", name: "&dArr;", cp: 8659, desc: "Downwards double arrow", cat: "Arrows" },
+  { char: "⇔", name: "&hArr;", cp: 8660, desc: "Left right double arrow", cat: "Arrows" },
+  // Math
+  { char: "×", name: "&times;", cp: 215, desc: "Multiplication sign", cat: "Math" },
+  { char: "÷", name: "&divide;", cp: 247, desc: "Division sign", cat: "Math" },
+  { char: "½", name: "&frac12;", cp: 189, desc: "Vulgar fraction one half", cat: "Math" },
+  { char: "¼", name: "&frac14;", cp: 188, desc: "Vulgar fraction one quarter", cat: "Math" },
+  { char: "¾", name: "&frac34;", cp: 190, desc: "Vulgar fraction three quarters", cat: "Math" },
+  { char: "≠", name: "&ne;", cp: 8800, desc: "Not equal to", cat: "Math" },
+  { char: "≤", name: "&le;", cp: 8804, desc: "Less-than or equal to", cat: "Math" },
+  { char: "≥", name: "&ge;", cp: 8805, desc: "Greater-than or equal to", cat: "Math" },
+  { char: "≈", name: "&asymp;", cp: 8776, desc: "Almost equal to", cat: "Math" },
+  { char: "√", name: "&radic;", cp: 8730, desc: "Square root", cat: "Math" },
+  { char: "∑", name: "&sum;", cp: 8721, desc: "N-ary summation", cat: "Math" },
+  { char: "∏", name: "&prod;", cp: 8719, desc: "N-ary product", cat: "Math" },
+  { char: "∫", name: "&int;", cp: 8747, desc: "Integral", cat: "Math" },
+  { char: "∂", name: "&part;", cp: 8706, desc: "Partial differential", cat: "Math" },
+  { char: "π", name: "&pi;", cp: 960, desc: "Greek small letter pi", cat: "Math" },
+  { char: "²", name: "&sup2;", cp: 178, desc: "Superscript two", cat: "Math" },
+  { char: "³", name: "&sup3;", cp: 179, desc: "Superscript three", cat: "Math" },
+  // Latin
+  { char: "À", name: "&Agrave;", cp: 192, desc: "Latin capital letter A with grave", cat: "Latin" },
+  { char: "Á", name: "&Aacute;", cp: 193, desc: "Latin capital letter A with acute", cat: "Latin" },
+  { char: "Â", name: "&Acirc;", cp: 194, desc: "Latin capital letter A with circumflex", cat: "Latin" },
+  { char: "Ã", name: "&Atilde;", cp: 195, desc: "Latin capital letter A with tilde", cat: "Latin" },
+  { char: "Ä", name: "&Auml;", cp: 196, desc: "Latin capital letter A with diaeresis", cat: "Latin" },
+  { char: "Å", name: "&Aring;", cp: 197, desc: "Latin capital letter A with ring above", cat: "Latin" },
+  { char: "Æ", name: "&AElig;", cp: 198, desc: "Latin capital letter AE", cat: "Latin" },
+  { char: "Ç", name: "&Ccedil;", cp: 199, desc: "Latin capital letter C with cedilla", cat: "Latin" },
+  { char: "È", name: "&Egrave;", cp: 200, desc: "Latin capital letter E with grave", cat: "Latin" },
+  { char: "É", name: "&Eacute;", cp: 201, desc: "Latin capital letter E with acute", cat: "Latin" },
+  { char: "Ê", name: "&Ecirc;", cp: 202, desc: "Latin capital letter E with circumflex", cat: "Latin" },
+  { char: "Ë", name: "&Euml;", cp: 203, desc: "Latin capital letter E with diaeresis", cat: "Latin" },
+  { char: "Ñ", name: "&Ntilde;", cp: 209, desc: "Latin capital letter N with tilde", cat: "Latin" },
+  { char: "Ö", name: "&Ouml;", cp: 214, desc: "Latin capital letter O with diaeresis", cat: "Latin" },
+  { char: "Ü", name: "&Uuml;", cp: 220, desc: "Latin capital letter U with diaeresis", cat: "Latin" },
+  { char: "ß", name: "&szlig;", cp: 223, desc: "Latin small letter sharp s", cat: "Latin" },
+  { char: "à", name: "&agrave;", cp: 224, desc: "Latin small letter a with grave", cat: "Latin" },
+  { char: "á", name: "&aacute;", cp: 225, desc: "Latin small letter a with acute", cat: "Latin" },
+  { char: "â", name: "&acirc;", cp: 226, desc: "Latin small letter a with circumflex", cat: "Latin" },
+  { char: "ä", name: "&auml;", cp: 228, desc: "Latin small letter a with diaeresis", cat: "Latin" },
+  { char: "å", name: "&aring;", cp: 229, desc: "Latin small letter a with ring above", cat: "Latin" },
+  { char: "æ", name: "&aelig;", cp: 230, desc: "Latin small letter ae", cat: "Latin" },
+  { char: "ç", name: "&ccedil;", cp: 231, desc: "Latin small letter c with cedilla", cat: "Latin" },
+  { char: "é", name: "&eacute;", cp: 233, desc: "Latin small letter e with acute", cat: "Latin" },
+  { char: "ñ", name: "&ntilde;", cp: 241, desc: "Latin small letter n with tilde", cat: "Latin" },
+  { char: "ö", name: "&ouml;", cp: 246, desc: "Latin small letter o with diaeresis", cat: "Latin" },
+  { char: "ü", name: "&uuml;", cp: 252, desc: "Latin small letter u with diaeresis", cat: "Latin" },
+];
+
+let activeCat = "all";
+let query = "";
+
+function render() {
+  const q = query.toLowerCase().trim();
+  const tbody = document.getElementById("tbody");
+  const noR = document.getElementById("no-results");
+  tbody.innerHTML = "";
+  let count = 0;
+
+  ENTITIES.forEach(e => {
+    if (activeCat !== "all" && e.cat !== activeCat) return;
+    if (q) {
+      const hay = [e.char, e.name, e.desc, String(e.cp), e.cat].join(" ").toLowerCase();
+      if (!hay.includes(q)) return;
+    }
+    count++;
+    const dec = `&#${e.cp};`;
+    const hex = `&#x${e.cp.toString(16).toUpperCase()};`;
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="char-cell">${e.char === " " ? '&nbsp;' : e.char}</td>
+      <td class="name-cell">${e.name}</td>
+      <td class="num-cell">${dec}</td>
+      <td class="num-cell">${hex}</td>
+      <td class="desc-cell">${e.desc}</td>
+      <td class="cat-cell">${e.cat}</td>
+      <td>
+        <button class="copy-btn" data-val="${e.name}" title="Copy named entity">Name</button>
+        <button class="copy-btn" data-val="${dec}" title="Copy decimal code" style="margin-top:3px">Dec</button>
+      </td>`;
+    tr.querySelectorAll(".copy-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        navigator.clipboard.writeText(btn.dataset.val).then(() => {
+          btn.classList.add("ok");
+          const orig = btn.textContent;
+          btn.textContent = "✓";
+          setTimeout(() => { btn.classList.remove("ok"); btn.textContent = orig; }, 1200);
+        });
+      });
+    });
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById("count").textContent = `Showing ${count} entit${count === 1 ? 'y' : 'ies'}`;
+  noR.style.display = count === 0 ? "" : "none";
+  document.querySelector("table").style.display = count === 0 ? "none" : "";
+}
+
+document.getElementById("search").addEventListener("input", e => { query = e.target.value; render(); });
+document.querySelectorAll(".filter-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    activeCat = btn.dataset.cat;
+    render();
+  });
+});
+
+render();
+</script>
+</body>
+</html>

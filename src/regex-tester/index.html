@@ -1,322 +1,268 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Regex Tester – Test Regular Expressions Online | DevNestio</title>
-  <meta name="description" content="Test regular expressions in real time. See all matches, capture groups, and named groups highlighted. Supports all JS regex flags." />
-  <link rel="canonical" href="https://devnestio.pages.dev/regex-tester/" />
-  <meta property="og:title" content="Regex Tester – Test Regular Expressions Online" />
-  <meta property="og:description" content="Test regular expressions in real time. Matches, capture groups, and named groups highlighted instantly." />
-  <meta property="og:url" content="https://devnestio.pages.dev/regex-tester/" />
-  <meta property="og:type" content="website" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Regex Tester — devnestio</title>
+  <meta name="description" content="Live regex tester with match highlighting, capture groups, and flag toggles (g/i/m/s). Test regular expressions in real time, browser-only.">
+  <link rel="canonical" href="https://devnestio.pages.dev/regex-tester/">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #0f1117; --surface: #1a1d27; --surface2: #22263a; --border: #2e3248;
-      --text: #e2e8f0; --muted: #8892a4;
-      --accent: #a78bfa; --green: #4ade80; --red: #f87171; --yellow: #fbbf24;
-      --hl0: #fbbf2440; --hl1: #4ade8040; --hl2: #60a5fa40; --hl3: #f4721040; --hl4: #c084fc40;
-      --hlt0: #fbbf24; --hlt1: #4ade80; --hlt2: #60a5fa; --hlt3: #f47210; --hlt4: #c084fc;
+      --bg: #0d1117; --surface: #161b22; --surface2: #21262d;
+      --border: #30363d; --text: #c9d1d9; --muted: #8b949e;
+      --accent: #58a6ff; --green: #3fb950; --red: #f85149; --yellow: #d29922; --purple: #bc8cff;
     }
-    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
-    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1.1rem 1.5rem; }
-    header h1 { font-size: 1.35rem; font-weight: 700; color: var(--accent); }
-    header p { font-size: .85rem; color: var(--muted); margin-top: .2rem; }
-    .main { max-width: 1000px; margin: 0 auto; padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 24px; }
+    header nav a { color: var(--accent); text-decoration: none; font-size: 0.9em; }
+    header h1 { font-size: 1.6rem; margin: 8px 0 4px; }
+    header p { color: var(--muted); font-size: 0.95em; }
+    main { flex: 1; padding: 24px; max-width: 900px; width: 100%; margin: 0 auto; }
+    footer { background: var(--surface); border-top: 1px solid var(--border); padding: 16px 24px; text-align: center; color: var(--muted); font-size: 0.875rem; }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
 
     /* Pattern row */
-    .pattern-row { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: .9rem 1.1rem; display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; }
-    .pattern-wrap { flex: 1; min-width: 200px; display: flex; align-items: center; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; transition: border-color .2s; }
-    .pattern-wrap:focus-within { border-color: var(--accent); }
-    .pattern-slash { padding: 0 .4rem; color: var(--muted); font-family: monospace; font-size: 1.1rem; user-select: none; }
-    .pattern-wrap input { flex: 1; background: none; border: none; color: var(--text); font-family: 'Fira Code', monospace; font-size: .95rem; padding: .5rem .2rem; outline: none; }
-    .flags-input { background: var(--bg); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: .5rem .75rem; font-family: monospace; font-size: .95rem; width: 90px; outline: none; transition: border-color .2s; }
-    .flags-input:focus { border-color: var(--accent); }
-    .flag-pills { display: flex; gap: .3rem; flex-wrap: wrap; }
-    .flag-pill { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); border-radius: 5px; padding: .2rem .55rem; font-size: .78rem; font-family: monospace; cursor: pointer; transition: all .15s; user-select: none; }
-    .flag-pill.active { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 700; }
-    .err-msg { color: var(--red); font-size: .82rem; width: 100%; }
+    .pattern-row { display: flex; align-items: center; gap: 0; margin-bottom: 14px; }
+    .pattern-slash { font-family: 'SF Mono', monospace; font-size: 1.2em; color: var(--muted); padding: 0 4px; }
+    .pattern-input {
+      flex: 1; background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+      padding: 11px 14px; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 1em;
+      transition: border-color .15s; outline: none; border-radius: 8px 0 0 8px;
+    }
+    .pattern-input:focus { border-color: var(--accent); }
+    .pattern-input.error { border-color: var(--red); }
+    .flags-end { background: var(--surface2); border: 1px solid var(--border); border-left: none; border-radius: 0 8px 8px 0; padding: 11px 8px; display: flex; gap: 4px; align-items: center; }
+    .flag-btn {
+      font-family: 'SF Mono', monospace; font-size: 0.9em; font-weight: 700;
+      width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border);
+      background: transparent; color: var(--muted); cursor: pointer; transition: all .15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .flag-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .flag-btn.on { background: rgba(88,166,255,.15); border-color: var(--accent); color: var(--accent); }
+    .err-msg { font-size: 0.82em; color: var(--red); min-height: 18px; margin-bottom: 6px; }
 
     /* Test string */
-    .section-label { font-size: .78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: .4rem; }
-    .test-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.1rem; }
-    textarea#testStr { width: 100%; min-height: 120px; background: var(--surface2); border: 1px solid var(--border); color: var(--text); font-family: 'Fira Code', monospace; font-size: .88rem; border-radius: 8px; padding: .6rem .85rem; resize: vertical; outline: none; line-height: 1.7; transition: border-color .2s; }
-    textarea#testStr:focus { border-color: var(--accent); }
+    .test-label { font-size: 0.8em; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: 6px; }
+    .test-area {
+      width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+      padding: 12px 14px; border-radius: 8px; font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.9em; resize: vertical; min-height: 120px; transition: border-color .15s; outline: none;
+    }
+    .test-area:focus { border-color: var(--accent); }
 
-    /* Highlighted result */
-    .result-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.1rem; }
-    .highlight-area { background: var(--surface2); border-radius: 8px; padding: .6rem .85rem; font-family: 'Fira Code', monospace; font-size: .88rem; line-height: 1.7; white-space: pre-wrap; word-break: break-all; min-height: 48px; }
-    .hl { border-radius: 3px; padding: .05em .05em; position: relative; cursor: default; }
-    .hl-0 { background: var(--hl0); outline: 1px solid var(--hlt0); }
-    .hl-1 { background: var(--hl1); outline: 1px solid var(--hlt1); }
-    .hl-2 { background: var(--hl2); outline: 1px solid var(--hlt2); }
-    .hl-3 { background: var(--hl3); outline: 1px solid var(--hlt3); }
-    .hl-4 { background: var(--hl4); outline: 1px solid var(--hlt4); }
+    /* Highlighted output */
+    .highlight-wrap {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+      padding: 12px 14px; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.9em;
+      line-height: 1.7; white-space: pre-wrap; word-break: break-all; min-height: 60px;
+      margin-top: 12px;
+    }
+    .m0 { background: rgba(88,166,255,.25); border-bottom: 2px solid var(--accent); border-radius: 2px; }
+    .m1 { background: rgba(63,185,80,.2); border-bottom: 2px solid var(--green); border-radius: 2px; }
+    .m2 { background: rgba(210,153,34,.2); border-bottom: 2px solid var(--yellow); border-radius: 2px; }
+    .m3 { background: rgba(188,140,255,.2); border-bottom: 2px solid var(--purple); border-radius: 2px; }
+    .m4 { background: rgba(248,81,73,.2); border-bottom: 2px solid var(--red); border-radius: 2px; }
 
-    /* Match list */
-    .matches-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.1rem; }
-    .match-count { font-size: .85rem; color: var(--muted); margin-bottom: .75rem; }
-    .match-count span { color: var(--green); font-weight: 600; }
-    .match-list { display: flex; flex-direction: column; gap: .5rem; }
-    .match-item { background: var(--surface2); border-radius: 8px; padding: .65rem .9rem; }
-    .match-header { display: flex; align-items: center; gap: .75rem; margin-bottom: .3rem; }
-    .match-idx { font-size: .72rem; font-weight: 600; color: var(--muted); text-transform: uppercase; }
-    .match-val { font-family: monospace; font-size: .88rem; color: var(--yellow); font-weight: 600; }
-    .match-pos { font-size: .72rem; color: var(--muted); margin-left: auto; }
-    .groups-list { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .3rem; }
-    .group-chip { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: .15rem .5rem; font-size: .75rem; font-family: monospace; }
-    .group-chip .gname { color: var(--muted); }
-    .group-chip .gval { color: var(--accent); }
-    .no-match { color: var(--red); font-size: .88rem; }
-    .empty-state { color: var(--muted); font-size: .88rem; font-style: italic; }
+    /* Stats bar */
+    .stats { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; margin: 12px 0 0; font-size: 0.82em; color: var(--muted); }
+    .stats strong { color: var(--text); }
 
-    /* Cheat sheet */
-    .cheat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.1rem; }
-    .cheat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: .4rem; margin-top: .5rem; }
-    .cheat-item { background: var(--surface2); border-radius: 6px; padding: .4rem .65rem; display: flex; gap: .5rem; align-items: baseline; font-size: .8rem; }
-    .cheat-pat { font-family: monospace; color: var(--accent); flex-shrink: 0; }
-    .cheat-desc { color: var(--muted); }
-
-    footer { text-align: center; padding: 1.5rem; color: var(--muted); font-size: .8rem; border-top: 1px solid var(--border); margin-top: .5rem; }
-    @media (max-width: 600px) { .main { padding: .75rem; } }
+    /* Groups */
+    .groups-title { font-size: 0.8em; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: 10px; }
+    .match-list { display: flex; flex-direction: column; gap: 8px; }
+    .match-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+    .match-header { font-size: 0.78em; color: var(--muted); margin-bottom: 6px; }
+    .match-full { font-family: 'SF Mono', monospace; font-size: 0.88em; color: var(--text); margin-bottom: 6px; word-break: break-all; }
+    .match-full mark { background: rgba(88,166,255,.25); color: var(--text); border-bottom: 2px solid var(--accent); border-radius: 2px; padding: 0; }
+    .groups-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+    .group-chip { font-family: 'SF Mono', monospace; font-size: 0.8em; padding: 3px 8px; border-radius: 5px; border: 1px solid var(--border); background: var(--surface); }
+    .group-idx { color: var(--muted); margin-right: 4px; }
+    .group-val { color: var(--accent); }
   </style>
 </head>
 <body>
 <header>
-  <h1>🔍 Regex Tester</h1>
-  <p>Test regular expressions in real time — matches, groups, and named groups</p>
+  <nav><a href="https://devnestio.pages.dev">← devnestio</a></nav>
+  <h1>Regex Tester</h1>
+  <p>Live regular expression tester — highlights matches, shows capture groups, flag toggles (g/i/m/s).</p>
 </header>
-
-<div class="main">
-
-  <!-- Pattern input -->
-  <div class="pattern-row">
-    <div class="pattern-wrap">
+<main>
+  <div class="card">
+    <div class="pattern-row">
       <span class="pattern-slash">/</span>
-      <input type="text" id="patternInput" placeholder="pattern" autocomplete="off" autocorrect="off" spellcheck="false" />
+      <input class="pattern-input" id="pattern" type="text" placeholder="(\w+)@([\w.-]+\.\w{2,})" spellcheck="false" autocomplete="off" autocorrect="off">
       <span class="pattern-slash">/</span>
+      <div class="flags-end">
+        <button class="flag-btn on" data-flag="g" title="Global — find all matches">g</button>
+        <button class="flag-btn on" data-flag="i" title="Case-insensitive">i</button>
+        <button class="flag-btn" data-flag="m" title="Multiline — ^ and $ match line boundaries">m</button>
+        <button class="flag-btn" data-flag="s" title="Dot-all — . matches newlines too">s</button>
+      </div>
     </div>
-    <input type="text" id="flagsInput" class="flags-input" value="gm" maxlength="6" placeholder="flags" autocomplete="off" />
-    <div class="flag-pills" id="flagPills">
-      <span class="flag-pill" data-flag="g" title="global">g</span>
-      <span class="flag-pill" data-flag="i" title="case insensitive">i</span>
-      <span class="flag-pill" data-flag="m" title="multiline">m</span>
-      <span class="flag-pill" data-flag="s" title="dotAll">s</span>
-      <span class="flag-pill" data-flag="u" title="unicode">u</span>
-      <span class="flag-pill" data-flag="d" title="hasIndices">d</span>
-    </div>
-    <div class="err-msg" id="errMsg"></div>
+    <div class="err-msg" id="err-msg"></div>
+
+    <div class="test-label">Test string</div>
+    <textarea class="test-area" id="test-str" placeholder="Type or paste your test string here…&#10;&#10;Matches will be highlighted below in real time."></textarea>
+
+    <div id="stats" class="stats" style="display:none"></div>
+    <div class="highlight-wrap" id="highlight" style="display:none"></div>
   </div>
 
-  <!-- Test string -->
-  <div class="test-card">
-    <div class="section-label">Test String</div>
-    <textarea id="testStr" placeholder="Enter test string here…" spellcheck="false"></textarea>
+  <div class="card" id="groups-card" style="display:none">
+    <div class="groups-title">Matches &amp; Capture Groups</div>
+    <div class="match-list" id="match-list"></div>
   </div>
-
-  <!-- Highlighted result -->
-  <div class="result-card">
-    <div class="section-label">Highlighted Matches</div>
-    <div class="highlight-area" id="highlightArea"></div>
-  </div>
-
-  <!-- Match list -->
-  <div class="matches-card">
-    <div class="section-label">Matches</div>
-    <div class="match-count" id="matchCount"></div>
-    <div class="match-list" id="matchList"></div>
-  </div>
-
-  <!-- Cheat sheet -->
-  <div class="cheat-card">
-    <div class="section-label">Quick Reference</div>
-    <div class="cheat-grid">
-      <div class="cheat-item"><span class="cheat-pat">.</span><span class="cheat-desc">Any char (except newline)</span></div>
-      <div class="cheat-item"><span class="cheat-pat">\d</span><span class="cheat-desc">Digit [0-9]</span></div>
-      <div class="cheat-item"><span class="cheat-pat">\w</span><span class="cheat-desc">Word char [a-zA-Z0-9_]</span></div>
-      <div class="cheat-item"><span class="cheat-pat">\s</span><span class="cheat-desc">Whitespace</span></div>
-      <div class="cheat-item"><span class="cheat-pat">\b</span><span class="cheat-desc">Word boundary</span></div>
-      <div class="cheat-item"><span class="cheat-pat">^</span><span class="cheat-desc">Start of line (with m)</span></div>
-      <div class="cheat-item"><span class="cheat-pat">$</span><span class="cheat-desc">End of line (with m)</span></div>
-      <div class="cheat-item"><span class="cheat-pat">*</span><span class="cheat-desc">0 or more (greedy)</span></div>
-      <div class="cheat-item"><span class="cheat-pat">+</span><span class="cheat-desc">1 or more (greedy)</span></div>
-      <div class="cheat-item"><span class="cheat-pat">?</span><span class="cheat-desc">0 or 1 (optional)</span></div>
-      <div class="cheat-item"><span class="cheat-pat">{n,m}</span><span class="cheat-desc">Between n and m times</span></div>
-      <div class="cheat-item"><span class="cheat-pat">[abc]</span><span class="cheat-desc">Character class</span></div>
-      <div class="cheat-item"><span class="cheat-pat">[^abc]</span><span class="cheat-desc">Negated class</span></div>
-      <div class="cheat-item"><span class="cheat-pat">(abc)</span><span class="cheat-desc">Capture group</span></div>
-      <div class="cheat-item"><span class="cheat-pat">(?:abc)</span><span class="cheat-desc">Non-capturing group</span></div>
-      <div class="cheat-item"><span class="cheat-pat">(?&lt;n&gt;abc)</span><span class="cheat-desc">Named group</span></div>
-      <div class="cheat-item"><span class="cheat-pat">a|b</span><span class="cheat-desc">Alternation (a or b)</span></div>
-      <div class="cheat-item"><span class="cheat-pat">*?</span><span class="cheat-desc">Non-greedy</span></div>
-      <div class="cheat-item"><span class="cheat-pat">(?=abc)</span><span class="cheat-desc">Lookahead</span></div>
-      <div class="cheat-item"><span class="cheat-pat">(?!abc)</span><span class="cheat-desc">Negative lookahead</span></div>
-    </div>
-  </div>
-</div>
-
+</main>
 <footer>
-  DevNestio Regex Tester · <a href="https://devnestio.pages.dev/" style="color:var(--accent)">More Tools</a>
+  <a href="https://www.buymeacoffee.com/devnestio" target="_blank" rel="noopener">☕ Buy me a coffee</a>
+  &nbsp;·&nbsp;
+  <a href="https://devnestio.pages.dev">devnestio — free developer tools</a>
 </footer>
-
 <script>
-const COLORS = 5;
-let debounceTimer;
+const flags = { g: true, i: true, m: false, s: false };
 
 function getFlags() {
-  return document.getElementById('flagsInput').value.replace(/[^gimsud]/g, '');
+  return Object.entries(flags).filter(([,v])=>v).map(([k])=>k).join('');
 }
 
-function parseRegex(pattern, flags) {
-  if (!pattern) return { re: null, err: null };
-  try {
-    return { re: new RegExp(pattern, flags), err: null };
-  } catch (e) {
-    return { re: null, err: e.message };
-  }
-}
-
-function escHtml(s) {
+function esc(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 function run() {
-  const pattern = document.getElementById('patternInput').value;
-  const flags = getFlags();
-  const testStr = document.getElementById('testStr').value;
-  const errEl = document.getElementById('errMsg');
-  const highlightEl = document.getElementById('highlightArea');
-  const countEl = document.getElementById('matchCount');
-  const listEl = document.getElementById('matchList');
+  const pat = document.getElementById('pattern').value;
+  const str = document.getElementById('test-str').value;
+  const errEl = document.getElementById('err-msg');
+  const highlightEl = document.getElementById('highlight');
+  const statsEl = document.getElementById('stats');
+  const groupsCard = document.getElementById('groups-card');
+  const matchList = document.getElementById('match-list');
+  const patEl = document.getElementById('pattern');
 
-  if (!pattern) {
-    errEl.textContent = '';
-    highlightEl.textContent = testStr || '';
-    countEl.innerHTML = '';
-    listEl.innerHTML = '<div class="empty-state">Enter a pattern above to start matching.</div>';
-    return;
-  }
-
-  const { re, err } = parseRegex(pattern, flags);
-  if (err) {
-    errEl.textContent = err;
-    highlightEl.textContent = testStr;
-    countEl.innerHTML = '';
-    listEl.innerHTML = '';
-    return;
-  }
   errEl.textContent = '';
+  patEl.classList.remove('error');
 
-  // Find all matches
-  const matches = [];
-  if (flags.includes('g') || flags.includes('y')) {
-    let m;
-    re.lastIndex = 0;
-    while ((m = re.exec(testStr)) !== null) {
-      matches.push(m);
-      if (m[0].length === 0) re.lastIndex++; // avoid infinite loop on zero-width
-    }
-  } else {
-    const m = re.exec(testStr);
-    if (m) matches.push(m);
+  if (!pat) {
+    highlightEl.style.display = 'none';
+    statsEl.style.display = 'none';
+    groupsCard.style.display = 'none';
+    return;
   }
 
-  // Build highlighted HTML
-  if (!testStr) {
-    highlightEl.textContent = '';
-  } else if (matches.length === 0) {
-    highlightEl.textContent = testStr;
-  } else {
+  let re;
+  try {
+    const f = getFlags().replace('g','') + 'g';
+    re = new RegExp(pat, f);
+  } catch(e) {
+    patEl.classList.add('error');
+    errEl.textContent = e.message;
+    highlightEl.style.display = 'none';
+    statsEl.style.display = 'none';
+    groupsCard.style.display = 'none';
+    return;
+  }
+
+  const matches = [];
+  let m;
+  let safety = 0;
+  re.lastIndex = 0;
+  while ((m = re.exec(str)) !== null && safety++ < 2000) {
+    matches.push({
+      index: m.index,
+      end: m.index + m[0].length,
+      full: m[0],
+      groups: Array.from(m).slice(1),
+      named: m.groups || {}
+    });
+    if (m[0].length === 0) re.lastIndex++;
+  }
+
+  statsEl.style.display = '';
+  statsEl.innerHTML = `
+    <span><strong>${matches.length}</strong> match${matches.length !== 1 ? 'es' : ''}</span>
+    <span><strong>${str.length}</strong> chars</span>
+    <span>flags: <strong>/${getFlags() || '(none)'}/</strong></span>
+    ${flags.g ? '' : '<span style="color:var(--yellow)">⚠ g flag off — only first match</span>'}
+  `;
+
+  if (str.length > 0) {
+    highlightEl.style.display = '';
     let html = '';
     let pos = 0;
-    matches.forEach((m, i) => {
-      const start = m.index;
-      const end = start + m[0].length;
-      html += escHtml(testStr.slice(pos, start));
-      const cls = `hl hl-${i % COLORS}`;
-      html += `<span class="${cls}" title="Match ${i+1}">${escHtml(m[0] || '')}</span>`;
-      pos = end;
+    matches.forEach((mx, i) => {
+      if (mx.index > pos) html += esc(str.slice(pos, mx.index));
+      html += `<mark class="m${i % 5}">${esc(mx.full)}</mark>`;
+      pos = mx.end;
     });
-    html += escHtml(testStr.slice(pos));
-    highlightEl.innerHTML = html;
+    if (pos < str.length) html += esc(str.slice(pos));
+    highlightEl.innerHTML = html || `<span style="color:var(--muted)">${esc(str)}</span>`;
+  } else {
+    highlightEl.style.display = 'none';
   }
 
-  // Match count
   if (matches.length === 0) {
-    countEl.innerHTML = '<span class="no-match">No matches found</span>';
-    listEl.innerHTML = '';
+    groupsCard.style.display = 'none';
     return;
   }
-  countEl.innerHTML = `<span>${matches.length}</span> match${matches.length !== 1 ? 'es' : ''} found`;
+  groupsCard.style.display = '';
+  matchList.innerHTML = '';
 
-  // Match list
-  listEl.innerHTML = matches.map((m, i) => {
-    const groups = [];
-    // Numbered groups
-    for (let g = 1; g < m.length; g++) {
-      groups.push({ name: `$${g}`, val: m[g] });
-    }
-    // Named groups
-    if (m.groups) {
-      Object.entries(m.groups).forEach(([k, v]) => {
-        groups.push({ name: k, val: v });
+  const limit = Math.min(matches.length, 50);
+  for (let i = 0; i < limit; i++) {
+    const mx = matches[i];
+    const item = document.createElement('div');
+    item.className = 'match-item';
+
+    const hasGroups = mx.groups.length > 0 || Object.keys(mx.named).length > 0;
+    let groupsHtml = '';
+    if (hasGroups) {
+      groupsHtml = '<div class="groups-grid">';
+      mx.groups.forEach((g, gi) => {
+        const val = g === undefined ? '<em style="color:var(--muted)">undefined</em>' : esc(g);
+        groupsHtml += `<div class="group-chip"><span class="group-idx">$${gi + 1}</span><span class="group-val">${val}</span></div>`;
       });
+      Object.entries(mx.named).forEach(([name, val]) => {
+        const v = val === undefined ? '<em style="color:var(--muted)">undefined</em>' : esc(val);
+        groupsHtml += `<div class="group-chip"><span class="group-idx">?&lt;${esc(name)}&gt;</span><span class="group-val">${v}</span></div>`;
+      });
+      groupsHtml += '</div>';
     }
-    const groupsHtml = groups.length ? `<div class="groups-list">${
-      groups.map(g => `<span class="group-chip"><span class="gname">${escHtml(g.name)}: </span><span class="gval">${g.val != null ? escHtml(g.val) : '<i>undefined</i>'}</span></span>`).join('')
-    }</div>` : '';
 
-    return `<div class="match-item">
-      <div class="match-header">
-        <span class="match-idx">Match ${i+1}</span>
-        <span class="match-val">${escHtml(JSON.stringify(m[0]))}</span>
-        <span class="match-pos">index ${m.index}–${m.index + m[0].length}</span>
-      </div>
-      ${groupsHtml}
-    </div>`;
-  }).join('');
-}
-
-function scheduleRun() {
-  clearTimeout(debounceTimer);
-  debounceTimer = setTimeout(run, 80);
-}
-
-// Flag pills
-document.getElementById('flagPills').addEventListener('click', e => {
-  const pill = e.target.closest('.flag-pill');
-  if (!pill) return;
-  const flag = pill.dataset.flag;
-  const input = document.getElementById('flagsInput');
-  let flags = input.value;
-  if (flags.includes(flag)) {
-    flags = flags.replace(flag, '');
-  } else {
-    flags += flag;
+    item.innerHTML = `
+      <div class="match-header">Match ${i + 1} &middot; index ${mx.index}–${mx.end} &middot; length ${mx.full.length}</div>
+      <div class="match-full"><mark>${esc(mx.full)}</mark></div>
+      ${hasGroups ? groupsHtml : '<span style="font-size:.8em;color:var(--muted)">No capture groups</span>'}
+    `;
+    matchList.appendChild(item);
   }
-  input.value = flags;
-  syncPills();
-  run();
+
+  if (matches.length > 50) {
+    const more = document.createElement('div');
+    more.style.cssText = 'text-align:center;padding:10px;color:var(--muted);font-size:.85em';
+    more.textContent = `… and ${matches.length - 50} more matches`;
+    matchList.appendChild(more);
+  }
+}
+
+document.getElementById('pattern').addEventListener('input', run);
+document.getElementById('test-str').addEventListener('input', run);
+
+document.querySelectorAll('.flag-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const f = btn.dataset.flag;
+    flags[f] = !flags[f];
+    btn.classList.toggle('on', flags[f]);
+    run();
+  });
 });
 
-document.getElementById('flagsInput').addEventListener('input', () => { syncPills(); run(); });
-
-function syncPills() {
-  const flags = document.getElementById('flagsInput').value;
-  document.querySelectorAll('.flag-pill').forEach(p => {
-    p.classList.toggle('active', flags.includes(p.dataset.flag));
-  });
-}
-
-document.getElementById('patternInput').addEventListener('input', scheduleRun);
-document.getElementById('testStr').addEventListener('input', scheduleRun);
-
-// Init
-syncPills();
-document.getElementById('testStr').value = 'Hello, World!\nfoo@example.com\nhttps://devnestio.pages.dev\n2026-07-01';
-document.getElementById('patternInput').value = '[\\w.+-]+@[\\w-]+\\.[\\w.]+';
+document.getElementById('pattern').value = '(\\w+)@([\\w.-]+\\.\\w{2,})';
+document.getElementById('test-str').value = 'Contact us at hello@devnestio.com or support@example.org\nInvalid: notanemail, @nouser.com, missing@';
 run();
 </script>
 </body>
