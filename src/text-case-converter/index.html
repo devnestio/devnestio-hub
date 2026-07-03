@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Text Case Converter — devnestio</title>
+  <meta name="description" content="Convert text between camelCase, PascalCase, snake_case, kebab-case, CONSTANT_CASE, Title Case, and sentence case instantly in your browser." />
+  <link rel="canonical" href="https://devnestio.pages.dev/text-case-converter/" />
+  <meta property="og:title" content="Text Case Converter — devnestio" />
+  <meta property="og:description" content="Convert text between camelCase, PascalCase, snake_case, kebab-case, CONSTANT_CASE, Title Case, and sentence case." />
+  <meta property="og:url" content="https://devnestio.pages.dev/text-case-converter/" />
+  <meta property="og:type" content="website" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface2: #1c2128;
+      --border: #30363d;
+      --text: #c9d1d9;
+      --muted: #8b949e;
+      --accent: #58a6ff;
+      --green: #3fb950;
+    }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; min-height: 100vh; line-height: 1.6; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1.1rem 1.5rem; display: flex; align-items: center; gap: 1rem; }
+    .logo { font-size: 1.2rem; font-weight: 700; color: var(--text); text-decoration: none; }
+    .logo span { color: var(--accent); }
+    header h1 { font-size: 1rem; font-weight: 600; color: var(--text); }
+    .main { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem 4rem; display: flex; flex-direction: column; gap: 1.5rem; }
+    .field { display: flex; flex-direction: column; gap: 0.35rem; }
+    .field-label { font-size: 0.78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; display: flex; justify-content: space-between; align-items: center; }
+    textarea { width: 100%; min-height: 120px; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-size: 1rem; border-radius: 8px; padding: 0.75rem 1rem; resize: vertical; outline: none; transition: border-color 0.2s; line-height: 1.6; }
+    textarea:focus { border-color: var(--accent); }
+    .clear-btn { background: none; border: 1px solid var(--border); color: var(--muted); font-size: 0.75rem; border-radius: 4px; padding: 0.2rem 0.6rem; cursor: pointer; }
+    .clear-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .hint { font-size: 0.78rem; color: var(--muted); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+    .case-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.9rem 1rem; display: flex; flex-direction: column; gap: 0.4rem; }
+    .case-title { font-size: 0.75rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; display: flex; justify-content: space-between; align-items: center; }
+    .case-output { font-family: 'Courier New', monospace; font-size: 0.9rem; color: var(--accent); word-break: break-all; min-height: 1.4em; }
+    .copy-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); font-size: 0.72rem; border-radius: 4px; padding: 0.15rem 0.5rem; cursor: pointer; white-space: nowrap; }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .copy-btn.copied { border-color: var(--green); color: var(--green); }
+    .copy-all { display: flex; justify-content: flex-end; }
+    .btn-outline { background: none; border: 1px solid var(--border); color: var(--muted); font-size: 0.82rem; border-radius: 6px; padding: 0.4rem 0.9rem; cursor: pointer; }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+    .copy-toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--accent); color: #0d1117; font-weight: 700; font-size: 0.85rem; border-radius: 6px; padding: 0.5rem 1rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+    .copy-toast.show { opacity: 1; }
+    footer { border-top: 1px solid var(--border); padding: 1.5rem; text-align: center; font-size: 0.82rem; color: var(--muted); }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+<header>
+  <a href="/" class="logo">dev<span>nestio</span></a>
+  <h1>Text Case Converter</h1>
+</header>
+
+<div class="main">
+  <div class="field">
+    <div class="field-label">
+      <span>Input Text</span>
+      <button class="clear-btn" onclick="clearInput()">Clear</button>
+    </div>
+    <textarea id="input" placeholder="Type or paste any text here — e.g. hello world, helloWorld, hello_world ..." oninput="convert()"></textarea>
+    <span class="hint">Supports mixed input: camelCase, PascalCase, snake_case, kebab-case, spaces, or plain words.</span>
+  </div>
+
+  <div class="grid" id="grid"></div>
+</div>
+
+<footer>
+  <a href="/">← All tools</a> &nbsp;·&nbsp; Built with ❤️ for developers &nbsp;·&nbsp;
+  <a href="https://buymeacoffee.com/devnestio" target="_blank" rel="noopener">☕ Buy me a coffee</a>
+</footer>
+<div class="copy-toast" id="toast">Copied!</div>
+
+<script>
+const CASES = [
+  { id: 'camel',    label: 'camelCase',      fn: toCamel },
+  { id: 'pascal',   label: 'PascalCase',     fn: toPascal },
+  { id: 'snake',    label: 'snake_case',     fn: toSnake },
+  { id: 'kebab',    label: 'kebab-case',     fn: toKebab },
+  { id: 'constant', label: 'CONSTANT_CASE',  fn: toConstant },
+  { id: 'title',    label: 'Title Case',     fn: toTitle },
+  { id: 'sentence', label: 'Sentence case',  fn: toSentence },
+  { id: 'upper',    label: 'UPPER CASE',     fn: s => s.toUpperCase() },
+  { id: 'lower',    label: 'lower case',     fn: s => s.toLowerCase() },
+  { id: 'dot',      label: 'dot.case',       fn: s => toWords(s).join('.').toLowerCase() },
+  { id: 'path',     label: 'path/case',      fn: s => toWords(s).join('/').toLowerCase() },
+  { id: 'cobol',    label: 'COBOL-CASE',     fn: s => toWords(s).join('-').toUpperCase() },
+];
+
+const grid = document.getElementById('grid');
+CASES.forEach(c => {
+  const card = document.createElement('div');
+  card.className = 'case-card';
+  card.id = 'card-' + c.id;
+  card.innerHTML = `
+    <div class="case-title">
+      <span>${c.label}</span>
+      <button class="copy-btn" onclick="copyCase('${c.id}')">Copy</button>
+    </div>
+    <div class="case-output" id="out-${c.id}"></div>
+  `;
+  grid.appendChild(card);
+});
+
+function toWords(input) {
+  return input
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
+    .replace(/[-_./\\]+/g, ' ')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+}
+
+function toCamel(s) {
+  const w = toWords(s);
+  return w.map((w, i) => i === 0 ? w.toLowerCase() : w[0].toUpperCase() + w.slice(1).toLowerCase()).join('');
+}
+function toPascal(s) {
+  return toWords(s).map(w => w[0].toUpperCase() + w.slice(1).toLowerCase()).join('');
+}
+function toSnake(s) { return toWords(s).join('_').toLowerCase(); }
+function toKebab(s) { return toWords(s).join('-').toLowerCase(); }
+function toConstant(s) { return toWords(s).join('_').toUpperCase(); }
+function toTitle(s) {
+  const minors = new Set(['a','an','the','and','but','or','for','nor','on','at','to','by','in','of','up']);
+  return toWords(s).map((w, i) =>
+    i === 0 || !minors.has(w.toLowerCase())
+      ? w[0].toUpperCase() + w.slice(1).toLowerCase()
+      : w.toLowerCase()
+  ).join(' ');
+}
+function toSentence(s) {
+  const words = toWords(s);
+  if (!words.length) return '';
+  return [words[0][0].toUpperCase() + words[0].slice(1).toLowerCase(), ...words.slice(1).map(w => w.toLowerCase())].join(' ');
+}
+
+function convert() {
+  const raw = document.getElementById('input').value;
+  CASES.forEach(c => {
+    const out = document.getElementById('out-' + c.id);
+    out.textContent = raw ? c.fn(raw) : '';
+  });
+}
+
+function copyCase(id) {
+  const text = document.getElementById('out-' + id).textContent;
+  if (!text) return;
+  navigator.clipboard.writeText(text).catch(() => {});
+  const btn = document.querySelector(`#card-${id} .copy-btn`);
+  btn.textContent = 'Copied!';
+  btn.classList.add('copied');
+  setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+}
+
+function clearInput() {
+  document.getElementById('input').value = '';
+  convert();
+}
+</script>
+</body>
+</html>

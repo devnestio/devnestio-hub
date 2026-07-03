@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ASCII Table Generator — devnestio</title>
+  <meta name="description" content="Paste CSV or TSV data and generate ASCII tables in multiple styles: compact, grid, markdown, MySQL, and RST. Free browser tool, no server required." />
+  <link rel="canonical" href="https://devnestio.pages.dev/ascii-table-generator/" />
+  <meta property="og:title" content="ASCII Table Generator — devnestio" />
+  <meta property="og:description" content="Convert CSV/TSV data to ASCII tables in compact, grid, markdown, MySQL, and RST styles." />
+  <meta property="og:url" content="https://devnestio.pages.dev/ascii-table-generator/" />
+  <meta property="og:type" content="website" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface2: #1c2128;
+      --border: #30363d;
+      --text: #c9d1d9;
+      --muted: #8b949e;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --red: #f85149;
+    }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; min-height: 100vh; line-height: 1.6; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1.1rem 1.5rem; display: flex; align-items: center; gap: 1rem; }
+    .logo { font-size: 1.2rem; font-weight: 700; color: var(--text); text-decoration: none; }
+    .logo span { color: var(--accent); }
+    header h1 { font-size: 1rem; font-weight: 600; color: var(--text); }
+    .main { max-width: 1000px; margin: 0 auto; padding: 2rem 1.5rem 4rem; display: flex; flex-direction: column; gap: 1.5rem; }
+    .row { display: flex; gap: 1rem; align-items: flex-start; flex-wrap: wrap; }
+    .field { display: flex; flex-direction: column; gap: 0.35rem; flex: 1; min-width: 200px; }
+    .field-label { font-size: 0.78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    textarea { width: 100%; min-height: 180px; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'Courier New', monospace; font-size: 0.88rem; border-radius: 8px; padding: 0.75rem 1rem; resize: vertical; outline: none; transition: border-color 0.2s; line-height: 1.6; tab-size: 8; }
+    textarea:focus { border-color: var(--accent); }
+    .options { display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; }
+    .opt-group { display: flex; flex-direction: column; gap: 0.3rem; }
+    select { background: var(--surface); border: 1px solid var(--border); color: var(--text); font-size: 0.88rem; border-radius: 6px; padding: 0.5rem 0.75rem; outline: none; cursor: pointer; }
+    select:focus { border-color: var(--accent); }
+    .opt-check { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text); cursor: pointer; user-select: none; }
+    .opt-check input[type="checkbox"] { accent-color: var(--accent); width: 15px; height: 15px; cursor: pointer; }
+    .btn { background: var(--accent); color: #0d1117; font-weight: 700; border: none; border-radius: 6px; padding: 0.6rem 1.3rem; font-size: 0.9rem; cursor: pointer; white-space: nowrap; transition: opacity 0.15s; }
+    .btn:hover { opacity: 0.85; }
+    .btn-outline { background: none; border: 1px solid var(--border); color: var(--muted); font-size: 0.82rem; border-radius: 6px; padding: 0.4rem 0.9rem; cursor: pointer; }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+    .error { color: var(--red); font-size: 0.82rem; }
+    .output-section { display: flex; flex-direction: column; gap: 0.5rem; }
+    .output-header { display: flex; justify-content: space-between; align-items: center; }
+    .style-tabs { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .tab { background: var(--surface); border: 1px solid var(--border); color: var(--muted); font-size: 0.8rem; border-radius: 4px; padding: 0.3rem 0.8rem; cursor: pointer; transition: all 0.15s; }
+    .tab.active { background: var(--surface2); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+    .tab:hover:not(.active) { border-color: var(--muted); }
+    .output-box { position: relative; }
+    pre { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.1rem; font-family: 'Courier New', monospace; font-size: 0.85rem; overflow-x: auto; white-space: pre; color: var(--text); min-height: 120px; line-height: 1.5; }
+    .copy-btn-abs { position: absolute; top: 0.6rem; right: 0.6rem; background: var(--surface2); border: 1px solid var(--border); color: var(--muted); font-size: 0.72rem; border-radius: 4px; padding: 0.2rem 0.6rem; cursor: pointer; }
+    .copy-btn-abs:hover { border-color: var(--accent); color: var(--accent); }
+    .copy-toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--accent); color: #0d1117; font-weight: 700; font-size: 0.85rem; border-radius: 6px; padding: 0.5rem 1rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+    .copy-toast.show { opacity: 1; }
+    .examples { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.1rem; }
+    .examples h3 { font-size: 0.78rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.6rem; }
+    .ex-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .chip { background: var(--surface2); border: 1px solid var(--border); color: var(--accent); font-size: 0.8rem; border-radius: 4px; padding: 0.25rem 0.65rem; cursor: pointer; }
+    .chip:hover { border-color: var(--accent); background: #1a2c42; }
+    footer { border-top: 1px solid var(--border); padding: 1.5rem; text-align: center; font-size: 0.82rem; color: var(--muted); }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+<header>
+  <a href="/" class="logo">dev<span>nestio</span></a>
+  <h1>ASCII Table Generator</h1>
+</header>
+
+<div class="main">
+  <div class="field">
+    <div class="field-label">Input Data (CSV or TSV — first row = headers)</div>
+    <textarea id="input" spellcheck="false" placeholder="Name,Age,City&#10;Alice,30,New York&#10;Bob,25,London&#10;Charlie,35,Tokyo" oninput="autoGenerate()"></textarea>
+  </div>
+
+  <div class="options">
+    <div class="opt-group">
+      <div class="field-label">Delimiter</div>
+      <select id="delim" onchange="autoGenerate()">
+        <option value="auto">Auto detect</option>
+        <option value=",">Comma (CSV)</option>
+        <option value="\t">Tab (TSV)</option>
+        <option value="|">Pipe |</option>
+        <option value=";">Semicolon ;</option>
+      </select>
+    </div>
+    <div class="opt-group">
+      <div class="field-label">Alignment</div>
+      <select id="align" onchange="autoGenerate()">
+        <option value="left">Left</option>
+        <option value="right">Right</option>
+        <option value="center">Center</option>
+      </select>
+    </div>
+    <label class="opt-check" style="align-self:flex-end;padding-bottom:0.1rem">
+      <input type="checkbox" id="header-row" checked onchange="autoGenerate()" />
+      First row is header
+    </label>
+    <button class="btn" onclick="generate()">Generate</button>
+  </div>
+
+  <div class="error" id="err"></div>
+
+  <div class="examples">
+    <h3>Try an example</h3>
+    <div class="ex-chips">
+      <span class="chip" onclick="loadEx('csv')">CSV data</span>
+      <span class="chip" onclick="loadEx('tsv')">TSV data</span>
+      <span class="chip" onclick="loadEx('mixed')">Mixed numbers</span>
+    </div>
+  </div>
+
+  <div class="output-section" id="output-section" style="display:none">
+    <div class="output-header">
+      <div class="style-tabs" id="tabs"></div>
+    </div>
+    <div class="output-box">
+      <pre id="output"></pre>
+      <button class="copy-btn-abs" onclick="copyOutput()">Copy</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <a href="/">← All tools</a> &nbsp;·&nbsp; Built with ❤️ for developers &nbsp;·&nbsp;
+  <a href="https://buymeacoffee.com/devnestio" target="_blank" rel="noopener">☕ Buy me a coffee</a>
+</footer>
+<div class="copy-toast" id="toast">Copied!</div>
+
+<script>
+const STYLES = [
+  { id: 'grid',     label: 'Grid' },
+  { id: 'compact',  label: 'Compact' },
+  { id: 'markdown', label: 'Markdown' },
+  { id: 'mysql',    label: 'MySQL' },
+  { id: 'rst',      label: 'RST' },
+  { id: 'simple',   label: 'Simple' },
+];
+
+let currentStyle = 'grid';
+let lastData = null;
+
+const tabsEl = document.getElementById('tabs');
+STYLES.forEach(s => {
+  const btn = document.createElement('button');
+  btn.className = 'tab' + (s.id === currentStyle ? ' active' : '');
+  btn.textContent = s.label;
+  btn.onclick = () => { currentStyle = s.id; tabsEl.querySelectorAll('.tab').forEach(t => t.classList.remove('active')); btn.classList.add('active'); if (lastData) renderTable(lastData); };
+  tabsEl.appendChild(btn);
+});
+
+const EXAMPLES = {
+  csv: `Name,Role,Language,Experience\nAlice,Frontend Dev,JavaScript,5 years\nBob,Backend Dev,Python,8 years\nCharlie,DevOps,Go,3 years\nDiana,Full Stack,TypeScript,6 years`,
+  tsv: `Package\tVersion\tLicense\tSize\nreact\t18.2.0\tMIT\t6.9 kB\nvue\t3.3.4\tMIT\t22 kB\nangular\t16.0.0\tMIT\t62 kB\nsvelte\t4.0.0\tMIT\t3.8 kB`,
+  mixed: `City,Population,Area (km²),Density\nTokyo,13960000,2194,6362\nNew York,8336817,783.8,10635\nLondon,8982000,1572,5714\nParis,2161000,105.4,20492\nSydney,5312000,12368,429`,
+};
+
+function loadEx(key) {
+  document.getElementById('input').value = EXAMPLES[key];
+  document.getElementById('delim').value = key === 'tsv' ? '\t' : ',';
+  generate();
+}
+
+function getDelim(raw) {
+  const sel = document.getElementById('delim').value;
+  if (sel !== 'auto') return sel === '\\t' ? '\t' : sel;
+  const counts = { ',': 0, '\t': 0, '|': 0, ';': 0 };
+  const line = raw.split('\n')[0];
+  for (const c of line) if (c in counts) counts[c]++;
+  return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
+}
+
+function parseData(raw, delim) {
+  return raw.trim().split('\n').filter(Boolean).map(line => {
+    const cells = [];
+    let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') { inQ = !inQ; }
+      else if (ch === delim && !inQ) { cells.push(cur.trim()); cur = ''; }
+      else cur += ch;
+    }
+    cells.push(cur.trim());
+    return cells;
+  });
+}
+
+function padCell(text, width, align) {
+  const t = String(text);
+  const diff = width - t.length;
+  if (align === 'right') return ' '.repeat(diff) + t;
+  if (align === 'center') { const l = Math.floor(diff / 2); return ' '.repeat(l) + t + ' '.repeat(diff - l); }
+  return t + ' '.repeat(diff);
+}
+
+function renderTable(rows) {
+  const align = document.getElementById('align').value;
+  const hasHeader = document.getElementById('header-row').checked;
+  const colCount = Math.max(...rows.map(r => r.length));
+  const norm = rows.map(r => { while (r.length < colCount) r.push(''); return r; });
+  const widths = Array.from({ length: colCount }, (_, i) => Math.max(...norm.map(r => String(r[i] || '').length)));
+
+  const cellStr = (val, i) => ' ' + padCell(val, widths[i], align) + ' ';
+
+  let out = '';
+  if (currentStyle === 'grid') {
+    const hr = (l, m, r, s) => l + widths.map(w => s.repeat(w + 2)).join(m) + r;
+    out += hr('┌', '┬', '┐', '─') + '\n';
+    if (hasHeader && norm.length > 0) {
+      out += '│' + norm[0].map((v, i) => cellStr(v, i)).join('│') + '│\n';
+      out += hr('├', '┼', '┤', '─') + '\n';
+      norm.slice(1).forEach(row => { out += '│' + row.map((v, i) => cellStr(v, i)).join('│') + '│\n'; });
+    } else {
+      norm.forEach(row => { out += '│' + row.map((v, i) => cellStr(v, i)).join('│') + '│\n'; });
+    }
+    out += hr('└', '┴', '┘', '─');
+
+  } else if (currentStyle === 'compact') {
+    const hr = '  ' + widths.map(w => '-'.repeat(w + 2)).join('  ') + '  ';
+    if (hasHeader && norm.length > 0) {
+      out += hr + '\n';
+      out += '  ' + norm[0].map((v, i) => cellStr(v, i)).join('  ') + '  \n';
+      out += hr + '\n';
+      norm.slice(1).forEach(row => { out += '  ' + row.map((v, i) => cellStr(v, i)).join('  ') + '  \n'; });
+      out += hr;
+    } else {
+      out += hr + '\n';
+      norm.forEach(row => { out += '  ' + row.map((v, i) => cellStr(v, i)).join('  ') + '  \n'; });
+      out += hr;
+    }
+
+  } else if (currentStyle === 'markdown') {
+    if (hasHeader && norm.length > 0) {
+      out += '|' + norm[0].map((v, i) => cellStr(v, i)).join('|') + '|\n';
+      out += '|' + widths.map((w, i) => {
+        if (align === 'center') return ':' + '-'.repeat(w) + ':';
+        if (align === 'right') return '-'.repeat(w + 1) + ':';
+        return '-'.repeat(w + 2);
+      }).join('|') + '|\n';
+      norm.slice(1).forEach(row => { out += '|' + row.map((v, i) => cellStr(v, i)).join('|') + '|\n'; });
+    } else {
+      norm.forEach(row => { out += '|' + row.map((v, i) => cellStr(v, i)).join('|') + '|\n'; });
+    }
+    out = out.trimEnd();
+
+  } else if (currentStyle === 'mysql') {
+    const hr = '+' + widths.map(w => '-'.repeat(w + 2)).join('+') + '+';
+    out += hr + '\n';
+    if (hasHeader && norm.length > 0) {
+      out += '|' + norm[0].map((v, i) => cellStr(v, i)).join('|') + '|\n';
+      out += hr + '\n';
+      norm.slice(1).forEach(row => { out += '|' + row.map((v, i) => cellStr(v, i)).join('|') + '|\n'; });
+    } else {
+      norm.forEach(row => { out += '|' + row.map((v, i) => cellStr(v, i)).join('|') + '|\n'; });
+    }
+    out += hr;
+
+  } else if (currentStyle === 'rst') {
+    const hr = widths.map(w => '='.repeat(w + 2)).join(' ');
+    const hr2 = widths.map(w => '-'.repeat(w + 2)).join(' ');
+    if (hasHeader && norm.length > 0) {
+      out += hr + '\n';
+      out += norm[0].map((v, i) => cellStr(v, i)).join(' ') + '\n';
+      out += hr + '\n';
+      norm.slice(1).forEach(row => { out += row.map((v, i) => cellStr(v, i)).join(' ') + '\n'; });
+      out += hr;
+    } else {
+      out += hr2 + '\n';
+      norm.forEach(row => { out += row.map((v, i) => cellStr(v, i)).join(' ') + '\n'; });
+      out += hr2;
+    }
+
+  } else if (currentStyle === 'simple') {
+    if (hasHeader && norm.length > 0) {
+      out += norm[0].map((v, i) => padCell(v, widths[i], align)).join('  ') + '\n';
+      out += widths.map(w => '-'.repeat(w)).join('  ') + '\n';
+      norm.slice(1).forEach(row => { out += row.map((v, i) => padCell(v, widths[i], align)).join('  ') + '\n'; });
+    } else {
+      norm.forEach(row => { out += row.map((v, i) => padCell(v, widths[i], align)).join('  ') + '\n'; });
+    }
+    out = out.trimEnd();
+  }
+
+  document.getElementById('output').textContent = out;
+  document.getElementById('output-section').style.display = 'flex';
+  document.getElementById('output-section').style.flexDirection = 'column';
+  document.getElementById('output-section').style.gap = '0.5rem';
+}
+
+function generate() {
+  const raw = document.getElementById('input').value;
+  const errEl = document.getElementById('err');
+  errEl.textContent = '';
+  if (!raw.trim()) { document.getElementById('output-section').style.display = 'none'; return; }
+  try {
+    const delim = getDelim(raw);
+    const rows = parseData(raw, delim);
+    if (!rows.length) { errEl.textContent = 'No data found.'; return; }
+    lastData = rows;
+    renderTable(rows);
+  } catch (e) {
+    errEl.textContent = 'Parse error: ' + e.message;
+  }
+}
+
+function autoGenerate() {
+  if (lastData || document.getElementById('input').value.trim()) generate();
+}
+
+function copyOutput() {
+  const text = document.getElementById('output').textContent;
+  navigator.clipboard.writeText(text).catch(() => {});
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1500);
+}
+</script>
+</body>
+</html>

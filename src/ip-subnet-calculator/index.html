@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IP Subnet Calculator — devnestio</title>
+  <meta name="description" content="Free IPv4 subnet calculator. Enter CIDR notation to get network address, broadcast address, host range, usable hosts, and subnet mask instantly." />
+  <link rel="canonical" href="https://devnestio.pages.dev/ip-subnet-calculator/" />
+  <meta property="og:title" content="IP Subnet Calculator — devnestio" />
+  <meta property="og:description" content="IPv4 subnet calculator: CIDR input → network, broadcast, host range, usable hosts, subnet mask." />
+  <meta property="og:url" content="https://devnestio.pages.dev/ip-subnet-calculator/" />
+  <meta property="og:type" content="website" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface2: #1c2128;
+      --border: #30363d;
+      --text: #c9d1d9;
+      --muted: #8b949e;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --red: #f85149;
+      --yellow: #d29922;
+    }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; min-height: 100vh; line-height: 1.6; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1.1rem 1.5rem; display: flex; align-items: center; gap: 1rem; }
+    .logo { font-size: 1.2rem; font-weight: 700; color: var(--text); text-decoration: none; }
+    .logo span { color: var(--accent); }
+    header h1 { font-size: 1rem; font-weight: 600; color: var(--text); }
+    .main { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem 4rem; display: flex; flex-direction: column; gap: 1.5rem; }
+    .input-row { display: flex; gap: 0.75rem; align-items: flex-end; flex-wrap: wrap; }
+    .field { display: flex; flex-direction: column; gap: 0.35rem; flex: 1; min-width: 200px; }
+    label { font-size: 0.78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    input[type="text"] { background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'Courier New', monospace; font-size: 1rem; border-radius: 6px; padding: 0.6rem 0.9rem; outline: none; transition: border-color 0.2s; width: 100%; }
+    input[type="text"]:focus { border-color: var(--accent); }
+    input[type="text"].error { border-color: var(--red); }
+    .btn { background: var(--accent); color: #0d1117; font-weight: 700; border: none; border-radius: 6px; padding: 0.65rem 1.4rem; font-size: 0.9rem; cursor: pointer; white-space: nowrap; transition: opacity 0.15s; align-self: flex-end; }
+    .btn:hover { opacity: 0.85; }
+    .error-msg { color: var(--red); font-size: 0.82rem; min-height: 1.2em; }
+    .results { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
+    .result-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.1rem; display: flex; flex-direction: column; gap: 0.3rem; }
+    .result-card .label { font-size: 0.75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .result-card .value { font-family: 'Courier New', monospace; font-size: 1.05rem; color: var(--accent); word-break: break-all; cursor: pointer; }
+    .result-card .value:hover { text-decoration: underline; }
+    .result-card .sub { font-size: 0.78rem; color: var(--muted); }
+    .binary-section { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.1rem; }
+    .binary-section h3 { font-size: 0.82rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; }
+    .binary-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
+    .binary-row-label { font-size: 0.78rem; color: var(--muted); min-width: 120px; }
+    .binary-bits { font-family: 'Courier New', monospace; font-size: 0.88rem; letter-spacing: 0.05em; }
+    .bit-net { color: var(--accent); }
+    .bit-host { color: var(--green); }
+    .bit-sep { color: var(--border); margin: 0 2px; }
+    .examples { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.1rem; }
+    .examples h3 { font-size: 0.82rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.65rem; }
+    .example-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .chip { background: var(--surface2); border: 1px solid var(--border); color: var(--accent); font-family: 'Courier New', monospace; font-size: 0.82rem; border-radius: 4px; padding: 0.25rem 0.65rem; cursor: pointer; transition: background 0.15s; }
+    .chip:hover { background: #1f3a5f; border-color: var(--accent); }
+    .copy-toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--accent); color: #0d1117; font-weight: 700; font-size: 0.85rem; border-radius: 6px; padding: 0.5rem 1rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+    .copy-toast.show { opacity: 1; }
+    footer { border-top: 1px solid var(--border); padding: 1.5rem; text-align: center; font-size: 0.82rem; color: var(--muted); }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+<header>
+  <a href="/" class="logo">dev<span>nestio</span></a>
+  <h1>IP Subnet Calculator</h1>
+</header>
+
+<div class="main">
+  <div>
+    <div class="input-row">
+      <div class="field">
+        <label for="cidr">CIDR Notation</label>
+        <input type="text" id="cidr" placeholder="192.168.1.0/24" autocomplete="off" spellcheck="false" />
+      </div>
+      <button class="btn" onclick="calculate()">Calculate</button>
+    </div>
+    <div class="error-msg" id="err"></div>
+  </div>
+
+  <div class="examples">
+    <h3>Examples</h3>
+    <div class="example-chips">
+      <span class="chip" onclick="loadExample(this)">10.0.0.0/8</span>
+      <span class="chip" onclick="loadExample(this)">172.16.0.0/12</span>
+      <span class="chip" onclick="loadExample(this)">192.168.1.0/24</span>
+      <span class="chip" onclick="loadExample(this)">192.168.1.128/25</span>
+      <span class="chip" onclick="loadExample(this)">10.10.10.0/28</span>
+      <span class="chip" onclick="loadExample(this)">203.0.113.0/30</span>
+      <span class="chip" onclick="loadExample(this)">0.0.0.0/0</span>
+      <span class="chip" onclick="loadExample(this)">192.168.0.1/32</span>
+    </div>
+  </div>
+
+  <div class="results hidden" id="results"></div>
+  <div class="binary-section hidden" id="binary"></div>
+</div>
+
+<footer>
+  <a href="/">← All tools</a> &nbsp;·&nbsp; Built with ❤️ for developers &nbsp;·&nbsp;
+  <a href="https://buymeacoffee.com/devnestio" target="_blank" rel="noopener">☕ Buy me a coffee</a>
+</footer>
+<div class="copy-toast" id="toast">Copied!</div>
+
+<script>
+function loadExample(el) {
+  document.getElementById('cidr').value = el.textContent.trim();
+  calculate();
+}
+
+function ipToInt(ip) {
+  return ip.split('.').reduce((acc, oct) => (acc << 8) | parseInt(oct, 10), 0) >>> 0;
+}
+
+function intToIp(n) {
+  return [(n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255].join('.');
+}
+
+function intToBin(n) {
+  return ('00000000000000000000000000000000' + (n >>> 0).toString(2)).slice(-32);
+}
+
+function calculate() {
+  const input = document.getElementById('cidr').value.trim();
+  const errEl = document.getElementById('err');
+  const resultsEl = document.getElementById('results');
+  const binaryEl = document.getElementById('binary');
+  errEl.textContent = '';
+  document.getElementById('cidr').classList.remove('error');
+
+  const match = input.match(/^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\/(\d{1,2})$/);
+  if (!match) {
+    errEl.textContent = 'Invalid format. Use CIDR notation like 192.168.1.0/24';
+    document.getElementById('cidr').classList.add('error');
+    resultsEl.classList.add('hidden');
+    binaryEl.classList.add('hidden');
+    return;
+  }
+
+  const ipStr = match[1];
+  const prefix = parseInt(match[2], 10);
+  const octets = ipStr.split('.').map(Number);
+
+  if (octets.some(o => o > 255) || prefix > 32) {
+    errEl.textContent = 'Invalid IP address or prefix length (must be 0–32)';
+    document.getElementById('cidr').classList.add('error');
+    resultsEl.classList.add('hidden');
+    binaryEl.classList.add('hidden');
+    return;
+  }
+
+  const ipInt = ipToInt(ipStr);
+  const maskInt = prefix === 0 ? 0 : (0xFFFFFFFF << (32 - prefix)) >>> 0;
+  const networkInt = (ipInt & maskInt) >>> 0;
+  const broadcastInt = (networkInt | ~maskInt) >>> 0;
+  const firstHost = prefix < 31 ? networkInt + 1 : networkInt;
+  const lastHost = prefix < 31 ? broadcastInt - 1 : broadcastInt;
+  const usableHosts = prefix >= 31 ? Math.pow(2, 32 - prefix) : Math.max(0, broadcastInt - networkInt - 1);
+  const totalHosts = Math.pow(2, 32 - prefix);
+  const wildcardInt = (~maskInt) >>> 0;
+
+  function card(label, value, sub) {
+    return `<div class="result-card">
+      <div class="label">${label}</div>
+      <div class="value" onclick="copyVal(this)">${value}</div>
+      ${sub ? `<div class="sub">${sub}</div>` : ''}
+    </div>`;
+  }
+
+  resultsEl.innerHTML =
+    card('Network Address', intToIp(networkInt), `/${prefix} CIDR`) +
+    card('Broadcast Address', intToIp(broadcastInt)) +
+    card('Subnet Mask', intToIp(maskInt), `Prefix /${prefix}`) +
+    card('Wildcard Mask', intToIp(wildcardInt)) +
+    card('First Usable Host', prefix <= 30 ? intToIp(firstHost) : '—', prefix > 30 ? 'N/A for /31, /32' : '') +
+    card('Last Usable Host', prefix <= 30 ? intToIp(lastHost) : '—', prefix > 30 ? 'N/A for /31, /32' : '') +
+    card('Usable Hosts', usableHosts.toLocaleString(), `Total addresses: ${totalHosts.toLocaleString()}`) +
+    card('IP Class', getClass(octets[0]), getClassDesc(octets[0]));
+
+  const bits = intToBin(networkInt);
+  const maskBits = intToBin(maskInt);
+
+  function renderBits(n, plen) {
+    const b = intToBin(n);
+    let html = '';
+    for (let i = 0; i < 32; i++) {
+      if (i === 8 || i === 16 || i === 24) html += '<span class="bit-sep">.</span>';
+      html += `<span class="${i < plen ? 'bit-net' : 'bit-host'}">${b[i]}</span>`;
+    }
+    return html;
+  }
+
+  binaryEl.innerHTML = `<h3>Binary Representation</h3>
+    <div class="binary-row"><span class="binary-row-label">IP Address</span><span class="binary-bits">${renderBits(ipInt, prefix)}</span></div>
+    <div class="binary-row"><span class="binary-row-label">Network</span><span class="binary-bits">${renderBits(networkInt, prefix)}</span></div>
+    <div class="binary-row"><span class="binary-row-label">Subnet Mask</span><span class="binary-bits">${renderBits(maskInt, prefix)}</span></div>
+    <div class="binary-row"><span class="binary-row-label">Broadcast</span><span class="binary-bits">${renderBits(broadcastInt, prefix)}</span></div>
+    <div style="margin-top:0.75rem;font-size:0.78rem;color:var(--muted)">
+      <span style="color:var(--accent)">■</span> Network bits (/${prefix}) &nbsp;&nbsp;
+      <span style="color:var(--green)">■</span> Host bits
+    </div>`;
+
+  resultsEl.classList.remove('hidden');
+  binaryEl.classList.remove('hidden');
+}
+
+function getClass(first) {
+  if (first < 128) return 'Class A';
+  if (first < 192) return 'Class B';
+  if (first < 224) return 'Class C';
+  if (first < 240) return 'Class D (Multicast)';
+  return 'Class E (Reserved)';
+}
+
+function getClassDesc(first) {
+  if (first < 128) return 'Range 1.0.0.0 – 126.255.255.255';
+  if (first < 192) return 'Range 128.0.0.0 – 191.255.255.255';
+  if (first < 224) return 'Range 192.0.0.0 – 223.255.255.255';
+  if (first < 240) return 'Range 224.0.0.0 – 239.255.255.255';
+  return 'Range 240.0.0.0 – 255.255.255.255';
+}
+
+function copyVal(el) {
+  navigator.clipboard.writeText(el.textContent).catch(() => {});
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1500);
+}
+
+document.getElementById('cidr').addEventListener('keydown', e => { if (e.key === 'Enter') calculate(); });
+</script>
+</body>
+</html>

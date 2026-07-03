@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>URL Parser & Inspector — devnestio</title>
+  <meta name="description" content="Parse any URL into protocol, host, path, query parameters, and hash. Decode query string in a table, rebuild URLs from components. Free browser tool." />
+  <link rel="canonical" href="https://devnestio.pages.dev/url-parser/" />
+  <meta property="og:title" content="URL Parser & Inspector — devnestio" />
+  <meta property="og:description" content="Parse any URL into protocol, host, path, query params, and hash. Decode and rebuild URLs." />
+  <meta property="og:url" content="https://devnestio.pages.dev/url-parser/" />
+  <meta property="og:type" content="website" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface2: #1c2128;
+      --border: #30363d;
+      --text: #c9d1d9;
+      --muted: #8b949e;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --red: #f85149;
+      --yellow: #d29922;
+    }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; min-height: 100vh; line-height: 1.6; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1.1rem 1.5rem; display: flex; align-items: center; gap: 1rem; }
+    .logo { font-size: 1.2rem; font-weight: 700; color: var(--text); text-decoration: none; }
+    .logo span { color: var(--accent); }
+    header h1 { font-size: 1rem; font-weight: 600; color: var(--text); }
+    .main { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem 4rem; display: flex; flex-direction: column; gap: 1.5rem; }
+    .input-row { display: flex; gap: 0.75rem; }
+    input[type="text"] { flex: 1; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'Courier New', monospace; font-size: 0.95rem; border-radius: 6px; padding: 0.65rem 0.9rem; outline: none; transition: border-color 0.2s; }
+    input[type="text"]:focus { border-color: var(--accent); }
+    input[type="text"].error { border-color: var(--red); }
+    .btn { background: var(--accent); color: #0d1117; font-weight: 700; border: none; border-radius: 6px; padding: 0.65rem 1.3rem; font-size: 0.9rem; cursor: pointer; white-space: nowrap; transition: opacity 0.15s; }
+    .btn:hover { opacity: 0.85; }
+    .error-msg { color: var(--red); font-size: 0.82rem; min-height: 1.2em; }
+    .examples { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.85rem 1rem; }
+    .ex-label { font-size: 0.75rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.5rem; }
+    .chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .chip { background: var(--surface2); border: 1px solid var(--border); color: var(--accent); font-family: 'Courier New', monospace; font-size: 0.75rem; border-radius: 4px; padding: 0.2rem 0.55rem; cursor: pointer; white-space: nowrap; }
+    .chip:hover { background: #1a2c42; border-color: var(--accent); }
+    .section { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .section-header { padding: 0.7rem 1rem; font-size: 0.78rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--surface2); }
+    .parts-grid { display: grid; grid-template-columns: 150px 1fr; }
+    .part-row { display: contents; }
+    .part-key { padding: 0.55rem 1rem; font-size: 0.82rem; color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--border); background: var(--surface); }
+    .part-val { padding: 0.55rem 1rem; font-family: 'Courier New', monospace; font-size: 0.88rem; color: var(--text); border-bottom: 1px solid var(--border); word-break: break-all; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; }
+    .part-val.accent { color: var(--accent); }
+    .part-val.empty { color: var(--muted); font-style: italic; }
+    .part-key:last-of-type, .part-val:last-of-type { border-bottom: none; }
+    .copy-cell { background: none; border: 1px solid var(--border); color: var(--muted); font-size: 0.7rem; border-radius: 3px; padding: 0.1rem 0.4rem; cursor: pointer; flex-shrink: 0; }
+    .copy-cell:hover { border-color: var(--accent); color: var(--accent); }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 0.5rem 1rem; font-size: 0.85rem; border-bottom: 1px solid var(--border); text-align: left; }
+    th { background: var(--surface2); font-size: 0.75rem; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+    td { font-family: 'Courier New', monospace; }
+    td.key-col { color: var(--green); }
+    td.val-col { color: var(--text); word-break: break-all; }
+    td.raw-col { color: var(--muted); font-size: 0.8rem; }
+    tr:last-child td { border-bottom: none; }
+    .builder-section { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.1rem; display: flex; flex-direction: column; gap: 0.75rem; }
+    .builder-grid { display: grid; grid-template-columns: 120px 1fr; gap: 0.5rem 0.75rem; align-items: center; }
+    .builder-label { font-size: 0.78rem; color: var(--muted); font-weight: 600; }
+    .builder-input { background: var(--surface2); border: 1px solid var(--border); color: var(--text); font-family: 'Courier New', monospace; font-size: 0.88rem; border-radius: 5px; padding: 0.4rem 0.65rem; outline: none; transition: border-color 0.2s; }
+    .builder-input:focus { border-color: var(--accent); }
+    .built-url { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 0.65rem 0.9rem; font-family: 'Courier New', monospace; font-size: 0.88rem; color: var(--accent); word-break: break-all; }
+    .builder-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .btn-sm { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); font-size: 0.82rem; border-radius: 5px; padding: 0.35rem 0.8rem; cursor: pointer; }
+    .btn-sm:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-sm.primary { background: var(--accent); border-color: var(--accent); color: #0d1117; font-weight: 700; }
+    .btn-sm.primary:hover { opacity: 0.85; }
+    .copy-toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--accent); color: #0d1117; font-weight: 700; font-size: 0.85rem; border-radius: 6px; padding: 0.5rem 1rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+    .copy-toast.show { opacity: 1; }
+    .hidden { display: none; }
+    footer { border-top: 1px solid var(--border); padding: 1.5rem; text-align: center; font-size: 0.82rem; color: var(--muted); }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+<header>
+  <a href="/" class="logo">dev<span>nestio</span></a>
+  <h1>URL Parser &amp; Inspector</h1>
+</header>
+
+<div class="main">
+  <div>
+    <div class="input-row">
+      <input type="text" id="url-input" placeholder="https://example.com/path?foo=bar&baz=qux#section" autocomplete="off" spellcheck="false" oninput="parseURL()" />
+      <button class="btn" onclick="parseURL()">Parse</button>
+    </div>
+    <div class="error-msg" id="err"></div>
+  </div>
+
+  <div class="examples">
+    <div class="ex-label">Examples</div>
+    <div class="chips" id="chips"></div>
+  </div>
+
+  <div id="parts-section" class="section hidden">
+    <div class="section-header"><span>URL Components</span></div>
+    <div class="parts-grid" id="parts-grid"></div>
+  </div>
+
+  <div id="params-section" class="section hidden">
+    <div class="section-header"><span>Query Parameters</span><span id="param-count" style="font-size:0.78rem;color:var(--muted)"></span></div>
+    <table id="params-table">
+      <thead><tr><th>Key</th><th>Decoded Value</th><th>Raw Value</th><th></th></tr></thead>
+      <tbody id="params-body"></tbody>
+    </table>
+  </div>
+
+  <div class="builder-section">
+    <div class="section-header" style="margin:-1.1rem -1.1rem 0.75rem;border-radius:7px 7px 0 0;padding:0.7rem 1rem"><span>URL Builder</span></div>
+    <div class="builder-grid">
+      <span class="builder-label">Protocol</span>
+      <input class="builder-input" id="b-proto" placeholder="https" oninput="buildURL()" />
+      <span class="builder-label">Host</span>
+      <input class="builder-input" id="b-host" placeholder="example.com" oninput="buildURL()" />
+      <span class="builder-label">Port</span>
+      <input class="builder-input" id="b-port" placeholder="(optional)" oninput="buildURL()" />
+      <span class="builder-label">Path</span>
+      <input class="builder-input" id="b-path" placeholder="/path/to/resource" oninput="buildURL()" />
+      <span class="builder-label">Query</span>
+      <input class="builder-input" id="b-query" placeholder="key=value&foo=bar" oninput="buildURL()" />
+      <span class="builder-label">Hash</span>
+      <input class="builder-input" id="b-hash" placeholder="section-id" oninput="buildURL()" />
+    </div>
+    <div class="built-url" id="built-url">https://example.com</div>
+    <div class="builder-actions">
+      <button class="btn-sm primary" onclick="copyBuilt()">Copy URL</button>
+      <button class="btn-sm" onclick="parseBuilt()">Parse this URL</button>
+      <button class="btn-sm" onclick="clearBuilder()">Clear</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <a href="/">← All tools</a> &nbsp;·&nbsp; Built with ❤️ for developers &nbsp;·&nbsp;
+  <a href="https://buymeacoffee.com/devnestio" target="_blank" rel="noopener">☕ Buy me a coffee</a>
+</footer>
+<div class="copy-toast" id="toast">Copied!</div>
+
+<script>
+const EXAMPLES = [
+  'https://api.example.com/v1/users?page=1&limit=20&sort=asc#results',
+  'https://user:pass@example.com:8080/path?q=hello+world&lang=en',
+  'ftp://files.example.org/pub/data.tar.gz',
+  'https://example.com/search?q=%E6%97%A5%E6%9C%AC%E8%AA%9E&safe=off',
+  'mailto:user@example.com',
+  'https://localhost:3000/api/auth/callback?code=abc123&state=xyz&redirect=/dashboard',
+];
+
+const chipsEl = document.getElementById('chips');
+EXAMPLES.forEach(ex => {
+  const span = document.createElement('span');
+  span.className = 'chip';
+  span.textContent = ex.length > 60 ? ex.slice(0, 60) + '…' : ex;
+  span.title = ex;
+  span.onclick = () => { document.getElementById('url-input').value = ex; parseURL(); };
+  chipsEl.appendChild(span);
+});
+
+const PARTS = [
+  { key: 'protocol', label: 'Protocol' },
+  { key: 'username', label: 'Username' },
+  { key: 'password', label: 'Password' },
+  { key: 'hostname', label: 'Hostname' },
+  { key: 'port',     label: 'Port' },
+  { key: 'origin',   label: 'Origin' },
+  { key: 'pathname', label: 'Path' },
+  { key: 'search',   label: 'Query String' },
+  { key: 'hash',     label: 'Hash / Fragment' },
+  { key: 'href',     label: 'Full URL' },
+];
+
+function parseURL() {
+  const raw = document.getElementById('url-input').value.trim();
+  const errEl = document.getElementById('err');
+  const partsSection = document.getElementById('parts-section');
+  const paramsSection = document.getElementById('params-section');
+  errEl.textContent = '';
+  document.getElementById('url-input').classList.remove('error');
+
+  if (!raw) { partsSection.classList.add('hidden'); paramsSection.classList.add('hidden'); return; }
+
+  let url;
+  try {
+    url = new URL(raw);
+  } catch (e) {
+    try { url = new URL('https://' + raw); } catch (_) {
+      errEl.textContent = 'Invalid URL. Make sure it includes a protocol (e.g. https://).';
+      document.getElementById('url-input').classList.add('error');
+      partsSection.classList.add('hidden'); paramsSection.classList.add('hidden');
+      return;
+    }
+  }
+
+  const grid = document.getElementById('parts-grid');
+  grid.innerHTML = '';
+  PARTS.forEach(({ key, label }) => {
+    let val = url[key] || '';
+    if (key === 'protocol' && val) val = val.replace(/:$/, '');
+    if (key === 'hash' && val) val = val.replace(/^#/, '');
+    if (key === 'search' && val) val = val.replace(/^\?/, '');
+
+    const keyEl = document.createElement('div');
+    keyEl.className = 'part-key';
+    keyEl.textContent = label;
+    const valEl = document.createElement('div');
+    valEl.className = 'part-val' + (val ? (key === 'href' ? '' : ' accent') : ' empty');
+    if (val) {
+      const span = document.createElement('span');
+      span.textContent = val;
+      valEl.appendChild(span);
+      const btn = document.createElement('button');
+      btn.className = 'copy-cell';
+      btn.textContent = 'Copy';
+      btn.onclick = () => { navigator.clipboard.writeText(val); toast(); };
+      valEl.appendChild(btn);
+    } else {
+      valEl.textContent = '—';
+    }
+    grid.appendChild(keyEl);
+    grid.appendChild(valEl);
+  });
+  partsSection.classList.remove('hidden');
+
+  const tbody = document.getElementById('params-body');
+  tbody.innerHTML = '';
+  const params = [...url.searchParams.entries()];
+  if (params.length) {
+    params.forEach(([k, v]) => {
+      const raw_v = url.search.slice(1).split('&').map(p => p.split('=')[1] || '').find(p => decodeURIComponent(p.replace(/\+/g, ' ')) === v) || v;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="key-col">${esc(k)}</td>
+        <td class="val-col">${esc(v)}</td>
+        <td class="raw-col">${esc(encodeURIComponent(v))}</td>
+        <td><button class="copy-cell" onclick="navigator.clipboard.writeText('${esc(v).replace(/'/g,"\\'")}');toast()">Copy</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+    document.getElementById('param-count').textContent = params.length + ' param' + (params.length === 1 ? '' : 's');
+    paramsSection.classList.remove('hidden');
+  } else {
+    paramsSection.classList.add('hidden');
+  }
+
+  fillBuilder(url);
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function fillBuilder(url) {
+  document.getElementById('b-proto').value = url.protocol.replace(/:$/, '');
+  document.getElementById('b-host').value = url.hostname;
+  document.getElementById('b-port').value = url.port;
+  document.getElementById('b-path').value = url.pathname;
+  document.getElementById('b-query').value = url.search.replace(/^\?/, '');
+  document.getElementById('b-hash').value = url.hash.replace(/^#/, '');
+  buildURL();
+}
+
+function buildURL() {
+  const proto = document.getElementById('b-proto').value.trim() || 'https';
+  const host  = document.getElementById('b-host').value.trim();
+  const port  = document.getElementById('b-port').value.trim();
+  const path  = document.getElementById('b-path').value.trim();
+  const query = document.getElementById('b-query').value.trim();
+  const hash  = document.getElementById('b-hash').value.trim();
+
+  if (!host) { document.getElementById('built-url').textContent = `${proto}://example.com`; return; }
+  let url = `${proto}://${host}`;
+  if (port) url += `:${port}`;
+  if (path && !path.startsWith('/')) url += '/' + path;
+  else if (path) url += path;
+  if (query) url += '?' + query;
+  if (hash) url += '#' + hash;
+  document.getElementById('built-url').textContent = url;
+}
+
+function copyBuilt() {
+  navigator.clipboard.writeText(document.getElementById('built-url').textContent);
+  toast();
+}
+
+function parseBuilt() {
+  const url = document.getElementById('built-url').textContent;
+  document.getElementById('url-input').value = url;
+  parseURL();
+}
+
+function clearBuilder() {
+  ['b-proto','b-host','b-port','b-path','b-query','b-hash'].forEach(id => document.getElementById(id).value = '');
+  buildURL();
+}
+
+function toast() {
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1500);
+}
+
+document.getElementById('url-input').addEventListener('keydown', e => { if (e.key === 'Enter') parseURL(); });
+</script>
+</body>
+</html>
