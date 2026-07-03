@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Docker Compose Reference — Interactive YAML Key Browser</title>
+  <meta name="description" content="Interactive Docker Compose YAML reference. Browse all top-level keys and service properties with examples, types, and descriptions. Searchable, dark-themed." />
+  <link rel="canonical" href="https://devnestio.pages.dev/docker-compose-reference/" />
+  <meta property="og:title" content="Docker Compose Reference" />
+  <meta property="og:description" content="Browse Docker Compose YAML keys with examples. Searchable interactive reference." />
+  <meta property="og:type" content="website" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117;
+      --bg-card: #161b22;
+      --border: #30363d;
+      --text: #c9d1d9;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --accent-hover: #79b8ff;
+      --green: #3fb950;
+      --yellow: #d29922;
+      --purple: #bc8cff;
+      --orange: #ffa657;
+      --red: #f85149;
+    }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+    header { padding: 28px 32px 20px; border-bottom: 1px solid var(--border); }
+    header h1 { font-size: 1.5rem; font-weight: 700; color: #e6edf3; }
+    header h1 span { color: var(--accent); }
+    header p { color: var(--text-muted); margin-top: 6px; font-size: .9rem; }
+    .toolbar { display: flex; gap: 12px; flex-wrap: wrap; padding: 16px 32px; border-bottom: 1px solid var(--border); align-items: center; }
+    .search-wrap { position: relative; flex: 1; min-width: 220px; max-width: 420px; }
+    .search-wrap svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; }
+    #search { width: 100%; background: var(--bg-card); border: 1px solid var(--border); color: var(--text); padding: 8px 12px 8px 34px; border-radius: 6px; font-size: .9rem; outline: none; }
+    #search:focus { border-color: var(--accent); }
+    .cats { display: flex; gap: 8px; flex-wrap: wrap; }
+    .cat-btn { font-size: .8rem; padding: 5px 12px; border-radius: 14px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; transition: all .15s; white-space: nowrap; }
+    .cat-btn.active, .cat-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(88,166,255,.1); }
+    main { flex: 1; padding: 24px 32px; display: flex; gap: 24px; }
+    .sidebar { width: 220px; flex-shrink: 0; display: flex; flex-direction: column; gap: 4px; position: sticky; top: 16px; align-self: flex-start; }
+    .sidebar-item { padding: 7px 12px; border-radius: 6px; cursor: pointer; font-size: .85rem; color: var(--text-muted); transition: all .15s; border-left: 2px solid transparent; }
+    .sidebar-item:hover { color: var(--text); background: rgba(255,255,255,.04); }
+    .sidebar-item.active { color: var(--accent); background: rgba(88,166,255,.1); border-left-color: var(--accent); }
+    .content { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+    .key-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .key-card-head { display: flex; justify-content: space-between; align-items: flex-start; padding: 14px 18px 12px; gap: 12px; }
+    .key-name { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 1rem; font-weight: 700; color: #e6edf3; }
+    .key-meta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .badge { font-size: .72rem; padding: 2px 8px; border-radius: 12px; font-weight: 600; white-space: nowrap; }
+    .badge-section { background: rgba(88,166,255,.12); color: var(--accent); border: 1px solid rgba(88,166,255,.25); }
+    .badge-type { background: rgba(188,140,255,.12); color: var(--purple); border: 1px solid rgba(188,140,255,.25); }
+    .badge-req { background: rgba(248,81,73,.12); color: var(--red); border: 1px solid rgba(248,81,73,.25); }
+    .badge-opt { background: rgba(63,185,80,.12); color: var(--green); border: 1px solid rgba(63,185,80,.25); }
+    .key-desc { padding: 0 18px 12px; font-size: .88rem; color: var(--text-muted); line-height: 1.6; }
+    .key-example { background: var(--bg); border-top: 1px solid var(--border); padding: 14px 18px; position: relative; }
+    .key-example pre { font-family: 'SFMono-Regular', Consolas, monospace; font-size: .8rem; color: #c9d1d9; line-height: 1.7; white-space: pre-wrap; word-break: break-word; }
+    .copy-btn { position: absolute; top: 10px; right: 12px; font-size: .75rem; padding: 4px 10px; background: var(--bg-card); color: var(--accent); border: 1px solid var(--border); border-radius: 5px; cursor: pointer; transition: all .15s; }
+    .copy-btn:hover { border-color: var(--accent); }
+    .copy-btn.copied { color: var(--green); border-color: var(--green); }
+    .no-results { text-align: center; color: var(--text-muted); padding: 60px 20px; font-size: .95rem; }
+    footer { text-align: center; padding: 24px; font-size: .82rem; color: var(--text-muted); border-top: 1px solid var(--border); }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    .hl { background: rgba(88,166,255,.25); border-radius: 2px; }
+    @media (max-width: 700px) {
+      main { flex-direction: column; padding: 16px; }
+      .sidebar { width: 100%; position: static; flex-direction: row; flex-wrap: wrap; }
+      header, .toolbar { padding-left: 16px; padding-right: 16px; }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Docker Compose <span>Reference</span></h1>
+  <p>Interactive YAML key browser for Docker Compose — all top-level keys and service properties with examples.</p>
+</header>
+
+<div class="toolbar">
+  <div class="search-wrap">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="search" type="search" placeholder="Search keys, descriptions, examples…" autocomplete="off" />
+  </div>
+  <div class="cats">
+    <button class="cat-btn active" data-cat="all">All</button>
+    <button class="cat-btn" data-cat="top-level">Top-level</button>
+    <button class="cat-btn" data-cat="services">Services</button>
+    <button class="cat-btn" data-cat="networks">Networks</button>
+    <button class="cat-btn" data-cat="volumes">Volumes</button>
+    <button class="cat-btn" data-cat="deploy">Deploy</button>
+  </div>
+</div>
+
+<main>
+  <nav class="sidebar" id="sidebar"></nav>
+  <div class="content" id="content"></div>
+</main>
+
+<footer>
+  <p>Docker Compose YAML Reference &nbsp;|&nbsp; <a href="https://buymeacoffee.com/devnestio" target="_blank" rel="noopener">Buy me a coffee ☕</a></p>
+</footer>
+
+<script>
+const KEYS = [
+  {
+    id: 'version', cat: 'top-level', name: 'version', type: 'string', req: false,
+    desc: 'Declares the Compose file format version. Obsolete in Compose v2+ (ignored by modern Docker Compose), but still widely seen. Use "3.8" or higher for compatibility.',
+    example: `version: "3.9"`
+  },
+  {
+    id: 'services', cat: 'top-level', name: 'services', type: 'mapping', req: true,
+    desc: 'Defines all containers (services) that make up the application. Each key is the service name.',
+    example: `services:
+  web:
+    image: nginx:alpine
+  db:
+    image: postgres:15`
+  },
+  {
+    id: 'networks', cat: 'top-level', name: 'networks', type: 'mapping', req: false,
+    desc: 'Defines named networks that services can attach to. If omitted, a default network is created automatically.',
+    example: `networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+    internal: true`
+  },
+  {
+    id: 'volumes', cat: 'top-level', name: 'volumes', type: 'mapping', req: false,
+    desc: 'Declares named volumes that can be reused across services. Volumes persist data beyond container lifecycle.',
+    example: `volumes:
+  db_data:
+  app_uploads:
+    driver: local`
+  },
+  {
+    id: 'configs', cat: 'top-level', name: 'configs', type: 'mapping', req: false,
+    desc: 'Defines configuration objects (Swarm mode). Grant services access to config files without rebuilding images.',
+    example: `configs:
+  nginx_conf:
+    file: ./nginx.conf`
+  },
+  {
+    id: 'secrets', cat: 'top-level', name: 'secrets', type: 'mapping', req: false,
+    desc: 'Defines secrets (sensitive data like passwords) at the top level. Services can reference them.',
+    example: `secrets:
+  db_password:
+    file: ./secrets/db_password.txt`
+  },
+  {
+    id: 'svc-image', cat: 'services', name: 'image', type: 'string', req: false,
+    desc: 'The Docker image to use for this service. Can include a tag or digest. Used when build is not specified.',
+    example: `services:
+  web:
+    image: nginx:1.25-alpine`
+  },
+  {
+    id: 'svc-build', cat: 'services', name: 'build', type: 'string | mapping', req: false,
+    desc: 'Build context and options. Can be a path string or a mapping with context, dockerfile, args, target, etc.',
+    example: `services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+      args:
+        NODE_ENV: production
+      target: runner`
+  },
+  {
+    id: 'svc-container_name', cat: 'services', name: 'container_name', type: 'string', req: false,
+    desc: 'Custom name for the container. Prevents scaling (Docker requires unique names). Avoid in production.',
+    example: `services:
+  db:
+    container_name: my_postgres`
+  },
+  {
+    id: 'svc-command', cat: 'services', name: 'command', type: 'string | list', req: false,
+    desc: 'Override the default CMD from the image. String form uses shell; list form is exec form (preferred).',
+    example: `services:
+  app:
+    command: ["node", "server.js"]
+    # or:
+    # command: node server.js`
+  },
+  {
+    id: 'svc-entrypoint', cat: 'services', name: 'entrypoint', type: 'string | list', req: false,
+    desc: 'Override the ENTRYPOINT of the image. Replaces the image ENTRYPOINT; command is appended.',
+    example: `services:
+  app:
+    entrypoint: ["/bin/sh", "-c"]
+    command: "echo hello"`
+  },
+  {
+    id: 'svc-environment', cat: 'services', name: 'environment', type: 'mapping | list', req: false,
+    desc: 'Set environment variables. Mapping or list syntax. Values without = pass-through from the host shell.',
+    example: `services:
+  app:
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      SECRET_KEY: # passed from host`
+  },
+  {
+    id: 'svc-env_file', cat: 'services', name: 'env_file', type: 'string | list', req: false,
+    desc: 'Load environment variables from a .env file. Each line must be VAR=value. Comments start with #.',
+    example: `services:
+  app:
+    env_file:
+      - .env
+      - .env.local`
+  },
+  {
+    id: 'svc-ports', cat: 'services', name: 'ports', type: 'list', req: false,
+    desc: 'Publish container ports to the host. Format: "HOST:CONTAINER" or "HOST:CONTAINER/protocol". Exposes to host.',
+    example: `services:
+  web:
+    ports:
+      - "80:80"
+      - "443:443"
+      - "127.0.0.1:8080:8080"  # bind to localhost only`
+  },
+  {
+    id: 'svc-expose', cat: 'services', name: 'expose', type: 'list', req: false,
+    desc: 'Expose ports to other services without publishing to the host. For inter-container communication only.',
+    example: `services:
+  db:
+    expose:
+      - "5432"`
+  },
+  {
+    id: 'svc-volumes', cat: 'services', name: 'volumes', type: 'list', req: false,
+    desc: 'Mount paths or named volumes. Format: HOST_PATH:CONTAINER_PATH[:options]. Options: ro, rw, z, Z.',
+    example: `services:
+  app:
+    volumes:
+      - ./src:/app/src:ro
+      - db_data:/var/lib/postgresql/data
+      - /tmp/cache:/cache`
+  },
+  {
+    id: 'svc-depends_on', cat: 'services', name: 'depends_on', type: 'list | mapping', req: false,
+    desc: 'Service startup order dependencies. With condition, waits for a specific state (service_healthy, service_started).',
+    example: `services:
+  app:
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started`
+  },
+  {
+    id: 'svc-networks', cat: 'services', name: 'networks', type: 'list | mapping', req: false,
+    desc: 'Networks this service joins. If omitted, joins the default network. Aliases and IPv4/IPv6 can be set.',
+    example: `services:
+  web:
+    networks:
+      frontend:
+        aliases:
+          - webapp
+      backend:`
+  },
+  {
+    id: 'svc-restart', cat: 'services', name: 'restart', type: 'string', req: false,
+    desc: 'Restart policy: no (default), always, on-failure, unless-stopped. For Swarm use deploy.restart_policy.',
+    example: `services:
+  app:
+    restart: unless-stopped`
+  },
+  {
+    id: 'svc-healthcheck', cat: 'services', name: 'healthcheck', type: 'mapping', req: false,
+    desc: 'Test to determine if a container is healthy. Used with depends_on condition: service_healthy.',
+    example: `services:
+  db:
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s`
+  },
+  {
+    id: 'svc-labels', cat: 'services', name: 'labels', type: 'mapping | list', req: false,
+    desc: 'Add metadata labels to containers. Used by Traefik, monitoring tools, and Docker itself.',
+    example: `services:
+  web:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.web.rule=Host(\`example.com\`)"`
+  },
+  {
+    id: 'svc-user', cat: 'services', name: 'user', type: 'string', req: false,
+    desc: 'Override the default user inside the container. Format: uid, uid:gid, username, or username:groupname.',
+    example: `services:
+  app:
+    user: "1000:1000"`
+  },
+  {
+    id: 'svc-working_dir', cat: 'services', name: 'working_dir', type: 'string', req: false,
+    desc: 'Override the working directory set in the image. Equivalent to WORKDIR in a Dockerfile.',
+    example: `services:
+  app:
+    working_dir: /app`
+  },
+  {
+    id: 'svc-stdin_open', cat: 'services', name: 'stdin_open', type: 'boolean', req: false,
+    desc: 'Keep STDIN open even if not attached. Equivalent to docker run -i. Needed for interactive processes.',
+    example: `services:
+  shell:
+    stdin_open: true
+    tty: true`
+  },
+  {
+    id: 'svc-tty', cat: 'services', name: 'tty', type: 'boolean', req: false,
+    desc: 'Allocate a pseudo-TTY. Equivalent to docker run -t. Often paired with stdin_open.',
+    example: `services:
+  app:
+    tty: true`
+  },
+  {
+    id: 'svc-extra_hosts', cat: 'services', name: 'extra_hosts', type: 'list', req: false,
+    desc: 'Add entries to /etc/hosts inside the container. Format: "hostname:IP".',
+    example: `services:
+  app:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "myhost:192.168.1.10"`
+  },
+  {
+    id: 'svc-secrets', cat: 'services', name: 'secrets', type: 'list', req: false,
+    desc: 'Grant access to top-level secrets. Secrets are mounted at /run/secrets/<name> inside the container.',
+    example: `services:
+  app:
+    secrets:
+      - db_password
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt`
+  },
+  {
+    id: 'svc-platform', cat: 'services', name: 'platform', type: 'string', req: false,
+    desc: 'Target platform for this service. Overrides the default platform for multi-arch images.',
+    example: `services:
+  app:
+    platform: linux/amd64`
+  },
+  {
+    id: 'net-driver', cat: 'networks', name: 'driver', type: 'string', req: false,
+    desc: 'Network driver. Common values: bridge (default), overlay (Swarm), host, none, macvlan.',
+    example: `networks:
+  mynet:
+    driver: bridge`
+  },
+  {
+    id: 'net-driver_opts', cat: 'networks', name: 'driver_opts', type: 'mapping', req: false,
+    desc: 'Driver-specific options passed to the network driver.',
+    example: `networks:
+  mynet:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: my_bridge`
+  },
+  {
+    id: 'net-external', cat: 'networks', name: 'external', type: 'boolean', req: false,
+    desc: 'Use a pre-existing network not managed by this Compose file. Compose will not create or destroy it.',
+    example: `networks:
+  proxy:
+    external: true`
+  },
+  {
+    id: 'net-internal', cat: 'networks', name: 'internal', type: 'boolean', req: false,
+    desc: 'Restrict outbound access. Containers on an internal network cannot reach the internet.',
+    example: `networks:
+  backend:
+    internal: true`
+  },
+  {
+    id: 'net-ipam', cat: 'networks', name: 'ipam', type: 'mapping', req: false,
+    desc: 'IP Address Management configuration. Set custom subnets, gateways, and IP ranges.',
+    example: `networks:
+  mynet:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16
+          gateway: 172.28.0.1`
+  },
+  {
+    id: 'vol-driver', cat: 'volumes', name: 'driver', type: 'string', req: false,
+    desc: 'Volume driver. Default is local. Third-party drivers support NFS, cloud storage, etc.',
+    example: `volumes:
+  data:
+    driver: local`
+  },
+  {
+    id: 'vol-driver_opts', cat: 'volumes', name: 'driver_opts', type: 'mapping', req: false,
+    desc: 'Options passed to the volume driver. For local driver: type, o, device flags (NFS/bind mounts).',
+    example: `volumes:
+  nfs_data:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=192.168.1.1,rw
+      device: ":/path/to/dir"`
+  },
+  {
+    id: 'vol-external', cat: 'volumes', name: 'external', type: 'boolean', req: false,
+    desc: 'Reference a volume managed outside this Compose file. Compose will not create or destroy it.',
+    example: `volumes:
+  shared_data:
+    external: true`
+  },
+  {
+    id: 'deploy-replicas', cat: 'deploy', name: 'deploy.replicas', type: 'integer', req: false,
+    desc: 'Number of container replicas to run (Swarm mode). Defaults to 1.',
+    example: `services:
+  web:
+    deploy:
+      replicas: 3`
+  },
+  {
+    id: 'deploy-resources', cat: 'deploy', name: 'deploy.resources', type: 'mapping', req: false,
+    desc: 'CPU and memory limits and reservations for the service (Swarm / Docker Desktop resource limits).',
+    example: `services:
+  app:
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 128M`
+  },
+  {
+    id: 'deploy-restart_policy', cat: 'deploy', name: 'deploy.restart_policy', type: 'mapping', req: false,
+    desc: 'Restart policy for Swarm. condition: none | on-failure | any. delay, max_attempts, window.',
+    example: `services:
+  app:
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s`
+  },
+  {
+    id: 'deploy-update_config', cat: 'deploy', name: 'deploy.update_config', type: 'mapping', req: false,
+    desc: 'Rolling update configuration for Swarm. parallelism, delay, order (stop-first | start-first).',
+    example: `services:
+  web:
+    deploy:
+      update_config:
+        parallelism: 2
+        delay: 10s
+        order: start-first`
+  },
+  {
+    id: 'deploy-mode', cat: 'deploy', name: 'deploy.mode', type: 'string', req: false,
+    desc: 'Service mode: replicated (default, with replicas count) or global (one instance per Swarm node).',
+    example: `services:
+  agent:
+    deploy:
+      mode: global`
+  },
+  {
+    id: 'deploy-placement', cat: 'deploy', name: 'deploy.placement', type: 'mapping', req: false,
+    desc: 'Placement constraints and preferences control which Swarm nodes run service tasks.',
+    example: `services:
+  db:
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+          - node.labels.region == us-east`
+  }
+];
+
+let activeCat = 'all';
+let searchTerm = '';
+
+function escape(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function highlight(text, term) {
+  if (!term) return escape(text);
+  const re = new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'), 'gi');
+  return escape(text).replace(re, m => `<span class="hl">${m}</span>`);
+}
+
+function render() {
+  const q = searchTerm.toLowerCase();
+  const filtered = KEYS.filter(k => {
+    const catOk = activeCat === 'all' || k.cat === activeCat;
+    if (!catOk) return false;
+    if (!q) return true;
+    return k.name.toLowerCase().includes(q) || k.desc.toLowerCase().includes(q) || k.example.toLowerCase().includes(q);
+  });
+
+  const sidebar = document.getElementById('sidebar');
+  const content = document.getElementById('content');
+
+  sidebar.innerHTML = filtered.map(k =>
+    `<div class="sidebar-item" data-id="${k.id}" onclick="scrollTo('${k.id}')">${k.name}</div>`
+  ).join('');
+
+  if (!filtered.length) {
+    content.innerHTML = '<div class="no-results">No keys match your search.</div>';
+    return;
+  }
+
+  content.innerHTML = filtered.map(k => `
+    <div class="key-card" id="card-${k.id}">
+      <div class="key-card-head">
+        <div class="key-name">${highlight(k.name, q)}</div>
+        <div class="key-meta">
+          <span class="badge badge-section">${k.cat}</span>
+          <span class="badge badge-type">${k.type}</span>
+          <span class="badge ${k.req ? 'badge-req' : 'badge-opt'}">${k.req ? 'required' : 'optional'}</span>
+        </div>
+      </div>
+      <div class="key-desc">${highlight(k.desc, q)}</div>
+      <div class="key-example">
+        <pre>${highlight(k.example, q)}</pre>
+        <button class="copy-btn" onclick="copyEx(this, ${JSON.stringify(k.example)})">Copy</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function scrollTo(id) {
+  const el = document.getElementById('card-' + id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.querySelectorAll('.sidebar-item').forEach(s => s.classList.toggle('active', s.dataset.id === id));
+}
+
+async function copyEx(btn, text) {
+  try { await navigator.clipboard.writeText(text); } catch { }
+  btn.textContent = 'Copied!';
+  btn.classList.add('copied');
+  setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+}
+
+document.getElementById('search').addEventListener('input', e => {
+  searchTerm = e.target.value;
+  render();
+});
+
+document.querySelectorAll('.cat-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    activeCat = btn.dataset.cat;
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b === btn));
+    render();
+  });
+});
+
+render();
+</script>
+</body>
+</html>

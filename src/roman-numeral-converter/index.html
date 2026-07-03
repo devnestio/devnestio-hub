@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roman Numeral Converter — Decimal ↔ Roman with Breakdown</title>
+  <meta name="description" content="Convert decimal numbers to Roman numerals and Roman numerals to decimal. See a step-by-step breakdown of each conversion. Supports 1–3999. 100% in-browser." />
+  <link rel="canonical" href="https://devnestio.pages.dev/roman-numeral-converter/" />
+  <meta property="og:title" content="Roman Numeral Converter" />
+  <meta property="og:description" content="Convert decimal ↔ Roman numerals with step-by-step breakdown. Browser-only." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117;
+      --bg-card: #161b22;
+      --border: #30363d;
+      --text: #c9d1d9;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --accent-hover: #79b8ff;
+      --green: #3fb950;
+      --red: #f85149;
+      --yellow: #d29922;
+      --purple: #bc8cff;
+      --orange: #f97316;
+    }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+    header { padding: 28px 32px 20px; border-bottom: 1px solid var(--border); }
+    header h1 { font-size: 1.5rem; font-weight: 700; color: #e6edf3; }
+    header h1 span { color: var(--accent); }
+    header p { color: var(--text-muted); margin-top: 6px; font-size: .9rem; }
+    main { flex: 1; padding: 28px 32px; max-width: 860px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+
+    .converter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 640px) { .converter-grid { grid-template-columns: 1fr; } }
+
+    .conv-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .conv-head { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+    .conv-head h2 { font-size: .95rem; font-weight: 700; color: #e6edf3; }
+    .direction-badge { font-size: .72rem; padding: 2px 8px; border-radius: 10px; font-weight: 600; background: rgba(88,166,255,.12); color: var(--accent); border: 1px solid rgba(88,166,255,.25); }
+    .conv-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+    .input-row { display: flex; gap: 10px; align-items: stretch; }
+    input[type="text"], input[type="number"] {
+      flex: 1; background: var(--bg); border: 1px solid var(--border); color: var(--text);
+      border-radius: 6px; padding: 10px 14px; font-size: 1rem; font-family: 'SFMono-Regular','Consolas',monospace;
+      outline: none; transition: border-color .15s;
+    }
+    input:focus { border-color: var(--accent); }
+    input::placeholder { color: var(--text-muted); }
+    button.go { padding: 10px 18px; border-radius: 6px; background: var(--accent); color: #0d1117; border: none; font-size: .9rem; font-weight: 700; cursor: pointer; transition: background .15s; white-space: nowrap; }
+    button.go:hover { background: var(--accent-hover); }
+
+    .result-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px; min-height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .result-value { font-size: 1.6rem; font-weight: 700; font-family: 'SFMono-Regular','Consolas',monospace; color: #e6edf3; letter-spacing: .04em; }
+    .copy-btn { font-size: .78rem; padding: 5px 12px; background: var(--bg-card); color: var(--accent); border: 1px solid var(--border); border-radius: 5px; cursor: pointer; transition: all .15s; white-space: nowrap; }
+    .copy-btn:hover { border-color: var(--accent); }
+    .copy-btn.copied { color: var(--green); border-color: var(--green); }
+    .error-msg { color: var(--red); font-size: .84rem; }
+
+    .breakdown { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+    .breakdown h3 { font-size: .82rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--text-muted); margin-bottom: 16px; }
+    .steps { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .step { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .step-roman { font-size: 1.2rem; font-weight: 700; color: var(--accent); font-family: 'SFMono-Regular','Consolas',monospace; }
+    .step-dec { font-size: .78rem; color: var(--text-muted); }
+    .step-sep { font-size: 1.1rem; color: var(--border); margin-top: -6px; }
+    .step-total { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-left: 4px; padding-left: 14px; border-left: 2px solid var(--border); }
+    .step-total .step-roman { color: #e6edf3; }
+
+    .ref-table-wrap { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .ref-table-head { padding: 14px 20px; border-bottom: 1px solid var(--border); }
+    .ref-table-head h3 { font-size: .88rem; font-weight: 700; color: #e6edf3; }
+    table.ref { width: 100%; border-collapse: collapse; }
+    table.ref thead th { padding: 10px 20px; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--text-muted); text-align: left; border-bottom: 1px solid var(--border); }
+    table.ref tbody tr { border-bottom: 1px solid var(--border); cursor: pointer; transition: background .1s; }
+    table.ref tbody tr:last-child { border-bottom: none; }
+    table.ref tbody tr:hover { background: rgba(88,166,255,.05); }
+    table.ref tbody td { padding: 8px 20px; font-size: .9rem; }
+    table.ref tbody td:first-child { font-family: 'SFMono-Regular','Consolas',monospace; color: var(--accent); font-weight: 700; font-size: 1rem; }
+    table.ref tbody td:nth-child(2) { color: var(--text); }
+    table.ref tbody td.note { color: var(--text-muted); font-size: .82rem; }
+
+    footer { text-align: center; padding: 24px; font-size: .82rem; color: var(--text-muted); border-top: 1px solid var(--border); }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    @media (max-width: 600px) { header, main { padding-left: 16px; padding-right: 16px; } }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Roman <span>Numeral Converter</span></h1>
+  <p>Convert decimal ↔ Roman numerals. See the step-by-step breakdown of every value.</p>
+</header>
+
+<main>
+  <div class="converter-grid">
+    <!-- Decimal → Roman -->
+    <div class="conv-card">
+      <div class="conv-head">
+        <h2>Decimal → Roman</h2>
+        <span class="direction-badge">1 – 3999</span>
+      </div>
+      <div class="conv-body">
+        <div class="input-row">
+          <input type="number" id="decInput" placeholder="e.g. 2024" min="1" max="3999" oninput="decToRoman()" />
+        </div>
+        <div class="result-box" id="decResult">
+          <span class="result-value" id="decResultVal" style="color:var(--text-muted);font-size:1rem">—</span>
+          <button class="copy-btn" id="decCopyBtn" onclick="copyResult('decResultVal','decCopyBtn')" style="display:none">Copy</button>
+        </div>
+        <div class="error-msg" id="decError"></div>
+      </div>
+    </div>
+
+    <!-- Roman → Decimal -->
+    <div class="conv-card">
+      <div class="conv-head">
+        <h2>Roman → Decimal</h2>
+        <span class="direction-badge">I – MMMCMXCIX</span>
+      </div>
+      <div class="conv-body">
+        <div class="input-row">
+          <input type="text" id="romanInput" placeholder="e.g. MMXXIV" oninput="romanToDec()" style="text-transform:uppercase" />
+        </div>
+        <div class="result-box" id="romanResult">
+          <span class="result-value" id="romanResultVal" style="color:var(--text-muted);font-size:1rem">—</span>
+          <button class="copy-btn" id="romanCopyBtn" onclick="copyResult('romanResultVal','romanCopyBtn')" style="display:none">Copy</button>
+        </div>
+        <div class="error-msg" id="romanError"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Breakdown -->
+  <div class="breakdown" id="breakdown" style="display:none">
+    <h3>Breakdown</h3>
+    <div class="steps" id="breakdownSteps"></div>
+  </div>
+
+  <!-- Reference table -->
+  <div class="ref-table-wrap">
+    <div class="ref-table-head"><h3>Roman Numeral Reference</h3></div>
+    <table class="ref">
+      <thead><tr><th>Symbol</th><th>Value</th><th>Note</th></tr></thead>
+      <tbody id="refBody"></tbody>
+    </table>
+  </div>
+</main>
+
+<footer>
+  <p>Roman numeral converter — 100% in-browser &nbsp;|&nbsp; <a href="https://buymeacoffee.com/devnestio" target="_blank" rel="noopener">Buy me a coffee ☕</a></p>
+</footer>
+
+<script>
+const TABLE = [
+  { s:'M',  v:1000, note:'Mille (thousand)' },
+  { s:'CM', v:900,  note:'Subtraction: 1000−100' },
+  { s:'D',  v:500,  note:'Quingenti (five hundred)' },
+  { s:'CD', v:400,  note:'Subtraction: 500−100' },
+  { s:'C',  v:100,  note:'Centum (hundred)' },
+  { s:'XC', v:90,   note:'Subtraction: 100−10' },
+  { s:'L',  v:50,   note:'Quinquaginta (fifty)' },
+  { s:'XL', v:40,   note:'Subtraction: 50−10' },
+  { s:'X',  v:10,   note:'Decem (ten)' },
+  { s:'IX', v:9,    note:'Subtraction: 10−1' },
+  { s:'V',  v:5,    note:'Quinque (five)' },
+  { s:'IV', v:4,    note:'Subtraction: 5−1' },
+  { s:'I',  v:1,    note:'Unus (one)' },
+];
+
+// Build reference table
+const refBody = document.getElementById('refBody');
+TABLE.forEach(r => {
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td>${r.s}</td><td>${r.v.toLocaleString()}</td><td class="note">${r.note}</td>`;
+  tr.onclick = () => { document.getElementById('decInput').value = r.v; decToRoman(); };
+  refBody.appendChild(tr);
+});
+
+function toRoman(num) {
+  const steps = [];
+  let remaining = num;
+  for (const { s, v } of TABLE) {
+    while (remaining >= v) {
+      steps.push({ symbol: s, value: v });
+      remaining -= v;
+    }
+  }
+  return steps;
+}
+
+function fromRoman(str) {
+  const map = { I:1, V:5, X:10, L:50, C:100, D:500, M:1000 };
+  let total = 0;
+  const s = str.toUpperCase();
+  for (let i = 0; i < s.length; i++) {
+    const curr = map[s[i]];
+    const next = map[s[i+1]];
+    if (curr === undefined) return null;
+    if (next && curr < next) { total += next - curr; i++; }
+    else total += curr;
+  }
+  return total;
+}
+
+function isValidRoman(str) {
+  return /^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$/i.test(str) && str.length > 0;
+}
+
+function renderBreakdown(steps, total) {
+  const bd = document.getElementById('breakdown');
+  const stepsEl = document.getElementById('breakdownSteps');
+  if (!steps.length) { bd.style.display = 'none'; return; }
+  bd.style.display = 'block';
+  stepsEl.innerHTML = '';
+  steps.forEach((step, i) => {
+    const el = document.createElement('div');
+    el.className = 'step';
+    el.innerHTML = `<div class="step-roman">${step.symbol}</div><div class="step-dec">${step.value}</div>`;
+    stepsEl.appendChild(el);
+    if (i < steps.length - 1) {
+      const sep = document.createElement('div');
+      sep.className = 'step-sep';
+      sep.textContent = '+';
+      stepsEl.appendChild(sep);
+    }
+  });
+  const totalEl = document.createElement('div');
+  totalEl.className = 'step step-total';
+  totalEl.innerHTML = `<div class="step-roman">${steps.map(s=>s.symbol).join('')}</div><div class="step-dec">${total}</div>`;
+  stepsEl.appendChild(totalEl);
+}
+
+function decToRoman() {
+  const raw = document.getElementById('decInput').value.trim();
+  document.getElementById('decError').textContent = '';
+  document.getElementById('decResultVal').style.color = '';
+  document.getElementById('decCopyBtn').style.display = 'none';
+  document.getElementById('breakdown').style.display = 'none';
+  if (!raw) { document.getElementById('decResultVal').textContent = '—'; document.getElementById('decResultVal').style.color = 'var(--text-muted)'; document.getElementById('decResultVal').style.fontSize = '1rem'; return; }
+  const n = parseInt(raw, 10);
+  if (isNaN(n) || n < 1 || n > 3999) {
+    document.getElementById('decError').textContent = 'Enter a whole number between 1 and 3999.';
+    document.getElementById('decResultVal').textContent = '—'; document.getElementById('decResultVal').style.color = 'var(--text-muted)'; document.getElementById('decResultVal').style.fontSize = '1rem';
+    return;
+  }
+  const steps = toRoman(n);
+  const roman = steps.map(s => s.symbol).join('');
+  document.getElementById('decResultVal').textContent = roman;
+  document.getElementById('decResultVal').style.color = '';
+  document.getElementById('decResultVal').style.fontSize = '';
+  document.getElementById('decCopyBtn').style.display = 'block';
+  renderBreakdown(steps, n);
+}
+
+function romanToDec() {
+  const raw = document.getElementById('romanInput').value.trim().toUpperCase();
+  document.getElementById('romanError').textContent = '';
+  document.getElementById('romanCopyBtn').style.display = 'none';
+  document.getElementById('breakdown').style.display = 'none';
+  if (!raw) { document.getElementById('romanResultVal').textContent = '—'; document.getElementById('romanResultVal').style.color = 'var(--text-muted)'; document.getElementById('romanResultVal').style.fontSize = '1rem'; return; }
+  if (!isValidRoman(raw)) {
+    document.getElementById('romanError').textContent = 'Invalid Roman numeral. Use I, V, X, L, C, D, M (standard form).';
+    document.getElementById('romanResultVal').textContent = '—'; document.getElementById('romanResultVal').style.color = 'var(--text-muted)'; document.getElementById('romanResultVal').style.fontSize = '1rem';
+    return;
+  }
+  const n = fromRoman(raw);
+  document.getElementById('romanResultVal').textContent = n.toLocaleString();
+  document.getElementById('romanResultVal').style.color = '';
+  document.getElementById('romanResultVal').style.fontSize = '';
+  document.getElementById('romanCopyBtn').style.display = 'block';
+  renderBreakdown(toRoman(n), n);
+}
+
+async function copyResult(valId, btnId) {
+  const val = document.getElementById(valId).textContent;
+  const btn = document.getElementById(btnId);
+  if (!val || val === '—') return;
+  try {
+    await navigator.clipboard.writeText(val);
+    btn.textContent = 'Copied!'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  } catch {}
+}
+
+// Default example
+document.getElementById('decInput').value = '2024';
+decToRoman();
+</script>
+</body>
+</html>

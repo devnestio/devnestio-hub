@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Binary ↔ Text Converter — Also Hex ↔ Binary | devnestio</title>
+  <meta name="description" content="Convert text to binary (8-bit groups) and back. Also convert hex to binary and binary to hex. See bit groupings clearly. 100% in-browser, no server." />
+  <link rel="canonical" href="https://devnestio.pages.dev/binary-text-converter/" />
+  <meta property="og:title" content="Binary ↔ Text Converter" />
+  <meta property="og:description" content="Convert text↔binary (8-bit), hex↔binary with clear bit groupings. Browser-only." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117;
+      --bg-card: #161b22;
+      --border: #30363d;
+      --text: #c9d1d9;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --accent-hover: #79b8ff;
+      --green: #3fb950;
+      --red: #f85149;
+      --yellow: #d29922;
+      --purple: #bc8cff;
+    }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+    header { padding: 28px 32px 20px; border-bottom: 1px solid var(--border); }
+    header h1 { font-size: 1.5rem; font-weight: 700; color: #e6edf3; }
+    header h1 span { color: var(--accent); }
+    header p { color: var(--text-muted); margin-top: 6px; font-size: .9rem; }
+    main { flex: 1; padding: 28px 32px; max-width: 900px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+    .tabs { display: flex; gap: 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; width: fit-content; }
+    .tab { padding: 8px 20px; font-size: .87rem; font-weight: 600; cursor: pointer; background: var(--bg-card); color: var(--text-muted); border: none; transition: all .15s; }
+    .tab.active { background: var(--accent); color: #0d1117; }
+    .tab:not(:last-child) { border-right: 1px solid var(--border); }
+    .panel { display: none; flex-direction: column; gap: 16px; }
+    .panel.active { display: flex; }
+    .io-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 680px) { .io-row { grid-template-columns: 1fr; } }
+    .io-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .io-head { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--border); }
+    .io-label { font-size: .82rem; font-weight: 700; color: #e6edf3; text-transform: uppercase; letter-spacing: .06em; }
+    .copy-btn { font-size: .78rem; padding: 4px 10px; background: var(--bg); color: var(--accent); border: 1px solid var(--border); border-radius: 5px; cursor: pointer; transition: all .15s; }
+    .copy-btn:hover { border-color: var(--accent); }
+    .copy-btn.copied { color: var(--green); border-color: var(--green); }
+    textarea { width: 100%; min-height: 140px; background: transparent; border: none; color: var(--text); font-family: 'SFMono-Regular', 'Consolas', monospace; font-size: .83rem; line-height: 1.7; padding: 14px 16px; resize: vertical; outline: none; }
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    button.action { padding: 9px 20px; border-radius: 6px; border: 1px solid transparent; font-size: .88rem; font-weight: 700; cursor: pointer; transition: background .15s; }
+    button.primary { background: var(--accent); color: #0d1117; }
+    button.primary:hover { background: var(--accent-hover); }
+    button.secondary { background: var(--bg-card); color: var(--text); border-color: var(--border); }
+    button.secondary:hover { border-color: var(--accent); color: var(--accent); }
+    .error { color: var(--red); font-size: .85rem; padding: 8px 0; }
+    .bit-display { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 18px 20px; }
+    .bit-display h3 { font-size: .82rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 14px; }
+    .bit-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+    .byte-group { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .byte-bits { display: flex; gap: 2px; }
+    .bit-cell { width: 22px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 3px; font-family: 'SFMono-Regular', 'Consolas', monospace; font-size: .82rem; font-weight: 700; border: 1px solid var(--border); }
+    .bit-cell.one { background: rgba(88,166,255,.15); color: var(--accent); border-color: rgba(88,166,255,.3); }
+    .bit-cell.zero { background: transparent; color: var(--text-muted); }
+    .byte-char { font-size: .78rem; color: var(--text-muted); font-family: 'SFMono-Regular', 'Consolas', monospace; }
+    .byte-dec { font-size: .72rem; color: #5e6673; }
+    .info-box { background: rgba(88,166,255,.07); border: 1px solid rgba(88,166,255,.2); border-radius: 8px; padding: 14px 18px; font-size: .84rem; color: var(--text-muted); line-height: 1.6; }
+    .info-box strong { color: var(--text); }
+    footer { text-align: center; padding: 24px; font-size: .82rem; color: var(--text-muted); border-top: 1px solid var(--border); }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    @media (max-width: 600px) { header, main { padding-left: 16px; padding-right: 16px; } }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Binary <span>↔ Text</span> Converter</h1>
+  <p>Convert text to binary (8-bit groups) and back. Also hex ↔ binary. See individual bit groupings.</p>
+</header>
+
+<main>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('text-binary')">Text ↔ Binary</button>
+    <button class="tab" onclick="switchTab('hex-binary')">Hex ↔ Binary</button>
+  </div>
+
+  <!-- Text ↔ Binary Panel -->
+  <div class="panel active" id="panel-text-binary">
+    <div class="io-row">
+      <div class="io-box">
+        <div class="io-head">
+          <span class="io-label">Text</span>
+          <button class="copy-btn" onclick="copyField('textInput')">Copy</button>
+        </div>
+        <textarea id="textInput" placeholder="Enter text here…" oninput="textToBinary()"></textarea>
+      </div>
+      <div class="io-box">
+        <div class="io-head">
+          <span class="io-label">Binary</span>
+          <button class="copy-btn" onclick="copyField('binaryOutput')">Copy</button>
+        </div>
+        <textarea id="binaryOutput" placeholder="Binary output (8-bit groups)…" oninput="binaryToText()"></textarea>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="action primary" onclick="textToBinary()">Text → Binary</button>
+      <button class="action primary" onclick="binaryToText()">Binary → Text</button>
+      <button class="action secondary" onclick="clearTextPanel()">Clear</button>
+    </div>
+    <div class="error" id="textError"></div>
+    <div class="bit-display" id="bitDisplay" style="display:none">
+      <h3>Bit visualization</h3>
+      <div class="bit-grid" id="bitGrid"></div>
+    </div>
+    <div class="info-box">
+      <strong>Format:</strong> Each character is represented as 8 bits (one byte). Groups are separated by spaces.
+      Example: <code>A</code> → <code>01000001</code>, <code>hello</code> → <code>01101000 01100101 01101100 01101100 01101111</code>
+    </div>
+  </div>
+
+  <!-- Hex ↔ Binary Panel -->
+  <div class="panel" id="panel-hex-binary">
+    <div class="io-row">
+      <div class="io-box">
+        <div class="io-head">
+          <span class="io-label">Hexadecimal</span>
+          <button class="copy-btn" onclick="copyField('hexInput')">Copy</button>
+        </div>
+        <textarea id="hexInput" placeholder="Enter hex: FF A0 1B or FF:A0:1B or FFA01B…" oninput="hexToBinary()"></textarea>
+      </div>
+      <div class="io-box">
+        <div class="io-head">
+          <span class="io-label">Binary</span>
+          <button class="copy-btn" onclick="copyField('hexBinaryOutput')">Copy</button>
+        </div>
+        <textarea id="hexBinaryOutput" placeholder="Binary output (8-bit groups)…" oninput="binaryToHex()"></textarea>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="action primary" onclick="hexToBinary()">Hex → Binary</button>
+      <button class="action primary" onclick="binaryToHex()">Binary → Hex</button>
+      <button class="action secondary" onclick="clearHexPanel()">Clear</button>
+    </div>
+    <div class="error" id="hexError"></div>
+    <div class="bit-display" id="hexBitDisplay" style="display:none">
+      <h3>Bit visualization</h3>
+      <div class="bit-grid" id="hexBitGrid"></div>
+    </div>
+    <div class="info-box">
+      <strong>Format:</strong> Hex bytes separated by spaces, colons, or none.
+      Example: <code>FF</code> → <code>11111111</code>, <code>0A 1F</code> → <code>00001010 00011111</code>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <p>Binary converter — 100% in-browser, no data sent &nbsp;|&nbsp; <a href="https://buymeacoffee.com/devnestio" target="_blank" rel="noopener">Buy me a coffee ☕</a></p>
+</footer>
+
+<script>
+let lastChanged = 'text';
+
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === (id === 'text-binary' ? 0 : 1)));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+}
+
+function renderBitGrid(bytes, containerId, labelFn) {
+  const grid = document.getElementById(containerId);
+  grid.innerHTML = '';
+  bytes.slice(0, 64).forEach((b, i) => {
+    const bits = b.toString(2).padStart(8, '0');
+    const group = document.createElement('div');
+    group.className = 'byte-group';
+    const bitsRow = document.createElement('div');
+    bitsRow.className = 'byte-bits';
+    bits.split('').forEach(bit => {
+      const cell = document.createElement('div');
+      cell.className = 'bit-cell ' + (bit === '1' ? 'one' : 'zero');
+      cell.textContent = bit;
+      bitsRow.appendChild(cell);
+    });
+    const label = document.createElement('div');
+    label.className = 'byte-char';
+    label.textContent = labelFn(b, i);
+    const dec = document.createElement('div');
+    dec.className = 'byte-dec';
+    dec.textContent = b;
+    group.appendChild(bitsRow);
+    group.appendChild(label);
+    group.appendChild(dec);
+    grid.appendChild(group);
+  });
+  if (bytes.length > 64) {
+    const more = document.createElement('div');
+    more.style.cssText = 'color:var(--text-muted);font-size:.8rem;padding:8px 4px;align-self:flex-end;';
+    more.textContent = `+${bytes.length - 64} more bytes…`;
+    grid.appendChild(more);
+  }
+}
+
+function textToBinary() {
+  const text = document.getElementById('textInput').value;
+  document.getElementById('textError').textContent = '';
+  if (!text) {
+    document.getElementById('binaryOutput').value = '';
+    document.getElementById('bitDisplay').style.display = 'none';
+    return;
+  }
+  const encoder = new TextEncoder();
+  const bytes = encoder.encode(text);
+  const binary = Array.from(bytes).map(b => b.toString(2).padStart(8, '0')).join(' ');
+  document.getElementById('binaryOutput').value = binary;
+  renderBitGrid(Array.from(bytes), 'bitGrid', (b) => {
+    const ch = String.fromCharCode(b);
+    return /[\x20-\x7e]/.test(ch) ? ch : '·';
+  });
+  document.getElementById('bitDisplay').style.display = 'block';
+}
+
+function binaryToText() {
+  const binary = document.getElementById('binaryOutput').value.trim();
+  document.getElementById('textError').textContent = '';
+  if (!binary) {
+    document.getElementById('textInput').value = '';
+    document.getElementById('bitDisplay').style.display = 'none';
+    return;
+  }
+  const parts = binary.split(/\s+/);
+  if (parts.some(p => !/^[01]{1,8}$/.test(p))) {
+    document.getElementById('textError').textContent = 'Invalid binary — use 0s and 1s in 8-bit groups separated by spaces.';
+    return;
+  }
+  const bytes = parts.map(p => parseInt(p.padStart(8, '0'), 2));
+  try {
+    const text = new TextDecoder('utf-8', { fatal: true }).decode(new Uint8Array(bytes));
+    document.getElementById('textInput').value = text;
+    renderBitGrid(bytes, 'bitGrid', (b) => {
+      const ch = String.fromCharCode(b);
+      return /[\x20-\x7e]/.test(ch) ? ch : '·';
+    });
+    document.getElementById('bitDisplay').style.display = 'block';
+  } catch {
+    document.getElementById('textError').textContent = 'Could not decode as UTF-8 text.';
+  }
+}
+
+function hexToBinary() {
+  const raw = document.getElementById('hexInput').value.trim();
+  document.getElementById('hexError').textContent = '';
+  if (!raw) {
+    document.getElementById('hexBinaryOutput').value = '';
+    document.getElementById('hexBitDisplay').style.display = 'none';
+    return;
+  }
+  const cleaned = raw.replace(/[\s:,\-]/g, '');
+  if (!/^[0-9a-fA-F]+$/.test(cleaned) || cleaned.length % 2 !== 0) {
+    document.getElementById('hexError').textContent = 'Invalid hex — enter pairs like FF A0 or FFA0. Length must be even.';
+    return;
+  }
+  const bytes = [];
+  for (let i = 0; i < cleaned.length; i += 2) bytes.push(parseInt(cleaned.slice(i, i + 2), 16));
+  const binary = bytes.map(b => b.toString(2).padStart(8, '0')).join(' ');
+  document.getElementById('hexBinaryOutput').value = binary;
+  renderBitGrid(bytes, 'hexBitGrid', (b) => b.toString(16).toUpperCase().padStart(2, '0'));
+  document.getElementById('hexBitDisplay').style.display = 'block';
+}
+
+function binaryToHex() {
+  const binary = document.getElementById('hexBinaryOutput').value.trim();
+  document.getElementById('hexError').textContent = '';
+  if (!binary) {
+    document.getElementById('hexInput').value = '';
+    document.getElementById('hexBitDisplay').style.display = 'none';
+    return;
+  }
+  const parts = binary.split(/\s+/);
+  if (parts.some(p => !/^[01]{1,8}$/.test(p))) {
+    document.getElementById('hexError').textContent = 'Invalid binary — use 0s and 1s in 8-bit groups separated by spaces.';
+    return;
+  }
+  const bytes = parts.map(p => parseInt(p.padStart(8, '0'), 2));
+  document.getElementById('hexInput').value = bytes.map(b => b.toString(16).toUpperCase().padStart(2, '0')).join(' ');
+  renderBitGrid(bytes, 'hexBitGrid', (b) => b.toString(16).toUpperCase().padStart(2, '0'));
+  document.getElementById('hexBitDisplay').style.display = 'block';
+}
+
+function clearTextPanel() {
+  document.getElementById('textInput').value = '';
+  document.getElementById('binaryOutput').value = '';
+  document.getElementById('textError').textContent = '';
+  document.getElementById('bitDisplay').style.display = 'none';
+}
+
+function clearHexPanel() {
+  document.getElementById('hexInput').value = '';
+  document.getElementById('hexBinaryOutput').value = '';
+  document.getElementById('hexError').textContent = '';
+  document.getElementById('hexBitDisplay').style.display = 'none';
+}
+
+async function copyField(id) {
+  const val = document.getElementById(id).value;
+  if (!val) return;
+  const btn = document.querySelector(`button[onclick="copyField('${id}')"]`);
+  try {
+    await navigator.clipboard.writeText(val);
+    if (btn) { btn.textContent = 'Copied!'; btn.classList.add('copied'); setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000); }
+  } catch {}
+}
+</script>
+</body>
+</html>

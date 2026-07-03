@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Keyboard Shortcuts Reference — VS Code, Chrome, Mac, Windows</title>
+  <meta name="description" content="Searchable keyboard shortcuts reference for VS Code, Chrome, macOS, and Windows. Find any shortcut instantly. Filter by app and category. 100% browser-based." />
+  <link rel="canonical" href="https://devnestio.pages.dev/keyboard-shortcuts-reference/" />
+  <meta property="og:title" content="Keyboard Shortcuts Reference" />
+  <meta property="og:description" content="Searchable shortcuts for VS Code, Chrome, macOS, and Windows. Filter by app and category." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117;
+      --bg-card: #161b22;
+      --border: #30363d;
+      --text: #c9d1d9;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --accent-hover: #79b8ff;
+      --green: #3fb950;
+      --yellow: #d29922;
+      --purple: #bc8cff;
+      --orange: #f97316;
+    }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+    header { padding: 28px 32px 20px; border-bottom: 1px solid var(--border); }
+    header h1 { font-size: 1.5rem; font-weight: 700; color: #e6edf3; }
+    header h1 span { color: var(--accent); }
+    header p { color: var(--text-muted); margin-top: 6px; font-size: .9rem; }
+    main { flex: 1; padding: 24px 32px; max-width: 1100px; width: 100%; margin: 0 auto; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+    .search-box { flex: 1; min-width: 220px; position: relative; }
+    .search-box input { width: 100%; background: var(--bg-card); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 9px 14px 9px 36px; font-size: .9rem; outline: none; }
+    .search-box input:focus { border-color: var(--accent); }
+    .search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; }
+    .filter-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip { padding: 6px 14px; border-radius: 20px; font-size: .82rem; font-weight: 600; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-muted); cursor: pointer; transition: all .15s; }
+    .chip:hover { border-color: var(--accent); color: var(--accent); }
+    .chip.active { border-color: var(--accent); background: rgba(88,166,255,.12); color: var(--accent); }
+    .chip[data-app="vscode"].active { border-color: var(--purple); background: rgba(188,140,255,.12); color: var(--purple); }
+    .chip[data-app="chrome"].active { border-color: var(--yellow); background: rgba(210,153,34,.12); color: var(--yellow); }
+    .chip[data-app="mac"].active { border-color: var(--green); background: rgba(63,185,80,.12); color: var(--green); }
+    .chip[data-app="windows"].active { border-color: var(--orange); background: rgba(249,115,22,.12); color: var(--orange); }
+    .results-count { font-size: .83rem; color: var(--text-muted); margin-bottom: 16px; }
+    .sections { display: flex; flex-direction: column; gap: 20px; }
+    .section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .section-head { padding: 12px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+    .section-head h2 { font-size: .9rem; font-weight: 700; color: #e6edf3; }
+    .app-badge { font-size: .72rem; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+    .badge-vscode { background: rgba(188,140,255,.15); color: var(--purple); border: 1px solid rgba(188,140,255,.3); }
+    .badge-chrome { background: rgba(210,153,34,.15); color: var(--yellow); border: 1px solid rgba(210,153,34,.3); }
+    .badge-mac { background: rgba(63,185,80,.15); color: var(--green); border: 1px solid rgba(63,185,80,.3); }
+    .badge-windows { background: rgba(249,115,22,.15); color: var(--orange); border: 1px solid rgba(249,115,22,.3); }
+    .shortcut-table { width: 100%; border-collapse: collapse; }
+    .shortcut-table tr { border-bottom: 1px solid var(--border); }
+    .shortcut-table tr:last-child { border-bottom: none; }
+    .shortcut-table tr.hidden { display: none; }
+    .shortcut-table td { padding: 10px 18px; font-size: .87rem; vertical-align: middle; }
+    .shortcut-table td:first-child { color: var(--text-muted); width: 55%; }
+    .shortcut-table td:last-child { text-align: right; }
+    .kbd-group { display: flex; gap: 4px; justify-content: flex-end; flex-wrap: wrap; }
+    kbd { display: inline-block; background: #21262d; border: 1px solid #444c56; border-bottom: 2px solid #444c56; border-radius: 4px; padding: 2px 7px; font-family: 'SFMono-Regular', 'Consolas', monospace; font-size: .78rem; color: #e6edf3; white-space: nowrap; }
+    .sep { color: var(--text-muted); font-size: .8rem; }
+    .no-results { padding: 40px; text-align: center; color: var(--text-muted); font-size: .9rem; }
+    footer { text-align: center; padding: 24px; font-size: .82rem; color: var(--text-muted); border-top: 1px solid var(--border); }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    @media (max-width: 600px) { header, main { padding-left: 16px; padding-right: 16px; } }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Keyboard <span>Shortcuts Reference</span></h1>
+  <p>Search shortcuts for VS Code, Chrome, macOS, and Windows. Click any shortcut to copy.</p>
+</header>
+
+<main>
+  <div class="toolbar">
+    <div class="search-box">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="search" id="searchInput" placeholder="Search shortcuts…" autocomplete="off" oninput="filterAll()" />
+    </div>
+    <div class="filter-chips" id="appChips">
+      <button class="chip active" data-app="all" onclick="setApp('all')">All</button>
+      <button class="chip" data-app="vscode" onclick="setApp('vscode')">VS Code</button>
+      <button class="chip" data-app="chrome" onclick="setApp('chrome')">Chrome</button>
+      <button class="chip" data-app="mac" onclick="setApp('mac')">macOS</button>
+      <button class="chip" data-app="windows" onclick="setApp('windows')">Windows</button>
+    </div>
+  </div>
+  <div class="results-count" id="resultsCount"></div>
+  <div class="sections" id="sections"></div>
+  <div class="no-results" id="noResults" style="display:none">No shortcuts match your search.</div>
+</main>
+
+<footer>
+  <p>Shortcuts reference — browser-only, no tracking &nbsp;|&nbsp; <a href="https://buymeacoffee.com/devnestio" target="_blank" rel="noopener">Buy me a coffee ☕</a></p>
+</footer>
+
+<script>
+const DATA = [
+  { app:'vscode', cat:'Editing', desc:'Cut line', keys:[['Ctrl','X']], keysMac:[['⌘','X']] },
+  { app:'vscode', cat:'Editing', desc:'Copy line', keys:[['Ctrl','C']], keysMac:[['⌘','C']] },
+  { app:'vscode', cat:'Editing', desc:'Move line up', keys:[['Alt','↑']], keysMac:[['⌥','↑']] },
+  { app:'vscode', cat:'Editing', desc:'Move line down', keys:[['Alt','↓']], keysMac:[['⌥','↓']] },
+  { app:'vscode', cat:'Editing', desc:'Copy line up', keys:[['Shift','Alt','↑']], keysMac:[['⇧','⌥','↑']] },
+  { app:'vscode', cat:'Editing', desc:'Copy line down', keys:[['Shift','Alt','↓']], keysMac:[['⇧','⌥','↓']] },
+  { app:'vscode', cat:'Editing', desc:'Delete line', keys:[['Ctrl','Shift','K']], keysMac:[['⌘','⇧','K']] },
+  { app:'vscode', cat:'Editing', desc:'Insert line below', keys:[['Ctrl','Enter']], keysMac:[['⌘','Enter']] },
+  { app:'vscode', cat:'Editing', desc:'Insert line above', keys:[['Ctrl','Shift','Enter']], keysMac:[['⌘','⇧','Enter']] },
+  { app:'vscode', cat:'Editing', desc:'Jump to matching bracket', keys:[['Ctrl','Shift','\\']], keysMac:[['⌘','⇧','\\']] },
+  { app:'vscode', cat:'Editing', desc:'Indent line', keys:[['Ctrl',']']], keysMac:[['⌘',']']] },
+  { app:'vscode', cat:'Editing', desc:'Outdent line', keys:[['Ctrl','[']], keysMac:[['⌘','[']] },
+  { app:'vscode', cat:'Editing', desc:'Go to beginning of line', keys:[['Home']], keysMac:[['⌘','←']] },
+  { app:'vscode', cat:'Editing', desc:'Go to end of line', keys:[['End']], keysMac:[['⌘','→']] },
+  { app:'vscode', cat:'Editing', desc:'Go to top of file', keys:[['Ctrl','Home']], keysMac:[['⌘','↑']] },
+  { app:'vscode', cat:'Editing', desc:'Go to end of file', keys:[['Ctrl','End']], keysMac:[['⌘','↓']] },
+  { app:'vscode', cat:'Editing', desc:'Toggle comment', keys:[['Ctrl','/']], keysMac:[['⌘','/']] },
+  { app:'vscode', cat:'Editing', desc:'Block comment', keys:[['Shift','Alt','A']], keysMac:[['⇧','⌥','A']] },
+  { app:'vscode', cat:'Editing', desc:'Format document', keys:[['Shift','Alt','F']], keysMac:[['⇧','⌥','F']] },
+  { app:'vscode', cat:'Editing', desc:'Trigger suggestion', keys:[['Ctrl','Space']], keysMac:[['⌘','Space']] },
+  { app:'vscode', cat:'Multi-cursor', desc:'Add cursor above', keys:[['Ctrl','Alt','↑']], keysMac:[['⌘','⌥','↑']] },
+  { app:'vscode', cat:'Multi-cursor', desc:'Add cursor below', keys:[['Ctrl','Alt','↓']], keysMac:[['⌘','⌥','↓']] },
+  { app:'vscode', cat:'Multi-cursor', desc:'Select all occurrences', keys:[['Ctrl','Shift','L']], keysMac:[['⌘','⇧','L']] },
+  { app:'vscode', cat:'Multi-cursor', desc:'Select next occurrence', keys:[['Ctrl','D']], keysMac:[['⌘','D']] },
+  { app:'vscode', cat:'Multi-cursor', desc:'Column (box) selection', keys:[['Shift','Alt','drag']], keysMac:[['⇧','⌥','drag']] },
+  { app:'vscode', cat:'Navigation', desc:'Command Palette', keys:[['Ctrl','Shift','P']], keysMac:[['⌘','⇧','P']] },
+  { app:'vscode', cat:'Navigation', desc:'Quick Open file', keys:[['Ctrl','P']], keysMac:[['⌘','P']] },
+  { app:'vscode', cat:'Navigation', desc:'Go to symbol in file', keys:[['Ctrl','Shift','O']], keysMac:[['⌘','⇧','O']] },
+  { app:'vscode', cat:'Navigation', desc:'Go to line', keys:[['Ctrl','G']], keysMac:[['Ctrl','G']] },
+  { app:'vscode', cat:'Navigation', desc:'Go to definition', keys:[['F12']], keysMac:[['F12']] },
+  { app:'vscode', cat:'Navigation', desc:'Peek definition', keys:[['Alt','F12']], keysMac:[['⌥','F12']] },
+  { app:'vscode', cat:'Navigation', desc:'Find references', keys:[['Shift','F12']], keysMac:[['⇧','F12']] },
+  { app:'vscode', cat:'Navigation', desc:'Navigate back', keys:[['Alt','←']], keysMac:[['Ctrl','-']] },
+  { app:'vscode', cat:'Navigation', desc:'Navigate forward', keys:[['Alt','→']], keysMac:[['Ctrl','⇧','-']] },
+  { app:'vscode', cat:'Search', desc:'Find in file', keys:[['Ctrl','F']], keysMac:[['⌘','F']] },
+  { app:'vscode', cat:'Search', desc:'Replace in file', keys:[['Ctrl','H']], keysMac:[['⌘','H']] },
+  { app:'vscode', cat:'Search', desc:'Find in files', keys:[['Ctrl','Shift','F']], keysMac:[['⌘','⇧','F']] },
+  { app:'vscode', cat:'Search', desc:'Replace in files', keys:[['Ctrl','Shift','H']], keysMac:[['⌘','⇧','H']] },
+  { app:'vscode', cat:'View', desc:'Toggle Sidebar', keys:[['Ctrl','B']], keysMac:[['⌘','B']] },
+  { app:'vscode', cat:'View', desc:'Toggle Terminal', keys:[['Ctrl','`']], keysMac:[['Ctrl','`']] },
+  { app:'vscode', cat:'View', desc:'New Terminal', keys:[['Ctrl','Shift','`']], keysMac:[['Ctrl','⇧','`']] },
+  { app:'vscode', cat:'View', desc:'Split editor', keys:[['Ctrl','\\']], keysMac:[['⌘','\\']] },
+  { app:'vscode', cat:'View', desc:'Zoom in', keys:[['Ctrl','+']], keysMac:[['⌘','+']] },
+  { app:'vscode', cat:'View', desc:'Zoom out', keys:[['Ctrl','-']], keysMac:[['⌘','-']] },
+  { app:'vscode', cat:'View', desc:'Zen mode', keys:[['Ctrl','K','Z']], keysMac:[['⌘','K','Z']] },
+
+  { app:'chrome', cat:'Navigation', desc:'Open new tab', keys:[['Ctrl','T']], keysMac:[['⌘','T']] },
+  { app:'chrome', cat:'Navigation', desc:'Close tab', keys:[['Ctrl','W']], keysMac:[['⌘','W']] },
+  { app:'chrome', cat:'Navigation', desc:'Reopen closed tab', keys:[['Ctrl','Shift','T']], keysMac:[['⌘','⇧','T']] },
+  { app:'chrome', cat:'Navigation', desc:'New window', keys:[['Ctrl','N']], keysMac:[['⌘','N']] },
+  { app:'chrome', cat:'Navigation', desc:'New incognito window', keys:[['Ctrl','Shift','N']], keysMac:[['⌘','⇧','N']] },
+  { app:'chrome', cat:'Navigation', desc:'Next tab', keys:[['Ctrl','Tab']], keysMac:[['⌘','⌥','→']] },
+  { app:'chrome', cat:'Navigation', desc:'Previous tab', keys:[['Ctrl','Shift','Tab']], keysMac:[['⌘','⌥','←']] },
+  { app:'chrome', cat:'Navigation', desc:'Go to tab 1–8', keys:[['Ctrl','1–8']], keysMac:[['⌘','1–8']] },
+  { app:'chrome', cat:'Navigation', desc:'Go to last tab', keys:[['Ctrl','9']], keysMac:[['⌘','9']] },
+  { app:'chrome', cat:'Address bar', desc:'Open address bar', keys:[['Ctrl','L']], keysMac:[['⌘','L']] },
+  { app:'chrome', cat:'Address bar', desc:'Open in new tab', keys:[['Alt','Enter']], keysMac:[['⌥','Enter']] },
+  { app:'chrome', cat:'Page', desc:'Reload page', keys:[['F5']], keysMac:[['⌘','R']] },
+  { app:'chrome', cat:'Page', desc:'Hard reload (clear cache)', keys:[['Ctrl','Shift','R']], keysMac:[['⌘','⇧','R']] },
+  { app:'chrome', cat:'Page', desc:'Zoom in', keys:[['Ctrl','+']], keysMac:[['⌘','+']] },
+  { app:'chrome', cat:'Page', desc:'Zoom out', keys:[['Ctrl','-']], keysMac:[['⌘','-']] },
+  { app:'chrome', cat:'Page', desc:'Reset zoom', keys:[['Ctrl','0']], keysMac:[['⌘','0']] },
+  { app:'chrome', cat:'Page', desc:'Find on page', keys:[['Ctrl','F']], keysMac:[['⌘','F']] },
+  { app:'chrome', cat:'Page', desc:'Print page', keys:[['Ctrl','P']], keysMac:[['⌘','P']] },
+  { app:'chrome', cat:'Page', desc:'Save page', keys:[['Ctrl','S']], keysMac:[['⌘','S']] },
+  { app:'chrome', cat:'Page', desc:'View page source', keys:[['Ctrl','U']], keysMac:[['⌘','U']] },
+  { app:'chrome', cat:'DevTools', desc:'Open DevTools', keys:[['F12']], keysMac:[['⌘','⌥','I']] },
+  { app:'chrome', cat:'DevTools', desc:'Open Console', keys:[['Ctrl','Shift','J']], keysMac:[['⌘','⌥','J']] },
+  { app:'chrome', cat:'DevTools', desc:'Inspect element', keys:[['Ctrl','Shift','C']], keysMac:[['⌘','⌥','C']] },
+  { app:'chrome', cat:'DevTools', desc:'Open Network tab', keys:[['Ctrl','Shift','E']], keysMac:[['⌘','⌥','E']] },
+  { app:'chrome', cat:'History', desc:'View history', keys:[['Ctrl','H']], keysMac:[['⌘','Y']] },
+  { app:'chrome', cat:'History', desc:'View downloads', keys:[['Ctrl','J']], keysMac:[['⌘','⇧','J']] },
+  { app:'chrome', cat:'History', desc:'Go back', keys:[['Alt','←']], keysMac:[['⌘','[']] },
+  { app:'chrome', cat:'History', desc:'Go forward', keys:[['Alt','→']], keysMac:[['⌘',']']] },
+  { app:'chrome', cat:'Bookmarks', desc:'Bookmark page', keys:[['Ctrl','D']], keysMac:[['⌘','D']] },
+  { app:'chrome', cat:'Bookmarks', desc:'Bookmark all tabs', keys:[['Ctrl','Shift','D']], keysMac:[['⌘','⇧','D']] },
+  { app:'chrome', cat:'Bookmarks', desc:'Toggle bookmarks bar', keys:[['Ctrl','Shift','B']], keysMac:[['⌘','⇧','B']] },
+
+  { app:'mac', cat:'System', desc:'Spotlight Search', keys:[['⌘','Space']], keysMac:[['⌘','Space']] },
+  { app:'mac', cat:'System', desc:'Force Quit app', keys:[['⌘','⌥','Esc']], keysMac:[['⌘','⌥','Esc']] },
+  { app:'mac', cat:'System', desc:'Quit app', keys:[['⌘','Q']], keysMac:[['⌘','Q']] },
+  { app:'mac', cat:'System', desc:'Hide app', keys:[['⌘','H']], keysMac:[['⌘','H']] },
+  { app:'mac', cat:'System', desc:'Minimize window', keys:[['⌘','M']], keysMac:[['⌘','M']] },
+  { app:'mac', cat:'System', desc:'Switch apps', keys:[['⌘','Tab']], keysMac:[['⌘','Tab']] },
+  { app:'mac', cat:'System', desc:'Switch windows (same app)', keys:[['⌘','`']], keysMac:[['⌘','`']] },
+  { app:'mac', cat:'System', desc:'Lock screen', keys:[['Ctrl','⌘','Q']], keysMac:[['Ctrl','⌘','Q']] },
+  { app:'mac', cat:'System', desc:'Sleep display', keys:[['⌃','⇧','Eject']], keysMac:[['⌃','⇧','Eject']] },
+  { app:'mac', cat:'System', desc:'Screenshot (full)', keys:[['⌘','⇧','3']], keysMac:[['⌘','⇧','3']] },
+  { app:'mac', cat:'System', desc:'Screenshot (selection)', keys:[['⌘','⇧','4']], keysMac:[['⌘','⇧','4']] },
+  { app:'mac', cat:'System', desc:'Screenshot tool', keys:[['⌘','⇧','5']], keysMac:[['⌘','⇧','5']] },
+  { app:'mac', cat:'Text', desc:'Move to word start', keys:[['⌥','←']], keysMac:[['⌥','←']] },
+  { app:'mac', cat:'Text', desc:'Move to word end', keys:[['⌥','→']], keysMac:[['⌥','→']] },
+  { app:'mac', cat:'Text', desc:'Move to line start', keys:[['⌘','←']], keysMac:[['⌘','←']] },
+  { app:'mac', cat:'Text', desc:'Move to line end', keys:[['⌘','→']], keysMac:[['⌘','→']] },
+  { app:'mac', cat:'Text', desc:'Select word', keys:[['⌥','⇧','←/→']], keysMac:[['⌥','⇧','←/→']] },
+  { app:'mac', cat:'Text', desc:'Select to line start/end', keys:[['⌘','⇧','←/→']], keysMac:[['⌘','⇧','←/→']] },
+  { app:'mac', cat:'Text', desc:'Delete word (backward)', keys:[['⌥','⌫']], keysMac:[['⌥','⌫']] },
+  { app:'mac', cat:'Text', desc:'Delete to line start', keys:[['⌘','⌫']], keysMac:[['⌘','⌫']] },
+  { app:'mac', cat:'Finder', desc:'New Finder window', keys:[['⌘','N']], keysMac:[['⌘','N']] },
+  { app:'mac', cat:'Finder', desc:'New folder', keys:[['⌘','⇧','N']], keysMac:[['⌘','⇧','N']] },
+  { app:'mac', cat:'Finder', desc:'Move to Trash', keys:[['⌘','⌫']], keysMac:[['⌘','⌫']] },
+  { app:'mac', cat:'Finder', desc:'Empty Trash', keys:[['⌘','⇧','⌫']], keysMac:[['⌘','⇧','⌫']] },
+  { app:'mac', cat:'Finder', desc:'Get Info', keys:[['⌘','I']], keysMac:[['⌘','I']] },
+  { app:'mac', cat:'Finder', desc:'Rename', keys:[['Enter']], keysMac:[['Enter']] },
+  { app:'mac', cat:'Finder', desc:'Quick Look preview', keys:[['Space']], keysMac:[['Space']] },
+  { app:'mac', cat:'Finder', desc:'Go to folder', keys:[['⌘','⇧','G']], keysMac:[['⌘','⇧','G']] },
+  { app:'mac', cat:'Finder', desc:'Show hidden files', keys:[['⌘','⇧','.']], keysMac:[['⌘','⇧','.']] },
+
+  { app:'windows', cat:'System', desc:'Open Start Menu', keys:[['Win']], keysMac:[['Win']] },
+  { app:'windows', cat:'System', desc:'Open Settings', keys:[['Win','I']], keysMac:[['Win','I']] },
+  { app:'windows', cat:'System', desc:'Open File Explorer', keys:[['Win','E']], keysMac:[['Win','E']] },
+  { app:'windows', cat:'System', desc:'Lock screen', keys:[['Win','L']], keysMac:[['Win','L']] },
+  { app:'windows', cat:'System', desc:'Virtual desktop view', keys:[['Win','Tab']], keysMac:[['Win','Tab']] },
+  { app:'windows', cat:'System', desc:'New virtual desktop', keys:[['Win','Ctrl','D']], keysMac:[['Win','Ctrl','D']] },
+  { app:'windows', cat:'System', desc:'Switch virtual desktop', keys:[['Win','Ctrl','←/→']], keysMac:[['Win','Ctrl','←/→']] },
+  { app:'windows', cat:'System', desc:'Search', keys:[['Win','S']], keysMac:[['Win','S']] },
+  { app:'windows', cat:'System', desc:'Screenshot snipping', keys:[['Win','Shift','S']], keysMac:[['Win','⇧','S']] },
+  { app:'windows', cat:'System', desc:'Open Action Center', keys:[['Win','A']], keysMac:[['Win','A']] },
+  { app:'windows', cat:'Window', desc:'Minimize window', keys:[['Win','↓']], keysMac:[['Win','↓']] },
+  { app:'windows', cat:'Window', desc:'Maximize window', keys:[['Win','↑']], keysMac:[['Win','↑']] },
+  { app:'windows', cat:'Window', desc:'Snap left', keys:[['Win','←']], keysMac:[['Win','←']] },
+  { app:'windows', cat:'Window', desc:'Snap right', keys:[['Win','→']], keysMac:[['Win','→']] },
+  { app:'windows', cat:'Window', desc:'Close window', keys:[['Alt','F4']], keysMac:[['Alt','F4']] },
+  { app:'windows', cat:'Window', desc:'Switch windows', keys:[['Alt','Tab']], keysMac:[['Alt','Tab']] },
+  { app:'windows', cat:'Window', desc:'Switch apps (same type)', keys:[['Win','T']], keysMac:[['Win','T']] },
+  { app:'windows', cat:'Text', desc:'Select all', keys:[['Ctrl','A']], keysMac:[['Ctrl','A']] },
+  { app:'windows', cat:'Text', desc:'Cut', keys:[['Ctrl','X']], keysMac:[['Ctrl','X']] },
+  { app:'windows', cat:'Text', desc:'Copy', keys:[['Ctrl','C']], keysMac:[['Ctrl','C']] },
+  { app:'windows', cat:'Text', desc:'Paste', keys:[['Ctrl','V']], keysMac:[['Ctrl','V']] },
+  { app:'windows', cat:'Text', desc:'Undo', keys:[['Ctrl','Z']], keysMac:[['Ctrl','Z']] },
+  { app:'windows', cat:'Text', desc:'Redo', keys:[['Ctrl','Y']], keysMac:[['Ctrl','Y']] },
+  { app:'windows', cat:'Text', desc:'Find', keys:[['Ctrl','F']], keysMac:[['Ctrl','F']] },
+  { app:'windows', cat:'Text', desc:'Move to word start/end', keys:[['Ctrl','←/→']], keysMac:[['Ctrl','←/→']] },
+  { app:'windows', cat:'Text', desc:'Select word', keys:[['Ctrl','⇧','←/→']], keysMac:[['Ctrl','⇧','←/→']] },
+];
+
+let currentApp = 'all';
+
+const isMac = /Mac/.test(navigator.platform);
+
+function renderKeys(shortcut) {
+  const keysArr = isMac ? (shortcut.keysMac || shortcut.keys) : shortcut.keys;
+  if (keysArr.length === 1) {
+    return `<div class="kbd-group">${keysArr[0].map(k => `<kbd>${k}</kbd>`).join(' + ')}</div>`;
+  }
+  return keysArr.map(ks => `<div class="kbd-group">${ks.map(k => `<kbd>${k}</kbd>`).join(' + ')}</div>`).join('<span class="sep">or</span>');
+}
+
+function copyKeys(shortcut) {
+  const keysArr = isMac ? (shortcut.keysMac || shortcut.keys) : shortcut.keys;
+  const text = keysArr.map(ks => ks.join('+')).join(' or ');
+  navigator.clipboard?.writeText(text).catch(() => {});
+}
+
+function getAppBadgeClass(app) {
+  const map = { vscode:'badge-vscode', chrome:'badge-chrome', mac:'badge-mac', windows:'badge-windows' };
+  return map[app] || '';
+}
+function getAppLabel(app) {
+  const map = { vscode:'VS Code', chrome:'Chrome', mac:'macOS', windows:'Windows' };
+  return map[app] || app;
+}
+
+function buildSections(data) {
+  const sectionsEl = document.getElementById('sections');
+  sectionsEl.innerHTML = '';
+  const grouped = {};
+  data.forEach(s => {
+    const key = s.app + '||' + s.cat;
+    if (!grouped[key]) grouped[key] = { app: s.app, cat: s.cat, items: [] };
+    grouped[key].items.push(s);
+  });
+  if (Object.keys(grouped).length === 0) {
+    document.getElementById('noResults').style.display = 'block';
+    return;
+  }
+  document.getElementById('noResults').style.display = 'none';
+  Object.values(grouped).forEach(g => {
+    const sec = document.createElement('div');
+    sec.className = 'section';
+    sec.innerHTML = `
+      <div class="section-head">
+        <span class="app-badge ${getAppBadgeClass(g.app)}">${getAppLabel(g.app)}</span>
+        <h2>${g.cat}</h2>
+      </div>
+      <table class="shortcut-table">
+        ${g.items.map(s => `<tr><td>${s.desc}</td><td>${renderKeys(s)}</td></tr>`).join('')}
+      </table>`;
+    sec.querySelectorAll('tr').forEach((tr, i) => {
+      tr.style.cursor = 'pointer';
+      tr.title = 'Click to copy shortcut';
+      tr.onclick = () => copyKeys(g.items[i]);
+    });
+    sectionsEl.appendChild(sec);
+  });
+}
+
+function filterAll() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  let filtered = DATA.filter(s => {
+    if (currentApp !== 'all' && s.app !== currentApp) return false;
+    if (!q) return true;
+    return s.desc.toLowerCase().includes(q) || s.cat.toLowerCase().includes(q) ||
+      s.keys.some(ks => ks.some(k => k.toLowerCase().includes(q)));
+  });
+  buildSections(filtered);
+  document.getElementById('resultsCount').textContent = `${filtered.length} shortcut${filtered.length !== 1 ? 's' : ''} shown`;
+}
+
+function setApp(app) {
+  currentApp = app;
+  document.querySelectorAll('#appChips .chip').forEach(c => {
+    c.classList.toggle('active', c.dataset.app === app);
+  });
+  filterAll();
+}
+
+filterAll();
+</script>
+</body>
+</html>
