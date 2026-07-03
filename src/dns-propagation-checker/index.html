@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DNS Lookup Tool — Query A, AAAA, MX, TXT, CNAME via Cloudflare DoH</title>
+  <meta name="description" content="Look up DNS records instantly using Cloudflare DNS-over-HTTPS. Query A, AAAA, MX, TXT, CNAME, NS records with TTL values. No ads on queries, 100% in-browser." />
+  <link rel="canonical" href="https://devnestio.pages.dev/dns-propagation-checker/" />
+  <meta property="og:title" content="DNS Propagation / Lookup Checker" />
+  <meta property="og:description" content="Query DNS records via Cloudflare DoH. View A, AAAA, MX, TXT, CNAME with TTL values." />
+  <meta property="og:type" content="website" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117;
+      --bg-card: #161b22;
+      --border: #30363d;
+      --text: #c9d1d9;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --accent-hover: #79b8ff;
+      --green: #3fb950;
+      --red: #f85149;
+      --yellow: #d29922;
+    }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+    header { padding: 28px 32px 20px; border-bottom: 1px solid var(--border); }
+    header h1 { font-size: 1.5rem; font-weight: 700; color: #e6edf3; }
+    header h1 span { color: var(--accent); }
+    header p { color: var(--text-muted); margin-top: 6px; font-size: .9rem; }
+    main { flex: 1; padding: 28px 32px; max-width: 860px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+    .section-title { font-size: .78rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); margin-bottom: 10px; }
+    .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 20px 24px; }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; }
+    input[type=text] { flex: 1; min-width: 200px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text); padding: 10px 14px; font-size: .92rem; outline: none; transition: border-color .15s; }
+    input[type=text]:focus { border-color: var(--accent); }
+    input[type=text]::placeholder { color: var(--text-muted); }
+    .type-btns { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+    .type-btn { padding: 7px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text-muted); font-size: .82rem; cursor: pointer; transition: all .15s; font-family: 'SFMono-Regular', Consolas, monospace; }
+    .type-btn.active { background: rgba(88,166,255,.15); color: var(--accent); border-color: var(--accent); }
+    .type-btn:hover:not(.active) { border-color: var(--text-muted); color: var(--text); }
+    .btn { padding: 10px 22px; background: var(--accent); color: #0d1117; border: none; border-radius: 6px; font-weight: 600; font-size: .9rem; cursor: pointer; transition: background .15s; }
+    .btn:hover { background: var(--accent-hover); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    table { width: 100%; border-collapse: collapse; font-size: .875rem; }
+    th { text-align: left; padding: 10px 12px; font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+    td { padding: 10px 12px; border-bottom: 1px solid rgba(48,54,61,.6); font-family: 'SFMono-Regular', Consolas, monospace; word-break: break-all; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(88,166,255,.03); }
+    .type-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: .75rem; font-weight: 700; background: rgba(88,166,255,.15); color: var(--accent); font-family: inherit; }
+    .ttl-val { color: var(--text-muted); }
+    .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; vertical-align: middle; margin-right: 8px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .error-msg { color: var(--red); font-size: .9rem; display: flex; align-items: center; gap: 8px; }
+    .empty-msg { color: var(--text-muted); font-size: .88rem; }
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .record-count { font-size: .8rem; color: var(--text-muted); }
+    footer { text-align: center; padding: 24px; font-size: .82rem; color: var(--text-muted); border-top: 1px solid var(--border); margin-top: auto; }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>DNS <span>Lookup Tool</span></h1>
+  <p>Query DNS records via Cloudflare DNS-over-HTTPS (1.1.1.1). Results include TTL values.</p>
+</header>
+<main>
+  <div class="card">
+    <div class="section-title">Domain & Record Type</div>
+    <div class="row">
+      <input type="text" id="domainInput" placeholder="example.com" value="" onkeydown="if(event.key==='Enter')lookup()" />
+      <button class="btn" id="lookupBtn" onclick="lookup()">Lookup</button>
+    </div>
+    <div class="type-btns">
+      <button class="type-btn active" data-type="A" onclick="selectType(this)">A</button>
+      <button class="type-btn" data-type="AAAA" onclick="selectType(this)">AAAA</button>
+      <button class="type-btn" data-type="MX" onclick="selectType(this)">MX</button>
+      <button class="type-btn" data-type="TXT" onclick="selectType(this)">TXT</button>
+      <button class="type-btn" data-type="CNAME" onclick="selectType(this)">CNAME</button>
+      <button class="type-btn" data-type="NS" onclick="selectType(this)">NS</button>
+      <button class="type-btn" data-type="SOA" onclick="selectType(this)">SOA</button>
+      <button class="type-btn" data-type="CAA" onclick="selectType(this)">CAA</button>
+    </div>
+  </div>
+
+  <div id="status" style="display:none" class="card"></div>
+
+  <div id="resultsCard" style="display:none" class="card">
+    <div class="section-header">
+      <div class="section-title" id="resultsTitle" style="margin-bottom:0"></div>
+      <span class="record-count" id="recordCount"></span>
+    </div>
+    <div id="resultsBody"></div>
+  </div>
+
+  <div class="card" style="font-size:.85rem;color:var(--text-muted);line-height:1.7">
+    <strong style="color:var(--text);display:block;margin-bottom:8px">Quick Reference</strong>
+    <strong style="color:var(--text)">A</strong> — IPv4 address &nbsp;|&nbsp;
+    <strong style="color:var(--text)">AAAA</strong> — IPv6 address &nbsp;|&nbsp;
+    <strong style="color:var(--text)">CNAME</strong> — Canonical name alias &nbsp;|&nbsp;
+    <strong style="color:var(--text)">MX</strong> — Mail exchange &nbsp;|&nbsp;
+    <strong style="color:var(--text)">TXT</strong> — Text records (SPF, DKIM, verification) &nbsp;|&nbsp;
+    <strong style="color:var(--text)">NS</strong> — Name servers &nbsp;|&nbsp;
+    <strong style="color:var(--text)">SOA</strong> — Start of Authority &nbsp;|&nbsp;
+    <strong style="color:var(--text)">CAA</strong> — Certification Authority Authorization
+  </div>
+</main>
+<footer>
+  <p>DNS Lookup Tool — powered by Cloudflare DoH &nbsp;|&nbsp; <a href="https://buymeacoffee.com/devnestio" target="_blank" rel="noopener">Buy me a coffee ☕</a></p>
+</footer>
+<script>
+let selectedType = 'A';
+
+function selectType(btn) {
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedType = btn.dataset.type;
+}
+
+const TYPE_NUMS = { A:1, NS:2, CNAME:5, SOA:6, MX:15, TXT:16, AAAA:28, CAA:257 };
+
+async function lookup() {
+  const domain = document.getElementById('domainInput').value.trim().replace(/^https?:\/\//,'').replace(/\/.*/,'');
+  if (!domain) return;
+  const btn = document.getElementById('lookupBtn');
+  btn.disabled = true;
+
+  const statusEl = document.getElementById('status');
+  statusEl.style.display = 'block';
+  statusEl.innerHTML = `<span class="spinner"></span> Querying ${selectedType} records for <strong>${domain}</strong>…`;
+
+  document.getElementById('resultsCard').style.display = 'none';
+
+  try {
+    const typeNum = TYPE_NUMS[selectedType] || selectedType;
+    const url = `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(domain)}&type=${selectedType}`;
+    const resp = await fetch(url, { headers: { Accept: 'application/dns-json' } });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+
+    statusEl.style.display = 'none';
+    renderResults(data, domain, selectedType);
+  } catch (e) {
+    statusEl.innerHTML = `<span class="error-msg">⚠ Error: ${e.message}. Check the domain and try again.</span>`;
+  }
+  btn.disabled = false;
+}
+
+function renderResults(data, domain, type) {
+  const answers = data.Answer || [];
+  const card = document.getElementById('resultsCard');
+  const body = document.getElementById('resultsBody');
+  card.style.display = 'block';
+
+  document.getElementById('resultsTitle').textContent = `${type} Records for ${domain}`;
+  document.getElementById('recordCount').textContent = `${answers.length} record${answers.length !== 1 ? 's' : ''} found`;
+
+  if (answers.length === 0) {
+    body.innerHTML = `<div class="empty-msg">No ${type} records found for ${domain}. ${data.Status === 3 ? '(NXDOMAIN — domain does not exist)' : ''}</div>`;
+    return;
+  }
+
+  const headers = getHeaders(type);
+  body.innerHTML = `<table>
+    <thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}<th>TTL</th></tr></thead>
+    <tbody>${answers.map(r => renderRow(r, type)).join('')}</tbody>
+  </table>`;
+}
+
+function getHeaders(type) {
+  const map = {
+    A: ['Type','IP Address'],
+    AAAA: ['Type','IPv6 Address'],
+    CNAME: ['Type','Target'],
+    MX: ['Type','Priority','Mail Server'],
+    TXT: ['Type','Value'],
+    NS: ['Type','Name Server'],
+    SOA: ['Type','Value'],
+    CAA: ['Type','Value'],
+  };
+  return map[type] || ['Type','Value'];
+}
+
+function renderRow(r, type) {
+  const ttl = `<td class="ttl-val">${r.TTL}s</td>`;
+  const tag = `<td><span class="type-tag">${type}</span></td>`;
+  const d = r.data || '';
+
+  if (type === 'MX') {
+    const parts = d.split(' ');
+    const prio = parts[0] || '';
+    const host = parts.slice(1).join(' ') || d;
+    return `<tr>${tag}<td>${prio}</td><td>${escHtml(host)}</td>${ttl}</tr>`;
+  }
+  return `<tr>${tag}<td>${escHtml(d)}</td>${ttl}</tr>`;
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+</body>
+</html>

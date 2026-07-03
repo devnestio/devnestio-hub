@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HTTP Header Security Checker — Analyze CSP, HSTS, X-Frame-Options & More</title>
+  <meta name="description" content="Paste HTTP response headers and instantly analyze security headers: CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy. Score and fix recommendations." />
+  <link rel="canonical" href="https://devnestio.pages.dev/http-header-security-checker/" />
+  <meta property="og:title" content="HTTP Header Security Checker" />
+  <meta property="og:description" content="Analyze HTTP security headers and get a score with fix recommendations. 100% in-browser." />
+  <meta property="og:type" content="website" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117;
+      --bg-card: #161b22;
+      --border: #30363d;
+      --text: #c9d1d9;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --accent-hover: #79b8ff;
+      --green: #3fb950;
+      --red: #f85149;
+      --yellow: #d29922;
+      --orange: #db6d28;
+    }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+    header { padding: 28px 32px 20px; border-bottom: 1px solid var(--border); }
+    header h1 { font-size: 1.5rem; font-weight: 700; color: #e6edf3; }
+    header h1 span { color: var(--accent); }
+    header p { color: var(--text-muted); margin-top: 6px; font-size: .9rem; }
+    main { flex: 1; padding: 28px 32px; max-width: 900px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+    .section-title { font-size: .78rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); margin-bottom: 10px; }
+    .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 20px 24px; }
+    textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: 'SFMono-Regular', Consolas, monospace; font-size: .85rem; padding: 12px; resize: vertical; min-height: 180px; outline: none; transition: border-color .15s; }
+    textarea:focus { border-color: var(--accent); }
+    textarea::placeholder { color: var(--text-muted); }
+    .btn { padding: 10px 22px; background: var(--accent); color: #0d1117; border: none; border-radius: 6px; font-weight: 600; font-size: .9rem; cursor: pointer; transition: background .15s; }
+    .btn:hover { background: var(--accent-hover); }
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+    .btn-secondary { background: transparent; color: var(--text-muted); border: 1px solid var(--border); border-radius: 6px; padding: 8px 16px; cursor: pointer; font-size: .85rem; transition: all .15s; }
+    .btn-secondary:hover { color: var(--text); border-color: var(--text-muted); }
+
+    /* score ring */
+    .score-wrap { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; }
+    .score-ring { position: relative; width: 100px; height: 100px; flex-shrink: 0; }
+    .score-ring svg { transform: rotate(-90deg); }
+    .score-ring .ring-bg { fill: none; stroke: var(--border); stroke-width: 10; }
+    .score-ring .ring-fg { fill: none; stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset .6s ease, stroke .4s; }
+    .score-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .score-num { font-size: 1.6rem; font-weight: 700; line-height: 1; }
+    .score-label { font-size: .7rem; color: var(--text-muted); margin-top: 2px; }
+    .score-info h2 { font-size: 1.2rem; font-weight: 700; }
+    .score-info p { color: var(--text-muted); font-size: .88rem; margin-top: 6px; max-width: 440px; }
+
+    /* header results */
+    .result-list { display: flex; flex-direction: column; gap: 12px; }
+    .result-item { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .result-header { display: flex; align-items: center; gap: 12px; padding: 14px 16px; cursor: pointer; user-select: none; }
+    .result-header:hover { background: rgba(88,166,255,.05); }
+    .status-badge { padding: 3px 10px; border-radius: 100px; font-size: .75rem; font-weight: 600; flex-shrink: 0; }
+    .badge-pass { background: rgba(63,185,80,.15); color: var(--green); }
+    .badge-warn { background: rgba(210,153,34,.15); color: var(--yellow); }
+    .badge-fail { background: rgba(248,81,73,.15); color: var(--red); }
+    .badge-na { background: rgba(139,148,158,.1); color: var(--text-muted); }
+    .result-name { font-weight: 600; font-size: .92rem; flex: 1; }
+    .result-chevron { color: var(--text-muted); font-size: .8rem; transition: transform .2s; }
+    .result-chevron.open { transform: rotate(180deg); }
+    .result-body { padding: 0 16px 14px; border-top: 1px solid var(--border); display: none; }
+    .result-body.open { display: block; padding-top: 12px; }
+    .result-value { font-family: 'SFMono-Regular', Consolas, monospace; font-size: .82rem; color: var(--accent); word-break: break-all; background: rgba(88,166,255,.05); padding: 8px 10px; border-radius: 4px; margin-bottom: 10px; }
+    .result-desc { font-size: .86rem; color: var(--text-muted); line-height: 1.6; }
+    .result-fix { margin-top: 8px; font-size: .84rem; color: var(--yellow); }
+    .result-fix code { background: rgba(210,153,34,.1); padding: 2px 5px; border-radius: 3px; font-family: 'SFMono-Regular', Consolas, monospace; }
+
+    footer { text-align: center; padding: 24px; font-size: .82rem; color: var(--text-muted); border-top: 1px solid var(--border); }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>HTTP Header <span>Security Checker</span></h1>
+  <p>Paste your HTTP response headers to analyze security posture and get fix recommendations.</p>
+</header>
+<main>
+  <div class="card">
+    <div class="section-title">Paste HTTP Response Headers</div>
+    <textarea id="inputArea" placeholder="Content-Type: text/html; charset=utf-8&#10;Strict-Transport-Security: max-age=31536000; includeSubDomains&#10;X-Frame-Options: DENY&#10;X-Content-Type-Options: nosniff&#10;..."></textarea>
+    <div class="btn-row">
+      <button class="btn" onclick="analyze()">Analyze Headers</button>
+      <button class="btn-secondary" onclick="loadExample()">Load Example</button>
+      <button class="btn-secondary" onclick="clearAll()">Clear</button>
+    </div>
+  </div>
+
+  <div id="results" style="display:none;flex-direction:column;gap:20px;">
+    <div class="card">
+      <div class="section-title">Security Score</div>
+      <div class="score-wrap">
+        <div class="score-ring">
+          <svg width="100" height="100" viewBox="0 0 100 100">
+            <circle class="ring-bg" cx="50" cy="50" r="42"/>
+            <circle class="ring-fg" id="ringFg" cx="50" cy="50" r="42"
+              stroke-dasharray="263.9" stroke-dashoffset="263.9"/>
+          </svg>
+          <div class="score-center">
+            <span class="score-num" id="scoreNum">0</span>
+            <span class="score-label">/ 100</span>
+          </div>
+        </div>
+        <div class="score-info">
+          <h2 id="scoreGrade">—</h2>
+          <p id="scoreSummary">Paste headers above and click Analyze.</p>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="section-title">Header Analysis</div>
+      <div class="result-list" id="resultList"></div>
+    </div>
+  </div>
+</main>
+<footer>
+  <p>HTTP Header Security Checker — 100% in-browser, no data transmitted &nbsp;|&nbsp; <a href="https://buymeacoffee.com/devnestio" target="_blank" rel="noopener">Buy me a coffee ☕</a></p>
+</footer>
+<script>
+const HEADERS = [
+  {
+    key: 'strict-transport-security',
+    name: 'Strict-Transport-Security (HSTS)',
+    weight: 20,
+    check(val) {
+      if (!val) return { status: 'fail', note: 'Missing. Forces HTTPS and prevents protocol downgrade attacks.' };
+      const age = val.match(/max-age=(\d+)/i);
+      const subs = /includeSubDomains/i.test(val);
+      if (!age) return { status: 'warn', note: 'max-age directive missing.' };
+      if (parseInt(age[1]) < 31536000) return { status: 'warn', note: `max-age should be ≥ 31536000 (1 year). Found: ${age[1]}.` };
+      return { status: 'pass', note: `max-age=${age[1]}${subs ? ', includeSubDomains' : ''}. Good.` };
+    },
+    fix: 'Strict-Transport-Security: max-age=31536000; includeSubDomains; preload',
+    desc: 'Instructs browsers to always use HTTPS. Prevents SSL-stripping attacks and protocol downgrade.'
+  },
+  {
+    key: 'content-security-policy',
+    name: 'Content-Security-Policy (CSP)',
+    weight: 25,
+    check(val) {
+      if (!val) return { status: 'fail', note: 'Missing. CSP is the primary defense against XSS.' };
+      if (/unsafe-inline/i.test(val) && /unsafe-eval/i.test(val)) return { status: 'warn', note: "Contains both 'unsafe-inline' and 'unsafe-eval' — greatly reduces protection." };
+      if (/unsafe-inline/i.test(val)) return { status: 'warn', note: "Contains 'unsafe-inline' — reduces XSS protection." };
+      return { status: 'pass', note: 'CSP is present.' };
+    },
+    fix: "Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; base-uri 'self'; frame-ancestors 'none';",
+    desc: 'Defines which content sources are allowed. The primary defense against Cross-Site Scripting (XSS) attacks.'
+  },
+  {
+    key: 'x-frame-options',
+    name: 'X-Frame-Options',
+    weight: 15,
+    check(val) {
+      if (!val) return { status: 'fail', note: 'Missing. Allows clickjacking attacks.' };
+      const v = val.trim().toUpperCase();
+      if (v === 'DENY' || v === 'SAMEORIGIN') return { status: 'pass', note: `Set to ${v}. Good.` };
+      return { status: 'warn', note: `Value "${val}" is non-standard. Use DENY or SAMEORIGIN.` };
+    },
+    fix: 'X-Frame-Options: DENY',
+    desc: 'Prevents the page from being embedded in iframes. Mitigates clickjacking attacks. Superseded by CSP frame-ancestors but still widely supported.'
+  },
+  {
+    key: 'x-content-type-options',
+    name: 'X-Content-Type-Options',
+    weight: 10,
+    check(val) {
+      if (!val) return { status: 'fail', note: 'Missing. Allows MIME-sniffing attacks.' };
+      if (val.trim().toLowerCase() === 'nosniff') return { status: 'pass', note: 'Set to nosniff. Good.' };
+      return { status: 'warn', note: `Unexpected value: "${val}". Should be "nosniff".` };
+    },
+    fix: 'X-Content-Type-Options: nosniff',
+    desc: 'Prevents browsers from MIME-sniffing a response away from the declared content-type. Stops certain MIME confusion attacks.'
+  },
+  {
+    key: 'referrer-policy',
+    name: 'Referrer-Policy',
+    weight: 10,
+    check(val) {
+      if (!val) return { status: 'warn', note: 'Missing. Browser will use default referrer behavior.' };
+      const safe = ['no-referrer','no-referrer-when-downgrade','strict-origin','strict-origin-when-cross-origin','same-origin'];
+      const v = val.trim().toLowerCase();
+      if (safe.includes(v)) return { status: 'pass', note: `Set to "${val}". Good.` };
+      if (['unsafe-url','origin-when-cross-origin'].includes(v)) return { status: 'warn', note: `"${val}" leaks full URL to cross-origin destinations.` };
+      return { status: 'warn', note: `Value "${val}" — consider a stricter policy.` };
+    },
+    fix: 'Referrer-Policy: strict-origin-when-cross-origin',
+    desc: 'Controls how much referrer information is sent with requests. Reduces information leakage to third parties.'
+  },
+  {
+    key: 'permissions-policy',
+    name: 'Permissions-Policy',
+    weight: 10,
+    check(val) {
+      if (!val) {
+        // also check legacy Feature-Policy
+        return { status: 'warn', note: 'Missing. Consider restricting powerful browser features.' };
+      }
+      return { status: 'pass', note: 'Present. Review the directives to ensure appropriate restrictions.' };
+    },
+    fix: 'Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()',
+    desc: 'Restricts which browser features (camera, microphone, geolocation, etc.) can be used. Reduces attack surface and privacy risks.'
+  },
+  {
+    key: 'x-xss-protection',
+    name: 'X-XSS-Protection',
+    weight: 5,
+    check(val) {
+      if (!val) return { status: 'na', note: 'Not present. This header is deprecated — prefer CSP instead.' };
+      if (val.trim() === '0') return { status: 'pass', note: 'Set to 0 (disabled). Correct for modern sites using CSP.' };
+      return { status: 'warn', note: `Value "${val}" — this header is deprecated and can introduce vulnerabilities. Set to 0 or omit it.` };
+    },
+    fix: 'X-XSS-Protection: 0  (deprecated — use CSP instead)',
+    desc: 'Legacy header for IE/old Chrome. Deprecated and can introduce vulnerabilities. Set to 0 or omit. Use Content-Security-Policy instead.'
+  },
+  {
+    key: 'cache-control',
+    name: 'Cache-Control (sensitive pages)',
+    weight: 5,
+    check(val) {
+      if (!val) return { status: 'na', note: 'Not present. For pages with sensitive data, set no-store.' };
+      if (/no-store/i.test(val)) return { status: 'pass', note: 'Contains no-store. Good for sensitive pages.' };
+      if (/no-cache/i.test(val) || /private/i.test(val)) return { status: 'warn', note: 'Consider adding no-store for pages with sensitive user data.' };
+      return { status: 'na', note: `Set to "${val}". For sensitive pages, consider no-store.` };
+    },
+    fix: 'Cache-Control: no-store, private',
+    desc: 'Controls caching behavior. Pages with sensitive data should use no-store to prevent browsers and proxies from caching the response.'
+  },
+];
+
+function parseHeaders(raw) {
+  const map = {};
+  raw.split(/\r?\n/).forEach(line => {
+    const idx = line.indexOf(':');
+    if (idx < 1) return;
+    const k = line.slice(0, idx).trim().toLowerCase();
+    const v = line.slice(idx + 1).trim();
+    if (k) map[k] = v;
+  });
+  return map;
+}
+
+function analyze() {
+  const raw = document.getElementById('inputArea').value.trim();
+  if (!raw) return;
+  const map = parseHeaders(raw);
+  const results = HEADERS.map(h => {
+    const val = map[h.key] || '';
+    const result = h.check(val);
+    return { ...h, val, ...result };
+  });
+
+  const scored = results.filter(r => r.status !== 'na');
+  const total = scored.reduce((s, r) => s + r.weight, 0);
+  const earned = scored.filter(r => r.status === 'pass').reduce((s, r) => s + r.weight, 0);
+  const warnPart = scored.filter(r => r.status === 'warn').reduce((s, r) => s + r.weight * 0.4, 0);
+  const raw_score = Math.round(((earned + warnPart) / total) * 100);
+  const score = Math.min(100, raw_score);
+
+  // Update ring
+  const circ = 263.9;
+  const fg = document.getElementById('ringFg');
+  fg.style.strokeDashoffset = circ - (circ * score / 100);
+  fg.style.stroke = score >= 80 ? 'var(--green)' : score >= 50 ? 'var(--yellow)' : 'var(--red)';
+  document.getElementById('scoreNum').textContent = score;
+  document.getElementById('scoreNum').style.color = score >= 80 ? 'var(--green)' : score >= 50 ? 'var(--yellow)' : 'var(--red)';
+
+  const grade = score >= 90 ? 'A+' : score >= 80 ? 'A' : score >= 70 ? 'B' : score >= 60 ? 'C' : score >= 40 ? 'D' : 'F';
+  document.getElementById('scoreGrade').textContent = `Grade: ${grade}`;
+  const passCount = results.filter(r => r.status === 'pass').length;
+  const failCount = results.filter(r => r.status === 'fail').length;
+  document.getElementById('scoreSummary').textContent = `${passCount} headers passing, ${failCount} missing. ${score >= 80 ? 'Good security posture.' : score >= 50 ? 'Some improvements needed.' : 'Significant security headers missing.'}`;
+
+  const list = document.getElementById('resultList');
+  list.innerHTML = results.map((r, i) => `
+    <div class="result-item">
+      <div class="result-header" onclick="toggle(${i})">
+        <span class="status-badge badge-${r.status}">${r.status.toUpperCase()}</span>
+        <span class="result-name">${r.name}</span>
+        <span class="result-chevron" id="chev${i}">▼</span>
+      </div>
+      <div class="result-body" id="body${i}">
+        ${r.val ? `<div class="result-value">${escHtml(r.val)}</div>` : ''}
+        <div class="result-desc">${r.desc}</div>
+        <div class="result-desc" style="margin-top:8px;color:var(--text)">${r.note}</div>
+        ${r.status !== 'pass' ? `<div class="result-fix">Suggested: <code>${escHtml(r.fix)}</code></div>` : ''}
+      </div>
+    </div>
+  `).join('');
+
+  const resultsEl = document.getElementById('results');
+  resultsEl.style.display = 'flex';
+}
+
+function toggle(i) {
+  const body = document.getElementById('body' + i);
+  const chev = document.getElementById('chev' + i);
+  body.classList.toggle('open');
+  chev.classList.toggle('open');
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function loadExample() {
+  document.getElementById('inputArea').value = `HTTP/1.1 200 OK
+Content-Type: text/html; charset=utf-8
+Content-Length: 12345
+Strict-Transport-Security: max-age=86400
+X-Frame-Options: SAMEORIGIN
+X-Content-Type-Options: nosniff
+Cache-Control: max-age=300, public
+Server: nginx/1.24.0`;
+}
+
+function clearAll() {
+  document.getElementById('inputArea').value = '';
+  document.getElementById('results').style.display = 'none';
+}
+</script>
+</body>
+</html>

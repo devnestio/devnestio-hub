@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Text Statistics — Word Count, Reading Time, Frequency Analysis</title>
+  <meta name="description" content="Paste any text to get instant statistics: word count, character count, sentence count, paragraph count, reading time, average word length, and top 10 most frequent words." />
+  <link rel="canonical" href="https://devnestio.pages.dev/text-statistics/" />
+  <meta property="og:title" content="Text Statistics Analyzer" />
+  <meta property="og:description" content="Word count, reading time, sentence count, frequency analysis and more. 100% in-browser." />
+  <meta property="og:type" content="website" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117;
+      --bg-card: #161b22;
+      --border: #30363d;
+      --text: #c9d1d9;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --accent-hover: #79b8ff;
+      --green: #3fb950;
+    }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+    header { padding: 28px 32px 20px; border-bottom: 1px solid var(--border); }
+    header h1 { font-size: 1.5rem; font-weight: 700; color: #e6edf3; }
+    header h1 span { color: var(--accent); }
+    header p { color: var(--text-muted); margin-top: 6px; font-size: .9rem; }
+    main { flex: 1; padding: 28px 32px; max-width: 900px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+    .section-title { font-size: .78rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); margin-bottom: 10px; }
+    .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 20px 24px; }
+    textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: system-ui, -apple-system, sans-serif; font-size: .9rem; padding: 14px; resize: vertical; min-height: 220px; outline: none; transition: border-color .15s; line-height: 1.6; }
+    textarea:focus { border-color: var(--accent); }
+    textarea::placeholder { color: var(--text-muted); }
+    .char-counter { text-align: right; font-size: .78rem; color: var(--text-muted); margin-top: 6px; }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+    .stat-item { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; text-align: center; }
+    .stat-num { font-size: 1.8rem; font-weight: 700; color: var(--accent); line-height: 1; }
+    .stat-label { font-size: .78rem; color: var(--text-muted); margin-top: 6px; text-transform: uppercase; letter-spacing: .05em; }
+    .stat-sub { font-size: .75rem; color: var(--text-muted); margin-top: 2px; }
+
+    .freq-list { display: flex; flex-direction: column; gap: 8px; }
+    .freq-item { display: flex; align-items: center; gap: 10px; }
+    .freq-rank { font-size: .75rem; color: var(--text-muted); width: 20px; text-align: right; flex-shrink: 0; }
+    .freq-word { font-family: 'SFMono-Regular', Consolas, monospace; font-size: .88rem; width: 120px; flex-shrink: 0; }
+    .freq-bar-wrap { flex: 1; background: var(--border); border-radius: 3px; height: 8px; overflow: hidden; }
+    .freq-bar { height: 100%; background: var(--accent); border-radius: 3px; transition: width .4s ease; }
+    .freq-count { font-size: .8rem; color: var(--text-muted); width: 40px; text-align: right; flex-shrink: 0; }
+
+    .empty-state { color: var(--text-muted); font-size: .9rem; text-align: center; padding: 20px; }
+
+    footer { text-align: center; padding: 24px; font-size: .82rem; color: var(--text-muted); border-top: 1px solid var(--border); margin-top: auto; }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Text <span>Statistics</span></h1>
+  <p>Paste any text to analyze word count, reading time, sentence structure, and word frequency.</p>
+</header>
+<main>
+  <div class="card">
+    <div class="section-title">Input Text</div>
+    <textarea id="textInput" placeholder="Paste or type your text here…" oninput="analyze()"></textarea>
+    <div class="char-counter" id="charCounter">0 characters</div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Statistics</div>
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-item"><div class="stat-num" id="sWords">0</div><div class="stat-label">Words</div></div>
+      <div class="stat-item"><div class="stat-num" id="sChars">0</div><div class="stat-label">Characters</div><div class="stat-sub" id="sCharsNoSp">0 without spaces</div></div>
+      <div class="stat-item"><div class="stat-num" id="sSents">0</div><div class="stat-label">Sentences</div></div>
+      <div class="stat-item"><div class="stat-num" id="sParas">0</div><div class="stat-label">Paragraphs</div></div>
+      <div class="stat-item"><div class="stat-num" id="sReadTime">0</div><div class="stat-label">Read Time</div><div class="stat-sub">at 200 wpm</div></div>
+      <div class="stat-item"><div class="stat-num" id="sAvgWord">0</div><div class="stat-label">Avg Word Len</div><div class="stat-sub">characters</div></div>
+      <div class="stat-item"><div class="stat-num" id="sAvgSent">0</div><div class="stat-label">Avg Sent Len</div><div class="stat-sub">words</div></div>
+      <div class="stat-item"><div class="stat-num" id="sUnique">0</div><div class="stat-label">Unique Words</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Top 10 Most Frequent Words</div>
+    <div class="freq-list" id="freqList"><div class="empty-state">Start typing to see word frequency.</div></div>
+  </div>
+</main>
+<footer>
+  <p>Text Statistics — 100% in-browser, no data transmitted &nbsp;|&nbsp; <a href="https://buymeacoffee.com/devnestio" target="_blank" rel="noopener">Buy me a coffee ☕</a></p>
+</footer>
+<script>
+const STOP_WORDS = new Set(['the','a','an','and','or','but','in','on','at','to','for','of','with','by','from','is','it','its','be','was','are','were','been','has','have','had','do','does','did','will','would','could','should','may','might','shall','can','that','this','these','those','i','you','he','she','we','they','me','him','her','us','them','my','your','his','our','their','what','which','who','whom','when','where','how','not','no','so','if','as','up','out','about','into','than','more','also','just','then','he','she','it','we','they','but','or','nor','yet','both','either','neither']);
+
+function analyze() {
+  const text = document.getElementById('textInput').value;
+  const chars = text.length;
+  const charsNoSp = text.replace(/\s/g, '').length;
+
+  // Words
+  const words = text.trim() ? text.trim().split(/\s+/).filter(w => w.length > 0) : [];
+  const wordCount = words.length;
+
+  // Sentences — split on .!? followed by space or end
+  const sentences = text.trim() ? text.split(/[.!?]+(?:\s|$)/).filter(s => s.trim().length > 0) : [];
+  const sentCount = sentences.length;
+
+  // Paragraphs — blank lines
+  const paras = text.trim() ? text.split(/\n{2,}/).filter(p => p.trim().length > 0) : [];
+  const paraCount = paras.length;
+
+  // Reading time
+  const WPM = 200;
+  const readMins = wordCount / WPM;
+  let readTimeStr;
+  if (wordCount === 0) readTimeStr = '0s';
+  else if (readMins < 1) readTimeStr = `${Math.ceil(readMins * 60)}s`;
+  else readTimeStr = `${Math.ceil(readMins)}m`;
+
+  // Avg word length
+  const cleanWords = words.map(w => w.replace(/[^a-zA-Z0-9]/g, '')).filter(w => w.length > 0);
+  const avgWordLen = cleanWords.length ? (cleanWords.reduce((s, w) => s + w.length, 0) / cleanWords.length).toFixed(1) : '0';
+
+  // Avg sentence length
+  const avgSentLen = sentCount ? Math.round(wordCount / sentCount) : 0;
+
+  // Unique words
+  const uniqueWords = new Set(cleanWords.map(w => w.toLowerCase()));
+
+  document.getElementById('sWords').textContent = wordCount.toLocaleString();
+  document.getElementById('sChars').textContent = chars.toLocaleString();
+  document.getElementById('sCharsNoSp').textContent = charsNoSp.toLocaleString() + ' without spaces';
+  document.getElementById('sSents').textContent = sentCount.toLocaleString();
+  document.getElementById('sParas').textContent = paraCount.toLocaleString();
+  document.getElementById('sReadTime').textContent = readTimeStr;
+  document.getElementById('sAvgWord').textContent = avgWordLen;
+  document.getElementById('sAvgSent').textContent = avgSentLen;
+  document.getElementById('sUnique').textContent = uniqueWords.size.toLocaleString();
+  document.getElementById('charCounter').textContent = `${chars.toLocaleString()} characters`;
+
+  // Frequency (exclude stop words & short words)
+  const freq = {};
+  cleanWords.forEach(w => {
+    const lw = w.toLowerCase();
+    if (lw.length > 2 && !STOP_WORDS.has(lw)) freq[lw] = (freq[lw] || 0) + 1;
+  });
+  const top10 = Object.entries(freq).sort((a,b) => b[1]-a[1]).slice(0, 10);
+  const maxFreq = top10[0]?.[1] || 1;
+
+  const freqEl = document.getElementById('freqList');
+  if (top10.length === 0) {
+    freqEl.innerHTML = '<div class="empty-state">No significant words found yet.</div>';
+  } else {
+    freqEl.innerHTML = top10.map(([word, count], i) => `
+      <div class="freq-item">
+        <span class="freq-rank">#${i+1}</span>
+        <span class="freq-word">${word}</span>
+        <div class="freq-bar-wrap"><div class="freq-bar" style="width:${(count/maxFreq*100).toFixed(1)}%"></div></div>
+        <span class="freq-count">${count}</span>
+      </div>
+    `).join('');
+  }
+}
+analyze();
+</script>
+</body>
+</html>

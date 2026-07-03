@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HTTP Method Reference — GET, POST, PUT, PATCH, DELETE & More</title>
+  <meta name="description" content="Interactive reference for all HTTP methods: GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS, TRACE. Idempotency, safety, use cases, and request/response examples." />
+  <link rel="canonical" href="https://devnestio.pages.dev/http-method-reference/" />
+  <meta property="og:title" content="HTTP Method Reference" />
+  <meta property="og:description" content="When to use GET vs POST vs PUT vs PATCH. Idempotency, safety, examples for all 8 HTTP methods." />
+  <meta property="og:type" content="website" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7162190147304602" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117;
+      --bg-card: #161b22;
+      --border: #30363d;
+      --text: #c9d1d9;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --red: #f85149;
+      --yellow: #d29922;
+      --orange: #db6d28;
+      --purple: #bc8cff;
+    }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+    header { padding: 28px 32px 20px; border-bottom: 1px solid var(--border); }
+    header h1 { font-size: 1.5rem; font-weight: 700; color: #e6edf3; }
+    header h1 span { color: var(--accent); }
+    header p { color: var(--text-muted); margin-top: 6px; font-size: .9rem; }
+    main { flex: 1; padding: 28px 32px; max-width: 960px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+
+    /* method tabs */
+    .method-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+    .method-tab { padding: 8px 18px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); font-weight: 700; font-size: .85rem; cursor: pointer; transition: all .15s; font-family: 'SFMono-Regular', Consolas, monospace; }
+    .method-tab:hover { color: var(--text); border-color: var(--text-muted); }
+    .method-tab.active { color: #0d1117; border-color: transparent; }
+
+    /* method colors */
+    .m-get    { --mc: #3fb950; }
+    .m-post   { --mc: #58a6ff; }
+    .m-put    { --mc: #d29922; }
+    .m-patch  { --mc: #db6d28; }
+    .m-delete { --mc: #f85149; }
+    .m-head   { --mc: #bc8cff; }
+    .m-options{ --mc: #8b949e; }
+    .m-trace  { --mc: #8b949e; }
+    .method-tab.active { background: var(--mc); }
+
+    .detail-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .detail-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 16px; }
+    .method-badge { font-family: 'SFMono-Regular', Consolas, monospace; font-weight: 700; font-size: 1.1rem; padding: 6px 16px; border-radius: 6px; color: #0d1117; }
+    .detail-title { font-size: 1.15rem; font-weight: 700; color: #e6edf3; }
+    .detail-subtitle { color: var(--text-muted); font-size: .88rem; margin-top: 3px; }
+    .detail-body { padding: 24px; display: flex; flex-direction: column; gap: 24px; }
+
+    .props-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .prop-chip { padding: 5px 14px; border-radius: 100px; font-size: .8rem; font-weight: 600; }
+    .prop-yes { background: rgba(63,185,80,.15); color: var(--green); }
+    .prop-no  { background: rgba(248,81,73,.15); color: var(--red); }
+    .prop-na  { background: rgba(139,148,158,.1); color: var(--text-muted); }
+    .prop-warn { background: rgba(210,153,34,.15); color: var(--yellow); }
+
+    .section-label { font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); margin-bottom: 10px; }
+    .desc-text { font-size: .9rem; line-height: 1.7; color: var(--text); }
+
+    .use-cases { display: flex; flex-direction: column; gap: 6px; }
+    .use-case { font-size: .88rem; line-height: 1.5; padding-left: 16px; position: relative; color: var(--text); }
+    .use-case::before { content:'•'; position:absolute; left:0; color: var(--accent); }
+
+    pre { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; font-family: 'SFMono-Regular', Consolas, monospace; font-size: .82rem; overflow-x: auto; line-height: 1.6; white-space: pre; }
+    .kw  { color: #f85149; }
+    .str { color: #3fb950; }
+    .hdr { color: #d29922; }
+    .url { color: #58a6ff; }
+    .cmt { color: #8b949e; font-style: italic; }
+    .num { color: #bc8cff; }
+
+    .cols-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 640px) { .cols-2 { grid-template-columns: 1fr; } }
+
+    .status-codes { display: flex; gap: 8px; flex-wrap: wrap; }
+    .status-chip { padding: 4px 10px; border-radius: 4px; font-size: .78rem; font-family: 'SFMono-Regular', Consolas, monospace; }
+    .s2xx { background: rgba(63,185,80,.15); color: var(--green); }
+    .s3xx { background: rgba(88,166,255,.15); color: var(--accent); }
+    .s4xx { background: rgba(210,153,34,.15); color: var(--yellow); }
+    .s5xx { background: rgba(248,81,73,.15); color: var(--red); }
+
+    .summary-table { width: 100%; border-collapse: collapse; font-size: .85rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .summary-table th { text-align: left; padding: 10px 14px; font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); border-bottom: 1px solid var(--border); font-weight: 600; }
+    .summary-table td { padding: 10px 14px; border-bottom: 1px solid rgba(48,54,61,.5); vertical-align: middle; }
+    .summary-table tr:last-child td { border-bottom: none; }
+    .summary-table tr:hover td { background: rgba(88,166,255,.03); }
+    .m-name { font-family: 'SFMono-Regular', Consolas, monospace; font-weight: 700; }
+
+    footer { text-align: center; padding: 24px; font-size: .82rem; color: var(--text-muted); border-top: 1px solid var(--border); margin-top: auto; }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>HTTP Method <span>Reference</span></h1>
+  <p>Interactive guide to HTTP methods — idempotency, safety, use cases, and request/response examples.</p>
+</header>
+<main>
+  <div class="method-tabs" id="tabs"></div>
+  <div id="detail"></div>
+  <div>
+    <div style="font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:12px">Quick Comparison</div>
+    <table class="summary-table">
+      <thead><tr><th>Method</th><th>Safe</th><th>Idempotent</th><th>Body</th><th>Cacheable</th><th>Use</th></tr></thead>
+      <tbody id="summaryBody"></tbody>
+    </table>
+  </div>
+</main>
+<footer>
+  <p>HTTP Method Reference — 100% in-browser &nbsp;|&nbsp; <a href="https://buymeacoffee.com/devnestio" target="_blank" rel="noopener">Buy me a coffee ☕</a></p>
+</footer>
+<script>
+const METHODS = [
+  {
+    method: 'GET',
+    cls: 'm-get',
+    color: '#3fb950',
+    tagline: 'Retrieve a resource',
+    desc: 'GET requests a representation of a resource. GET requests should only retrieve data — they must not modify server state. Results are often cached, making GET the fastest HTTP method.',
+    safe: true, idempotent: true, body: false, cacheable: true,
+    use: 'Listing use',
+    useCases: [
+      'Fetch a list of resources: GET /api/users',
+      'Retrieve a single resource by ID: GET /api/users/42',
+      'Search/filter with query params: GET /api/products?category=books',
+      'Load a web page, image, or static asset',
+    ],
+    statuses: ['200 OK','204 No Content','304 Not Modified','404 Not Found','401 Unauthorized'],
+    request: `GET /api/users/42 HTTP/1.1
+<span class="hdr">Host:</span> api.example.com
+<span class="hdr">Accept:</span> application/json
+<span class="hdr">Authorization:</span> Bearer eyJhbGc...`,
+    response: `HTTP/1.1 <span class="num">200</span> OK
+<span class="hdr">Content-Type:</span> application/json
+<span class="hdr">Cache-Control:</span> max-age=300
+
+{
+  <span class="str">"id"</span>: <span class="num">42</span>,
+  <span class="str">"name"</span>: <span class="str">"Alice"</span>,
+  <span class="str">"email"</span>: <span class="str">"alice@example.com"</span>
+}`,
+  },
+  {
+    method: 'POST',
+    cls: 'm-post',
+    color: '#58a6ff',
+    tagline: 'Create a resource or submit data',
+    desc: 'POST submits data to be processed. Most commonly used to create new resources. POST is neither safe nor idempotent — calling it twice may create two resources. The response usually includes a Location header pointing to the new resource.',
+    safe: false, idempotent: false, body: true, cacheable: false,
+    use: 'Create',
+    useCases: [
+      'Create a new resource: POST /api/users',
+      'Submit a form (login, signup, checkout)',
+      'Trigger an action (send email, process payment)',
+      'Upload a file or binary data',
+    ],
+    statuses: ['201 Created','200 OK','204 No Content','400 Bad Request','409 Conflict'],
+    request: `POST /api/users HTTP/1.1
+<span class="hdr">Host:</span> api.example.com
+<span class="hdr">Content-Type:</span> application/json
+<span class="hdr">Authorization:</span> Bearer eyJhbGc...
+
+{
+  <span class="str">"name"</span>: <span class="str">"Bob"</span>,
+  <span class="str">"email"</span>: <span class="str">"bob@example.com"</span>
+}`,
+    response: `HTTP/1.1 <span class="num">201</span> Created
+<span class="hdr">Location:</span> /api/users/43
+<span class="hdr">Content-Type:</span> application/json
+
+{
+  <span class="str">"id"</span>: <span class="num">43</span>,
+  <span class="str">"name"</span>: <span class="str">"Bob"</span>,
+  <span class="str">"email"</span>: <span class="str">"bob@example.com"</span>,
+  <span class="str">"createdAt"</span>: <span class="str">"2025-01-01T00:00:00Z"</span>
+}`,
+  },
+  {
+    method: 'PUT',
+    cls: 'm-put',
+    color: '#d29922',
+    tagline: 'Replace a resource completely',
+    desc: 'PUT replaces the entire resource at the target URI with the request body. If the resource does not exist, PUT may create it. PUT is idempotent — calling it multiple times has the same effect as calling it once. Unlike PATCH, PUT requires the full resource representation.',
+    safe: false, idempotent: true, body: true, cacheable: false,
+    use: 'Full replace',
+    useCases: [
+      'Replace a full resource: PUT /api/users/42',
+      'Create a resource at a known URL (upsert)',
+      'Update a configuration that must be fully replaced',
+      'Overwrite a file at a specific path',
+    ],
+    statuses: ['200 OK','201 Created','204 No Content','400 Bad Request','404 Not Found'],
+    request: `PUT /api/users/42 HTTP/1.1
+<span class="hdr">Host:</span> api.example.com
+<span class="hdr">Content-Type:</span> application/json
+<span class="hdr">Authorization:</span> Bearer eyJhbGc...
+
+{
+  <span class="str">"id"</span>: <span class="num">42</span>,
+  <span class="str">"name"</span>: <span class="str">"Alice Updated"</span>,
+  <span class="str">"email"</span>: <span class="str">"alice.new@example.com"</span>,
+  <span class="str">"role"</span>: <span class="str">"admin"</span>
+}`,
+    response: `HTTP/1.1 <span class="num">200</span> OK
+<span class="hdr">Content-Type:</span> application/json
+
+{
+  <span class="str">"id"</span>: <span class="num">42</span>,
+  <span class="str">"name"</span>: <span class="str">"Alice Updated"</span>,
+  <span class="str">"email"</span>: <span class="str">"alice.new@example.com"</span>,
+  <span class="str">"role"</span>: <span class="str">"admin"</span>,
+  <span class="str">"updatedAt"</span>: <span class="str">"2025-01-02T10:00:00Z"</span>
+}`,
+  },
+  {
+    method: 'PATCH',
+    cls: 'm-patch',
+    color: '#db6d28',
+    tagline: 'Partially update a resource',
+    desc: 'PATCH applies partial modifications to a resource. Only the fields provided in the request body are updated — other fields remain unchanged. PATCH is more efficient than PUT when updating a single field of a large resource. Whether PATCH is idempotent depends on implementation.',
+    safe: false, idempotent: 'maybe', body: true, cacheable: false,
+    use: 'Partial update',
+    useCases: [
+      'Update only specific fields: PATCH /api/users/42',
+      'Toggle a status flag (active/inactive)',
+      'Update a single attribute without fetching the full resource',
+      'Apply a JSON Patch document (RFC 6902)',
+    ],
+    statuses: ['200 OK','204 No Content','400 Bad Request','404 Not Found','409 Conflict'],
+    request: `PATCH /api/users/42 HTTP/1.1
+<span class="hdr">Host:</span> api.example.com
+<span class="hdr">Content-Type:</span> application/json
+<span class="hdr">Authorization:</span> Bearer eyJhbGc...
+
+{
+  <span class="str">"email"</span>: <span class="str">"alice.patched@example.com"</span>
+}`,
+    response: `HTTP/1.1 <span class="num">200</span> OK
+<span class="hdr">Content-Type:</span> application/json
+
+{
+  <span class="str">"id"</span>: <span class="num">42</span>,
+  <span class="str">"name"</span>: <span class="str">"Alice"</span>,
+  <span class="str">"email"</span>: <span class="str">"alice.patched@example.com"</span>,
+  <span class="str">"updatedAt"</span>: <span class="str">"2025-01-03T09:00:00Z"</span>
+}`,
+  },
+  {
+    method: 'DELETE',
+    cls: 'm-delete',
+    color: '#f85149',
+    tagline: 'Remove a resource',
+    desc: 'DELETE removes the specified resource. It is idempotent — deleting an already-deleted resource should return 404 or 204 without causing an error state. DELETE typically returns 204 No Content on success. Some APIs soft-delete (mark as deleted) rather than physically removing data.',
+    safe: false, idempotent: true, body: false, cacheable: false,
+    use: 'Delete',
+    useCases: [
+      'Delete a resource by ID: DELETE /api/users/42',
+      'Remove an item from a collection',
+      'Revoke a token or session',
+      'Cancel a subscription or order',
+    ],
+    statuses: ['204 No Content','200 OK','202 Accepted','404 Not Found','403 Forbidden'],
+    request: `DELETE /api/users/42 HTTP/1.1
+<span class="hdr">Host:</span> api.example.com
+<span class="hdr">Authorization:</span> Bearer eyJhbGc...`,
+    response: `HTTP/1.1 <span class="num">204</span> No Content
+<span class="hdr">X-Request-Id:</span> req_abc123
+
+<span class="cmt">(empty body)</span>`,
+  },
+  {
+    method: 'HEAD',
+    cls: 'm-head',
+    color: '#bc8cff',
+    tagline: 'Like GET, but headers only',
+    desc: 'HEAD is identical to GET, but the server must not include a message body in the response. It is used to check resource existence, metadata, or headers without downloading the body. Safe and idempotent. Responses are cacheable using the same rules as GET.',
+    safe: true, idempotent: true, body: false, cacheable: true,
+    use: 'Headers only',
+    useCases: [
+      'Check if a resource exists before fetching it',
+      'Read Content-Length to know file size before download',
+      'Validate ETag/Last-Modified for cache freshness',
+      'Health checks — confirm endpoint responds without body overhead',
+    ],
+    statuses: ['200 OK','301 Moved Permanently','404 Not Found'],
+    request: `HEAD /files/report.pdf HTTP/1.1
+<span class="hdr">Host:</span> api.example.com
+<span class="hdr">Authorization:</span> Bearer eyJhbGc...`,
+    response: `HTTP/1.1 <span class="num">200</span> OK
+<span class="hdr">Content-Type:</span> application/pdf
+<span class="hdr">Content-Length:</span> 204800
+<span class="hdr">Last-Modified:</span> Wed, 01 Jan 2025 12:00:00 GMT
+<span class="hdr">ETag:</span> "abc123"
+
+<span class="cmt">(no body — headers only)</span>`,
+  },
+  {
+    method: 'OPTIONS',
+    cls: 'm-options',
+    color: '#8b949e',
+    tagline: 'Discover allowed methods / CORS preflight',
+    desc: 'OPTIONS returns the HTTP methods supported by the server for a specific URL. Primarily used for CORS preflight requests — browsers automatically send an OPTIONS request before cross-origin requests to check permissions. Safe and idempotent.',
+    safe: true, idempotent: true, body: false, cacheable: false,
+    use: 'CORS / discovery',
+    useCases: [
+      'CORS preflight — browser auto-sends before cross-origin fetch/XHR',
+      'Discover allowed methods on a resource',
+      'Check supported content types before sending data',
+      'API capability discovery',
+    ],
+    statuses: ['200 OK','204 No Content'],
+    request: `OPTIONS /api/users HTTP/1.1
+<span class="hdr">Host:</span> api.example.com
+<span class="hdr">Origin:</span> https://app.example.com
+<span class="hdr">Access-Control-Request-Method:</span> POST
+<span class="hdr">Access-Control-Request-Headers:</span> Authorization, Content-Type`,
+    response: `HTTP/1.1 <span class="num">204</span> No Content
+<span class="hdr">Allow:</span> GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS
+<span class="hdr">Access-Control-Allow-Origin:</span> https://app.example.com
+<span class="hdr">Access-Control-Allow-Methods:</span> GET, POST, PUT, PATCH, DELETE
+<span class="hdr">Access-Control-Allow-Headers:</span> Authorization, Content-Type
+<span class="hdr">Access-Control-Max-Age:</span> 86400`,
+  },
+  {
+    method: 'TRACE',
+    cls: 'm-trace',
+    color: '#8b949e',
+    tagline: 'Diagnostic loopback — rarely used',
+    desc: 'TRACE performs a message loop-back test along the path to the target resource. The server echoes the received request back to the client. Primarily used for diagnostics to see what changes intermediaries make. Most production servers disable TRACE due to Cross-Site Tracing (XST) security concerns.',
+    safe: true, idempotent: true, body: false, cacheable: false,
+    use: 'Debug / loopback',
+    useCases: [
+      'Debug what proxies or load balancers modify in requests',
+      'Trace the exact request received by the server',
+      'Network path analysis and diagnostics',
+    ],
+    statuses: ['200 OK','405 Method Not Allowed (most servers disable TRACE)'],
+    request: `TRACE /debug HTTP/1.1
+<span class="hdr">Host:</span> api.example.com
+<span class="hdr">X-Custom-Header:</span> test-value`,
+    response: `HTTP/1.1 <span class="num">200</span> OK
+<span class="hdr">Content-Type:</span> message/http
+
+TRACE /debug HTTP/1.1
+Host: api.example.com
+X-Custom-Header: test-value
+<span class="cmt">(server echoes the request back)</span>
+
+<span class="cmt">⚠ Note: disabled on most servers due to XST vulnerability</span>`,
+  },
+];
+
+let active = 0;
+
+function yesNo(v) {
+  if (v === true) return '<span style="color:var(--green)">✓ Yes</span>';
+  if (v === false) return '<span style="color:var(--red)">✗ No</span>';
+  return '<span style="color:var(--yellow)">~ Maybe</span>';
+}
+
+function chipClass(v) {
+  if (v === true) return 'prop-yes';
+  if (v === false) return 'prop-no';
+  return 'prop-warn';
+}
+
+function renderDetail(idx) {
+  const m = METHODS[idx];
+  const statusChips = m.statuses.map(s => {
+    const code = parseInt(s);
+    const cls = code >= 500 ? 's5xx' : code >= 400 ? 's4xx' : code >= 300 ? 's3xx' : 's2xx';
+    return `<span class="status-chip ${cls}">${s}</span>`;
+  }).join('');
+
+  document.getElementById('detail').innerHTML = `
+    <div class="detail-card">
+      <div class="detail-header">
+        <div class="method-badge" style="background:${m.color}">${m.method}</div>
+        <div>
+          <div class="detail-title">${m.tagline}</div>
+          <div class="detail-subtitle">${m.method} /resource</div>
+        </div>
+      </div>
+      <div class="detail-body">
+        <div>
+          <div class="section-label">Properties</div>
+          <div class="props-row">
+            <span class="prop-chip ${chipClass(m.safe)}">Safe: ${m.safe ? 'Yes' : 'No'}</span>
+            <span class="prop-chip ${chipClass(m.idempotent)}">Idempotent: ${m.idempotent === true ? 'Yes' : m.idempotent === false ? 'No' : 'Maybe'}</span>
+            <span class="prop-chip ${chipClass(m.body)}">Request Body: ${m.body ? 'Yes' : 'No'}</span>
+            <span class="prop-chip ${chipClass(m.cacheable)}">Cacheable: ${m.cacheable ? 'Yes' : 'No'}</span>
+          </div>
+        </div>
+        <div>
+          <div class="section-label">Description</div>
+          <div class="desc-text">${m.desc}</div>
+        </div>
+        <div>
+          <div class="section-label">When to Use</div>
+          <div class="use-cases">${m.useCases.map(u=>`<div class="use-case">${u}</div>`).join('')}</div>
+        </div>
+        <div class="cols-2">
+          <div>
+            <div class="section-label">Request Example</div>
+            <pre>${m.request}</pre>
+          </div>
+          <div>
+            <div class="section-label">Response Example</div>
+            <pre>${m.response}</pre>
+          </div>
+        </div>
+        <div>
+          <div class="section-label">Common Status Codes</div>
+          <div class="status-codes">${statusChips}</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function setActive(idx) {
+  active = idx;
+  document.querySelectorAll('.method-tab').forEach((t,i) => t.classList.toggle('active', i===idx));
+  renderDetail(idx);
+}
+
+// Build tabs
+const tabsEl = document.getElementById('tabs');
+METHODS.forEach((m, i) => {
+  const btn = document.createElement('button');
+  btn.className = `method-tab ${m.cls}`;
+  btn.textContent = m.method;
+  btn.onclick = () => setActive(i);
+  tabsEl.appendChild(btn);
+});
+
+// Build summary table
+document.getElementById('summaryBody').innerHTML = METHODS.map(m => `
+  <tr onclick="setActive(${METHODS.indexOf(m)})" style="cursor:pointer">
+    <td><span class="m-name" style="color:${m.color}">${m.method}</span></td>
+    <td>${yesNo(m.safe)}</td>
+    <td>${yesNo(m.idempotent)}</td>
+    <td>${yesNo(m.body)}</td>
+    <td>${yesNo(m.cacheable)}</td>
+    <td style="color:var(--text-muted);font-size:.82rem">${m.use}</td>
+  </tr>
+`).join('');
+
+setActive(0);
+</script>
+</body>
+</html>
